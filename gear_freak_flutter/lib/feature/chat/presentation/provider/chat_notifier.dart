@@ -37,19 +37,22 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// 채팅 목록 조회
   Future<void> loadChatList() async {
     state = state.copyWith(isLoading: true, error: null);
-    
-    try {
-      final chatList = await getChatListUseCase();
-      state = state.copyWith(
-        chatList: chatList,
-        isLoading: false,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-    }
+
+    final result = await getChatListUseCase(null);
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
+      (chatList) {
+        state = state.copyWith(
+          chatList: chatList,
+          isLoading: false,
+        );
+      },
+    );
   }
 }
-

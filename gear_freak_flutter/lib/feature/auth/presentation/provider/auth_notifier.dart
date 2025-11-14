@@ -44,27 +44,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    try {
-      final user = await loginUseCase.call(
-        email: email,
-        password: password,
-      );
-      
-      state = state.copyWith(
-        user: user,
-        isLoading: false,
-        isAuthenticated: true,
-      );
-      
-      return true;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-        isAuthenticated: false,
-      );
-      return false;
-    }
+    final result = await loginUseCase(
+      LoginParams(email: email, password: password),
+    );
+    
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+          isAuthenticated: false,
+        );
+        return false;
+      },
+      (user) {
+        state = state.copyWith(
+          user: user,
+          isLoading: false,
+          isAuthenticated: true,
+        );
+        return true;
+      },
+    );
   }
 
   /// 로그아웃

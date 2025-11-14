@@ -3,6 +3,7 @@ import '../../../core/di/providers.dart';
 import '../data/datasource/profile_remote_datasource.dart';
 import '../data/repository/profile_repository_impl.dart';
 import '../domain/repository/profile_repository.dart';
+import '../domain/usecase/get_user_profile_usecase.dart';
 import '../presentation/provider/profile_notifier.dart';
 
 /// Profile Remote DataSource Provider
@@ -17,9 +18,15 @@ final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
   return ProfileRepositoryImpl(remoteDataSource);
 });
 
+/// Get User Profile UseCase Provider
+final getUserProfileUseCaseProvider = Provider<GetUserProfileUseCase>((ref) {
+  final repository = ref.watch(profileRepositoryProvider);
+  return GetUserProfileUseCase(repository);
+});
+
 /// Profile Notifier Provider
 final profileNotifierProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  final repository = ref.watch(profileRepositoryProvider);
-  return ProfileNotifier(repository);
+  final getUserProfileUseCase = ref.watch(getUserProfileUseCaseProvider);
+  return ProfileNotifier(getUserProfileUseCase);
 });
 

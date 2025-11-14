@@ -1,14 +1,29 @@
-import '../entity/product.dart';
-import '../repository/home_repository.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../core/domain/usecase/usecase.dart';
+import '../domain.dart';
 
 /// 최근 등록 상품 조회 UseCase
-class GetRecentProductsUseCase {
+class GetRecentProductsUseCase
+    implements UseCase<List<Product>, void, HomeRepository> {
   final HomeRepository repository;
 
-  GetRecentProductsUseCase(this.repository);
+  const GetRecentProductsUseCase(this.repository);
 
-  Future<List<Product>> call() async {
-    return await repository.getRecentProducts();
+  @override
+  HomeRepository get repo => repository;
+
+  @override
+  Future<Either<Failure, List<Product>>> call(void param) async {
+    try {
+      final result = await repository.getRecentProducts();
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(
+        GetProductsFailure(
+          '상품 목록을 불러올 수 없습니다.',
+          exception: e,
+        ),
+      );
+    }
   }
 }
-

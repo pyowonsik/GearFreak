@@ -22,7 +22,7 @@ final homeRepositoryProvider = Provider<HomeRepository>((ref) {
 final getRecentProductsUseCaseProvider =
     Provider<GetRecentProductsUseCase>((ref) {
   final repository = ref.watch(homeRepositoryProvider);
-  return GetRecentProductsUseCase(repository);
+  return GetRecentProductsUseCase(repository); // const 생성자 사용 가능
 });
 
 /// Home Notifier Provider

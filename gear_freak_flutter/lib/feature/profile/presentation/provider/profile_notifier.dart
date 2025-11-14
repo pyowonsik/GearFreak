@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entity/user_profile.dart';
-import '../../domain/repository/profile_repository.dart';
+import '../../domain/domain.dart';
 
 /// 프로필 상태
 class ProfileState {
@@ -29,26 +28,29 @@ class ProfileState {
 
 /// 프로필 Notifier
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  final ProfileRepository repository;
+  final GetUserProfileUseCase getUserProfileUseCase;
 
-  ProfileNotifier(this.repository) : super(const ProfileState());
+  ProfileNotifier(this.getUserProfileUseCase) : super(const ProfileState());
 
   /// 프로필 로드
   Future<void> loadProfile() async {
     state = state.copyWith(isLoading: true, error: null);
 
-    try {
-      final profile = await repository.getUserProfile();
-      state = state.copyWith(
-        profile: profile,
-        isLoading: false,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-    }
+    final result = await getUserProfileUseCase(null);
+
+    result.fold(
+      (failure) {
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
+      (profile) {
+        state = state.copyWith(
+          profile: profile,
+          isLoading: false,
+        );
+      },
+    );
   }
 }
-

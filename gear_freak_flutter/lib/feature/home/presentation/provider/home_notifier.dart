@@ -37,26 +37,38 @@ class HomeNotifier extends StateNotifier<HomeState> {
   final GetRecentProductsUseCase getRecentProductsUseCase;
   final HomeRepository repository;
 
-  HomeNotifier(this.getRecentProductsUseCase, this.repository) : super(const HomeState());
+  HomeNotifier(this.getRecentProductsUseCase, this.repository)
+      : super(const HomeState());
 
   /// 홈 데이터 로드
   Future<void> loadHomeData() async {
     state = state.copyWith(isLoading: true, error: null);
 
-    try {
-      final products = await getRecentProductsUseCase();
-      final categories = await repository.getCategories();
-      state = state.copyWith(
-        products: products,
-        categories: categories,
-        isLoading: false,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-    }
+    final productsResult = await getRecentProductsUseCase(null);
+
+    productsResult.fold(
+      (failure) {
+        state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        );
+      },
+      (products) async {
+        try {
+          final categories = await repository.getCategories();
+          state = state.copyWith(
+            products: products,
+            categories: categories,
+            isLoading: false,
+          );
+        } catch (e) {
+          state = state.copyWith(
+            products: products,
+            isLoading: false,
+            error: e.toString(),
+          );
+        }
+      },
+    );
   }
 }
-

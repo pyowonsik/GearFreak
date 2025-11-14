@@ -21,13 +21,12 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
 /// Get Chat List UseCase Provider
 final getChatListUseCaseProvider = Provider<GetChatListUseCase>((ref) {
   final repository = ref.watch(chatRepositoryProvider);
-  return GetChatListUseCase(repository);
+  return GetChatListUseCase(repository); // const 생성자 사용 가능
 });
 
 /// Chat Notifier Provider
-final chatNotifierProvider = 
+final chatNotifierProvider =
     StateNotifierProvider<ChatNotifier, ChatState>((ref) {
   final getChatListUseCase = ref.watch(getChatListUseCaseProvider);
   return ChatNotifier(getChatListUseCase);
 });
-
