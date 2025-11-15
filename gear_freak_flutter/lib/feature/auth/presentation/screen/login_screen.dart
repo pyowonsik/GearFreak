@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../di/auth_providers.dart';
+import '../../presentation/provider/auth_state.dart';
 
 /// 로그인 화면
 class LoginScreen extends ConsumerStatefulWidget {
@@ -15,7 +17,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,18 +30,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    final authNotifier = ref.read(authNotifierProvider.notifier);
 
-    // TODO: 실제 로그인 로직 구현 전까지 강제로 홈으로 이동
-    await Future.delayed(const Duration(milliseconds: 500)); // 로딩 시뮬레이션
+    await authNotifier.login(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-      context.go('/main');
+    if (!mounted) return;
+
+    // 로그인 완료 후 상태 확인
+    final authState = ref.read(authNotifierProvider);
+    switch (authState) {
+      case AuthAuthenticated():
+        // 로그인 성공 후 메인 화면으로 이동
+        context.go('/main');
+      case AuthError(:final message):
+        // 에러 메시지 표시
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('로그인 실패: $message'),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      case AuthInitial():
+      case AuthLoading():
+      case AuthUnauthenticated():
+        // 예상치 못한 상태 (이론적으로는 발생하지 않아야 함)
+        break;
     }
   }
 
@@ -136,42 +153,68 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 24),
 
                   // 로그인 버튼
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            '로그인',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final authState = ref.watch(authNotifierProvider);
+                      final isLoading = authState is AuthLoading;
+
+                      return ElevatedButton(
+                        onPressed: isLoading ? null : _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                '로그인',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
 
                   // 회원가입 링크
-                  TextButton(
-                    onPressed: () {
-                      // TODO: 회원가입 화면으로 이동
-                    },
-                    child: const Text('회원가입'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        '계정이 없으신가요? ',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.push('/signup');
+                        },
+                        child: const Text(
+                          '회원가입',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

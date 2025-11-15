@@ -21,7 +21,8 @@ class LoginFailure extends AuthFailure {
 /// 인증 토큰 실패
 class AuthenticationTokenFailure extends AuthFailure {
   /// AuthenticationTokenFailure 생성자
-  const AuthenticationTokenFailure(super.message, {super.exception, super.stackTrace});
+  const AuthenticationTokenFailure(super.message,
+      {super.exception, super.stackTrace});
 
   @override
   String toString() => 'AuthenticationTokenFailure: $message';
@@ -36,3 +37,11 @@ class LogoutFailure extends AuthFailure {
   String toString() => 'LogoutFailure: $message';
 }
 
+// 회원가입 실패
+class SignupFailure extends AuthFailure {
+  /// SignupFailure 생성자
+  const SignupFailure(super.message, {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'SignupFailure: $message';
+}

@@ -1,14 +1,16 @@
 import '../../domain/entity/user.dart';
 import '../../domain/repository/auth_repository.dart';
 import '../datasource/auth_remote_datasource.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gear_freak_client/gear_freak_client.dart';
+import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 
 /// 인증 Repository 구현
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
-  final SharedPreferences sharedPreferences;
+  final Client client;
+  final SessionManager sessionManager;
 
-  AuthRepositoryImpl(this.remoteDataSource, this.sharedPreferences);
+  AuthRepositoryImpl(this.remoteDataSource, this.client, this.sessionManager);
 
   @override
   Future<User> login({
@@ -20,56 +22,63 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
 
+    // Serverpod SessionManager가 자동으로 인증 키를 관리하므로
+    // 별도로 토큰을 저장할 필요 없음
     final user = User(
-      id: data['id'] as String,
-      email: data['email'] as String,
-      nickname: data['nickname'] as String?,
-      accessToken: data['accessToken'] as String?,
-      refreshToken: data['refreshToken'] as String?,
+      id: data['id']?.toString() ?? '',
+      email: data['email'] as String? ?? email,
+      nickname: data['userName'] as String?,
     );
-
-    // 토큰 저장
-    if (user.accessToken != null && user.refreshToken != null) {
-      await saveTokens(
-        accessToken: user.accessToken!,
-        refreshToken: user.refreshToken!,
-      );
-    }
 
     return user;
   }
 
   @override
   Future<void> logout() async {
-    await sharedPreferences.remove('access_token');
-    await sharedPreferences.remove('refresh_token');
-    await sharedPreferences.remove('user_id');
+    // Serverpod SessionManager를 통해 로그아웃
+    await sessionManager.signOutDevice();
   }
 
   @override
-  Future<User?> getCurrentUser() async {
-    final userId = sharedPreferences.getString('user_id');
-    final accessToken = sharedPreferences.getString('access_token');
-
-    if (userId == null || accessToken == null) {
+  Future<User?> getMe() async {
+    // Serverpod SessionManager를 통해 현재 로그인 상태 확인
+    if (!sessionManager.isSignedIn) {
       return null;
     }
 
-    // TODO: 서버에서 사용자 정보 조회
-    return User(
-      id: userId,
-      email: '', // TODO: 저장된 이메일 조회
-      accessToken: accessToken,
-      refreshToken: sharedPreferences.getString('refresh_token'),
-    );
+    try {
+      // 서버에서 현재 사용자 정보 조회
+      final userInfo = await client.user.getMe();
+
+      return User(
+        id: userInfo.id?.toString() ?? '',
+        email: userInfo.email ?? '',
+        nickname: userInfo.userName,
+      );
+    } catch (e) {
+      // 로그인 상태가 아니거나 오류 발생 시 null 반환
+      return null;
+    }
   }
 
   @override
-  Future<void> saveTokens({
-    required String accessToken,
-    required String refreshToken,
+  Future<User> signup({
+    required String userName,
+    required String email,
+    required String password,
   }) async {
-    await sharedPreferences.setString('access_token', accessToken);
-    await sharedPreferences.setString('refresh_token', refreshToken);
+    final data = await remoteDataSource.signup(
+      userName: userName,
+      email: email,
+      password: password,
+    );
+
+    final user = User(
+      id: data['id']?.toString() ?? '',
+      email: data['email'] as String? ?? email,
+      nickname: data['userName'] as String? ?? userName,
+    );
+
+    return user;
   }
 }

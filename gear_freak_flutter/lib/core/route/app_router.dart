@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../feature/auth/presentation/screen/login_screen.dart';
+import '../../feature/auth/presentation/screen/signup_screen.dart';
 import '../../feature/home/presentation/screen/home_screen.dart';
 import '../../feature/search/presentation/screen/search_screen.dart';
 import '../../feature/chat/presentation/screen/chat_list_screen.dart';
@@ -19,6 +20,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+
+      // 회원가입 화면
+      GoRoute(
+        path: '/signup',
+        name: 'signup',
+        builder: (context, state) => const SignupScreen(),
       ),
 
       // 메인 화면 (탭 네비게이션)

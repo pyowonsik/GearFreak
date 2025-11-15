@@ -25,9 +25,10 @@ dependencies:
   flutter:
     sdk: flutter
   serverpod_flutter: 2.9.2
+  serverpod_auth_client: 2.9.2
+  serverpod_auth_shared_flutter: 2.9.2
   gear_freak_client:
     path: ../gear_freak_client
-
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -42,12 +43,17 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+# serverpod_auth_shared_flutter가 image_cropper를 의존하므로 호환 버전으로 오버라이드
+# Flutter 3.24 호환을 위해 최신 버전 사용
+dependency_overrides:
+  image_cropper: ^8.0.0
+  image_cropper_platform_interface: ^7.0.0
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

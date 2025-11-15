@@ -12,12 +12,12 @@ abstract class AuthRepository {
   Future<void> logout();
 
   /// 현재 사용자 조회
-  Future<User?> getCurrentUser();
+  Future<User?> getMe();
 
-  /// 토큰 저장
-  Future<void> saveTokens({
-    required String accessToken,
-    required String refreshToken,
+  /// 회원가입
+  Future<User> signup({
+    required String userName,
+    required String email,
+    required String password,
   });
 }
-
