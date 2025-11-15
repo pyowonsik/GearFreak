@@ -1,5 +1,6 @@
 import 'package:gear_freak_server/src/birthday_reminder.dart';
 import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as auth;
 
 import 'package:gear_freak_server/src/web/routes/root.dart';
 
@@ -12,7 +13,12 @@ import 'src/generated/endpoints.dart';
 
 void run(List<String> args) async {
   // Initialize Serverpod and connect it with your generated code.
-  final pod = Serverpod(args, Protocol(), Endpoints());
+  final pod = Serverpod(
+    args,
+    Protocol(),
+    Endpoints(),
+    authenticationHandler: auth.authenticationHandler,
+  );
 
   // Setup a default page at the web root.
   pod.webServer.addRoute(RouteRoot(), '/');
@@ -21,6 +27,20 @@ void run(List<String> args) async {
   pod.webServer.addRoute(
     RouteStaticDirectory(serverDirectory: 'static', basePath: '/'),
     '/*',
+  );
+
+  // 인증 설정
+  auth.AuthConfig.set(
+    auth.AuthConfig(
+      // 이메일로 가입할 때 비밀번호의 최소 길이
+      minPasswordLength: 8,
+      // 사용자가 사용자 이름을 볼 수 있는지 여부
+      userCanEditFullName: true,
+      // 사용자 이미지를 저장하는 데 사용되는 형식
+      userImageFormat: auth.UserImageType.png,
+      // 비밀번호 재설정이 유효한 시간
+      passwordResetExpirationTime: const Duration(hours: 24),
+    ),
   );
 
   // Start the server.

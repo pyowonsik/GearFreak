@@ -1,2 +1,7 @@
+auth:
+  - signupWithoutEmailVerification:
+user:
+  - getMe:
+  - getUserScopes:
 greeting:
   - hello:

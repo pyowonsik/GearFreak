@@ -1,0 +1,49 @@
+import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_server/serverpod_auth_server.dart';
+
+/// 인증 서비스
+/// 회원가입, 로그인 등 인증 관련 비즈니스 로직을 처리합니다.
+class AuthService {
+  /// 개발용: 이메일 인증 없이 바로 회원가입
+  static Future<UserInfo> signupWithoutEmailVerification(
+    Session session, {
+    required String userName,
+    required String email,
+    required String password,
+  }) async {
+    // 1. 이미 존재하는 이메일인지 확인
+    final existingEmailAuth = await EmailAuth.db.findFirstRow(
+      session,
+      where: (t) => t.email.equals(email),
+    );
+
+    if (existingEmailAuth != null) {
+      throw Exception('이미 존재하는 이메일입니다.');
+    }
+
+    // 2. 비밀번호 해시 생성 (Serverpod의 Argon2id 사용)
+    final passwordHash = await Emails.generatePasswordHash(password);
+
+    // 3. UserInfo 생성
+    final userInfo = UserInfo(
+      userIdentifier: email,
+      userName: userName,
+      email: email,
+      fullName: userName,
+      scopeNames: [],
+      blocked: false,
+      created: DateTime.now().toUtc(),
+    );
+    final savedUserInfo = await UserInfo.db.insertRow(session, userInfo);
+
+    // 4. EmailAuth 생성
+    final emailAuth = EmailAuth(
+      userId: savedUserInfo.id!,
+      email: email,
+      hash: passwordHash,
+    );
+    await EmailAuth.db.insertRow(session, emailAuth);
+
+    return savedUserInfo;
+  }
+}
