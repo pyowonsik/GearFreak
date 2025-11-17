@@ -11,8 +11,60 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:gear_freak_client/src/protocol/greeting.dart' as _i3;
-import 'protocol.dart' as _i4;
+import 'package:gear_freak_client/src/protocol/feature/user/model/user.dart'
+    as _i3;
+import 'package:gear_freak_client/src/protocol/greeting.dart' as _i4;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i5;
+import 'protocol.dart' as _i6;
+
+/// 인증 엔드포인트
+/// {@category Endpoint}
+class EndpointAuth extends _i1.EndpointRef {
+  EndpointAuth(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'auth';
+
+  /// 개발용: 이메일 인증 없이 바로 회원가입
+  _i2.Future<_i3.User> signupWithoutEmailVerification({
+    required String userName,
+    required String email,
+    required String password,
+  }) =>
+      caller.callServerEndpoint<_i3.User>(
+        'auth',
+        'signupWithoutEmailVerification',
+        {
+          'userName': userName,
+          'email': email,
+          'password': password,
+        },
+      );
+}
+
+/// 사용자 엔드포인트
+/// {@category Endpoint}
+class EndpointUser extends _i1.EndpointRef {
+  EndpointUser(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'user';
+
+  /// 현재 로그인한 사용자 정보를 가져옵니다
+  _i2.Future<_i3.User> getMe() => caller.callServerEndpoint<_i3.User>(
+        'user',
+        'getMe',
+        {},
+      );
+
+  /// 현재 사용자의 권한(Scope) 정보를 조회합니다
+  _i2.Future<List<String>> getUserScopes() =>
+      caller.callServerEndpoint<List<String>>(
+        'user',
+        'getUserScopes',
+        {},
+      );
+}
 
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
@@ -24,12 +76,20 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i3.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i3.Greeting>(
+  _i2.Future<_i4.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i4.Greeting>(
         'greeting',
         'hello',
         {'name': name},
       );
+}
+
+class Modules {
+  Modules(Client client) {
+    auth = _i5.Caller(client);
+  }
+
+  late final _i5.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -48,7 +108,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i4.Protocol(),
+          _i6.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -58,14 +118,28 @@ class Client extends _i1.ServerpodClientShared {
           disconnectStreamsOnLostInternetConnection:
               disconnectStreamsOnLostInternetConnection,
         ) {
+    auth = EndpointAuth(this);
+    user = EndpointUser(this);
     greeting = EndpointGreeting(this);
+    modules = Modules(this);
   }
+
+  late final EndpointAuth auth;
+
+  late final EndpointUser user;
 
   late final EndpointGreeting greeting;
 
-  @override
-  Map<String, _i1.EndpointRef> get endpointRefLookup => {'greeting': greeting};
+  late final Modules modules;
 
   @override
-  Map<String, _i1.ModuleEndpointCaller> get moduleLookup => {};
+  Map<String, _i1.EndpointRef> get endpointRefLookup => {
+        'auth': auth,
+        'user': user,
+        'greeting': greeting,
+      };
+
+  @override
+  Map<String, _i1.ModuleEndpointCaller> get moduleLookup =>
+      {'auth': modules.auth};
 }
