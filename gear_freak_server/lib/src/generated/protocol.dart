@@ -12,8 +12,16 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 import 'package:serverpod/protocol.dart' as _i2;
 import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i3;
-import 'feature/user/model/user.dart' as _i4;
-import 'greeting.dart' as _i5;
+import 'feature/product/model/product.dart' as _i4;
+import 'feature/product/model/product_category.dart' as _i5;
+import 'feature/product/model/product_condition.dart' as _i6;
+import 'feature/product/model/trade_method.dart' as _i7;
+import 'feature/user/model/user.dart' as _i8;
+import 'greeting.dart' as _i9;
+export 'feature/product/model/product.dart';
+export 'feature/product/model/product_category.dart';
+export 'feature/product/model/product_condition.dart';
+export 'feature/product/model/trade_method.dart';
 export 'feature/user/model/user.dart';
 export 'greeting.dart';
 
@@ -25,6 +33,178 @@ class Protocol extends _i1.SerializationManagerServer {
   static final Protocol _instance = Protocol._();
 
   static final List<_i2.TableDefinition> targetTableDefinitions = [
+    _i2.TableDefinition(
+      name: 'product',
+      dartName: 'Product',
+      schema: 'public',
+      module: 'gear_freak',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'product_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'sellerId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'title',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'category',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:ProductCategory',
+        ),
+        _i2.ColumnDefinition(
+          name: 'price',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'condition',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:ProductCondition',
+        ),
+        _i2.ColumnDefinition(
+          name: 'description',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'tradeMethod',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'protocol:TradeMethod',
+        ),
+        _i2.ColumnDefinition(
+          name: 'baseAddress',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'detailAddress',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'imageUrls',
+          columnType: _i2.ColumnType.json,
+          isNullable: true,
+          dartType: 'List<String>?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'viewCount',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'favoriteCount',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'chatCount',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'product_fk_0',
+          columns: ['sellerId'],
+          referenceTable: 'user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        )
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'product_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'seller_id_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'sellerId',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'category_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'category',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'created_at_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            )
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _i2.TableDefinition(
       name: 'user',
       dartName: 'User',
@@ -139,17 +319,46 @@ class Protocol extends _i1.SerializationManagerServer {
     Type? t,
   ]) {
     t ??= T;
-    if (t == _i4.User) {
-      return _i4.User.fromJson(data) as T;
+    if (t == _i4.Product) {
+      return _i4.Product.fromJson(data) as T;
     }
-    if (t == _i5.Greeting) {
-      return _i5.Greeting.fromJson(data) as T;
+    if (t == _i5.ProductCategory) {
+      return _i5.ProductCategory.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i4.User?>()) {
-      return (data != null ? _i4.User.fromJson(data) : null) as T;
+    if (t == _i6.ProductCondition) {
+      return _i6.ProductCondition.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i5.Greeting?>()) {
-      return (data != null ? _i5.Greeting.fromJson(data) : null) as T;
+    if (t == _i7.TradeMethod) {
+      return _i7.TradeMethod.fromJson(data) as T;
+    }
+    if (t == _i8.User) {
+      return _i8.User.fromJson(data) as T;
+    }
+    if (t == _i9.Greeting) {
+      return _i9.Greeting.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i4.Product?>()) {
+      return (data != null ? _i4.Product.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i5.ProductCategory?>()) {
+      return (data != null ? _i5.ProductCategory.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i6.ProductCondition?>()) {
+      return (data != null ? _i6.ProductCondition.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i7.TradeMethod?>()) {
+      return (data != null ? _i7.TradeMethod.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i8.User?>()) {
+      return (data != null ? _i8.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.Greeting?>()) {
+      return (data != null ? _i9.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<List<String>?>()) {
+      return (data != null
+          ? (data as List).map((e) => deserialize<String>(e)).toList()
+          : null) as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
@@ -167,10 +376,22 @@ class Protocol extends _i1.SerializationManagerServer {
   String? getClassNameForObject(Object? data) {
     String? className = super.getClassNameForObject(data);
     if (className != null) return className;
-    if (data is _i4.User) {
+    if (data is _i4.Product) {
+      return 'Product';
+    }
+    if (data is _i5.ProductCategory) {
+      return 'ProductCategory';
+    }
+    if (data is _i6.ProductCondition) {
+      return 'ProductCondition';
+    }
+    if (data is _i7.TradeMethod) {
+      return 'TradeMethod';
+    }
+    if (data is _i8.User) {
       return 'User';
     }
-    if (data is _i5.Greeting) {
+    if (data is _i9.Greeting) {
       return 'Greeting';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -190,11 +411,23 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'Product') {
+      return deserialize<_i4.Product>(data['data']);
+    }
+    if (dataClassName == 'ProductCategory') {
+      return deserialize<_i5.ProductCategory>(data['data']);
+    }
+    if (dataClassName == 'ProductCondition') {
+      return deserialize<_i6.ProductCondition>(data['data']);
+    }
+    if (dataClassName == 'TradeMethod') {
+      return deserialize<_i7.TradeMethod>(data['data']);
+    }
     if (dataClassName == 'User') {
-      return deserialize<_i4.User>(data['data']);
+      return deserialize<_i8.User>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i5.Greeting>(data['data']);
+      return deserialize<_i9.Greeting>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -222,8 +455,10 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i4.User:
-        return _i4.User.t;
+      case _i4.Product:
+        return _i4.Product.t;
+      case _i8.User:
+        return _i8.User.t;
     }
     return null;
   }

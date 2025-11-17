@@ -1,0 +1,10 @@
+### 상품 카테고리
+enum: ProductCategory
+values:
+  - equipment
+  - supplement
+  - clothing
+  - shoes
+  - etc
+
+

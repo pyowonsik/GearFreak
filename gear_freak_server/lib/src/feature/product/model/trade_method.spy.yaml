@@ -1,0 +1,7 @@
+### 거래 방법
+enum: TradeMethod
+values:
+  - direct
+  - delivery
+  - both
+

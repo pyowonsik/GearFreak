@@ -1,0 +1,7 @@
+### 상품 상태
+enum: ProductCondition
+values:
+  - brandNew
+  - usedExcellent
+  - usedGood
+  - usedFair
