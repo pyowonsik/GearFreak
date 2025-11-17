@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../di/home_providers.dart';
 import '../widget/category_item_widget.dart';
 import '../widget/product_card_widget.dart';
@@ -126,7 +127,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          context.push('/product/create');
+        },
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),

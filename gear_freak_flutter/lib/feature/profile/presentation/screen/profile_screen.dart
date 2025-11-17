@@ -224,7 +224,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           content: Text('로그아웃 실패: $e'),
           backgroundColor: Colors.red,
         ),
-      );
+    );
     }
   }
 }

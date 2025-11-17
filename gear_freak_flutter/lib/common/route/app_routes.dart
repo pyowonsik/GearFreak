@@ -4,6 +4,7 @@ import '../../feature/auth/presentation/screen/splash_screen.dart';
 import '../../feature/auth/presentation/screen/login_screen.dart';
 import '../../feature/auth/presentation/screen/signup_screen.dart';
 import '../../feature/home/presentation/screen/product_detail_screen.dart';
+import '../../feature/home/presentation/screen/create_product_screen.dart';
 import '../../feature/chat/presentation/screen/chat_room_screen.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -42,6 +43,13 @@ abstract final class AppRoutes {
 
         // 메인 화면 (탭 네비게이션) - StatefulShellRoute
         AppRoute.base,
+
+        // 상품 등록 화면 (동적 라우트보다 먼저 정의해야 함)
+        GoRoute(
+          path: '/product/create',
+          name: 'create-product',
+          builder: (context, state) => const CreateProductScreen(),
+        ),
 
         // 상품 상세 화면
         GoRoute(
