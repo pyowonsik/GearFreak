@@ -1,4 +1,4 @@
-import '../../../../core/domain/failure/failure.dart';
+import '../../../../common/domain/failure/failure.dart';
 
 /// 채팅 실패 추상 클래스
 abstract class ChatFailure extends Failure {
@@ -35,4 +35,3 @@ class MarkAsReadFailure extends ChatFailure {
   @override
   String toString() => 'MarkAsReadFailure: $message';
 }
-

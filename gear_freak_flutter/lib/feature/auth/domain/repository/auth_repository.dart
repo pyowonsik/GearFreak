@@ -1,9 +1,9 @@
-import '../entity/user.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
 /// 인증 Repository 인터페이스
 abstract class AuthRepository {
   /// 로그인
-  Future<User> login({
+  Future<pod.User> login({
     required String email,
     required String password,
   });
@@ -12,10 +12,10 @@ abstract class AuthRepository {
   Future<void> logout();
 
   /// 현재 사용자 조회
-  Future<User?> getMe();
+  Future<pod.User?> getMe();
 
   /// 회원가입
-  Future<User> signup({
+  Future<pod.User> signup({
     required String userName,
     required String email,
     required String password,

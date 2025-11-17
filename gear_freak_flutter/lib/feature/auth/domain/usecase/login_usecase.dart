@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/domain/usecase/usecase.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../../../../common/domain/usecase/usecase.dart';
 import '../domain.dart';
 
 /// 로그인 파라미터
@@ -14,7 +15,7 @@ class LoginParams {
 }
 
 /// 로그인 UseCase
-class LoginUseCase implements UseCase<User, LoginParams, AuthRepository> {
+class LoginUseCase implements UseCase<pod.User, LoginParams, AuthRepository> {
   final AuthRepository repository;
 
   const LoginUseCase(this.repository);
@@ -23,7 +24,7 @@ class LoginUseCase implements UseCase<User, LoginParams, AuthRepository> {
   AuthRepository get repo => repository;
 
   @override
-  Future<Either<Failure, User>> call(LoginParams param) async {
+  Future<Either<Failure, pod.User>> call(LoginParams param) async {
     try {
       final result = await repository.login(
         email: param.email,

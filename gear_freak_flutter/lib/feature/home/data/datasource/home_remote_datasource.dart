@@ -1,10 +1,11 @@
-import 'package:gear_freak_client/gear_freak_client.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../../../../common/service/pod_service.dart';
 
 /// 홈 원격 데이터 소스
 class HomeRemoteDataSource {
-  final Client client;
+  const HomeRemoteDataSource();
 
-  HomeRemoteDataSource(this.client);
+  pod.Client get _client => PodService.instance.client;
 
   /// 최근 등록 상품 조회
   Future<List<Map<String, dynamic>>> getRecentProducts() async {

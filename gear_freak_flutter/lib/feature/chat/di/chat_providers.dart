@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/di/providers.dart';
 import '../data/datasource/chat_remote_datasource.dart';
 import '../data/repository/chat_repository_impl.dart';
 import '../domain/repository/chat_repository.dart';
@@ -8,8 +7,7 @@ import '../presentation/provider/chat_notifier.dart';
 
 /// Chat Remote DataSource Provider
 final chatRemoteDataSourceProvider = Provider<ChatRemoteDataSource>((ref) {
-  final client = ref.watch(clientProvider);
-  return ChatRemoteDataSource(client);
+  return const ChatRemoteDataSource();
 });
 
 /// Chat Repository Provider

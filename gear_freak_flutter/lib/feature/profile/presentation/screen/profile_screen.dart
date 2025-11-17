@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../di/profile_providers.dart';
+import '../../../auth/di/auth_providers.dart';
+import '../../../../common/component/confirmation_dialog.dart';
 
 /// 프로필 화면
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -101,24 +104,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildStatItem('판매중', '${profileState.profile!.sellingCount}'),
-                            _buildStatItem('거래완료', '${profileState.profile!.soldCount}'),
-                            _buildStatItem('관심목록', '${profileState.profile!.favoriteCount}'),
+                            _buildStatItem(
+                                '판매중', '${profileState.profile!.sellingCount}'),
+                            _buildStatItem(
+                                '거래완료', '${profileState.profile!.soldCount}'),
+                            _buildStatItem('관심목록',
+                                '${profileState.profile!.favoriteCount}'),
                           ],
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // 메뉴 리스트
+                      // 메뉴 리스트c
                       Container(
                         color: Colors.white,
                         child: Column(
                           children: [
-                            _buildMenuItem(Icons.shopping_bag_outlined, '내 상품 관리'),
-                            _buildMenuItem(Icons.receipt_long_outlined, '거래 내역'),
+                            _buildMenuItem(
+                                Icons.shopping_bag_outlined, '내 상품 관리'),
+                            _buildMenuItem(
+                                Icons.receipt_long_outlined, '거래 내역'),
                             _buildMenuItem(Icons.favorite_outline, '관심 목록'),
                             _buildMenuItem(Icons.star_outline, '후기 관리'),
                             _buildMenuItem(Icons.help_outline, '고객 센터'),
                             _buildMenuItem(Icons.info_outline, '앱 정보'),
+                            _buildMenuItem(
+                              Icons.logout_outlined,
+                              '로그아웃',
+                              onTap: _handleLogout,
+                            ),
                           ],
                         ),
                       ),
@@ -152,7 +165,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title) {
+  Widget _buildMenuItem(
+    IconData icon,
+    String title, {
+    VoidCallback? onTap,
+  }) {
     return ListTile(
       leading: Icon(icon, color: const Color(0xFF4B5563)),
       title: Text(
@@ -166,8 +183,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Icons.chevron_right,
         color: Color(0xFF9CA3AF),
       ),
-      onTap: () {},
+      onTap: onTap,
     );
   }
-}
 
+  /// 로그아웃 처리
+  Future<void> _handleLogout() async {
+    // 로그아웃 확인 다이얼로그 표시
+    final shouldLogout = await ConfirmationDialog.show(
+      context: context,
+      title: '로그아웃',
+      content: '정말 로그아웃 하시겠습니까?',
+      cancelText: '취소',
+      confirmText: '로그아웃',
+      confirmColor: Colors.red,
+    );
+
+    if (shouldLogout != true || !mounted) return;
+
+    try {
+      // 로그아웃 실행
+      final authNotifier = ref.read(authNotifierProvider.notifier);
+      await authNotifier.logout();
+
+      if (!mounted) return;
+
+      // 다음 프레임에서 라우팅 (provider 재빌드 후)
+      // 이렇게 하면 authNotifierProvider의 상태 변경이 완료된 후 Guard가 실행됩니다
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.go('/login');
+        }
+      });
+    } catch (e) {
+      // 로그아웃 실패 시 에러 메시지 표시
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('로그아웃 실패: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/domain/usecase/usecase.dart';
+import '../../../../common/domain/usecase/usecase.dart';
 import '../domain.dart';
 
 /// 사용자 프로필 조회 UseCase

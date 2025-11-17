@@ -6,7 +6,7 @@ import '../datasource/profile_remote_datasource.dart';
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
 
-  ProfileRepositoryImpl(this.remoteDataSource);
+  const ProfileRepositoryImpl(this.remoteDataSource);
 
   @override
   Future<UserProfile> getUserProfile() async {

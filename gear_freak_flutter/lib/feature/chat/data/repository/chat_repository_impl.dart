@@ -7,7 +7,7 @@ import '../datasource/chat_remote_datasource.dart';
 class ChatRepositoryImpl implements ChatRepository {
   final ChatRemoteDataSource remoteDataSource;
 
-  ChatRepositoryImpl(this.remoteDataSource);
+  const ChatRepositoryImpl(this.remoteDataSource);
 
   @override
   Future<List<ChatMessage>> getChatList() async {

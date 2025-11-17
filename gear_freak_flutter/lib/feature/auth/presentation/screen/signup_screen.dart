@@ -59,9 +59,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     // 회원가입 완료 후 상태 확인
     final authState = ref.read(authNotifierProvider);
     switch (authState) {
-      case AuthAuthenticated():
-        // 회원가입 성공 후 메인 화면으로 이동
-        context.go('/main');
+            case AuthAuthenticated():
+              // 회원가입 성공 후 메인 화면으로 이동
+              context.go('/main/home');
       case AuthError(:final message):
         // 에러 메시지 표시
         ScaffoldMessenger.of(context).showSnackBar(

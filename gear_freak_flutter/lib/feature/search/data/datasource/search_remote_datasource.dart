@@ -1,10 +1,11 @@
-import 'package:gear_freak_client/gear_freak_client.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../../../../common/service/pod_service.dart';
 
 /// 검색 원격 데이터 소스
 class SearchRemoteDataSource {
-  final Client client;
+  const SearchRemoteDataSource();
 
-  SearchRemoteDataSource(this.client);
+  pod.Client get _client => PodService.instance.client;
 
   /// 상품 검색
   Future<List<Map<String, dynamic>>> searchProducts({

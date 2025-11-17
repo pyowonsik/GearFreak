@@ -6,7 +6,7 @@ import '../datasource/home_remote_datasource.dart';
 class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource remoteDataSource;
 
-  HomeRepositoryImpl(this.remoteDataSource);
+  const HomeRepositoryImpl(this.remoteDataSource);
 
   @override
   Future<List<Product>> getRecentProducts() async {

@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/domain/usecase/usecase.dart';
+import '../../../../common/domain/usecase/usecase.dart';
 import '../domain.dart';
 
 /// 검색 파라미터
@@ -44,4 +44,3 @@ class SearchProductsUseCase
     }
   }
 }
-

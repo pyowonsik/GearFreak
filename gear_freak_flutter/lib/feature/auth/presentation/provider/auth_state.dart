@@ -1,4 +1,4 @@
-import '../../domain/entity/user.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
 /// 인증 상태 (Sealed Class 방식)
 /// BLoC의 State 추상 클래스와 유사한 패턴
@@ -18,7 +18,7 @@ class AuthLoading extends AuthState {
 
 /// 인증 성공 상태
 class AuthAuthenticated extends AuthState {
-  final User user;
+  final pod.User user;
 
   const AuthAuthenticated(this.user);
 }

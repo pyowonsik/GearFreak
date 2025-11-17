@@ -1,9 +1,10 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/domain/usecase/usecase.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../../../../common/domain/usecase/usecase.dart';
 import '../domain.dart';
 
 /// 회원가입 UseCase
-class SignupUseCase implements UseCase<User, SignupParams, AuthRepository> {
+class SignupUseCase implements UseCase<pod.User, SignupParams, AuthRepository> {
   final AuthRepository repository;
 
   const SignupUseCase(this.repository);
@@ -12,7 +13,7 @@ class SignupUseCase implements UseCase<User, SignupParams, AuthRepository> {
   AuthRepository get repo => repository;
 
   @override
-  Future<Either<Failure, User>> call(SignupParams param) async {
+  Future<Either<Failure, pod.User>> call(SignupParams param) async {
     try {
       final result = await repository.signup(
         userName: param.userName,

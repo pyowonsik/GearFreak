@@ -1,4 +1,4 @@
-import '../../../../core/domain/failure/failure.dart';
+import '../../../../common/domain/failure/failure.dart';
 
 /// 프로필 실패 추상 클래스
 abstract class ProfileFailure extends Failure {

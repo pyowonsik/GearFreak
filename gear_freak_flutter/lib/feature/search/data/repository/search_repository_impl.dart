@@ -7,7 +7,7 @@ import '../datasource/search_remote_datasource.dart';
 class SearchRepositoryImpl implements SearchRepository {
   final SearchRemoteDataSource remoteDataSource;
 
-  SearchRepositoryImpl(this.remoteDataSource);
+  const SearchRepositoryImpl(this.remoteDataSource);
 
   @override
   Future<SearchResult> searchProducts({

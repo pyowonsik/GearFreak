@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/di/providers.dart';
 import '../data/datasource/search_remote_datasource.dart';
 import '../data/repository/search_repository_impl.dart';
 import '../domain/repository/search_repository.dart';
@@ -8,8 +7,7 @@ import '../presentation/provider/search_notifier.dart';
 
 /// Search Remote DataSource Provider
 final searchRemoteDataSourceProvider = Provider<SearchRemoteDataSource>((ref) {
-  final client = ref.watch(clientProvider);
-  return SearchRemoteDataSource(client);
+  return const SearchRemoteDataSource();
 });
 
 /// Search Repository Provider

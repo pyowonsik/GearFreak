@@ -1,10 +1,11 @@
-import 'package:gear_freak_client/gear_freak_client.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../../../../common/service/pod_service.dart';
 
 /// 프로필 원격 데이터 소스
 class ProfileRemoteDataSource {
-  final Client client;
+  const ProfileRemoteDataSource();
 
-  ProfileRemoteDataSource(this.client);
+  pod.Client get _client => PodService.instance.client;
 
   /// 사용자 프로필 조회
   Future<Map<String, dynamic>> getUserProfile() async {

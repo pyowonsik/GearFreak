@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/di/providers.dart';
 import '../data/datasource/home_remote_datasource.dart';
 import '../data/repository/home_repository_impl.dart';
 import '../domain/repository/home_repository.dart';
@@ -8,8 +7,7 @@ import '../presentation/provider/home_notifier.dart';
 
 /// Home Remote DataSource Provider
 final homeRemoteDataSourceProvider = Provider<HomeRemoteDataSource>((ref) {
-  final client = ref.watch(clientProvider);
-  return HomeRemoteDataSource(client);
+  return const HomeRemoteDataSource();
 });
 
 /// Home Repository Provider
