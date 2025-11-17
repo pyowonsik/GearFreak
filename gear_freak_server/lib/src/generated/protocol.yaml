@@ -1,7 +1,11 @@
 auth:
   - signupWithoutEmailVerification:
+product:
+  - getProduct:
+  - getProducts:
 user:
   - getMe:
+  - getUserById:
   - getUserScopes:
 greeting:
   - hello:

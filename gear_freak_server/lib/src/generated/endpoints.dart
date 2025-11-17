@@ -11,9 +11,10 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../feature/auth/endpoint/auth_endpoint.dart' as _i2;
-import '../feature/user/endpoint/user_endpoint.dart' as _i3;
-import '../greeting_endpoint.dart' as _i4;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i5;
+import '../feature/product/endpoint/product_endpoint.dart' as _i3;
+import '../feature/user/endpoint/user_endpoint.dart' as _i4;
+import '../greeting_endpoint.dart' as _i5;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i6;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -25,13 +26,19 @@ class Endpoints extends _i1.EndpointDispatch {
           'auth',
           null,
         ),
-      'user': _i3.UserEndpoint()
+      'product': _i3.ProductEndpoint()
+        ..initialize(
+          server,
+          'product',
+          null,
+        ),
+      'user': _i4.UserEndpoint()
         ..initialize(
           server,
           'user',
           null,
         ),
-      'greeting': _i4.GreetingEndpoint()
+      'greeting': _i5.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -75,6 +82,40 @@ class Endpoints extends _i1.EndpointDispatch {
         )
       },
     );
+    connectors['product'] = _i1.EndpointConnector(
+      name: 'product',
+      endpoint: endpoints['product']!,
+      methodConnectors: {
+        'getProduct': _i1.MethodConnector(
+          name: 'getProduct',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i3.ProductEndpoint).getProduct(
+            session,
+            params['id'],
+          ),
+        ),
+        'getProducts': _i1.MethodConnector(
+          name: 'getProducts',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i3.ProductEndpoint)
+                  .getProducts(session),
+        ),
+      },
+    );
     connectors['user'] = _i1.EndpointConnector(
       name: 'user',
       endpoint: endpoints['user']!,
@@ -86,7 +127,25 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i3.UserEndpoint).getMe(session),
+              (endpoints['user'] as _i4.UserEndpoint).getMe(session),
+        ),
+        'getUserById': _i1.MethodConnector(
+          name: 'getUserById',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['user'] as _i4.UserEndpoint).getUserById(
+            session,
+            params['id'],
+          ),
         ),
         'getUserScopes': _i1.MethodConnector(
           name: 'getUserScopes',
@@ -95,7 +154,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i3.UserEndpoint).getUserScopes(session),
+              (endpoints['user'] as _i4.UserEndpoint).getUserScopes(session),
         ),
       },
     );
@@ -116,13 +175,13 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['greeting'] as _i4.GreetingEndpoint).hello(
+              (endpoints['greeting'] as _i5.GreetingEndpoint).hello(
             session,
             params['name'],
           ),
         )
       },
     );
-    modules['serverpod_auth'] = _i5.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i6.Endpoints()..initializeEndpoints(server);
   }
 }

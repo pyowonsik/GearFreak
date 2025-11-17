@@ -11,6 +11,11 @@ class UserEndpoint extends Endpoint
     return await UserService.getMe(session);
   }
 
+  /// 사용자 Id로 사용자 정보를 가져옵니다
+  Future<User> getUserById(Session session, int id) async {
+    return await UserService.getUserById(session, id);
+  }
+
   /// 현재 사용자의 권한(Scope) 정보를 조회합니다
   Future<List<String>> getUserScopes(Session session) async {
     return await UserService.getUserScopes(session);

@@ -45,6 +45,17 @@ class UserService {
     return user.copyWith(userInfo: userInfo);
   }
 
+  /// 사용자 Id로 사용자 정보를 가져옵니다
+  static Future<User> getUserById(Session session, int id) async {
+    final user = await User.db.findById(session, id);
+
+    if (user == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    return user;
+  }
+
   /// 현재 사용자의 권한(Scope) 정보를 조회합니다
   static Future<List<String>> getUserScopes(Session session) async {
     final authenticationInfo = await session.authenticated;

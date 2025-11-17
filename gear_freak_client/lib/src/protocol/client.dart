@@ -13,9 +13,11 @@ import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
 import 'package:gear_freak_client/src/protocol/feature/user/model/user.dart'
     as _i3;
-import 'package:gear_freak_client/src/protocol/greeting.dart' as _i4;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i5;
-import 'protocol.dart' as _i6;
+import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
+    as _i4;
+import 'package:gear_freak_client/src/protocol/greeting.dart' as _i5;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i6;
+import 'protocol.dart' as _i7;
 
 /// 인증 엔드포인트
 /// {@category Endpoint}
@@ -42,6 +44,29 @@ class EndpointAuth extends _i1.EndpointRef {
       );
 }
 
+/// 인증 엔드포인트
+/// {@category Endpoint}
+class EndpointProduct extends _i1.EndpointRef {
+  EndpointProduct(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'product';
+
+  _i2.Future<_i4.Product> getProduct(int id) =>
+      caller.callServerEndpoint<_i4.Product>(
+        'product',
+        'getProduct',
+        {'id': id},
+      );
+
+  _i2.Future<List<_i4.Product>> getProducts() =>
+      caller.callServerEndpoint<List<_i4.Product>>(
+        'product',
+        'getProducts',
+        {},
+      );
+}
+
 /// 사용자 엔드포인트
 /// {@category Endpoint}
 class EndpointUser extends _i1.EndpointRef {
@@ -55,6 +80,14 @@ class EndpointUser extends _i1.EndpointRef {
         'user',
         'getMe',
         {},
+      );
+
+  /// 사용자 Id로 사용자 정보를 가져옵니다
+  _i2.Future<_i3.User> getUserById(int id) =>
+      caller.callServerEndpoint<_i3.User>(
+        'user',
+        'getUserById',
+        {'id': id},
       );
 
   /// 현재 사용자의 권한(Scope) 정보를 조회합니다
@@ -76,8 +109,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i4.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i4.Greeting>(
+  _i2.Future<_i5.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i5.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -86,10 +119,10 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i5.Caller(client);
+    auth = _i6.Caller(client);
   }
 
-  late final _i5.Caller auth;
+  late final _i6.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -108,7 +141,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i6.Protocol(),
+          _i7.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -119,12 +152,15 @@ class Client extends _i1.ServerpodClientShared {
               disconnectStreamsOnLostInternetConnection,
         ) {
     auth = EndpointAuth(this);
+    product = EndpointProduct(this);
     user = EndpointUser(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
 
   late final EndpointAuth auth;
+
+  late final EndpointProduct product;
 
   late final EndpointUser user;
 
@@ -135,6 +171,7 @@ class Client extends _i1.ServerpodClientShared {
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
         'auth': auth,
+        'product': product,
         'user': user,
         'greeting': greeting,
       };

@@ -13,11 +13,12 @@ class ProductService {
   }
 
   Future<List<Product>> getProducts(Session session) async {
-    final products = await Product.db.find(session);
-
-    if (products.isEmpty) {
-      throw Exception('Products not found');
-    }
+    final products = await Product.db.find(
+      session,
+      orderBy: (p) => p.createdAt,
+      orderDescending: true,
+      limit: 10,
+    );
 
     return products;
   }
