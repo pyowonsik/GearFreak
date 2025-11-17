@@ -1,3 +1,4 @@
+import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 
@@ -5,7 +6,7 @@ import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 /// 회원가입, 로그인 등 인증 관련 비즈니스 로직을 처리합니다.
 class AuthService {
   /// 개발용: 이메일 인증 없이 바로 회원가입
-  static Future<UserInfo> signupWithoutEmailVerification(
+  static Future<User> signupWithoutEmailVerification(
     Session session, {
     required String userName,
     required String email,
@@ -44,6 +45,15 @@ class AuthService {
     );
     await EmailAuth.db.insertRow(session, emailAuth);
 
-    return savedUserInfo;
+    // 5. User 생성 (UserInfo와 연결)
+    final user = User(
+      userInfoId: savedUserInfo.id!,
+      userInfo: savedUserInfo,
+      nickname: userName,
+      createdAt: DateTime.now().toUtc(),
+    );
+    final savedUser = await User.db.insertRow(session, user);
+
+    return savedUser;
   }
 }

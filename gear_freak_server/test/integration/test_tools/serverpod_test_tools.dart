@@ -14,7 +14,8 @@
 import 'package:serverpod_test/serverpod_test.dart' as _i1;
 import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i4;
+import 'package:gear_freak_server/src/generated/feature/user/model/user.dart'
+    as _i4;
 import 'package:gear_freak_server/src/generated/greeting.dart' as _i5;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
@@ -141,7 +142,7 @@ class _AuthEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i4.UserInfo> signupWithoutEmailVerification(
+  _i3.Future<_i4.User> signupWithoutEmailVerification(
     _i1.TestSessionBuilder sessionBuilder, {
     required String userName,
     required String email,
@@ -168,7 +169,7 @@ class _AuthEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i4.UserInfo>);
+        ) as _i3.Future<_i4.User>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -187,7 +188,7 @@ class _UserEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i4.UserInfo> getMe(_i1.TestSessionBuilder sessionBuilder) async {
+  _i3.Future<_i4.User> getMe(_i1.TestSessionBuilder sessionBuilder) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -205,7 +206,7 @@ class _UserEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i4.UserInfo>);
+        ) as _i3.Future<_i4.User>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

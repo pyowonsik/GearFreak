@@ -1,0 +1,29 @@
+### 사용자 정보
+class: User
+
+table: user
+
+fields:
+  ### 인증 모듈에 저장된 사용자 정보
+  userInfo: module:auth:UserInfo?, relation
+  ### 닉네임
+  nickname: String?
+  ### 자기 소개 (biography)
+  bio: String?
+  ### 사용자 탈퇴 요청 날짜 (3개월 후 사용자 정보 삭제)
+  withdrawalDate: DateTime?
+  ### 계정 정지 이유
+  blockedReason: String?
+  ### 계정 정지 날짜
+  blockedAt: DateTime?
+  ### 최근 접속일
+  lastLoginAt: DateTime?
+  ### 계정 생성일 (가입일)
+  createdAt: DateTime?
+
+indexes:
+  user_info_id_unique_idx:
+    fields: userInfoId
+    unique: true
+
+

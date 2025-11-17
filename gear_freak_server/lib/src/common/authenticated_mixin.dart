@@ -12,3 +12,4 @@ mixin AuthenticatedMixin on Endpoint {
   @override
   bool get requireLogin => true;
 }
+
