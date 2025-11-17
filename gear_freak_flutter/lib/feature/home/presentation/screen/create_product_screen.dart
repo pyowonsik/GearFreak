@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kpostal/kpostal.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../utils/product_enum_helper.dart';
 
 class CreateProductScreen extends StatefulWidget {
   const CreateProductScreen({super.key});
@@ -17,9 +19,9 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
   final _descriptionController = TextEditingController();
   final _detailAddressController = TextEditingController();
 
-  String _selectedCategory = '장비';
-  String _selectedCondition = '중고 - 상';
-  String _selectedTradeMethod = '직거래';
+  pod.ProductCategory _selectedCategory = pod.ProductCategory.equipment;
+  pod.ProductCondition _selectedCondition = pod.ProductCondition.usedExcellent;
+  pod.TradeMethod _selectedTradeMethod = pod.TradeMethod.direct;
   final List<XFile> _selectedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
   String? _baseAddress; // 기본 주소 (kpostal에서 가져온 주소)
@@ -129,23 +131,24 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
+                    DropdownButtonFormField<pod.ProductCategory>(
                       value: _selectedCategory,
                       decoration: const InputDecoration(
                         labelText: '카테고리',
                         border: OutlineInputBorder(),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: '장비', child: Text('장비')),
-                        DropdownMenuItem(value: '보충제', child: Text('보충제')),
-                        DropdownMenuItem(value: '의류', child: Text('의류')),
-                        DropdownMenuItem(value: '신발', child: Text('신발')),
-                        DropdownMenuItem(value: '기타', child: Text('기타')),
-                      ],
+                      items: pod.ProductCategory.values.map((category) {
+                        return DropdownMenuItem<pod.ProductCategory>(
+                          value: category,
+                          child: Text(getProductCategoryLabel(category)),
+                        );
+                      }).toList(),
                       onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value!;
-                        });
+                        if (value != null) {
+                          setState(() {
+                            _selectedCategory = value;
+                          });
+                        }
                       },
                     ),
                     const SizedBox(height: 16),
@@ -166,25 +169,24 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
+                    DropdownButtonFormField<pod.ProductCondition>(
                       value: _selectedCondition,
                       decoration: const InputDecoration(
                         labelText: '상품 상태',
                         border: OutlineInputBorder(),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: '새 제품', child: Text('새 제품')),
-                        DropdownMenuItem(
-                            value: '중고 - 상', child: Text('중고 - 상')),
-                        DropdownMenuItem(
-                            value: '중고 - 중', child: Text('중고 - 중')),
-                        DropdownMenuItem(
-                            value: '중고 - 하', child: Text('중고 - 하')),
-                      ],
+                      items: pod.ProductCondition.values.map((condition) {
+                        return DropdownMenuItem<pod.ProductCondition>(
+                          value: condition,
+                          child: Text(getProductConditionLabel(condition)),
+                        );
+                      }).toList(),
                       onChanged: (value) {
-                        setState(() {
-                          _selectedCondition = value!;
-                        });
+                        if (value != null) {
+                          setState(() {
+                            _selectedCondition = value;
+                          });
+                        }
                       },
                     ),
                     const SizedBox(height: 16),
@@ -225,25 +227,27 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
+                    DropdownButtonFormField<pod.TradeMethod>(
                       value: _selectedTradeMethod,
                       decoration: const InputDecoration(
                         labelText: '거래 방법',
                         border: OutlineInputBorder(),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: '직거래', child: Text('직거래')),
-                        DropdownMenuItem(value: '택배', child: Text('택배')),
-                        DropdownMenuItem(
-                            value: '직거래/택배', child: Text('직거래/택배')),
-                      ],
+                      items: pod.TradeMethod.values.map((method) {
+                        return DropdownMenuItem<pod.TradeMethod>(
+                          value: method,
+                          child: Text(getTradeMethodLabel(method)),
+                        );
+                      }).toList(),
                       onChanged: (value) {
-                        setState(() {
-                          _selectedTradeMethod = value!;
-                        });
+                        if (value != null) {
+                          setState(() {
+                            _selectedTradeMethod = value;
+                          });
+                        }
                       },
                     ),
-                    if (_selectedTradeMethod.contains('직거래')) ...[
+                    if (isDirectTrade(_selectedTradeMethod)) ...[
                       const SizedBox(height: 16),
                       // 기본 주소 검색
                       InkWell(
@@ -281,7 +285,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                         ),
                       ),
                       if (_baseAddress == null &&
-                          _selectedTradeMethod.contains('직거래'))
+                          isDirectTrade(_selectedTradeMethod))
                         Padding(
                           padding: const EdgeInsets.only(top: 8, left: 12),
                           child: Text(
@@ -303,7 +307,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                           prefixIcon: Icon(Icons.home),
                         ),
                         validator: (value) {
-                          if (_selectedTradeMethod.contains('직거래') &&
+                          if (isDirectTrade(_selectedTradeMethod) &&
                               _baseAddress != null &&
                               (value == null || value.isEmpty)) {
                             return '상세 주소를 입력해주세요';
@@ -477,7 +481,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
         return;
       }
 
-      if (_selectedTradeMethod.contains('직거래') &&
+      if (isDirectTrade(_selectedTradeMethod) &&
           (_baseAddress == null || _baseAddress!.isEmpty)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('주소를 검색해주세요')),

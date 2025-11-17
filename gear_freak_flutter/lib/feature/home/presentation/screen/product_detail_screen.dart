@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../utils/product_enum_helper.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
-  
+
   const ProductDetailScreen({
     super.key,
     required this.productId,
@@ -101,22 +103,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   // 카테고리 및 시간
-                  const Row(
+                  // TODO: 실제 product 데이터를 받아서 표시
+                  Row(
                     children: [
                       Text(
-                        '장비',
-                        style: TextStyle(
+                        getProductCategoryLabel(pod.ProductCategory.equipment),
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF6B7280),
                         ),
                       ),
-                      SizedBox(width: 8),
-                      Text(
+                      const SizedBox(width: 8),
+                      const Text(
                         '·',
                         style: TextStyle(color: Color(0xFF9CA3AF)),
                       ),
-                      SizedBox(width: 8),
-                      Text(
+                      const SizedBox(width: 8),
+                      const Text(
                         '5분 전',
                         style: TextStyle(
                           fontSize: 13,
@@ -202,7 +205,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 },
                 icon: Icon(
                   isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: isLiked ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
+                  color: isLiked
+                      ? const Color(0xFFEF4444)
+                      : const Color(0xFF6B7280),
                   size: 28,
                 ),
               ),
@@ -258,4 +263,3 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 }
-

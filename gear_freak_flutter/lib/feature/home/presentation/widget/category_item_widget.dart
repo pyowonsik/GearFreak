@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
-import '../../domain/entity/product.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
 /// 카테고리 아이템 위젯
 class CategoryItemWidget extends StatelessWidget {
-  final Category category;
+  final pod.ProductCategory category;
+  final String? name;
+  final String? iconName;
 
   const CategoryItemWidget({
     super.key,
     required this.category,
+    this.name,
+    this.iconName,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = _getCategoryColor(category.id);
+    final colors = _getCategoryColor(category);
+    final displayName = name ?? _getCategoryName(category);
+    final icon = _getIconData(iconName ?? _getCategoryIcon(category));
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -27,14 +33,14 @@ class CategoryItemWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
-              _getIconData(category.icon),
+              icon,
               color: colors['icon'],
               size: 32,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            category.name,
+            displayName,
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -46,38 +52,63 @@ class CategoryItemWidget extends StatelessWidget {
     );
   }
 
-  Map<String, Color> _getCategoryColor(String categoryId) {
-    switch (categoryId) {
-      case 'all':
-        return {
-          'icon': const Color(0xFF2563EB),
-          'background': const Color(0xFF2563EB)
-        };
-      case 'equipment':
+  Map<String, Color> _getCategoryColor(pod.ProductCategory category) {
+    switch (category) {
+      case pod.ProductCategory.equipment:
         return {
           'icon': const Color(0xFF10B981),
           'background': const Color(0xFF10B981)
         };
-      case 'supplement':
+      case pod.ProductCategory.supplement:
         return {
           'icon': const Color(0xFFF59E0B),
           'background': const Color(0xFFF59E0B)
         };
-      case 'clothing':
+      case pod.ProductCategory.clothing:
         return {
           'icon': const Color(0xFFEF4444),
           'background': const Color(0xFFEF4444)
         };
-      case 'shoes':
+      case pod.ProductCategory.shoes:
         return {
           'icon': const Color(0xFF8B5CF6),
           'background': const Color(0xFF8B5CF6)
         };
-      default:
+      case pod.ProductCategory.etc:
         return {
           'icon': const Color(0xFF6B7280),
           'background': const Color(0xFF6B7280)
         };
+    }
+  }
+
+  String _getCategoryName(pod.ProductCategory category) {
+    switch (category) {
+      case pod.ProductCategory.equipment:
+        return '장비';
+      case pod.ProductCategory.supplement:
+        return '보충제';
+      case pod.ProductCategory.clothing:
+        return '의류';
+      case pod.ProductCategory.shoes:
+        return '신발';
+      case pod.ProductCategory.etc:
+        return '기타';
+    }
+  }
+
+  String _getCategoryIcon(pod.ProductCategory category) {
+    switch (category) {
+      case pod.ProductCategory.equipment:
+        return 'settings_accessibility';
+      case pod.ProductCategory.supplement:
+        return 'medication';
+      case pod.ProductCategory.clothing:
+        return 'checkroom';
+      case pod.ProductCategory.shoes:
+        return 'downhill_skiing';
+      case pod.ProductCategory.etc:
+        return 'more_horiz';
     }
   }
 

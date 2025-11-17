@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../domain/entity/product.dart';
 import '../../domain/repository/home_repository.dart';
 import '../../domain/usecase/get_recent_products_usecase.dart';
@@ -6,7 +7,7 @@ import '../../domain/usecase/get_recent_products_usecase.dart';
 /// 홈 상태
 class HomeState {
   final List<Product> products;
-  final List<Category> categories;
+  final List<pod.ProductCategory> categories;
   final bool isLoading;
   final String? error;
 
@@ -19,7 +20,7 @@ class HomeState {
 
   HomeState copyWith({
     List<Product>? products,
-    List<Category>? categories,
+    List<pod.ProductCategory>? categories,
     bool? isLoading,
     String? error,
   }) {

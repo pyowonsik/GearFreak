@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entity/product.dart';
+import '../utils/product_enum_helper.dart';
 
 /// 상품 카드 위젯
 class ProductCardWidget extends StatelessWidget {
@@ -59,7 +60,7 @@ class ProductCardWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${product.location} · ${_formatTime(product.createdAt)}',
+                    '${getProductCategoryLabel(product.category)} · ${product.location} · ${_formatTime(product.createdAt)}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF9CA3AF),

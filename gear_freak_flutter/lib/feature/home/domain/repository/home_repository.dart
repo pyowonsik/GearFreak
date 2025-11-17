@@ -1,3 +1,4 @@
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../entity/product.dart';
 
 /// 홈 Repository 인터페이스
@@ -6,6 +7,6 @@ abstract class HomeRepository {
   Future<List<Product>> getRecentProducts();
 
   /// 카테고리 목록 조회
-  Future<List<Category>> getCategories();
+  Future<List<pod.ProductCategory>> getCategories();
 }
 

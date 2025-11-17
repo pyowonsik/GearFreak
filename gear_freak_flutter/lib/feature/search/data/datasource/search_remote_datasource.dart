@@ -28,7 +28,7 @@ class SearchRemoteDataSource {
         'location': '서울 강남구',
         'createdAt': DateTime.now().toIso8601String(),
         'favoriteCount': 10 + index,
-        'category': '검색결과',
+        'category': pod.ProductCategory.equipment.name,
       },
     );
   }

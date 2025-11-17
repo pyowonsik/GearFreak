@@ -22,20 +22,13 @@ class HomeRemoteDataSource {
                   .subtract(Duration(minutes: 5 + index))
                   .toIso8601String(),
               'favoriteCount': 12 + index,
-              'category': '장비',
+              'category': pod.ProductCategory.equipment.name,
             });
   }
 
   /// 카테고리 목록 조회
-  Future<List<Map<String, dynamic>>> getCategories() async {
+  Future<List<pod.ProductCategory>> getCategories() async {
     // TODO: Serverpod 엔드포인트 호출
-    return [
-      {'id': 'all', 'name': '전체', 'icon': 'grid_view'},
-      {'id': 'equipment', 'name': '장비', 'icon': 'settings_accessibility'},
-      {'id': 'supplement', 'name': '보충제', 'icon': 'medication'},
-      {'id': 'clothing', 'name': '의류', 'icon': 'checkroom'},
-      {'id': 'shoes', 'name': '신발', 'icon': 'downhill_skiing'},
-      {'id': 'etc', 'name': '기타', 'icon': 'more_horiz'},
-    ];
+    return pod.ProductCategory.values;
   }
 }

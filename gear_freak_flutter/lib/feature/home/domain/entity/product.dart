@@ -1,3 +1,5 @@
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+
 /// 상품 엔티티
 class Product {
   final String id;
@@ -7,7 +9,7 @@ class Product {
   final DateTime createdAt;
   final int favoriteCount;
   final String? imageUrl;
-  final String category;
+  final pod.ProductCategory category;
 
   const Product({
     required this.id,
@@ -28,7 +30,7 @@ class Product {
     DateTime? createdAt,
     int? favoriteCount,
     String? imageUrl,
-    String? category,
+    pod.ProductCategory? category,
   }) {
     return Product(
       id: id ?? this.id,
@@ -43,16 +45,6 @@ class Product {
   }
 }
 
-/// 카테고리 엔티티
-class Category {
-  final String id;
-  final String name;
-  final String icon;
-
-  const Category({
-    required this.id,
-    required this.name,
-    required this.icon,
-  });
-}
+/// 카테고리 엔티티 (pod.ProductCategory를 사용)
+typedef Category = pod.ProductCategory;
 
