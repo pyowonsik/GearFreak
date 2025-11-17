@@ -1,3 +1,4 @@
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../domain/entity/user_profile.dart';
 import '../../domain/repository/profile_repository.dart';
 import '../datasource/profile_remote_datasource.dart';
@@ -20,5 +21,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
       favoriteCount: data['favoriteCount'] as int? ?? 0,
     );
   }
-}
 
+  @override
+  Future<pod.User> getUserById(int id) async {
+    return await remoteDataSource.getUserById(id);
+  }
+}

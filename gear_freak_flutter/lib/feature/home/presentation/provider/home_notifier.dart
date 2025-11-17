@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../domain/entity/product.dart';
-import '../../domain/repository/home_repository.dart';
 import '../../domain/usecase/get_recent_products_usecase.dart';
 
 /// 홈 상태
 class HomeState {
-  final List<Product> products;
+  final List<pod.Product> products;
   final List<pod.ProductCategory> categories;
   final bool isLoading;
   final String? error;
@@ -19,7 +17,7 @@ class HomeState {
   });
 
   HomeState copyWith({
-    List<Product>? products,
+    List<pod.Product>? products,
     List<pod.ProductCategory>? categories,
     bool? isLoading,
     String? error,
@@ -36,10 +34,8 @@ class HomeState {
 /// 홈 Notifier
 class HomeNotifier extends StateNotifier<HomeState> {
   final GetRecentProductsUseCase getRecentProductsUseCase;
-  final HomeRepository repository;
 
-  HomeNotifier(this.getRecentProductsUseCase, this.repository)
-      : super(const HomeState());
+  HomeNotifier(this.getRecentProductsUseCase) : super(const HomeState());
 
   /// 홈 데이터 로드
   Future<void> loadHomeData() async {
@@ -52,23 +48,15 @@ class HomeNotifier extends StateNotifier<HomeState> {
         state = state.copyWith(
           isLoading: false,
           error: failure.message,
+          categories: pod.ProductCategory.values, // 카테고리는 고정값
         );
       },
-      (products) async {
-        try {
-          final categories = await repository.getCategories();
-          state = state.copyWith(
-            products: products,
-            categories: categories,
-            isLoading: false,
-          );
-        } catch (e) {
-          state = state.copyWith(
-            products: products,
-            isLoading: false,
-            error: e.toString(),
-          );
-        }
+      (products) {
+        state = state.copyWith(
+          products: products,
+          categories: pod.ProductCategory.values, // 카테고리는 고정값
+          isLoading: false,
+        );
       },
     );
   }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../domain/entity/product.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../../../../common/utils/format_utils.dart';
+import '../../../../common/utils/product_utils.dart';
 import '../utils/product_enum_helper.dart';
 
 /// 상품 카드 위젯
 class ProductCardWidget extends StatelessWidget {
-  final Product product;
+  final pod.Product product;
 
   const ProductCardWidget({
     super.key,
@@ -60,7 +62,7 @@ class ProductCardWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${getProductCategoryLabel(product.category)} · ${product.location} · ${_formatTime(product.createdAt)}',
+                    '${getProductCategoryLabel(product.category)} · ${getProductLocation(product)} · ${formatRelativeTime(product.createdAt)}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF9CA3AF),
@@ -71,7 +73,7 @@ class ProductCardWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${_formatPrice(product.price)}원',
+                        '${formatPrice(product.price)}원',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -87,7 +89,7 @@ class ProductCardWidget extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${product.favoriteCount}',
+                            '${product.favoriteCount ?? 0}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF9CA3AF),
@@ -104,28 +106,6 @@ class ProductCardWidget extends StatelessWidget {
         ],
       ),
       ),
-    );
-  }
-
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inMinutes < 1) {
-      return '방금 전';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}분 전';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}시간 전';
-    } else {
-      return '${difference.inDays}일 전';
-    }
-  }
-
-  String _formatPrice(int price) {
-    return price.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
     );
   }
 }

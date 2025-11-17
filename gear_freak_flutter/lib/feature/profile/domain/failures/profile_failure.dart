@@ -18,3 +18,12 @@ class GetUserProfileFailure extends ProfileFailure {
   @override
   String toString() => 'GetUserProfileFailure: $message';
 }
+
+/// 사용자 ID로 사용자 조회 실패
+class GetUserByIdFailure extends ProfileFailure {
+  /// GetUserByIdFailure 생성자
+  const GetUserByIdFailure(super.message, {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'GetUserByIdFailure: $message';
+}

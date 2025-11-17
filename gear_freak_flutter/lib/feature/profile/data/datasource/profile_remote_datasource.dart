@@ -20,4 +20,8 @@ class ProfileRemoteDataSource {
       'favoriteCount': 8,
     };
   }
+
+  Future<pod.User> getUserById(int id) async {
+    return await _client.user.getUserById(id);
+  }
 }

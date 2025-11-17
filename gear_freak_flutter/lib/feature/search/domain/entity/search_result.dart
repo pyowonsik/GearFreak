@@ -1,8 +1,8 @@
-import '../../../home/domain/entity/product.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
 /// 검색 결과
 class SearchResult {
-  final List<Product> products;
+  final List<pod.Product> products;
   final int totalCount;
   final String query;
 
@@ -12,4 +12,3 @@ class SearchResult {
     required this.query,
   });
 }
-

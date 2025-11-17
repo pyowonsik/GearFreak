@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../../../common/domain/usecase/usecase.dart';
 import '../domain.dart';
 
 /// 최근 등록 상품 조회 UseCase
 class GetRecentProductsUseCase
-    implements UseCase<List<Product>, void, HomeRepository> {
+    implements UseCase<List<pod.Product>, void, HomeRepository> {
   final HomeRepository repository;
 
   const GetRecentProductsUseCase(this.repository);
@@ -13,7 +14,7 @@ class GetRecentProductsUseCase
   HomeRepository get repo => repository;
 
   @override
-  Future<Either<Failure, List<Product>>> call(void param) async {
+  Future<Either<Failure, List<pod.Product>>> call(void param) async {
     try {
       final result = await repository.getRecentProducts();
       return Right(result);

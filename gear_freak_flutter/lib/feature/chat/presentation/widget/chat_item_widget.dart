@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../common/utils/format_utils.dart';
 import '../../domain/entity/chat_message.dart';
 
 /// 채팅 아이템 위젯
@@ -48,7 +49,7 @@ class ChatItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            _formatTime(chat.timestamp),
+            formatChatTime(chat.timestamp),
             style: const TextStyle(
               fontSize: 11,
               color: Color(0xFF9CA3AF),
@@ -78,23 +79,6 @@ class ChatItemWidget extends StatelessWidget {
         context.push('/chat/${chat.id}');
       },
     );
-  }
-
-  String _formatTime(DateTime timestamp) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inDays == 0) {
-      final hour = timestamp.hour;
-      final minute = timestamp.minute;
-      final period = hour >= 12 ? '오후' : '오전';
-      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-      return '$period $displayHour:${minute.toString().padLeft(2, '0')}';
-    } else if (difference.inDays == 1) {
-      return '어제';
-    } else {
-      return '${difference.inDays}일 전';
-    }
   }
 }
 

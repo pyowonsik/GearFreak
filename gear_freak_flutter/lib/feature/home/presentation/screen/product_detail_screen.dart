@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import '../../../../common/utils/format_utils.dart';
+import '../../../../common/utils/product_utils.dart';
+import '../../../profile/di/profile_providers.dart';
+import '../../di/home_providers.dart';
 import '../utils/product_enum_helper.dart';
 
-class ProductDetailScreen extends StatefulWidget {
+class ProductDetailScreen extends ConsumerStatefulWidget {
   final String productId;
 
   const ProductDetailScreen({
@@ -12,14 +17,94 @@ class ProductDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  ConsumerState<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   bool isLiked = false;
+  pod.Product? product;
+  pod.User? seller;
+  bool isLoading = true;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProduct();
+  }
+
+  Future<void> _loadProduct() async {
+    try {
+      final id = int.parse(widget.productId);
+      final repository = ref.read(homeRepositoryProvider);
+      final loadedProduct = await repository.getProductDetail(id);
+
+      // seller 정보가 없으면 profileNotifier를 통해 가져오기
+      pod.User? sellerData = loadedProduct.seller;
+      if (sellerData == null) {
+        final profileNotifier = ref.read(profileNotifierProvider.notifier);
+        sellerData = await profileNotifier.getUserById(loadedProduct.sellerId);
+        if (sellerData == null) {
+          // seller 정보를 가져오지 못해도 상품 정보는 표시
+          print('판매자 정보를 불러오는데 실패했습니다');
+        }
+      }
+
+      setState(() {
+        product = loadedProduct;
+        seller = sellerData;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (error != null || product == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                error ?? '상품을 불러올 수 없습니다',
+                style: const TextStyle(fontSize: 16, color: Colors.red),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    isLoading = true;
+                    error = null;
+                  });
+                  _loadProduct();
+                },
+                child: const Text('다시 시도'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final productData = product!;
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -42,11 +127,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               width: double.infinity,
               height: 320,
               color: const Color(0xFFF3F4F6),
-              child: const Icon(
-                Icons.shopping_bag,
-                size: 120,
-                color: Color(0xFF9CA3AF),
-              ),
+              child: productData.imageUrls?.isNotEmpty == true
+                  ? Image.network(
+                      productData.imageUrls!.first,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.shopping_bag,
+                            size: 120,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.shopping_bag,
+                        size: 120,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
             ),
             // 상품 정보
             Padding(
@@ -66,21 +167,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '판매자 닉네임',
-                            style: TextStyle(
+                            seller?.nickname ??
+                                productData.seller?.nickname ??
+                                '판매자',
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF1F2937),
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            '서울 강남구',
-                            style: TextStyle(
+                            getProductLocation(productData),
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF9CA3AF),
                             ),
@@ -93,9 +196,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const Divider(color: Color(0xFFE5E7EB)),
                   const SizedBox(height: 20),
                   // 상품명
-                  const Text(
-                    '리프팅 벨트 (사이즈 M) 거의 새것',
-                    style: TextStyle(
+                  Text(
+                    productData.title,
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1F2937),
@@ -103,11 +206,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   // 카테고리 및 시간
-                  // TODO: 실제 product 데이터를 받아서 표시
                   Row(
                     children: [
                       Text(
-                        getProductCategoryLabel(pod.ProductCategory.equipment),
+                        getProductCategoryLabel(productData.category),
                         style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF6B7280),
@@ -119,9 +221,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         style: TextStyle(color: Color(0xFF9CA3AF)),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        '5분 전',
-                        style: TextStyle(
+                      Text(
+                        formatRelativeTime(productData.createdAt),
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Color(0xFF6B7280),
                         ),
@@ -130,9 +232,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                   // 가격
-                  const Text(
-                    '150,000원',
-                    style: TextStyle(
+                  Text(
+                    '${formatPrice(productData.price)}원',
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF2563EB),
@@ -151,12 +253,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    '작년에 구매해서 3개월 정도 사용한 리프팅 벨트입니다.\n'
-                    '사이즈는 M이고 상태는 거의 새것과 같습니다.\n'
-                    '더 이상 사용하지 않아 판매합니다.\n\n'
-                    '직거래 환영합니다!',
-                    style: TextStyle(
+                  Text(
+                    productData.description,
+                    style: const TextStyle(
                       fontSize: 15,
                       color: Color(0xFF4B5563),
                       height: 1.6,
@@ -169,9 +268,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildInfoItem(Icons.remove_red_eye_outlined, '조회 132'),
-                      _buildInfoItem(Icons.favorite_border, '찜 12'),
-                      _buildInfoItem(Icons.chat_bubble_outline, '채팅 5'),
+                      _buildInfoItem(
+                        Icons.remove_red_eye_outlined,
+                        '조회 ${productData.viewCount ?? 0}',
+                      ),
+                      _buildInfoItem(
+                        Icons.favorite_border,
+                        '찜 ${productData.favoriteCount ?? 0}',
+                      ),
+                      _buildInfoItem(
+                        Icons.chat_bubble_outline,
+                        '채팅 ${productData.chatCount ?? 0}',
+                      ),
                     ],
                   ),
                   const SizedBox(height: 40),

@@ -27,6 +27,5 @@ final getRecentProductsUseCaseProvider =
 final homeNotifierProvider =
     StateNotifierProvider<HomeNotifier, HomeState>((ref) {
   final getRecentProductsUseCase = ref.watch(getRecentProductsUseCaseProvider);
-  final repository = ref.watch(homeRepositoryProvider);
-  return HomeNotifier(getRecentProductsUseCase, repository);
+  return HomeNotifier(getRecentProductsUseCase);
 });
