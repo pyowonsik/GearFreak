@@ -94,4 +94,3 @@ pod.TradeMethod? parseTradeMethod(String label) {
 bool isDirectTrade(pod.TradeMethod method) {
   return method == pod.TradeMethod.direct || method == pod.TradeMethod.both;
 }
-

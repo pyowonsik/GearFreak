@@ -5,13 +5,13 @@ import '../domain.dart';
 
 /// 최근 등록 상품 조회 UseCase
 class GetRecentProductsUseCase
-    implements UseCase<List<pod.Product>, void, HomeRepository> {
-  final HomeRepository repository;
+    implements UseCase<List<pod.Product>, void, ProductRepository> {
+  final ProductRepository repository;
 
   const GetRecentProductsUseCase(this.repository);
 
   @override
-  HomeRepository get repo => repository;
+  ProductRepository get repo => repository;
 
   @override
   Future<Either<Failure, List<pod.Product>>> call(void param) async {
@@ -28,3 +28,4 @@ class GetRecentProductsUseCase
     }
   }
 }
+

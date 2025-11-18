@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider/search_notifier.dart';
 import '../../di/search_providers.dart';
-import '../../../home/presentation/widget/product_card_widget.dart';
+import '../../../product/presentation/widget/product_card_widget.dart';
 
 /// 검색 화면
 class SearchScreen extends ConsumerStatefulWidget {

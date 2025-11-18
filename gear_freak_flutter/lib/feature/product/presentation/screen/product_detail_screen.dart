@@ -5,7 +5,7 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../../../common/utils/format_utils.dart';
 import '../../../../common/utils/product_utils.dart';
 import '../../../profile/di/profile_providers.dart';
-import '../../di/home_providers.dart';
+import '../../di/product_providers.dart';
 import '../utils/product_enum_helper.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
@@ -37,8 +37,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   Future<void> _loadProduct() async {
     try {
       final id = int.parse(widget.productId);
-      final repository = ref.read(homeRepositoryProvider);
-      final loadedProduct = await repository.getProductDetail(id);
+      final productNotifier = ref.read(productNotifierProvider.notifier);
+      final loadedProduct = await productNotifier.getProductDetail(id);
+
+      if (loadedProduct == null) {
+        setState(() {
+          error = '상품을 불러올 수 없습니다';
+          isLoading = false;
+        });
+        return;
+      }
 
       // seller 정보가 없으면 profileNotifier를 통해 가져오기
       pod.User? sellerData = loadedProduct.seller;

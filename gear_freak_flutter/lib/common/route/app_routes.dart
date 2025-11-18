@@ -3,8 +3,9 @@ import 'app_route.dart';
 import '../../feature/auth/presentation/screen/splash_screen.dart';
 import '../../feature/auth/presentation/screen/login_screen.dart';
 import '../../feature/auth/presentation/screen/signup_screen.dart';
-import '../../feature/home/presentation/screen/product_detail_screen.dart';
-import '../../feature/home/presentation/screen/create_product_screen.dart';
+import '../../feature/product/presentation/screen/product_detail_screen.dart';
+import '../../feature/product/presentation/screen/create_product_screen.dart';
+import '../../feature/product/presentation/screen/all_products_screen.dart';
 import '../../feature/chat/presentation/screen/chat_room_screen.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -49,6 +50,13 @@ abstract final class AppRoutes {
           path: '/product/create',
           name: 'create-product',
           builder: (context, state) => const CreateProductScreen(),
+        ),
+
+        // 전체 상품 목록 화면
+        GoRoute(
+          path: '/product/all',
+          name: 'all-products',
+          builder: (context, state) => const AllProductsScreen(),
         ),
 
         // 상품 상세 화면

@@ -505,3 +505,4 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
     }
   }
 }
+
