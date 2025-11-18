@@ -2,7 +2,8 @@ auth:
   - signupWithoutEmailVerification:
 product:
   - getProduct:
-  - getProducts:
+  - getRecentProducts:
+  - getAllProducts:
 user:
   - getMe:
   - getUserById:

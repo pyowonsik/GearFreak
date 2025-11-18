@@ -12,12 +12,24 @@ class ProductService {
     return product;
   }
 
-  Future<List<Product>> getProducts(Session session) async {
+  /// 최근 등록 상품 조회 (5개)
+  Future<List<Product>> getRecentProducts(Session session) async {
     final products = await Product.db.find(
       session,
       orderBy: (p) => p.createdAt,
       orderDescending: true,
-      limit: 10,
+      limit: 5,
+    );
+
+    return products;
+  }
+
+  /// 전체 상품 조회
+  Future<List<Product>> getAllProducts(Session session) async {
+    final products = await Product.db.find(
+      session,
+      orderBy: (p) => p.createdAt,
+      orderDescending: true,
     );
 
     return products;

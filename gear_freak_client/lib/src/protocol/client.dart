@@ -59,10 +59,19 @@ class EndpointProduct extends _i1.EndpointRef {
         {'id': id},
       );
 
-  _i2.Future<List<_i4.Product>> getProducts() =>
+  /// 최근 등록 상품 조회 (5개)
+  _i2.Future<List<_i4.Product>> getRecentProducts() =>
       caller.callServerEndpoint<List<_i4.Product>>(
         'product',
-        'getProducts',
+        'getRecentProducts',
+        {},
+      );
+
+  /// 전체 상품 조회
+  _i2.Future<List<_i4.Product>> getAllProducts() =>
+      caller.callServerEndpoint<List<_i4.Product>>(
+        'product',
+        'getAllProducts',
         {},
       );
 }

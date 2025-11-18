@@ -11,7 +11,13 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
     return await productService.getProductById(session, id);
   }
 
-  Future<List<Product>> getProducts(Session session) async {
-    return await productService.getProducts(session);
+  /// 최근 등록 상품 조회 (5개)
+  Future<List<Product>> getRecentProducts(Session session) async {
+    return await productService.getRecentProducts(session);
+  }
+
+  /// 전체 상품 조회
+  Future<List<Product>> getAllProducts(Session session) async {
+    return await productService.getAllProducts(session);
   }
 }
