@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kpostal/kpostal.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
@@ -501,8 +502,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('상품이 등록되었습니다')),
       );
-      Navigator.of(context).pop();
+      context.pop();
     }
   }
 }
-

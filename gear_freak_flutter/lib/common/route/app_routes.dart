@@ -3,9 +3,11 @@ import 'app_route.dart';
 import '../../feature/auth/presentation/screen/splash_screen.dart';
 import '../../feature/auth/presentation/screen/login_screen.dart';
 import '../../feature/auth/presentation/screen/signup_screen.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../feature/product/presentation/screen/product_detail_screen.dart';
 import '../../feature/product/presentation/screen/create_product_screen.dart';
 import '../../feature/product/presentation/screen/all_products_screen.dart';
+import '../../feature/product/presentation/screen/category_product_screen.dart';
 import '../../feature/chat/presentation/screen/chat_room_screen.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -57,6 +59,25 @@ abstract final class AppRoutes {
           path: '/product/all',
           name: 'all-products',
           builder: (context, state) => const AllProductsScreen(),
+        ),
+
+        // 카테고리별 상품 목록 화면
+        GoRoute(
+          path: '/product/category/:category',
+          name: 'category-products',
+          builder: (context, state) {
+            final categoryIndex =
+                int.tryParse(state.pathParameters['category'] ?? '');
+            if (categoryIndex == null ||
+                categoryIndex < 0 ||
+                categoryIndex >= pod.ProductCategory.values.length) {
+              // 잘못된 카테고리 인덱스인 경우 기본값 사용
+              return const CategoryProductScreen(
+                  category: pod.ProductCategory.equipment);
+            }
+            final category = pod.ProductCategory.values[categoryIndex];
+            return CategoryProductScreen(category: category);
+          },
         ),
 
         // 상품 상세 화면

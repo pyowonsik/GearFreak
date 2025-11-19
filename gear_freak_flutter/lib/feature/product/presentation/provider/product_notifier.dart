@@ -47,6 +47,41 @@ class ProductNotifier extends StateNotifier<ProductState> {
         state = ProductPaginatedLoaded(
           products: response.products,
           pagination: response.pagination,
+          category: null, // 전체 상품은 카테고리 필터 없음
+        );
+      },
+    );
+  }
+
+  /// 카테고리별 페이지네이션된 상품 로드 (첫 페이지)
+  Future<void> loadPaginatedProductsByCategory({
+    required pod.ProductCategory category,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    state = const ProductLoading();
+
+    final pagination = pod.PaginationDto(
+      page: page,
+      limit: limit,
+      category: category, // enum을 직접 전달
+    );
+    print(
+        '🔄 [ProductNotifier] 카테고리 페이지네이션 요청: category=${category.name}, page=$page, limit=$limit');
+    final result = await getPaginatedProductsUseCase(pagination);
+
+    result.fold(
+      (failure) {
+        print('❌ [ProductNotifier] 카테고리 페이지네이션 실패: ${failure.message}');
+        state = ProductError(failure.message);
+      },
+      (response) {
+        print(
+            '✅ [ProductNotifier] 카테고리 페이지네이션 성공: page=${response.pagination.page}, totalCount=${response.pagination.totalCount}, hasMore=${response.pagination.hasMore}, products=${response.products.length}개');
+        state = ProductPaginatedLoaded(
+          products: response.products,
+          pagination: response.pagination,
+          category: category, // 카테고리 정보 저장
         );
       },
     );
@@ -86,11 +121,14 @@ class ProductNotifier extends StateNotifier<ProductState> {
     state = ProductPaginatedLoadingMore(
       products: currentState.products,
       pagination: currentPagination,
+      category: currentState.category, // 카테고리 정보 유지
     );
 
+    // 저장된 카테고리 정보 사용
     final pagination = pod.PaginationDto(
       page: nextPage,
       limit: currentPagination.limit,
+      category: currentState.category, // 저장된 카테고리 정보 사용
     );
 
     final result = await getPaginatedProductsUseCase(pagination);
@@ -114,6 +152,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
         state = ProductPaginatedLoaded(
           products: updatedProducts,
           pagination: response.pagination,
+          category: currentState.category, // 카테고리 정보 유지
         );
       },
     );

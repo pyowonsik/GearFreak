@@ -26,10 +26,12 @@ class ProductError extends ProductState {
 class ProductPaginatedLoaded extends ProductState {
   final List<pod.Product> products;
   final pod.PaginationDto pagination;
+  final pod.ProductCategory? category; // 원래 요청 시 사용한 카테고리 (필터링용)
 
   const ProductPaginatedLoaded({
     required this.products,
     required this.pagination,
+    this.category,
   });
 }
 
@@ -37,9 +39,11 @@ class ProductPaginatedLoaded extends ProductState {
 class ProductPaginatedLoadingMore extends ProductState {
   final List<pod.Product> products;
   final pod.PaginationDto pagination;
+  final pod.ProductCategory? category; // 원래 요청 시 사용한 카테고리 (필터링용)
 
   const ProductPaginatedLoadingMore({
     required this.products,
     required this.pagination,
+    this.category,
   });
 }

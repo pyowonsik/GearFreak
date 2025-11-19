@@ -59,9 +59,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     // 회원가입 완료 후 상태 확인
     final authState = ref.read(authNotifierProvider);
     switch (authState) {
-            case AuthAuthenticated():
-              // 회원가입 성공 후 메인 화면으로 이동
-              context.go('/main/home');
+      case AuthAuthenticated():
+        // 회원가입 성공 후 메인 화면으로 이동
+        context.go('/main/home');
       case AuthError(:final message):
         // 에러 메시지 표시
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +87,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           '회원가입',
@@ -452,7 +452,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => context.pop(),
                       child: const Text(
                         '로그인',
                         style: TextStyle(

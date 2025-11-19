@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import '../../feature/product/model/product_category.dart' as _i2;
 
 /// 페이지네이션 DTO
 /// 요청 및 응답에서 공통으로 사용
@@ -22,6 +23,7 @@ abstract class PaginationDto
     this.hasMore,
     this.title,
     this.random,
+    this.category,
   });
 
   factory PaginationDto({
@@ -31,6 +33,7 @@ abstract class PaginationDto
     bool? hasMore,
     String? title,
     bool? random,
+    _i2.ProductCategory? category,
   }) = _PaginationDtoImpl;
 
   factory PaginationDto.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -41,6 +44,10 @@ abstract class PaginationDto
       hasMore: jsonSerialization['hasMore'] as bool?,
       title: jsonSerialization['title'] as String?,
       random: jsonSerialization['random'] as bool?,
+      category: jsonSerialization['category'] == null
+          ? null
+          : _i2.ProductCategory.fromJson(
+              (jsonSerialization['category'] as int)),
     );
   }
 
@@ -62,6 +69,9 @@ abstract class PaginationDto
   /// 랜덤 정렬 여부 (선택적)
   bool? random;
 
+  /// 카테고리 필터링 (선택적)
+  _i2.ProductCategory? category;
+
   /// Returns a shallow copy of this [PaginationDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -72,6 +82,7 @@ abstract class PaginationDto
     bool? hasMore,
     String? title,
     bool? random,
+    _i2.ProductCategory? category,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -82,6 +93,7 @@ abstract class PaginationDto
       if (hasMore != null) 'hasMore': hasMore,
       if (title != null) 'title': title,
       if (random != null) 'random': random,
+      if (category != null) 'category': category?.toJson(),
     };
   }
 
@@ -94,6 +106,7 @@ abstract class PaginationDto
       if (hasMore != null) 'hasMore': hasMore,
       if (title != null) 'title': title,
       if (random != null) 'random': random,
+      if (category != null) 'category': category?.toJson(),
     };
   }
 
@@ -113,6 +126,7 @@ class _PaginationDtoImpl extends PaginationDto {
     bool? hasMore,
     String? title,
     bool? random,
+    _i2.ProductCategory? category,
   }) : super._(
           page: page,
           limit: limit,
@@ -120,6 +134,7 @@ class _PaginationDtoImpl extends PaginationDto {
           hasMore: hasMore,
           title: title,
           random: random,
+          category: category,
         );
 
   /// Returns a shallow copy of this [PaginationDto]
@@ -133,6 +148,7 @@ class _PaginationDtoImpl extends PaginationDto {
     Object? hasMore = _Undefined,
     Object? title = _Undefined,
     Object? random = _Undefined,
+    Object? category = _Undefined,
   }) {
     return PaginationDto(
       page: page ?? this.page,
@@ -141,6 +157,7 @@ class _PaginationDtoImpl extends PaginationDto {
       hasMore: hasMore is bool? ? hasMore : this.hasMore,
       title: title is String? ? title : this.title,
       random: random is bool? ? random : this.random,
+      category: category is _i2.ProductCategory? ? category : this.category,
     );
   }
 }

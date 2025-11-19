@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ConfirmationDialog extends StatelessWidget {
   final String title;
@@ -28,11 +29,11 @@ class ConfirmationDialog extends StatelessWidget {
       actions: [
         if (cancelText != null)
           TextButton(
-            onPressed: onCancel ?? () => Navigator.of(context).pop(false),
+            onPressed: onCancel ?? () => context.pop(false),
             child: Text(cancelText!),
           ),
         TextButton(
-          onPressed: onConfirm ?? () => Navigator.of(context).pop(true),
+          onPressed: onConfirm ?? () => context.pop(true),
           style: TextButton.styleFrom(
             foregroundColor: confirmColor ?? Theme.of(context).primaryColor,
           ),
@@ -63,4 +64,3 @@ class ConfirmationDialog extends StatelessWidget {
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../data/datasource/product_remote_datasource.dart';
 import '../data/repository/product_repository_impl.dart';
 import '../domain/repository/product_repository.dart';
@@ -68,5 +69,18 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
   return ProductDetailNotifier(
     getProductDetailUseCase,
     getUserByIdUseCase,
+  );
+});
+
+/// Category Products Notifier Provider (카테고리별 상품 화면용 - 페이지네이션)
+final categoryProductsNotifierProvider = StateNotifierProvider.autoDispose
+    .family<ProductNotifier, ProductState, pod.ProductCategory>(
+        (ref, category) {
+  final getPaginatedProductsUseCase =
+      ref.watch(getPaginatedProductsUseCaseProvider);
+  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  return ProductNotifier(
+    getPaginatedProductsUseCase,
+    getProductDetailUseCase,
   );
 });

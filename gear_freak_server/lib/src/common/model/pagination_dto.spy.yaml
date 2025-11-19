@@ -15,3 +15,5 @@ fields:
   title: String?
   ### 랜덤 정렬 여부 (선택적)
   random: bool?
+  ### 카테고리 필터링 (선택적)
+  category: ProductCategory?

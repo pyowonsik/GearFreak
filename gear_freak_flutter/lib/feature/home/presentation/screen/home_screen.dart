@@ -117,7 +117,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           children: pod.ProductCategory.values.map((category) {
-                            return CategoryItemWidget(category: category);
+                            return CategoryItemWidget(
+                              category: category,
+                              onTap: () {
+                                context.push(
+                                    '/product/category/${category.index}');
+                              },
+                            );
                           }).toList(),
                         ),
                       ),
@@ -227,7 +233,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           children: pod.ProductCategory.values.map((category) {
-                            return CategoryItemWidget(category: category);
+                            return CategoryItemWidget(
+                              category: category,
+                              onTap: () {
+                                context.push(
+                                    '/product/category/${category.index}');
+                              },
+                            );
                           }).toList(),
                         ),
                       ),

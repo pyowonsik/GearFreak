@@ -6,12 +6,14 @@ class CategoryItemWidget extends StatelessWidget {
   final pod.ProductCategory category;
   final String? name;
   final String? iconName;
+  final VoidCallback? onTap;
 
   const CategoryItemWidget({
     super.key,
     required this.category,
     this.name,
     this.iconName,
+    this.onTap,
   });
 
   @override
@@ -20,34 +22,37 @@ class CategoryItemWidget extends StatelessWidget {
     final displayName = name ?? _getCategoryName(category);
     final icon = _getIconData(iconName ?? _getCategoryIcon(category));
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: colors['background']!.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: colors['background']!.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                icon,
+                color: colors['icon'],
+                size: 32,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: colors['icon'],
-              size: 32,
+            const SizedBox(height: 8),
+            Text(
+              displayName,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF4B5563),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            displayName,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF4B5563),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
