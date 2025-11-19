@@ -2,11 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/datasource/product_remote_datasource.dart';
 import '../data/repository/product_repository_impl.dart';
 import '../domain/repository/product_repository.dart';
-import '../domain/usecase/get_recent_products_usecase.dart';
-import '../domain/usecase/get_all_products_usecase.dart';
+import '../domain/usecase/get_paginated_products_usecase.dart';
 import '../domain/usecase/get_product_detail_usecase.dart';
 import '../presentation/provider/product_notifier.dart';
 import '../presentation/provider/product_state.dart';
+import '../presentation/provider/product_detail_notifier.dart';
+import '../presentation/provider/product_detail_state.dart';
+import '../../profile/di/profile_providers.dart';
 
 /// Product Remote DataSource Provider
 final productRemoteDataSourceProvider =
@@ -20,17 +22,11 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepositoryImpl(remoteDataSource);
 });
 
-/// Get Recent Products UseCase Provider
-final getRecentProductsUseCaseProvider =
-    Provider<GetRecentProductsUseCase>((ref) {
+/// Get Paginated Products UseCase Provider
+final getPaginatedProductsUseCaseProvider =
+    Provider<GetPaginatedProductsUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
-  return GetRecentProductsUseCase(repository);
-});
-
-/// Get All Products UseCase Provider
-final getAllProductsUseCaseProvider = Provider<GetAllProductsUseCase>((ref) {
-  final repository = ref.watch(productRepositoryProvider);
-  return GetAllProductsUseCase(repository);
+  return GetPaginatedProductsUseCase(repository);
 });
 
 /// Get Product Detail UseCase Provider
@@ -40,15 +36,37 @@ final getProductDetailUseCaseProvider =
   return GetProductDetailUseCase(repository);
 });
 
-/// Product Notifier Provider
-final productNotifierProvider =
-    StateNotifierProvider<ProductNotifier, ProductState>((ref) {
-  final getRecentProductsUseCase = ref.watch(getRecentProductsUseCaseProvider);
-  final getAllProductsUseCase = ref.watch(getAllProductsUseCaseProvider);
+/// Home Products Notifier Provider (홈 화면용 - 최근 상품 5개)
+final homeProductsNotifierProvider =
+    StateNotifierProvider.autoDispose<ProductNotifier, ProductState>((ref) {
+  final getPaginatedProductsUseCase =
+      ref.watch(getPaginatedProductsUseCaseProvider);
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ProductNotifier(
-    getRecentProductsUseCase,
-    getAllProductsUseCase,
+    getPaginatedProductsUseCase,
     getProductDetailUseCase,
+  );
+});
+
+/// All Products Notifier Provider (전체 상품 화면용 - 페이지네이션)
+final allProductsNotifierProvider =
+    StateNotifierProvider.autoDispose<ProductNotifier, ProductState>((ref) {
+  final getPaginatedProductsUseCase =
+      ref.watch(getPaginatedProductsUseCaseProvider);
+  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  return ProductNotifier(
+    getPaginatedProductsUseCase,
+    getProductDetailUseCase,
+  );
+});
+
+/// Product Detail Notifier Provider (상세 화면용)
+final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
+    ProductDetailNotifier, ProductDetailState>((ref) {
+  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
+  return ProductDetailNotifier(
+    getProductDetailUseCase,
+    getUserByIdUseCase,
   );
 });

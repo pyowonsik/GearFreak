@@ -7,19 +7,12 @@ class ProductRemoteDataSource {
 
   pod.Client get _client => PodService.instance.client;
 
-  /// 최근 등록 상품 조회 (5개)
-  Future<List<pod.Product>> getRecentProducts() async {
+  /// 페이지네이션된 상품 목록 조회
+  Future<pod.PaginatedProductsResponseDto> getPaginatedProducts(
+    pod.PaginationDto pagination,
+  ) async {
     try {
-      return await _client.product.getRecentProducts();
-    } catch (e) {
-      throw Exception('최근 상품 목록을 불러오는데 실패했습니다: $e');
-    }
-  }
-
-  /// 전체 상품 조회
-  Future<List<pod.Product>> getAllProducts() async {
-    try {
-      return await _client.product.getAllProducts();
+      return await _client.product.getPaginatedProducts(pagination);
     } catch (e) {
       throw Exception('상품 목록을 불러오는데 실패했습니다: $e');
     }

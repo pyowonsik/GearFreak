@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../../../common/utils/format_utils.dart';
 import '../../../../common/utils/product_utils.dart';
-import '../../../profile/di/profile_providers.dart';
 import '../../di/product_providers.dart';
+import '../provider/product_detail_state.dart';
 import '../utils/product_enum_helper.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
@@ -23,96 +23,68 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   bool isLiked = false;
-  pod.Product? product;
-  pod.User? seller;
-  bool isLoading = true;
-  String? error;
 
   @override
   void initState() {
     super.initState();
-    _loadProduct();
-  }
-
-  Future<void> _loadProduct() async {
-    try {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final id = int.parse(widget.productId);
-      final productNotifier = ref.read(productNotifierProvider.notifier);
-      final loadedProduct = await productNotifier.getProductDetail(id);
-
-      if (loadedProduct == null) {
-        setState(() {
-          error = '상품을 불러올 수 없습니다';
-          isLoading = false;
-        });
-        return;
-      }
-
-      // seller 정보가 없으면 profileNotifier를 통해 가져오기
-      pod.User? sellerData = loadedProduct.seller;
-      if (sellerData == null) {
-        final profileNotifier = ref.read(profileNotifierProvider.notifier);
-        sellerData = await profileNotifier.getUserById(loadedProduct.sellerId);
-        if (sellerData == null) {
-          // seller 정보를 가져오지 못해도 상품 정보는 표시
-          print('판매자 정보를 불러오는데 실패했습니다');
-        }
-      }
-
-      setState(() {
-        product = loadedProduct;
-        seller = sellerData;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        error = e.toString();
-        isLoading = false;
-      });
-    }
+      ref.read(productDetailNotifierProvider.notifier).loadProductDetail(id);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+    final productDetailState = ref.watch(productDetailNotifierProvider);
 
-    if (error != null || product == null) {
-      return Scaffold(
-        appBar: AppBar(),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                error ?? '상품을 불러올 수 없습니다',
-                style: const TextStyle(fontSize: 16, color: Colors.red),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    isLoading = true;
-                    error = null;
-                  });
-                  _loadProduct();
-                },
-                child: const Text('다시 시도'),
-              ),
-            ],
+    return switch (productDetailState) {
+      ProductDetailLoading() => Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: CircularProgressIndicator()),
+        ),
+      ProductDetailError(:final message) => Scaffold(
+          appBar: AppBar(),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 16, color: Colors.red),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    final id = int.parse(widget.productId);
+                    ref
+                        .read(productDetailNotifierProvider.notifier)
+                        .loadProductDetail(id);
+                  },
+                  child: const Text('다시 시도'),
+                ),
+              ],
+            ),
           ),
         ),
-      );
-    }
+      ProductDetailLoaded(:final product, :final seller) => _buildProductDetail(
+          context,
+          product,
+          seller,
+        ),
+      ProductDetailInitial() => Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: CircularProgressIndicator()),
+        ),
+    };
+  }
 
-    final productData = product!;
-
+  Widget _buildProductDetail(
+    BuildContext context,
+    pod.Product productData,
+    pod.User? sellerData,
+  ) {
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -179,7 +151,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            seller?.nickname ??
+                            sellerData?.nickname ??
                                 productData.seller?.nickname ??
                                 '판매자',
                             style: const TextStyle(
@@ -247,6 +219,71 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF2563EB),
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  // 상품 상태 및 거래 방법
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              getProductConditionLabel(productData.condition),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_shipping_outlined,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              getTradeMethodLabel(productData.tradeMethod),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   const Divider(color: Color(0xFFE5E7EB)),

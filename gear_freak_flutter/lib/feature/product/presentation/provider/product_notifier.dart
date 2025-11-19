@@ -1,50 +1,114 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../domain/usecase/get_recent_products_usecase.dart';
-import '../../domain/usecase/get_all_products_usecase.dart';
+import '../../domain/usecase/get_paginated_products_usecase.dart';
 import '../../domain/usecase/get_product_detail_usecase.dart';
 import 'product_state.dart';
 
 /// 상품 Notifier
 class ProductNotifier extends StateNotifier<ProductState> {
-  final GetRecentProductsUseCase getRecentProductsUseCase;
-  final GetAllProductsUseCase getAllProductsUseCase;
+  final GetPaginatedProductsUseCase getPaginatedProductsUseCase;
   final GetProductDetailUseCase getProductDetailUseCase;
 
   ProductNotifier(
-    this.getRecentProductsUseCase,
-    this.getAllProductsUseCase,
+    this.getPaginatedProductsUseCase,
     this.getProductDetailUseCase,
   ) : super(const ProductInitial());
 
-  /// 최근 등록 상품 로드 (5개)
+  /// 최근 등록 상품 로드 (5개) - 페이지네이션 사용
   Future<void> loadRecentProducts() async {
+    await loadPaginatedProducts(page: 1, limit: 5);
+  }
+
+  /// 페이지네이션된 상품 로드 (첫 페이지)
+  Future<void> loadPaginatedProducts({
+    int page = 1,
+    int limit = 10,
+  }) async {
     state = const ProductLoading();
 
-    final productsResult = await getRecentProductsUseCase(null);
+    final pagination = pod.PaginationDto(page: page, limit: limit);
+    print('🔄 [ProductNotifier] 페이지네이션 요청: page=$page, limit=$limit');
+    final result = await getPaginatedProductsUseCase(pagination);
 
-    productsResult.fold(
+    result.fold(
       (failure) {
+        print('❌ [ProductNotifier] 페이지네이션 실패: ${failure.message}');
         state = ProductError(failure.message);
       },
-      (products) {
-        state = ProductLoaded(products);
+      (response) {
+        print(
+            '✅ [ProductNotifier] 페이지네이션 성공: page=${response.pagination.page}, totalCount=${response.pagination.totalCount}, hasMore=${response.pagination.hasMore}, products=${response.products.length}개');
+        state = ProductPaginatedLoaded(
+          products: response.products,
+          pagination: response.pagination,
+        );
       },
     );
   }
 
-  /// 전체 상품 로드
-  Future<void> loadAllProducts() async {
-    state = const ProductLoading();
+  /// 페이지네이션된 상품 추가 로드 (다음 페이지)
+  Future<void> loadMoreProducts() async {
+    final currentState = state;
 
-    final productsResult = await getAllProductsUseCase(null);
+    // 현재 상태가 페이지네이션된 상태가 아니면 반환
+    if (currentState is! ProductPaginatedLoaded) {
+      print(
+          '⚠️ [ProductNotifier] loadMoreProducts: 현재 상태가 ProductPaginatedLoaded가 아닙니다. (${currentState.runtimeType})');
+      return;
+    }
 
-    productsResult.fold(
+    final currentPagination = currentState.pagination;
+
+    // 더 이상 데이터가 없으면 반환
+    if (currentPagination.hasMore != true) {
+      print('⚠️ [ProductNotifier] loadMoreProducts: 더 이상 불러올 데이터가 없습니다.');
+      return;
+    }
+
+    // 이미 로딩 중이면 반환
+    if (state is ProductPaginatedLoadingMore) {
+      print('⚠️ [ProductNotifier] loadMoreProducts: 이미 로딩 중입니다.');
+      return;
+    }
+
+    // 다음 페이지 요청
+    final nextPage = currentPagination.page + 1;
+    print(
+        '🔄 [ProductNotifier] 다음 페이지 로드: page=$nextPage (현재: ${currentPagination.page}, 전체: ${currentPagination.totalCount})');
+
+    // 로딩 상태로 변경 (기존 데이터 유지)
+    state = ProductPaginatedLoadingMore(
+      products: currentState.products,
+      pagination: currentPagination,
+    );
+
+    final pagination = pod.PaginationDto(
+      page: nextPage,
+      limit: currentPagination.limit,
+    );
+
+    final result = await getPaginatedProductsUseCase(pagination);
+
+    result.fold(
       (failure) {
-        state = ProductError(failure.message);
+        print('❌ [ProductNotifier] 다음 페이지 로드 실패: ${failure.message}');
+        // 에러 발생 시 이전 상태로 복구
+        state = currentState;
       },
-      (products) {
-        state = ProductLoaded(products);
+      (response) {
+        // 기존 데이터에 새 데이터 추가
+        final updatedProducts = [
+          ...currentState.products,
+          ...response.products,
+        ];
+
+        print(
+            '✅ [ProductNotifier] 다음 페이지 로드 성공: page=${response.pagination.page}, 추가된 상품=${response.products.length}개, 총 상품=${updatedProducts.length}개, hasMore=${response.pagination.hasMore}');
+
+        state = ProductPaginatedLoaded(
+          products: updatedProducts,
+          pagination: response.pagination,
+        );
       },
     );
   }

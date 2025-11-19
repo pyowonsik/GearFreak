@@ -15,16 +15,31 @@ class ProductLoading extends ProductState {
   const ProductLoading();
 }
 
-/// 상품 로드 성공 상태
-class ProductLoaded extends ProductState {
-  final List<pod.Product> products;
-
-  const ProductLoaded(this.products);
-}
-
 /// 상품 로드 실패 상태
 class ProductError extends ProductState {
   final String message;
 
   const ProductError(this.message);
+}
+
+/// 페이지네이션된 상품 로드 성공 상태
+class ProductPaginatedLoaded extends ProductState {
+  final List<pod.Product> products;
+  final pod.PaginationDto pagination;
+
+  const ProductPaginatedLoaded({
+    required this.products,
+    required this.pagination,
+  });
+}
+
+/// 페이지네이션 추가 로딩 중 상태 (기존 데이터 유지)
+class ProductPaginatedLoadingMore extends ProductState {
+  final List<pod.Product> products;
+  final pod.PaginationDto pagination;
+
+  const ProductPaginatedLoadingMore({
+    required this.products,
+    required this.pagination,
+  });
 }

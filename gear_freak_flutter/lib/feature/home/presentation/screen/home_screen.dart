@@ -20,13 +20,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(productNotifierProvider.notifier).loadRecentProducts();
+      ref.read(homeProductsNotifierProvider.notifier).loadRecentProducts();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final productState = ref.watch(productNotifierProvider);
+    final productState = ref.watch(homeProductsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,7 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ElevatedButton(
                   onPressed: () {
                     ref
-                        .read(productNotifierProvider.notifier)
+                        .read(homeProductsNotifierProvider.notifier)
                         .loadRecentProducts();
                   },
                   child: const Text('다시 시도'),
@@ -72,7 +72,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-        ProductLoaded(:final products) => SingleChildScrollView(
+        ProductPaginatedLoaded(:final products) => SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 카테고리 섹션
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          '카테고리',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 100,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          children: pod.ProductCategory.values.map((category) {
+                            return CategoryItemWidget(category: category);
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // 최근 등록 상품
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            '최근 등록 상품',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              context.push('/product/all');
+                            },
+                            child: const Text('전체보기'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      products.isEmpty
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(32.0),
+                                child: Text(
+                                  '등록된 상품이 없습니다',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                return ProductCardWidget(
+                                  product: products[index],
+                                );
+                              },
+                            ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ProductPaginatedLoadingMore(:final products) => SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

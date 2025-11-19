@@ -1,4 +1,5 @@
 /// 포맷 유틸리티 함수들
+library;
 
 /// 가격을 천 단위 콤마로 포맷팅
 String formatPrice(int price) {

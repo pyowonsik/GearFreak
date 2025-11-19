@@ -3,20 +3,22 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../../../common/domain/usecase/usecase.dart';
 import '../domain.dart';
 
-/// 최근 등록 상품 조회 UseCase
-class GetRecentProductsUseCase
-    implements UseCase<List<pod.Product>, void, ProductRepository> {
+/// 페이지네이션된 상품 목록 조회 UseCase
+class GetPaginatedProductsUseCase
+    implements UseCase<pod.PaginatedProductsResponseDto, pod.PaginationDto, ProductRepository> {
   final ProductRepository repository;
 
-  const GetRecentProductsUseCase(this.repository);
+  const GetPaginatedProductsUseCase(this.repository);
 
   @override
   ProductRepository get repo => repository;
 
   @override
-  Future<Either<Failure, List<pod.Product>>> call(void param) async {
+  Future<Either<Failure, pod.PaginatedProductsResponseDto>> call(
+    pod.PaginationDto param,
+  ) async {
     try {
-      final result = await repository.getRecentProducts();
+      final result = await repository.getPaginatedProducts(param);
       return Right(result);
     } on Exception catch (e) {
       return Left(
@@ -28,4 +30,5 @@ class GetRecentProductsUseCase
     }
   }
 }
+
 

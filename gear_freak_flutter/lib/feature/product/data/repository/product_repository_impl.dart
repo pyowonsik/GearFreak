@@ -9,13 +9,10 @@ class ProductRepositoryImpl implements ProductRepository {
   const ProductRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<List<pod.Product>> getRecentProducts() async {
-    return await remoteDataSource.getRecentProducts();
-  }
-
-  @override
-  Future<List<pod.Product>> getAllProducts() async {
-    return await remoteDataSource.getAllProducts();
+  Future<pod.PaginatedProductsResponseDto> getPaginatedProducts(
+    pod.PaginationDto pagination,
+  ) async {
+    return await remoteDataSource.getPaginatedProducts(pagination);
   }
 
   @override
@@ -23,4 +20,3 @@ class ProductRepositoryImpl implements ProductRepository {
     return await remoteDataSource.getProductDetail(id);
   }
 }
-
