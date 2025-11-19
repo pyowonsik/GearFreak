@@ -19,6 +19,8 @@ abstract class PaginationDto implements _i1.SerializableModel {
     required this.limit,
     this.totalCount,
     this.hasMore,
+    this.title,
+    this.random,
   });
 
   factory PaginationDto({
@@ -26,6 +28,8 @@ abstract class PaginationDto implements _i1.SerializableModel {
     required int limit,
     int? totalCount,
     bool? hasMore,
+    String? title,
+    bool? random,
   }) = _PaginationDtoImpl;
 
   factory PaginationDto.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -34,6 +38,8 @@ abstract class PaginationDto implements _i1.SerializableModel {
       limit: jsonSerialization['limit'] as int,
       totalCount: jsonSerialization['totalCount'] as int?,
       hasMore: jsonSerialization['hasMore'] as bool?,
+      title: jsonSerialization['title'] as String?,
+      random: jsonSerialization['random'] as bool?,
     );
   }
 
@@ -49,6 +55,12 @@ abstract class PaginationDto implements _i1.SerializableModel {
   /// 더 많은 데이터가 있는지 여부 (응답 시 사용, 선택적)
   bool? hasMore;
 
+  /// 검색어 (제목 필터링용, 선택적)
+  String? title;
+
+  /// 랜덤 정렬 여부 (선택적)
+  bool? random;
+
   /// Returns a shallow copy of this [PaginationDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -57,6 +69,8 @@ abstract class PaginationDto implements _i1.SerializableModel {
     int? limit,
     int? totalCount,
     bool? hasMore,
+    String? title,
+    bool? random,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -65,6 +79,8 @@ abstract class PaginationDto implements _i1.SerializableModel {
       'limit': limit,
       if (totalCount != null) 'totalCount': totalCount,
       if (hasMore != null) 'hasMore': hasMore,
+      if (title != null) 'title': title,
+      if (random != null) 'random': random,
     };
   }
 
@@ -82,11 +98,15 @@ class _PaginationDtoImpl extends PaginationDto {
     required int limit,
     int? totalCount,
     bool? hasMore,
+    String? title,
+    bool? random,
   }) : super._(
           page: page,
           limit: limit,
           totalCount: totalCount,
           hasMore: hasMore,
+          title: title,
+          random: random,
         );
 
   /// Returns a shallow copy of this [PaginationDto]
@@ -98,12 +118,16 @@ class _PaginationDtoImpl extends PaginationDto {
     int? limit,
     Object? totalCount = _Undefined,
     Object? hasMore = _Undefined,
+    Object? title = _Undefined,
+    Object? random = _Undefined,
   }) {
     return PaginationDto(
       page: page ?? this.page,
       limit: limit ?? this.limit,
       totalCount: totalCount is int? ? totalCount : this.totalCount,
       hasMore: hasMore is bool? ? hasMore : this.hasMore,
+      title: title is String? ? title : this.title,
+      random: random is bool? ? random : this.random,
     );
   }
 }

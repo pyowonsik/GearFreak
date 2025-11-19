@@ -11,5 +11,7 @@ fields:
   totalCount: int?
   ### 더 많은 데이터가 있는지 여부 (응답 시 사용, 선택적)
   hasMore: bool?
-
-
+  ### 검색어 (제목 필터링용, 선택적)
+  title: String?
+  ### 랜덤 정렬 여부 (선택적)
+  random: bool?
