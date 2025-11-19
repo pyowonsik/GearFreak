@@ -14,20 +14,26 @@ class ProductNotifier extends StateNotifier<ProductState> {
     this.getProductDetailUseCase,
   ) : super(const ProductInitial());
 
-  /// 최근 등록 상품 로드 (5개) - 페이지네이션 사용
-  Future<void> loadRecentProducts() async {
-    await loadPaginatedProducts(page: 1, limit: 5);
+  /// 랜덤 상품 로드 (5개) - 홈 화면용
+  Future<void> loadRandomProducts() async {
+    await loadPaginatedProducts(page: 1, limit: 5, random: true);
   }
 
   /// 페이지네이션된 상품 로드 (첫 페이지)
   Future<void> loadPaginatedProducts({
     int page = 1,
     int limit = 10,
+    bool random = false,
   }) async {
     state = const ProductLoading();
 
-    final pagination = pod.PaginationDto(page: page, limit: limit);
-    print('🔄 [ProductNotifier] 페이지네이션 요청: page=$page, limit=$limit');
+    final pagination = pod.PaginationDto(
+      page: page,
+      limit: limit,
+      random: random,
+    );
+    print(
+        '🔄 [ProductNotifier] 페이지네이션 요청: page=$page, limit=$limit, random=$random');
     final result = await getPaginatedProductsUseCase(pagination);
 
     result.fold(

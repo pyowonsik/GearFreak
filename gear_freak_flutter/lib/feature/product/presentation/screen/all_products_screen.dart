@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../common/utils/pagination_scroll_mixin.dart';
 import '../../di/product_providers.dart';
 import '../provider/product_state.dart';
 import '../widget/product_card_widget.dart';
@@ -11,61 +12,42 @@ class AllProductsScreen extends ConsumerStatefulWidget {
   ConsumerState<AllProductsScreen> createState() => _AllProductsScreenState();
 }
 
-class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
-  final ScrollController _scrollController = ScrollController();
+class _AllProductsScreenState extends ConsumerState<AllProductsScreen>
+    with PaginationScrollMixin {
   String _selectedSort = '최신순';
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    initPaginationScroll(
+      onLoadMore: () {
+        ref.read(allProductsNotifierProvider.notifier).loadMoreProducts();
+      },
+      getPagination: () {
+        final productState = ref.read(allProductsNotifierProvider);
+        if (productState is ProductPaginatedLoaded) {
+          return productState.pagination;
+        }
+        return null;
+      },
+      isLoading: () {
+        final productState = ref.read(allProductsNotifierProvider);
+        return productState is ProductPaginatedLoadingMore;
+      },
+      screenName: 'AllProductsScreen',
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(allProductsNotifierProvider.notifier).loadPaginatedProducts(
             page: 1,
-            limit: 10,
+            limit: 20,
           );
     });
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    disposePaginationScroll();
     super.dispose();
-  }
-
-  void _onScroll() {
-    // 스크롤 컨트롤러가 초기화되지 않았으면 무시
-    if (!_scrollController.hasClients) {
-      return;
-    }
-
-    final position = _scrollController.position;
-
-    // 스크롤 가능한 상태인지 확인
-    if (!position.hasContentDimensions) {
-      return;
-    }
-
-    // 스크롤이 하단 300px 이내에 도달하면 다음 페이지 로드
-    final threshold = position.maxScrollExtent - 300;
-    if (position.pixels >= threshold && position.pixels > 0) {
-      final productState = ref.read(allProductsNotifierProvider);
-
-      // 페이지네이션된 상태이고, 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 로드
-      if (productState is ProductPaginatedLoaded) {
-        final pagination = productState.pagination;
-        if (pagination.hasMore == true) {
-          print(
-              '📜 [AllProductsScreen] 스크롤 감지: pixels=${position.pixels.toStringAsFixed(0)}, maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(0)}, threshold=${threshold.toStringAsFixed(0)}');
-          print(
-              '📦 [AllProductsScreen] 현재 페이지: ${pagination.page}, 전체: ${pagination.totalCount}, hasMore: ${pagination.hasMore}');
-          ref.read(allProductsNotifierProvider.notifier).loadMoreProducts();
-        } else {
-          print('✅ [AllProductsScreen] 더 이상 불러올 데이터가 없습니다.');
-        }
-      }
-    }
   }
 
   @override
@@ -125,7 +107,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
         onRefresh: () async {
           await ref
               .read(allProductsNotifierProvider.notifier)
-              .loadPaginatedProducts(page: 1, limit: 10);
+              .loadPaginatedProducts(page: 1, limit: 20);
         },
         child: switch (productState) {
           ProductLoading() => const Center(child: CircularProgressIndicator()),
@@ -144,7 +126,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                     onPressed: () {
                       ref
                           .read(allProductsNotifierProvider.notifier)
-                          .loadPaginatedProducts(page: 1, limit: 10);
+                          .loadPaginatedProducts(page: 1, limit: 20);
                     },
                     child: const Text('다시 시도'),
                   ),
@@ -163,7 +145,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                     ),
                   )
                 : ListView.builder(
-                    controller: _scrollController,
+                    controller: scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount:
                         products.length + (pagination.hasMore == true ? 1 : 0),
@@ -183,7 +165,7 @@ class _AllProductsScreenState extends ConsumerState<AllProductsScreen> {
                     },
                   ),
           ProductPaginatedLoadingMore(:final products) => ListView.builder(
-              controller: _scrollController,
+              controller: scrollController,
               padding: const EdgeInsets.all(16),
               itemCount: products.length + 1,
               itemBuilder: (context, index) {

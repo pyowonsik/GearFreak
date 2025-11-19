@@ -20,7 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(homeProductsNotifierProvider.notifier).loadRecentProducts();
+      ref.read(homeProductsNotifierProvider.notifier).loadRandomProducts();
     });
   }
 
@@ -42,9 +42,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {},
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -65,7 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onPressed: () {
                     ref
                         .read(homeProductsNotifierProvider.notifier)
-                        .loadRecentProducts();
+                        .loadRandomProducts();
                   },
                   child: const Text('다시 시도'),
                 ),
@@ -109,7 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // 최근 등록 상품
+                // 상품 목록
                 Container(
                   color: Colors.white,
                   padding: const EdgeInsets.all(16),
@@ -120,18 +136,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            '최근 등록 상품',
+                            '상품 목록',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1F2937),
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              context.push('/product/all');
-                            },
-                            child: const Text('전체보기'),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.refresh_rounded),
+                                iconSize: 20,
+                                color: const Color(0xFF2563EB),
+                                onPressed: () {
+                                  ref
+                                      .read(
+                                          homeProductsNotifierProvider.notifier)
+                                      .loadRandomProducts();
+                                },
+                                tooltip: '새로고침',
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                onPressed: () {
+                                  context.push('/product/all');
+                                },
+                                child: const Text('전체보기'),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -202,7 +235,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // 최근 등록 상품
+                // 상품 목록
                 Container(
                   color: Colors.white,
                   padding: const EdgeInsets.all(16),
@@ -213,18 +246,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            '최근 등록 상품',
+                            '상품 목록',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1F2937),
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              context.push('/product/all');
-                            },
-                            child: const Text('전체보기'),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.refresh_rounded),
+                                iconSize: 20,
+                                color: const Color(0xFF2563EB),
+                                onPressed: () {
+                                  ref
+                                      .read(
+                                          homeProductsNotifierProvider.notifier)
+                                      .loadRandomProducts();
+                                },
+                                tooltip: '새로고침',
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                onPressed: () {
+                                  context.push('/product/all');
+                                },
+                                child: const Text('전체보기'),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -266,6 +316,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildCategoryItem(String label, IconData icon, Color color) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: color, size: 32),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF4B5563),
+            ),
+          ),
+        ],
       ),
     );
   }

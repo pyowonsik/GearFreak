@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../../../common/domain/usecase/usecase.dart';
 import '../domain.dart';
 
@@ -17,7 +18,9 @@ class SearchProductsParams {
 
 /// 상품 검색 UseCase
 class SearchProductsUseCase
-    implements UseCase<SearchResult, SearchProductsParams, SearchRepository> {
+    implements
+        UseCase<pod.PaginatedProductsResponseDto, SearchProductsParams,
+            SearchRepository> {
   final SearchRepository repository;
 
   const SearchProductsUseCase(this.repository);
@@ -26,7 +29,8 @@ class SearchProductsUseCase
   SearchRepository get repo => repository;
 
   @override
-  Future<Either<Failure, SearchResult>> call(SearchProductsParams param) async {
+  Future<Either<Failure, pod.PaginatedProductsResponseDto>> call(
+      SearchProductsParams param) async {
     try {
       final result = await repository.searchProducts(
         query: param.query,

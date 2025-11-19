@@ -1,4 +1,4 @@
-import '../../domain/entity/search_result.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../domain/repository/search_repository.dart';
 import '../datasource/search_remote_datasource.dart';
 
@@ -9,21 +9,15 @@ class SearchRepositoryImpl implements SearchRepository {
   const SearchRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<SearchResult> searchProducts({
+  Future<pod.PaginatedProductsResponseDto> searchProducts({
     required String query,
     int page = 1,
     int limit = 20,
   }) async {
-    final products = await remoteDataSource.searchProducts(
+    return await remoteDataSource.searchProducts(
       query: query,
       page: page,
       limit: limit,
-    );
-
-    return SearchResult(
-      products: products,
-      totalCount: products.length,
-      query: query,
     );
   }
 }

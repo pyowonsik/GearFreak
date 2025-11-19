@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../provider/search_notifier.dart';
+import '../../../../common/utils/pagination_scroll_mixin.dart';
+import '../provider/search_state.dart';
 import '../../di/search_providers.dart';
 import '../../../product/presentation/widget/product_card_widget.dart';
 
@@ -12,11 +13,35 @@ class SearchScreen extends ConsumerStatefulWidget {
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends ConsumerState<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen>
+    with PaginationScrollMixin {
   final _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    initPaginationScroll(
+      onLoadMore: () {
+        ref.read(searchNotifierProvider.notifier).loadMoreProducts();
+      },
+      getPagination: () {
+        final searchState = ref.read(searchNotifierProvider);
+        if (searchState is SearchLoaded) {
+          return searchState.result.pagination;
+        }
+        return null;
+      },
+      isLoading: () {
+        final searchState = ref.read(searchNotifierProvider);
+        return searchState is SearchLoadingMore;
+      },
+      screenName: 'SearchScreen',
+    );
+  }
+
+  @override
   void dispose() {
+    disposePaginationScroll();
     _searchController.dispose();
     super.dispose();
   }
@@ -44,7 +69,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _searchController.clear();
-                          ref.read(searchNotifierProvider.notifier).clearSearch();
+                          ref
+                              .read(searchNotifierProvider.notifier)
+                              .clearSearch();
                         },
                       )
                     : null,
@@ -61,7 +88,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               onSubmitted: (value) {
                 if (value.trim().isNotEmpty) {
-                  ref.read(searchNotifierProvider.notifier).searchProducts(value);
+                  ref
+                      .read(searchNotifierProvider.notifier)
+                      .searchProducts(value);
                 }
               },
               onChanged: (value) {
@@ -78,86 +107,110 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildBody(SearchState state) {
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '에러: ${state.error}',
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (state.currentQuery != null) {
-                  ref.read(searchNotifierProvider.notifier).searchProducts(state.currentQuery!);
+    return switch (state) {
+      SearchInitial() => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.search,
+                size: 64,
+                color: Colors.grey.shade300,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '상품을 검색해보세요',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      SearchLoading() => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      SearchError(:final message, :final query) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '에러: $message',
+                style: const TextStyle(color: Colors.red),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  if (query != null) {
+                    ref
+                        .read(searchNotifierProvider.notifier)
+                        .searchProducts(query);
+                  }
+                },
+                child: const Text('다시 시도'),
+              ),
+            ],
+          ),
+        ),
+      SearchLoaded(:final result) => result.products.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.search_off,
+                    size: 64,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '검색 결과가 없습니다',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              controller: scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: result.products.length +
+                  (result.pagination.hasMore == true ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == result.products.length) {
+                  // 마지막에 로딩 인디케이터 표시
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
                 }
+                final product = result.products[index];
+                return ProductCardWidget(product: product);
               },
-              child: const Text('다시 시도'),
             ),
-          ],
+      SearchLoadingMore(:final result) => ListView.builder(
+          controller: scrollController,
+          padding: const EdgeInsets.all(16),
+          itemCount: result.products.length + 1,
+          itemBuilder: (context, index) {
+            if (index == result.products.length) {
+              // 로딩 중 인디케이터 표시
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+            final product = result.products[index];
+            return ProductCardWidget(product: product);
+          },
         ),
-      );
-    }
-
-    if (state.searchResult == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search,
-              size: 64,
-              color: Colors.grey.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '상품을 검색해보세요',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (state.searchResult!.products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '검색 결과가 없습니다',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: state.searchResult!.products.length,
-      itemBuilder: (context, index) {
-        final product = state.searchResult!.products[index];
-        return ProductCardWidget(product: product);
-      },
-    );
+    };
   }
 }
