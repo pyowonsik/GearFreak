@@ -17,3 +17,5 @@ fields:
   random: bool?
   ### 카테고리 필터링 (선택적)
   category: ProductCategory?
+  ### 정렬 기준 (선택적, 기본값: latest)
+  sortBy: ProductSortBy?

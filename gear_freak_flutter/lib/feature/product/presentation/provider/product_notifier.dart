@@ -24,6 +24,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
     int page = 1,
     int limit = 10,
     bool random = false,
+    pod.ProductSortBy? sortBy,
   }) async {
     state = const ProductLoading();
 
@@ -31,9 +32,10 @@ class ProductNotifier extends StateNotifier<ProductState> {
       page: page,
       limit: limit,
       random: random,
+      sortBy: sortBy,
     );
     print(
-        '🔄 [ProductNotifier] 페이지네이션 요청: page=$page, limit=$limit, random=$random');
+        '🔄 [ProductNotifier] 페이지네이션 요청: page=$page, limit=$limit, random=$random, sortBy=${sortBy?.name ?? "없음"}');
     final result = await getPaginatedProductsUseCase(pagination);
 
     result.fold(
@@ -48,6 +50,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
           products: response.products,
           pagination: response.pagination,
           category: null, // 전체 상품은 카테고리 필터 없음
+          sortBy: sortBy,
         );
       },
     );
@@ -58,6 +61,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
     required pod.ProductCategory category,
     int page = 1,
     int limit = 20,
+    pod.ProductSortBy? sortBy,
   }) async {
     state = const ProductLoading();
 
@@ -65,9 +69,10 @@ class ProductNotifier extends StateNotifier<ProductState> {
       page: page,
       limit: limit,
       category: category, // enum을 직접 전달
+      sortBy: sortBy,
     );
     print(
-        '🔄 [ProductNotifier] 카테고리 페이지네이션 요청: category=${category.name}, page=$page, limit=$limit');
+        '🔄 [ProductNotifier] 카테고리 페이지네이션 요청: category=${category.name}, page=$page, limit=$limit, sortBy=${sortBy?.name ?? "없음"}');
     final result = await getPaginatedProductsUseCase(pagination);
 
     result.fold(
@@ -82,6 +87,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
           products: response.products,
           pagination: response.pagination,
           category: category, // 카테고리 정보 저장
+          sortBy: sortBy,
         );
       },
     );
@@ -122,13 +128,15 @@ class ProductNotifier extends StateNotifier<ProductState> {
       products: currentState.products,
       pagination: currentPagination,
       category: currentState.category, // 카테고리 정보 유지
+      sortBy: currentState.sortBy, // 정렬 기준 유지
     );
 
-    // 저장된 카테고리 정보 사용
+    // 저장된 카테고리 및 정렬 정보 사용
     final pagination = pod.PaginationDto(
       page: nextPage,
       limit: currentPagination.limit,
       category: currentState.category, // 저장된 카테고리 정보 사용
+      sortBy: currentState.sortBy, // 저장된 정렬 기준 사용
     );
 
     final result = await getPaginatedProductsUseCase(pagination);
@@ -153,6 +161,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
           products: updatedProducts,
           pagination: response.pagination,
           category: currentState.category, // 카테고리 정보 유지
+          sortBy: currentState.sortBy, // 정렬 기준 유지
         );
       },
     );

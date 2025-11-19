@@ -19,9 +19,10 @@ import 'feature/product/model/dto/update_product_request.dto.dart' as _i7;
 import 'feature/product/model/product.dart' as _i8;
 import 'feature/product/model/product_category.dart' as _i9;
 import 'feature/product/model/product_condition.dart' as _i10;
-import 'feature/product/model/trade_method.dart' as _i11;
-import 'feature/user/model/user.dart' as _i12;
-import 'greeting.dart' as _i13;
+import 'feature/product/model/product_sort_by.dart' as _i11;
+import 'feature/product/model/trade_method.dart' as _i12;
+import 'feature/user/model/user.dart' as _i13;
+import 'greeting.dart' as _i14;
 export 'common/model/pagination_dto.dart';
 export 'feature/product/model/dto/create_product_request.dto.dart';
 export 'feature/product/model/dto/paginated_products_response.dto.dart';
@@ -29,6 +30,7 @@ export 'feature/product/model/dto/update_product_request.dto.dart';
 export 'feature/product/model/product.dart';
 export 'feature/product/model/product_category.dart';
 export 'feature/product/model/product_condition.dart';
+export 'feature/product/model/product_sort_by.dart';
 export 'feature/product/model/trade_method.dart';
 export 'feature/user/model/user.dart';
 export 'greeting.dart';
@@ -348,14 +350,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i10.ProductCondition) {
       return _i10.ProductCondition.fromJson(data) as T;
     }
-    if (t == _i11.TradeMethod) {
-      return _i11.TradeMethod.fromJson(data) as T;
+    if (t == _i11.ProductSortBy) {
+      return _i11.ProductSortBy.fromJson(data) as T;
     }
-    if (t == _i12.User) {
-      return _i12.User.fromJson(data) as T;
+    if (t == _i12.TradeMethod) {
+      return _i12.TradeMethod.fromJson(data) as T;
     }
-    if (t == _i13.Greeting) {
-      return _i13.Greeting.fromJson(data) as T;
+    if (t == _i13.User) {
+      return _i13.User.fromJson(data) as T;
+    }
+    if (t == _i14.Greeting) {
+      return _i14.Greeting.fromJson(data) as T;
     }
     if (t == _i1.getType<_i4.PaginationDto?>()) {
       return (data != null ? _i4.PaginationDto.fromJson(data) : null) as T;
@@ -382,14 +387,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i10.ProductCondition?>()) {
       return (data != null ? _i10.ProductCondition.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.TradeMethod?>()) {
-      return (data != null ? _i11.TradeMethod.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.ProductSortBy?>()) {
+      return (data != null ? _i11.ProductSortBy.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.User?>()) {
-      return (data != null ? _i12.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.TradeMethod?>()) {
+      return (data != null ? _i12.TradeMethod.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.Greeting?>()) {
-      return (data != null ? _i13.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.User?>()) {
+      return (data != null ? _i13.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i14.Greeting?>()) {
+      return (data != null ? _i14.Greeting.fromJson(data) : null) as T;
     }
     if (t == List<_i8.Product>) {
       return (data as List).map((e) => deserialize<_i8.Product>(e)).toList()
@@ -437,13 +445,16 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i10.ProductCondition) {
       return 'ProductCondition';
     }
-    if (data is _i11.TradeMethod) {
+    if (data is _i11.ProductSortBy) {
+      return 'ProductSortBy';
+    }
+    if (data is _i12.TradeMethod) {
       return 'TradeMethod';
     }
-    if (data is _i12.User) {
+    if (data is _i13.User) {
       return 'User';
     }
-    if (data is _i13.Greeting) {
+    if (data is _i14.Greeting) {
       return 'Greeting';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -484,14 +495,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'ProductCondition') {
       return deserialize<_i10.ProductCondition>(data['data']);
     }
+    if (dataClassName == 'ProductSortBy') {
+      return deserialize<_i11.ProductSortBy>(data['data']);
+    }
     if (dataClassName == 'TradeMethod') {
-      return deserialize<_i11.TradeMethod>(data['data']);
+      return deserialize<_i12.TradeMethod>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i12.User>(data['data']);
+      return deserialize<_i13.User>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i13.Greeting>(data['data']);
+      return deserialize<_i14.Greeting>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -521,8 +535,8 @@ class Protocol extends _i1.SerializationManagerServer {
     switch (t) {
       case _i8.Product:
         return _i8.Product.t;
-      case _i12.User:
-        return _i12.User.t;
+      case _i13.User:
+        return _i13.User.t;
     }
     return null;
   }

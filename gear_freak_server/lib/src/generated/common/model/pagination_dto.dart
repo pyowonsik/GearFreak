@@ -11,6 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../../feature/product/model/product_category.dart' as _i2;
+import '../../feature/product/model/product_sort_by.dart' as _i3;
 
 /// 페이지네이션 DTO
 /// 요청 및 응답에서 공통으로 사용
@@ -24,6 +25,7 @@ abstract class PaginationDto
     this.title,
     this.random,
     this.category,
+    this.sortBy,
   });
 
   factory PaginationDto({
@@ -34,6 +36,7 @@ abstract class PaginationDto
     String? title,
     bool? random,
     _i2.ProductCategory? category,
+    _i3.ProductSortBy? sortBy,
   }) = _PaginationDtoImpl;
 
   factory PaginationDto.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -48,6 +51,9 @@ abstract class PaginationDto
           ? null
           : _i2.ProductCategory.fromJson(
               (jsonSerialization['category'] as int)),
+      sortBy: jsonSerialization['sortBy'] == null
+          ? null
+          : _i3.ProductSortBy.fromJson((jsonSerialization['sortBy'] as int)),
     );
   }
 
@@ -72,6 +78,9 @@ abstract class PaginationDto
   /// 카테고리 필터링 (선택적)
   _i2.ProductCategory? category;
 
+  /// 정렬 기준 (선택적, 기본값: latest)
+  _i3.ProductSortBy? sortBy;
+
   /// Returns a shallow copy of this [PaginationDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -83,6 +92,7 @@ abstract class PaginationDto
     String? title,
     bool? random,
     _i2.ProductCategory? category,
+    _i3.ProductSortBy? sortBy,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -94,6 +104,7 @@ abstract class PaginationDto
       if (title != null) 'title': title,
       if (random != null) 'random': random,
       if (category != null) 'category': category?.toJson(),
+      if (sortBy != null) 'sortBy': sortBy?.toJson(),
     };
   }
 
@@ -107,6 +118,7 @@ abstract class PaginationDto
       if (title != null) 'title': title,
       if (random != null) 'random': random,
       if (category != null) 'category': category?.toJson(),
+      if (sortBy != null) 'sortBy': sortBy?.toJson(),
     };
   }
 
@@ -127,6 +139,7 @@ class _PaginationDtoImpl extends PaginationDto {
     String? title,
     bool? random,
     _i2.ProductCategory? category,
+    _i3.ProductSortBy? sortBy,
   }) : super._(
           page: page,
           limit: limit,
@@ -135,6 +148,7 @@ class _PaginationDtoImpl extends PaginationDto {
           title: title,
           random: random,
           category: category,
+          sortBy: sortBy,
         );
 
   /// Returns a shallow copy of this [PaginationDto]
@@ -149,6 +163,7 @@ class _PaginationDtoImpl extends PaginationDto {
     Object? title = _Undefined,
     Object? random = _Undefined,
     Object? category = _Undefined,
+    Object? sortBy = _Undefined,
   }) {
     return PaginationDto(
       page: page ?? this.page,
@@ -158,6 +173,7 @@ class _PaginationDtoImpl extends PaginationDto {
       title: title is String? ? title : this.title,
       random: random is bool? ? random : this.random,
       category: category is _i2.ProductCategory? ? category : this.category,
+      sortBy: sortBy is _i3.ProductSortBy? ? sortBy : this.sortBy,
     );
   }
 }

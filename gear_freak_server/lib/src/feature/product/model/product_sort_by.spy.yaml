@@ -1,0 +1,8 @@
+### 상품 정렬 기준
+enum: ProductSortBy
+values:
+  - latest # 최신순 (createdAt DESC)
+  - priceAsc # 낮은 가격순 (price ASC)
+  - priceDesc # 높은 가격순 (price DESC)
+  - popular # 인기순 (favoriteCount DESC - 찜 많은 순)
+

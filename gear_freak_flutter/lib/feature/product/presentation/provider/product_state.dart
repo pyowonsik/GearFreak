@@ -27,11 +27,13 @@ class ProductPaginatedLoaded extends ProductState {
   final List<pod.Product> products;
   final pod.PaginationDto pagination;
   final pod.ProductCategory? category; // 원래 요청 시 사용한 카테고리 (필터링용)
+  final pod.ProductSortBy? sortBy; // 원래 요청 시 사용한 정렬 기준
 
   const ProductPaginatedLoaded({
     required this.products,
     required this.pagination,
     this.category,
+    this.sortBy,
   });
 }
 
@@ -40,10 +42,12 @@ class ProductPaginatedLoadingMore extends ProductState {
   final List<pod.Product> products;
   final pod.PaginationDto pagination;
   final pod.ProductCategory? category; // 원래 요청 시 사용한 카테고리 (필터링용)
+  final pod.ProductSortBy? sortBy; // 원래 요청 시 사용한 정렬 기준
 
   const ProductPaginatedLoadingMore({
     required this.products,
     required this.pagination,
     this.category,
+    this.sortBy,
   });
 }

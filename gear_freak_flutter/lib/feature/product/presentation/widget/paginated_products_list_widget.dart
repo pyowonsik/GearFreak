@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import '../../../../common/utils/pagination_scroll_mixin.dart';
 import '../provider/product_state.dart';
 import 'product_card_widget.dart';
@@ -12,6 +13,7 @@ class PaginatedProductsListWidget extends ConsumerStatefulWidget {
   final Future<void> Function() onRefresh;
   final VoidCallback onRetry;
   final String screenName;
+  final Future<void> Function(pod.ProductSortBy)? onSortChanged;
 
   const PaginatedProductsListWidget({
     super.key,
@@ -21,6 +23,7 @@ class PaginatedProductsListWidget extends ConsumerStatefulWidget {
     required this.onRefresh,
     required this.onRetry,
     required this.screenName,
+    this.onSortChanged,
   });
 
   @override
@@ -32,6 +35,22 @@ class _PaginatedProductsListWidgetState
     extends ConsumerState<PaginatedProductsListWidget>
     with PaginationScrollMixin {
   String _selectedSort = '최신순';
+
+  /// 정렬 옵션 문자열을 ProductSortBy enum으로 변환
+  pod.ProductSortBy? _getSortByFromString(String sortString) {
+    switch (sortString) {
+      case '최신순':
+        return pod.ProductSortBy.latest;
+      case '인기순':
+        return pod.ProductSortBy.popular;
+      case '낮은 가격순':
+        return pod.ProductSortBy.priceAsc;
+      case '높은 가격순':
+        return pod.ProductSortBy.priceDesc;
+      default:
+        return null;
+    }
+  }
 
   @override
   void initState() {
@@ -69,11 +88,15 @@ class _PaginatedProductsListWidgetState
         actions: [
           PopupMenuButton<String>(
             initialValue: _selectedSort,
-            onSelected: (value) {
+            onSelected: (value) async {
               setState(() {
                 _selectedSort = value;
               });
-              // TODO: 정렬 기능 구현
+              // 정렬 옵션 변경 시 서버에 전달
+              final sortBy = _getSortByFromString(value);
+              if (sortBy != null && widget.onSortChanged != null) {
+                await widget.onSortChanged!(sortBy);
+              }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(
@@ -190,4 +213,3 @@ class _PaginatedProductsListWidgetState
     );
   }
 }
-
