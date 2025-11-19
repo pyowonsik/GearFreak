@@ -1,0 +1,9 @@
+### 페이지네이션된 상품 목록 응답 DTO
+class: PaginatedProductsResponseDto
+
+fields:
+  ### 페이지네이션 정보
+  pagination: PaginationDto
+  ### 상품 목록
+  products: List<Product>
+

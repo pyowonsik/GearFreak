@@ -18,7 +18,11 @@ import 'package:gear_freak_server/src/generated/feature/user/model/user.dart'
     as _i4;
 import 'package:gear_freak_server/src/generated/feature/product/model/product.dart'
     as _i5;
-import 'package:gear_freak_server/src/generated/greeting.dart' as _i6;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/paginated_products_response.dto.dart'
+    as _i6;
+import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+    as _i7;
+import 'package:gear_freak_server/src/generated/greeting.dart' as _i8;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -225,53 +229,28 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<List<_i5.Product>> getRecentProducts(
-      _i1.TestSessionBuilder sessionBuilder) async {
+  _i3.Future<_i6.PaginatedProductsResponseDto> getPaginatedProducts(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i7.PaginationDto pagination,
+  ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
         endpoint: 'product',
-        method: 'getRecentProducts',
+        method: 'getPaginatedProducts',
       );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'product',
-          methodName: 'getRecentProducts',
-          parameters: _i1.testObjectToJson({}),
+          methodName: 'getPaginatedProducts',
+          parameters: _i1.testObjectToJson({'pagination': pagination}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i5.Product>>);
-        return _localReturnValue;
-      } finally {
-        await _localUniqueSession.close();
-      }
-    });
-  }
-
-  _i3.Future<List<_i5.Product>> getAllProducts(
-      _i1.TestSessionBuilder sessionBuilder) async {
-    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
-      var _localUniqueSession =
-          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-        endpoint: 'product',
-        method: 'getAllProducts',
-      );
-      try {
-        var _localCallContext = await _endpointDispatch.getMethodCallContext(
-          createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'product',
-          methodName: 'getAllProducts',
-          parameters: _i1.testObjectToJson({}),
-          serializationManager: _serializationManager,
-        );
-        var _localReturnValue = await (_localCallContext.method.call(
-          _localUniqueSession,
-          _localCallContext.arguments,
-        ) as _i3.Future<List<_i5.Product>>);
+        ) as _i3.Future<_i6.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -383,7 +362,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i6.Greeting> hello(
+  _i3.Future<_i8.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -404,7 +383,7 @@ class _GreetingEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i6.Greeting>);
+        ) as _i3.Future<_i8.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

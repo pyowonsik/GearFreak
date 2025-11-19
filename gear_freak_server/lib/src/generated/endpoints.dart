@@ -14,7 +14,9 @@ import '../feature/auth/endpoint/auth_endpoint.dart' as _i2;
 import '../feature/product/endpoint/product_endpoint.dart' as _i3;
 import '../feature/user/endpoint/user_endpoint.dart' as _i4;
 import '../greeting_endpoint.dart' as _i5;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i6;
+import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+    as _i6;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i7;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -104,25 +106,24 @@ class Endpoints extends _i1.EndpointDispatch {
             params['id'],
           ),
         ),
-        'getRecentProducts': _i1.MethodConnector(
-          name: 'getRecentProducts',
-          params: {},
+        'getPaginatedProducts': _i1.MethodConnector(
+          name: 'getPaginatedProducts',
+          params: {
+            'pagination': _i1.ParameterDescription(
+              name: 'pagination',
+              type: _i1.getType<_i6.PaginationDto>(),
+              nullable: false,
+            )
+          },
           call: (
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
               (endpoints['product'] as _i3.ProductEndpoint)
-                  .getRecentProducts(session),
-        ),
-        'getAllProducts': _i1.MethodConnector(
-          name: 'getAllProducts',
-          params: {},
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['product'] as _i3.ProductEndpoint)
-                  .getAllProducts(session),
+                  .getPaginatedProducts(
+            session,
+            params['pagination'],
+          ),
         ),
       },
     );
@@ -192,6 +193,6 @@ class Endpoints extends _i1.EndpointDispatch {
         )
       },
     );
-    modules['serverpod_auth'] = _i6.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i7.Endpoints()..initializeEndpoints(server);
   }
 }

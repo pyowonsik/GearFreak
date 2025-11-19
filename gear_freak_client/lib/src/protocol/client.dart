@@ -15,9 +15,13 @@ import 'package:gear_freak_client/src/protocol/feature/user/model/user.dart'
     as _i3;
 import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
     as _i4;
-import 'package:gear_freak_client/src/protocol/greeting.dart' as _i5;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i6;
-import 'protocol.dart' as _i7;
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
+    as _i5;
+import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
+    as _i6;
+import 'package:gear_freak_client/src/protocol/greeting.dart' as _i7;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i8;
+import 'protocol.dart' as _i9;
 
 /// 인증 엔드포인트
 /// {@category Endpoint}
@@ -59,20 +63,13 @@ class EndpointProduct extends _i1.EndpointRef {
         {'id': id},
       );
 
-  /// 최근 등록 상품 조회 (5개)
-  _i2.Future<List<_i4.Product>> getRecentProducts() =>
-      caller.callServerEndpoint<List<_i4.Product>>(
+  /// 페이지네이션된 상품 목록 조회
+  _i2.Future<_i5.PaginatedProductsResponseDto> getPaginatedProducts(
+          _i6.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i5.PaginatedProductsResponseDto>(
         'product',
-        'getRecentProducts',
-        {},
-      );
-
-  /// 전체 상품 조회
-  _i2.Future<List<_i4.Product>> getAllProducts() =>
-      caller.callServerEndpoint<List<_i4.Product>>(
-        'product',
-        'getAllProducts',
-        {},
+        'getPaginatedProducts',
+        {'pagination': pagination},
       );
 }
 
@@ -118,8 +115,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i2.Future<_i7.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i7.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -128,10 +125,10 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i6.Caller(client);
+    auth = _i8.Caller(client);
   }
 
-  late final _i6.Caller auth;
+  late final _i8.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -150,7 +147,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i7.Protocol(),
+          _i9.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

@@ -1,0 +1,40 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "gear_freak_client",
+            "cwd": "gear_freak_client",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gear_freak_flutter",
+            "cwd": "gear_freak_flutter",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "gear_freak_flutter (profile mode)",
+            "cwd": "gear_freak_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "gear_freak_flutter (release mode)",
+            "cwd": "gear_freak_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "gear_freak_server",
+            "cwd": "gear_freak_server",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}
