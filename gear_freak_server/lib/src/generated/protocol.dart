@@ -16,17 +16,19 @@ import 'common/model/pagination_dto.dart' as _i4;
 import 'feature/product/model/dto/create_product_request.dto.dart' as _i5;
 import 'feature/product/model/dto/paginated_products_response.dto.dart' as _i6;
 import 'feature/product/model/dto/update_product_request.dto.dart' as _i7;
-import 'feature/product/model/product.dart' as _i8;
-import 'feature/product/model/product_category.dart' as _i9;
-import 'feature/product/model/product_condition.dart' as _i10;
-import 'feature/product/model/product_sort_by.dart' as _i11;
-import 'feature/product/model/trade_method.dart' as _i12;
-import 'feature/user/model/user.dart' as _i13;
-import 'greeting.dart' as _i14;
+import 'feature/product/model/favorite.dart' as _i8;
+import 'feature/product/model/product.dart' as _i9;
+import 'feature/product/model/product_category.dart' as _i10;
+import 'feature/product/model/product_condition.dart' as _i11;
+import 'feature/product/model/product_sort_by.dart' as _i12;
+import 'feature/product/model/trade_method.dart' as _i13;
+import 'feature/user/model/user.dart' as _i14;
+import 'greeting.dart' as _i15;
 export 'common/model/pagination_dto.dart';
 export 'feature/product/model/dto/create_product_request.dto.dart';
 export 'feature/product/model/dto/paginated_products_response.dto.dart';
 export 'feature/product/model/dto/update_product_request.dto.dart';
+export 'feature/product/model/favorite.dart';
 export 'feature/product/model/product.dart';
 export 'feature/product/model/product_category.dart';
 export 'feature/product/model/product_condition.dart';
@@ -43,6 +45,94 @@ class Protocol extends _i1.SerializationManagerServer {
   static final Protocol _instance = Protocol._();
 
   static final List<_i2.TableDefinition> targetTableDefinitions = [
+    _i2.TableDefinition(
+      name: 'favorite',
+      dartName: 'Favorite',
+      schema: 'public',
+      module: 'gear_freak',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'favorite_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'userId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'productId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'favorite_fk_0',
+          columns: ['userId'],
+          referenceTable: 'user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+        _i2.ForeignKeyDefinition(
+          constraintName: 'favorite_fk_1',
+          columns: ['productId'],
+          referenceTable: 'product',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'favorite_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'user_product_unique_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'productId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     _i2.TableDefinition(
       name: 'product',
       dartName: 'Product',
@@ -341,26 +431,29 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i7.UpdateProductRequestDto) {
       return _i7.UpdateProductRequestDto.fromJson(data) as T;
     }
-    if (t == _i8.Product) {
-      return _i8.Product.fromJson(data) as T;
+    if (t == _i8.Favorite) {
+      return _i8.Favorite.fromJson(data) as T;
     }
-    if (t == _i9.ProductCategory) {
-      return _i9.ProductCategory.fromJson(data) as T;
+    if (t == _i9.Product) {
+      return _i9.Product.fromJson(data) as T;
     }
-    if (t == _i10.ProductCondition) {
-      return _i10.ProductCondition.fromJson(data) as T;
+    if (t == _i10.ProductCategory) {
+      return _i10.ProductCategory.fromJson(data) as T;
     }
-    if (t == _i11.ProductSortBy) {
-      return _i11.ProductSortBy.fromJson(data) as T;
+    if (t == _i11.ProductCondition) {
+      return _i11.ProductCondition.fromJson(data) as T;
     }
-    if (t == _i12.TradeMethod) {
-      return _i12.TradeMethod.fromJson(data) as T;
+    if (t == _i12.ProductSortBy) {
+      return _i12.ProductSortBy.fromJson(data) as T;
     }
-    if (t == _i13.User) {
-      return _i13.User.fromJson(data) as T;
+    if (t == _i13.TradeMethod) {
+      return _i13.TradeMethod.fromJson(data) as T;
     }
-    if (t == _i14.Greeting) {
-      return _i14.Greeting.fromJson(data) as T;
+    if (t == _i14.User) {
+      return _i14.User.fromJson(data) as T;
+    }
+    if (t == _i15.Greeting) {
+      return _i15.Greeting.fromJson(data) as T;
     }
     if (t == _i1.getType<_i4.PaginationDto?>()) {
       return (data != null ? _i4.PaginationDto.fromJson(data) : null) as T;
@@ -378,29 +471,32 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i7.UpdateProductRequestDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i8.Product?>()) {
-      return (data != null ? _i8.Product.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i8.Favorite?>()) {
+      return (data != null ? _i8.Favorite.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i9.ProductCategory?>()) {
-      return (data != null ? _i9.ProductCategory.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.Product?>()) {
+      return (data != null ? _i9.Product.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.ProductCondition?>()) {
-      return (data != null ? _i10.ProductCondition.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.ProductCategory?>()) {
+      return (data != null ? _i10.ProductCategory.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.ProductSortBy?>()) {
-      return (data != null ? _i11.ProductSortBy.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.ProductCondition?>()) {
+      return (data != null ? _i11.ProductCondition.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.TradeMethod?>()) {
-      return (data != null ? _i12.TradeMethod.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.ProductSortBy?>()) {
+      return (data != null ? _i12.ProductSortBy.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.User?>()) {
-      return (data != null ? _i13.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.TradeMethod?>()) {
+      return (data != null ? _i13.TradeMethod.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.Greeting?>()) {
-      return (data != null ? _i14.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.User?>()) {
+      return (data != null ? _i14.User.fromJson(data) : null) as T;
     }
-    if (t == List<_i8.Product>) {
-      return (data as List).map((e) => deserialize<_i8.Product>(e)).toList()
+    if (t == _i1.getType<_i15.Greeting?>()) {
+      return (data != null ? _i15.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == List<_i9.Product>) {
+      return (data as List).map((e) => deserialize<_i9.Product>(e)).toList()
           as T;
     }
     if (t == _i1.getType<List<String>?>()) {
@@ -436,25 +532,28 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i7.UpdateProductRequestDto) {
       return 'UpdateProductRequestDto';
     }
-    if (data is _i8.Product) {
+    if (data is _i8.Favorite) {
+      return 'Favorite';
+    }
+    if (data is _i9.Product) {
       return 'Product';
     }
-    if (data is _i9.ProductCategory) {
+    if (data is _i10.ProductCategory) {
       return 'ProductCategory';
     }
-    if (data is _i10.ProductCondition) {
+    if (data is _i11.ProductCondition) {
       return 'ProductCondition';
     }
-    if (data is _i11.ProductSortBy) {
+    if (data is _i12.ProductSortBy) {
       return 'ProductSortBy';
     }
-    if (data is _i12.TradeMethod) {
+    if (data is _i13.TradeMethod) {
       return 'TradeMethod';
     }
-    if (data is _i13.User) {
+    if (data is _i14.User) {
       return 'User';
     }
-    if (data is _i14.Greeting) {
+    if (data is _i15.Greeting) {
       return 'Greeting';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -486,26 +585,29 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'UpdateProductRequestDto') {
       return deserialize<_i7.UpdateProductRequestDto>(data['data']);
     }
+    if (dataClassName == 'Favorite') {
+      return deserialize<_i8.Favorite>(data['data']);
+    }
     if (dataClassName == 'Product') {
-      return deserialize<_i8.Product>(data['data']);
+      return deserialize<_i9.Product>(data['data']);
     }
     if (dataClassName == 'ProductCategory') {
-      return deserialize<_i9.ProductCategory>(data['data']);
+      return deserialize<_i10.ProductCategory>(data['data']);
     }
     if (dataClassName == 'ProductCondition') {
-      return deserialize<_i10.ProductCondition>(data['data']);
+      return deserialize<_i11.ProductCondition>(data['data']);
     }
     if (dataClassName == 'ProductSortBy') {
-      return deserialize<_i11.ProductSortBy>(data['data']);
+      return deserialize<_i12.ProductSortBy>(data['data']);
     }
     if (dataClassName == 'TradeMethod') {
-      return deserialize<_i12.TradeMethod>(data['data']);
+      return deserialize<_i13.TradeMethod>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i13.User>(data['data']);
+      return deserialize<_i14.User>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i14.Greeting>(data['data']);
+      return deserialize<_i15.Greeting>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -533,10 +635,12 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i8.Product:
-        return _i8.Product.t;
-      case _i13.User:
-        return _i13.User.t;
+      case _i8.Favorite:
+        return _i8.Favorite.t;
+      case _i9.Product:
+        return _i9.Product.t;
+      case _i14.User:
+        return _i14.User.t;
     }
     return null;
   }

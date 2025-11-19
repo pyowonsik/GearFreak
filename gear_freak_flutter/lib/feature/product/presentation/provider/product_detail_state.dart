@@ -19,11 +19,25 @@ class ProductDetailLoading extends ProductDetailState {
 class ProductDetailLoaded extends ProductDetailState {
   final pod.Product product;
   final pod.User? seller;
+  final bool isFavorite;
 
   const ProductDetailLoaded({
     required this.product,
     this.seller,
+    this.isFavorite = false,
   });
+
+  ProductDetailLoaded copyWith({
+    pod.Product? product,
+    pod.User? seller,
+    bool? isFavorite,
+  }) {
+    return ProductDetailLoaded(
+      product: product ?? this.product,
+      seller: seller ?? this.seller,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
 }
 
 /// 상품 상세 로드 실패 상태
@@ -32,4 +46,3 @@ class ProductDetailError extends ProductDetailState {
 
   const ProductDetailError(this.message);
 }
-

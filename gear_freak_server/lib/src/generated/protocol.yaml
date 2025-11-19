@@ -3,6 +3,8 @@ auth:
 product:
   - getProduct:
   - getPaginatedProducts:
+  - toggleFavorite:
+  - isFavorite:
 user:
   - getMe:
   - getUserById:

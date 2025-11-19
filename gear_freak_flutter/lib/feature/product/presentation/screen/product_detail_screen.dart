@@ -22,8 +22,6 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
-  bool isLiked = false;
-
   @override
   void initState() {
     super.initState();
@@ -68,10 +66,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
           ),
         ),
-      ProductDetailLoaded(:final product, :final seller) => _buildProductDetail(
+      ProductDetailLoaded(:final product, :final seller, :final isFavorite) =>
+        _buildProductDetail(
           context,
           product,
           seller,
+          isFavorite,
         ),
       ProductDetailInitial() => Scaffold(
           appBar: AppBar(),
@@ -84,6 +84,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     BuildContext context,
     pod.Product productData,
     pod.User? sellerData,
+    bool isFavorite,
   ) {
     return Scaffold(
       appBar: AppBar(
@@ -352,13 +353,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               // 찜하기 버튼
               IconButton(
                 onPressed: () {
-                  setState(() {
-                    isLiked = !isLiked;
-                  });
+                  final id = int.parse(widget.productId);
+                  ref
+                      .read(productDetailNotifierProvider.notifier)
+                      .toggleFavorite(id);
                 },
                 icon: Icon(
-                  isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: isLiked
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite
                       ? const Color(0xFFEF4444)
                       : const Color(0xFF6B7280),
                   size: 28,

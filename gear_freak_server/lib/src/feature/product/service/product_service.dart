@@ -1,8 +1,10 @@
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
+import '../../user/service/user_service.dart';
 import '../util/product_filter_util.dart';
 
 class ProductService {
+  // 상품 조회
   Future<Product> getProductById(Session session, int id) async {
     final product = await Product.db.findById(session, id);
 
@@ -11,6 +13,65 @@ class ProductService {
     }
 
     return product;
+  }
+
+  /// 찜 추가/제거 (토글)
+  /// 반환값: true = 찜 추가됨, false = 찜 제거됨
+  Future<bool> toggleFavorite(Session session, int userId, int productId) async {
+    // 상품 존재 확인
+    final product = await Product.db.findById(session, productId);
+    if (product == null) {
+      throw Exception('Product not found');
+    }
+
+    // 기존 찜 확인
+    final existingFavorite = await Favorite.db.findFirstRow(
+      session,
+      where: (f) => f.userId.equals(userId) & f.productId.equals(productId),
+    );
+
+    if (existingFavorite != null) {
+      // 찜 제거
+      await Favorite.db.deleteRow(session, existingFavorite);
+      
+      // favoriteCount 감소
+      final currentCount = product.favoriteCount ?? 0;
+      final newCount = (currentCount - 1).clamp(0, double.infinity).toInt();
+      await Product.db.updateRow(
+        session,
+        product.copyWith(favoriteCount: newCount),
+        columns: (t) => [t.favoriteCount],
+      );
+      
+      return false; // 찜 제거됨
+    } else {
+      // 찜 추가
+      final favorite = Favorite(
+        userId: userId,
+        productId: productId,
+        createdAt: DateTime.now(),
+      );
+      await Favorite.db.insertRow(session, favorite);
+      
+      // favoriteCount 증가
+      final currentCount = product.favoriteCount ?? 0;
+      await Product.db.updateRow(
+        session,
+        product.copyWith(favoriteCount: currentCount + 1),
+        columns: (t) => [t.favoriteCount],
+      );
+      
+      return true; // 찜 추가됨
+    }
+  }
+
+  /// 찜 상태 조회
+  Future<bool> isFavorite(Session session, int userId, int productId) async {
+    final favorite = await Favorite.db.findFirstRow(
+      session,
+      where: (f) => f.userId.equals(userId) & f.productId.equals(productId),
+    );
+    return favorite != null;
   }
 
   /// 페이지네이션된 상품 목록 조회

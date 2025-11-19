@@ -26,4 +26,23 @@ class ProductRemoteDataSource {
       throw Exception('상품 상세를 불러오는데 실패했습니다: $e');
     }
   }
+
+  /// 찜 추가/제거 (토글)
+  /// 반환값: true = 찜 추가됨, false = 찜 제거됨
+  Future<bool> toggleFavorite(int productId) async {
+    try {
+      return await _client.product.toggleFavorite(productId);
+    } catch (e) {
+      throw Exception('찜 상태를 변경하는데 실패했습니다: $e');
+    }
+  }
+
+  /// 찜 상태 조회
+  Future<bool> isFavorite(int productId) async {
+    try {
+      return await _client.product.isFavorite(productId);
+    } catch (e) {
+      throw Exception('찜 상태를 조회하는데 실패했습니다: $e');
+    }
+  }
 }

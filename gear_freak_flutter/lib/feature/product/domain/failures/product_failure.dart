@@ -28,3 +28,21 @@ class GetProductDetailFailure extends ProductFailure {
   String toString() => 'GetProductDetailFailure: $message';
 }
 
+/// 찜 토글 실패
+class ToggleFavoriteFailure extends ProductFailure {
+  /// ToggleFavoriteFailure 생성자
+  const ToggleFavoriteFailure(super.message,
+      {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'ToggleFavoriteFailure: $message';
+}
+
+/// 찜 상태 조회 실패
+class IsFavoriteFailure extends ProductFailure {
+  /// IsFavoriteFailure 생성자
+  const IsFavoriteFailure(super.message, {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'IsFavoriteFailure: $message';
+}

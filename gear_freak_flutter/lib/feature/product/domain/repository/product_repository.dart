@@ -9,5 +9,11 @@ abstract class ProductRepository {
 
   /// 상품 상세 조회
   Future<pod.Product> getProductDetail(int id);
-}
 
+  /// 찜 추가/제거 (토글)
+  /// 반환값: true = 찜 추가됨, false = 찜 제거됨
+  Future<bool> toggleFavorite(int productId);
+
+  /// 찜 상태 조회
+  Future<bool> isFavorite(int productId);
+}

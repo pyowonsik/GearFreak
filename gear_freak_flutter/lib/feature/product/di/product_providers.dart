@@ -5,6 +5,8 @@ import '../data/repository/product_repository_impl.dart';
 import '../domain/repository/product_repository.dart';
 import '../domain/usecase/get_paginated_products_usecase.dart';
 import '../domain/usecase/get_product_detail_usecase.dart';
+import '../domain/usecase/toggle_favorite_usecase.dart';
+import '../domain/usecase/is_favorite_usecase.dart';
 import '../presentation/provider/product_notifier.dart';
 import '../presentation/provider/product_state.dart';
 import '../presentation/provider/product_detail_notifier.dart';
@@ -37,6 +39,18 @@ final getProductDetailUseCaseProvider =
   return GetProductDetailUseCase(repository);
 });
 
+/// Toggle Favorite UseCase Provider
+final toggleFavoriteUseCaseProvider = Provider<ToggleFavoriteUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return ToggleFavoriteUseCase(repository);
+});
+
+/// Is Favorite UseCase Provider
+final isFavoriteUseCaseProvider = Provider<IsFavoriteUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return IsFavoriteUseCase(repository);
+});
+
 /// Home Products Notifier Provider (홈 화면용 - 최근 상품 5개)
 final homeProductsNotifierProvider =
     StateNotifierProvider.autoDispose<ProductNotifier, ProductState>((ref) {
@@ -65,9 +79,13 @@ final allProductsNotifierProvider =
 final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
     ProductDetailNotifier, ProductDetailState>((ref) {
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  final toggleFavoriteUseCase = ref.watch(toggleFavoriteUseCaseProvider);
+  final isFavoriteUseCase = ref.watch(isFavoriteUseCaseProvider);
   final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
   return ProductDetailNotifier(
     getProductDetailUseCase,
+    toggleFavoriteUseCase,
+    isFavoriteUseCase,
     getUserByIdUseCase,
   );
 });

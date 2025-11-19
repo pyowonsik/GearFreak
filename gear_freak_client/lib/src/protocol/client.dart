@@ -48,7 +48,7 @@ class EndpointAuth extends _i1.EndpointRef {
       );
 }
 
-/// 인증 엔드포인트
+/// 상품 엔드포인트
 /// {@category Endpoint}
 class EndpointProduct extends _i1.EndpointRef {
   EndpointProduct(_i1.EndpointCaller caller) : super(caller);
@@ -70,6 +70,22 @@ class EndpointProduct extends _i1.EndpointRef {
         'product',
         'getPaginatedProducts',
         {'pagination': pagination},
+      );
+
+  /// 찜 추가/제거 (토글)
+  /// 반환값: true = 찜 추가됨, false = 찜 제거됨
+  _i2.Future<bool> toggleFavorite(int productId) =>
+      caller.callServerEndpoint<bool>(
+        'product',
+        'toggleFavorite',
+        {'productId': productId},
+      );
+
+  /// 찜 상태 조회
+  _i2.Future<bool> isFavorite(int productId) => caller.callServerEndpoint<bool>(
+        'product',
+        'isFavorite',
+        {'productId': productId},
       );
 }
 

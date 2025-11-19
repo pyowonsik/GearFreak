@@ -19,4 +19,14 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<pod.Product> getProductDetail(int id) async {
     return await remoteDataSource.getProductDetail(id);
   }
+
+  @override
+  Future<bool> toggleFavorite(int productId) async {
+    return await remoteDataSource.toggleFavorite(productId);
+  }
+
+  @override
+  Future<bool> isFavorite(int productId) async {
+    return await remoteDataSource.isFavorite(productId);
+  }
 }

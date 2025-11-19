@@ -1,9 +1,10 @@
 import 'package:gear_freak_server/src/common/authenticated_mixin.dart';
 import 'package:gear_freak_server/src/feature/product/service/product_service.dart';
+import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// 인증 엔드포인트
+/// 상품 엔드포인트
 class ProductEndpoint extends Endpoint with AuthenticatedMixin {
   final ProductService productService = ProductService();
 
@@ -17,5 +18,18 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
     PaginationDto pagination,
   ) async {
     return await productService.getPaginatedProducts(session, pagination);
+  }
+
+  /// 찜 추가/제거 (토글)
+  /// 반환값: true = 찜 추가됨, false = 찜 제거됨
+  Future<bool> toggleFavorite(Session session, int productId) async {
+    final user = await UserService.getMe(session);
+    return await productService.toggleFavorite(session, user.id!, productId);
+  }
+
+  /// 찜 상태 조회
+  Future<bool> isFavorite(Session session, int productId) async {
+    final user = await UserService.getMe(session);
+    return await productService.isFavorite(session, user.id!, productId);
   }
 }
