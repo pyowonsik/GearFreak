@@ -8,15 +8,24 @@ resource "aws_s3_bucket" "public_storage" {
   }
 }
 
-resource "aws_s3_bucket_acl" "public_storage" {
-  bucket = aws_s3_bucket.public_storage.id
-  acl    = "private"
-}
-
+# ACL 비활성화 (최신 AWS S3는 ACL 대신 버킷 정책 사용)
 resource "aws_s3_bucket_ownership_controls" "public_storage" {
   bucket = aws_s3_bucket.public_storage.id
   rule {
-    object_ownership = "ObjectWriter"
+    object_ownership = "BucketOwnerEnforced"  # ACL 비활성화
+  }
+}
+
+# CORS 설정 (presigned URL 업로드를 위해 필요)
+resource "aws_s3_bucket_cors_configuration" "public_storage" {
+  bucket = aws_s3_bucket.public_storage.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "POST", "HEAD"]
+    allowed_origins = ["*"] # 프로덕션에서는 특정 도메인으로 제한하는 것을 권장
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
   }
 }
 
@@ -29,15 +38,11 @@ resource "aws_s3_bucket" "private_storage" {
   }
 }
 
-resource "aws_s3_bucket_acl" "private_storage" {
-  bucket = aws_s3_bucket.private_storage.id
-  acl    = "private"
-}
-
+# ACL 비활성화 (최신 AWS S3는 ACL 대신 버킷 정책 사용)
 resource "aws_s3_bucket_ownership_controls" "private_storage" {
   bucket = aws_s3_bucket.private_storage.id
   rule {
-    object_ownership = "ObjectWriter"
+    object_ownership = "BucketOwnerEnforced"  # ACL 비활성화
   }
 }
 

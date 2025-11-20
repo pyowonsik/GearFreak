@@ -55,8 +55,43 @@ resource "aws_iam_policy" "s3_deployment" {
 EOF
 }
 
+# S3 접근을 위한 IAM 정책 (presigned URL 생성 및 파일 업로드)
+resource "aws_iam_policy" "s3_storage" {
+  name        = "${var.project_name}-s3-storage-policy"
+  description = "Policy for S3 storage access (presigned URL generation and file upload)"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${var.public_storage_bucket_name}",
+        "arn:aws:s3:::${var.public_storage_bucket_name}/*",
+        "arn:aws:s3:::${var.private_storage_bucket_name}",
+        "arn:aws:s3:::${var.private_storage_bucket_name}/*"
+      ]
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy_attachment" "S3Role" {
   policy_arn = aws_iam_policy.s3_deployment.arn
+  role       = aws_iam_role.codedeploy_role.name
+}
+
+# S3 스토리지 정책을 CodeDeploy 역할에 연결
+resource "aws_iam_role_policy_attachment" "S3StorageRole" {
+  policy_arn = aws_iam_policy.s3_storage.arn
   role       = aws_iam_role.codedeploy_role.name
 }
 

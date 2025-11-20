@@ -15,7 +15,7 @@ project_name = "gear-freak"
 # need to update the instance_ami variable (see below) and update the region in
 # the .github/workflows/deployment-aws.yml file. In some cases you will also
 # need to update your instance_type.
-aws_region = "us-west-2"
+aws_region = "ap-northeast-2"
 
 # Enabling Redis may incur additional costs. You will also need to enable Redis
 # in your staging.yaml and production.yaml configuration files.
@@ -86,3 +86,7 @@ public_storage_bucket_name          = "gear-freak-public-storage-3059875"
 private_storage_bucket_name         = "gear-freak-private-storage-3059875"
 public_storage_bucket_name_staging  = "gear-freak-public-storage-staging-3059875"
 private_storage_bucket_name_staging = "gear-freak-private-storage-staging-3059875"
+
+# Database passwords (required by Terraform even if not creating database)
+DATABASE_PASSWORD_PRODUCTION = "PgrlKCor8l5vAb3215xEUl8lIWZrW73e"
+DATABASE_PASSWORD_STAGING = "n0eBMAwFDv5MfmKMGcAPFUynobszm23h"
