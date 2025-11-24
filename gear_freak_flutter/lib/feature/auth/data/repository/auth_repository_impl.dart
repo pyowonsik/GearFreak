@@ -1,14 +1,18 @@
-import '../../domain/repository/auth_repository.dart';
-import '../datasource/auth_remote_datasource.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/feature/auth/data/datasource/auth_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/repository/auth_repository.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
-import '../../../../common/service/pod_service.dart';
 
 /// 인증 Repository 구현
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
-
+  /// AuthRepositoryImpl 생성자
+  ///
+  /// [remoteDataSource]는 인증 원격 데이터 소스입니다.
   const AuthRepositoryImpl(this.remoteDataSource);
+
+  /// 인증 원격 데이터 소스
+  final AuthRemoteDataSource remoteDataSource;
 
   pod.Client get _client => PodService.instance.client;
   SessionManager get _sessionManager => PodService.instance.sessionManager;
@@ -20,7 +24,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     // Serverpod SessionManager가 자동으로 인증 키를 관리하므로
     // 별도로 토큰을 저장할 필요 없음
-    return await remoteDataSource.login(
+    return remoteDataSource.login(
       email: email,
       password: password,
     );
@@ -54,7 +58,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return await remoteDataSource.signup(
+    return remoteDataSource.signup(
       userName: userName,
       email: email,
       password: password,

@@ -1,13 +1,17 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../domain/entity/user_profile.dart';
-import '../../domain/repository/profile_repository.dart';
-import '../datasource/profile_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/profile/data/datasource/profile_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/entity/user_profile.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/repository/profile_repository.dart';
 
 /// 프로필 Repository 구현
 class ProfileRepositoryImpl implements ProfileRepository {
-  final ProfileRemoteDataSource remoteDataSource;
-
+  /// ProfileRepositoryImpl 생성자
+  ///
+  /// [remoteDataSource]는 프로필 원격 데이터 소스입니다.
   const ProfileRepositoryImpl(this.remoteDataSource);
+
+  /// 프로필 원격 데이터 소스
+  final ProfileRemoteDataSource remoteDataSource;
 
   @override
   Future<UserProfile> getUserProfile() async {
@@ -24,6 +28,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<pod.User> getUserById(int id) async {
-    return await remoteDataSource.getUserById(id);
+    return remoteDataSource.getUserById(id);
   }
 }

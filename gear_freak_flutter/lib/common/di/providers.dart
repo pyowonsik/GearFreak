@@ -1,7 +1,7 @@
-import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:serverpod_flutter/serverpod_flutter.dart';
-import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
+import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 /// Serverpod Client Provider
 /// 전역에서 사용하는 Serverpod Client를 제공합니다.

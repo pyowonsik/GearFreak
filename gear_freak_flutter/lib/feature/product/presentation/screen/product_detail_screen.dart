@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/utils/format_utils.dart';
-import '../../../../common/utils/product_utils.dart';
-import '../../di/product_providers.dart';
-import '../provider/product_detail_state.dart';
-import '../utils/product_enum_helper.dart';
+import 'package:gear_freak_flutter/common/utils/format_utils.dart';
+import 'package:gear_freak_flutter/common/utils/product_utils.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
+import 'package:go_router/go_router.dart';
 
+/// 상품 상세 화면
 class ProductDetailScreen extends ConsumerStatefulWidget {
-  final String productId;
-
+  /// ProductDetailScreen 생성자
+  ///
+  /// [key]는 위젯의 키입니다.
+  /// [productId]는 상품 ID입니다.
   const ProductDetailScreen({
-    super.key,
     required this.productId,
+    super.key,
   });
+
+  /// 상품 ID
+  final String productId;
 
   @override
   ConsumerState<ProductDetailScreen> createState() =>
@@ -108,7 +114,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               width: double.infinity,
               height: 320,
               color: const Color(0xFFF3F4F6),
-              child: productData.imageUrls?.isNotEmpty == true
+              child: true == productData.imageUrls?.isNotEmpty
                   ? Image.network(
                       productData.imageUrls!.first,
                       fit: BoxFit.cover,

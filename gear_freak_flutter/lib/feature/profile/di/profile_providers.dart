@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/datasource/profile_remote_datasource.dart';
-import '../data/repository/profile_repository_impl.dart';
-import '../domain/repository/profile_repository.dart';
-import '../domain/usecase/get_user_profile_usecase.dart';
-import '../domain/usecase/get_user_by_id_usecase.dart';
-import '../presentation/provider/profile_notifier.dart';
+import 'package:gear_freak_flutter/feature/profile/data/datasource/profile_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/profile/data/repository/profile_repository_impl.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/repository/profile_repository.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_profile_usecase.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_notifier.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 
 /// Profile Remote DataSource Provider
 final profileRemoteDataSourceProvider =

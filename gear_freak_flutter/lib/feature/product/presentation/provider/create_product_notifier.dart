@@ -2,15 +2,19 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/s3/domain/usecase/upload_image_usecase.dart';
-import 'create_product_state.dart';
+import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
 
 /// 상품 등록 Notifier
 class CreateProductNotifier extends StateNotifier<CreateProductState> {
-  final UploadImageUseCase uploadImageUseCase;
-
+  /// 상품 등록 Notifier 생성자
+  ///
+  /// [uploadImageUseCase]는 이미지 업로드 UseCase 인스턴스입니다.
   CreateProductNotifier(this.uploadImageUseCase)
       : super(const CreateProductInitial());
+
+  /// 이미지 업로드 UseCase
+  final UploadImageUseCase uploadImageUseCase;
 
   /// 이미지 업로드
   Future<void> uploadImage({
@@ -25,7 +29,7 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
       final fileSize = fileBytes.length;
 
       // 2. Content-Type 결정
-      String contentType = 'image/jpeg';
+      var contentType = 'image/jpeg';
       if (fileName.toLowerCase().endsWith('.png')) {
         contentType = 'image/png';
       } else if (fileName.toLowerCase().endsWith('.webp')) {
@@ -61,7 +65,7 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
           if (failure.exception != null) {
             debugPrint('❌ 상세: ${failure.exception}');
           }
-          
+
           final errorMessage = failure.exception != null
               ? '${failure.message}\n상세: ${failure.exception}'
               : failure.message;
@@ -72,7 +76,7 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
         },
         (response) {
           debugPrint('✅ 이미지 업로드 성공: ${response.fileKey}');
-          
+
           // 업로드 성공 시 fileKey 추가
           final updatedKeys = [...state.uploadedFileKeys, response.fileKey];
           state = CreateProductUploadSuccess(
@@ -82,7 +86,7 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
       );
     } catch (e) {
       debugPrint('❌ 이미지 업로드 예외: $e');
-      
+
       state = CreateProductUploadError(
         uploadedFileKeys: state.uploadedFileKeys,
         error: '이미지 업로드 중 오류가 발생했습니다: $e',

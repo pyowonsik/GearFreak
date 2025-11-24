@@ -1,22 +1,30 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../domain/usecase/get_paginated_products_usecase.dart';
-import '../../domain/usecase/get_product_detail_usecase.dart';
-import 'product_state.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 
 /// 상품 Notifier
 class ProductNotifier extends StateNotifier<ProductState> {
-  final GetPaginatedProductsUseCase getPaginatedProductsUseCase;
-  final GetProductDetailUseCase getProductDetailUseCase;
-
+  /// ProductNotifier 생성자
+  ///
+  /// [getPaginatedProductsUseCase]는 페이지네이션된 상품 목록 조회 UseCase 인스턴스입니다.
+  /// [getProductDetailUseCase]는 상품 상세 조회 UseCase 인스턴스입니다.
   ProductNotifier(
     this.getPaginatedProductsUseCase,
     this.getProductDetailUseCase,
   ) : super(const ProductInitial());
 
+  /// 페이지네이션된 상품 목록 조회 UseCase 인스턴스
+  final GetPaginatedProductsUseCase getPaginatedProductsUseCase;
+
+  /// 상품 상세 조회 UseCase 인스턴스
+  final GetProductDetailUseCase getProductDetailUseCase;
+
   /// 랜덤 상품 로드 (5개) - 홈 화면용
   Future<void> loadRandomProducts() async {
-    await loadPaginatedProducts(page: 1, limit: 5, random: true);
+    await loadPaginatedProducts(limit: 5, random: true);
   }
 
   /// 페이지네이션된 상품 로드 (첫 페이지)
@@ -34,22 +42,25 @@ class ProductNotifier extends StateNotifier<ProductState> {
       random: random,
       sortBy: sortBy,
     );
-    print(
-        '🔄 [ProductNotifier] 페이지네이션 요청: page=$page, limit=$limit, random=$random, sortBy=${sortBy?.name ?? "없음"}');
+    debugPrint('🔄 [ProductNotifier] 페이지네이션 요청: '
+        'page=$page, limit=$limit, '
+        'random=$random, sortBy=${sortBy?.name ?? "없음"}');
     final result = await getPaginatedProductsUseCase(pagination);
 
     result.fold(
       (failure) {
-        print('❌ [ProductNotifier] 페이지네이션 실패: ${failure.message}');
+        debugPrint('❌ [ProductNotifier] 페이지네이션 실패: ${failure.message}');
         state = ProductError(failure.message);
       },
       (response) {
-        print(
-            '✅ [ProductNotifier] 페이지네이션 성공: page=${response.pagination.page}, totalCount=${response.pagination.totalCount}, hasMore=${response.pagination.hasMore}, products=${response.products.length}개');
+        debugPrint('✅ [ProductNotifier] 페이지네이션 성공: '
+            'page=${response.pagination.page}, '
+            'totalCount=${response.pagination.totalCount}, '
+            'hasMore=${response.pagination.hasMore}, '
+            'products=${response.products.length}개');
         state = ProductPaginatedLoaded(
           products: response.products,
           pagination: response.pagination,
-          category: null, // 전체 상품은 카테고리 필터 없음
           sortBy: sortBy,
         );
       },
@@ -71,18 +82,23 @@ class ProductNotifier extends StateNotifier<ProductState> {
       category: category, // enum을 직접 전달
       sortBy: sortBy,
     );
-    print(
-        '🔄 [ProductNotifier] 카테고리 페이지네이션 요청: category=${category.name}, page=$page, limit=$limit, sortBy=${sortBy?.name ?? "없음"}');
+    debugPrint(
+        '🔄 [ProductNotifier] 카테고리 페이지네이션 요청: category=${category.name}, '
+        'page=$page, limit=$limit, '
+        'sortBy=${sortBy?.name ?? "없음"}');
     final result = await getPaginatedProductsUseCase(pagination);
 
     result.fold(
       (failure) {
-        print('❌ [ProductNotifier] 카테고리 페이지네이션 실패: ${failure.message}');
+        debugPrint('❌ [ProductNotifier] 카테고리 페이지네이션 실패: ${failure.message}');
         state = ProductError(failure.message);
       },
       (response) {
-        print(
-            '✅ [ProductNotifier] 카테고리 페이지네이션 성공: page=${response.pagination.page}, totalCount=${response.pagination.totalCount}, hasMore=${response.pagination.hasMore}, products=${response.products.length}개');
+        debugPrint('✅ [ProductNotifier] 카테고리 페이지네이션 성공: '
+            'page=${response.pagination.page}, '
+            'totalCount=${response.pagination.totalCount}, '
+            'hasMore=${response.pagination.hasMore}, '
+            'products=${response.products.length}개');
         state = ProductPaginatedLoaded(
           products: response.products,
           pagination: response.pagination,
@@ -99,8 +115,9 @@ class ProductNotifier extends StateNotifier<ProductState> {
 
     // 현재 상태가 페이지네이션된 상태가 아니면 반환
     if (currentState is! ProductPaginatedLoaded) {
-      print(
-          '⚠️ [ProductNotifier] loadMoreProducts: 현재 상태가 ProductPaginatedLoaded가 아닙니다. (${currentState.runtimeType})');
+      debugPrint('⚠️ [ProductNotifier] loadMoreProducts: '
+          '현재 상태가 ProductPaginatedLoaded가 아닙니다. '
+          '(${currentState.runtimeType})');
       return;
     }
 
@@ -108,20 +125,21 @@ class ProductNotifier extends StateNotifier<ProductState> {
 
     // 더 이상 데이터가 없으면 반환
     if (currentPagination.hasMore != true) {
-      print('⚠️ [ProductNotifier] loadMoreProducts: 더 이상 불러올 데이터가 없습니다.');
+      debugPrint('⚠️ [ProductNotifier] loadMoreProducts: 더 이상 불러올 데이터가 없습니다.');
       return;
     }
 
     // 이미 로딩 중이면 반환
     if (state is ProductPaginatedLoadingMore) {
-      print('⚠️ [ProductNotifier] loadMoreProducts: 이미 로딩 중입니다.');
+      debugPrint('⚠️ [ProductNotifier] loadMoreProducts: 이미 로딩 중입니다.');
       return;
     }
 
     // 다음 페이지 요청
     final nextPage = currentPagination.page + 1;
-    print(
-        '🔄 [ProductNotifier] 다음 페이지 로드: page=$nextPage (현재: ${currentPagination.page}, 전체: ${currentPagination.totalCount})');
+    debugPrint('🔄 [ProductNotifier] 다음 페이지 로드: page=$nextPage '
+        '(현재: ${currentPagination.page}, '
+        '전체: ${currentPagination.totalCount})');
 
     // 로딩 상태로 변경 (기존 데이터 유지)
     state = ProductPaginatedLoadingMore(
@@ -143,7 +161,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
 
     result.fold(
       (failure) {
-        print('❌ [ProductNotifier] 다음 페이지 로드 실패: ${failure.message}');
+        debugPrint('❌ [ProductNotifier] 다음 페이지 로드 실패: ${failure.message}');
         // 에러 발생 시 이전 상태로 복구
         state = currentState;
       },
@@ -154,8 +172,11 @@ class ProductNotifier extends StateNotifier<ProductState> {
           ...response.products,
         ];
 
-        print(
-            '✅ [ProductNotifier] 다음 페이지 로드 성공: page=${response.pagination.page}, 추가된 상품=${response.products.length}개, 총 상품=${updatedProducts.length}개, hasMore=${response.pagination.hasMore}');
+        debugPrint('✅ [ProductNotifier] 다음 페이지 로드 성공: '
+            'page=${response.pagination.page}, '
+            '추가된 상품=${response.products.length}개, '
+            '총 상품=${updatedProducts.length}개, '
+            'hasMore=${response.pagination.hasMore}');
 
         state = ProductPaginatedLoaded(
           products: updatedProducts,

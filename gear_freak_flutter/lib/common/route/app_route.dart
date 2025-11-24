@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gear_freak_flutter/common/route/app_router_page.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_list_screen.dart';
+import 'package:gear_freak_flutter/feature/home/presentation/screen/home_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_screen.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/screen/search_screen.dart';
 import 'package:go_router/go_router.dart';
-import '../../feature/home/presentation/screen/home_screen.dart';
-import '../../feature/search/presentation/screen/search_screen.dart';
-import '../../feature/chat/presentation/screen/chat_list_screen.dart';
-import '../../feature/profile/presentation/screen/profile_screen.dart';
-import 'app_router_page.dart';
 
 /// 앱의 메인 라우터(탭 기반 네비게이션) 라우트를 정의하는 클래스
 ///

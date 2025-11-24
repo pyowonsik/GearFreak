@@ -1,6 +1,6 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
-import '../entity/user_profile.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/entity/user_profile.dart';
 
 /// 프로필 Repository 인터페이스
 abstract class ProfileRepository {

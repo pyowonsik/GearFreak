@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../failure/failure.dart';
+import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
 
 /// UseCase 인터페이스
 ///
@@ -18,4 +18,3 @@ abstract class UseCase<T, Params, Repo> {
   /// 실패 시 [Failure] 타입의 오류를 포함한 [Left]를 반환합니다.
   Future<Either<Failure, T>> call(Params param);
 }
-

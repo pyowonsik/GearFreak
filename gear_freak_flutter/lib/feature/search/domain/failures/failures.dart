@@ -1,2 +1,1 @@
 export 'search_failure.dart';
-

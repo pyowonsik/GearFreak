@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+/// 스플래시 화면
 class SplashScreen extends StatelessWidget {
+  /// SplashScreen 생성자
+  ///
+  /// [key]는 위젯의 키입니다.
   const SplashScreen({super.key});
 
   @override
@@ -8,13 +12,13 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF2563EB),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF2563EB),
-              const Color(0xFF1E40AF),
+              Color(0xFF2563EB),
+              Color(0xFF1E40AF),
             ],
           ),
         ),

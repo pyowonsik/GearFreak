@@ -1,24 +1,17 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/domain/usecase/usecase.dart';
-import '../domain.dart';
-
-/// 로그인 파라미터
-class LoginParams {
-  final String email;
-  final String password;
-
-  const LoginParams({
-    required this.email,
-    required this.password,
-  });
-}
+import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/domain.dart';
 
 /// 로그인 UseCase
 class LoginUseCase implements UseCase<pod.User, LoginParams, AuthRepository> {
-  final AuthRepository repository;
-
+  /// LoginUseCase 생성자
+  ///
+  /// [repository]는 인증 Repository 인스턴스입니다.
   const LoginUseCase(this.repository);
+
+  /// 인증 Repository 인스턴스
+  final AuthRepository repository;
 
   @override
   AuthRepository get repo => repository;
@@ -40,4 +33,22 @@ class LoginUseCase implements UseCase<pod.User, LoginParams, AuthRepository> {
       );
     }
   }
+}
+
+/// 로그인 파라미터
+class LoginParams {
+  /// LoginParams 생성자
+  ///
+  /// [email]는 이메일입니다.
+  /// [password]는 비밀번호입니다.
+  const LoginParams({
+    required this.email,
+    required this.password,
+  });
+
+  /// 이메일
+  final String email;
+
+  /// 비밀번호
+  final String password;
 }

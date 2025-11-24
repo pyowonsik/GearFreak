@@ -1,45 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../domain/domain.dart';
-
-/// 프로필 상태
-class ProfileState {
-  final UserProfile? profile;
-  final bool isLoading;
-  final String? error;
-
-  const ProfileState({
-    this.profile,
-    this.isLoading = false,
-    this.error,
-  });
-
-  ProfileState copyWith({
-    UserProfile? profile,
-    bool? isLoading,
-    String? error,
-  }) {
-    return ProfileState(
-      profile: profile ?? this.profile,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
-    );
-  }
-}
+import 'package:gear_freak_flutter/feature/profile/domain/domain.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 
 /// 프로필 Notifier
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  final GetUserProfileUseCase getUserProfileUseCase;
-  final GetUserByIdUseCase getUserByIdUseCase;
-
+  /// ProfileNotifier 생성자
+  ///
+  /// [getUserProfileUseCase]는 사용자 프로필 조회 UseCase 인스턴스입니다.
+  /// [getUserByIdUseCase]는 사용자 ID로 사용자 정보 조회 UseCase 인스턴스입니다.
   ProfileNotifier(
     this.getUserProfileUseCase,
     this.getUserByIdUseCase,
   ) : super(const ProfileState());
 
+  /// 사용자 프로필 조회 UseCase 인스턴스
+  final GetUserProfileUseCase getUserProfileUseCase;
+
+  /// 사용자 ID로 사용자 정보 조회 UseCase 인스턴스
+  final GetUserByIdUseCase getUserByIdUseCase;
+
   /// 프로필 로드
   Future<void> loadProfile() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true);
 
     final result = await getUserProfileUseCase(null);
 

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:go_router/go_router.dart';
-import '../../di/auth_providers.dart';
-import '../../presentation/provider/auth_state.dart';
 
 /// 로그인 화면
 class LoginScreen extends ConsumerStatefulWidget {
+  /// LoginScreen 생성자
+  ///
+  /// [key]는 위젯의 키입니다.
   const LoginScreen({super.key});
 
   @override
@@ -42,9 +45,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // 로그인 완료 후 상태 확인
     final authState = ref.read(authNotifierProvider);
     switch (authState) {
-            case AuthAuthenticated():
-              // 로그인 성공 후 메인 화면으로 이동
-              context.go('/main/home');
+      case AuthAuthenticated():
+        // 로그인 성공 후 메인 화면으로 이동
+        context.go('/main/home');
       case AuthError(:final message):
         // 에러 메시지 표시
         ScaffoldMessenger.of(context).showSnackBar(
@@ -160,32 +163,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                       return ElevatedButton(
                         onPressed: isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
+                        style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                        child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            '로그인',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
+                        ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : const Text(
+                                '로그인',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       );
                     },
                   ),
@@ -202,10 +206,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           color: Color(0xFF6B7280),
                         ),
                       ),
-                  TextButton(
-                    onPressed: () {
+                      TextButton(
+                        onPressed: () {
                           context.push('/signup');
-                    },
+                        },
                         child: const Text(
                           '회원가입',
                           style: TextStyle(

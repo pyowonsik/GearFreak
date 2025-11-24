@@ -1,4 +1,4 @@
-import '../../../../common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
 
 /// 상품 실패 추상 클래스
 abstract class ProductFailure extends Failure {
@@ -21,8 +21,11 @@ class GetProductsFailure extends ProductFailure {
 /// 상품 상세 조회 실패
 class GetProductDetailFailure extends ProductFailure {
   /// GetProductDetailFailure 생성자
-  const GetProductDetailFailure(super.message,
-      {super.exception, super.stackTrace});
+  const GetProductDetailFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'GetProductDetailFailure: $message';
@@ -31,8 +34,11 @@ class GetProductDetailFailure extends ProductFailure {
 /// 찜 토글 실패
 class ToggleFavoriteFailure extends ProductFailure {
   /// ToggleFavoriteFailure 생성자
-  const ToggleFavoriteFailure(super.message,
-      {super.exception, super.stackTrace});
+  const ToggleFavoriteFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'ToggleFavoriteFailure: $message';

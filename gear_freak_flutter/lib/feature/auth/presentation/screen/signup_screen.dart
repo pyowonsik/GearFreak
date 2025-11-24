@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:go_router/go_router.dart';
-import '../../di/auth_providers.dart';
-import '../../presentation/provider/auth_state.dart';
 
+/// 회원가입 화면
 class SignupScreen extends ConsumerStatefulWidget {
+  /// SignupScreen 생성자
+  ///
+  /// [key]는 위젯의 키입니다.
   const SignupScreen({super.key});
 
   @override
@@ -100,7 +104,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
             child: Column(
@@ -157,7 +161,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           const BorderSide(color: Color(0xFF2563EB), width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -203,7 +209,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           const BorderSide(color: Color(0xFF2563EB), width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -263,7 +271,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           const BorderSide(color: Color(0xFF2563EB), width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -323,7 +333,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           const BorderSide(color: Color(0xFF2563EB), width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -357,16 +369,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
+                    const Expanded(
                       child: Text.rich(
                         TextSpan(
                           text: '서비스 약관',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             color: Color(0xFF2563EB),
                             decoration: TextDecoration.underline,
                           ),
-                          children: const [
+                          children: [
                             TextSpan(
                               text: ' 및 ',
                               style: TextStyle(
@@ -424,7 +436,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : const Text(

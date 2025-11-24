@@ -1,4 +1,4 @@
-import '../../../../common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
 
 /// 프로필 실패 추상 클래스
 abstract class ProfileFailure extends Failure {
@@ -12,8 +12,11 @@ abstract class ProfileFailure extends Failure {
 /// 프로필 조회 실패
 class GetUserProfileFailure extends ProfileFailure {
   /// GetUserProfileFailure 생성자
-  const GetUserProfileFailure(super.message,
-      {super.exception, super.stackTrace});
+  const GetUserProfileFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'GetUserProfileFailure: $message';

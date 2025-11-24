@@ -1,18 +1,22 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../domain/repository/s3_repository.dart';
-import '../datasource/s3_remote_datasource.dart';
+import 'package:gear_freak_flutter/common/s3/data/datasource/s3_remote_datasource.dart';
+import 'package:gear_freak_flutter/common/s3/domain/repository/s3_repository.dart';
 
 /// S3 Repository 구현
 class S3RepositoryImpl implements S3Repository {
-  final S3RemoteDataSource remoteDataSource;
-
+  /// S3RepositoryImpl 생성자
+  ///
+  /// [remoteDataSource]는 S3 원격 데이터 소스입니다.
   const S3RepositoryImpl(this.remoteDataSource);
+
+  /// S3 원격 데이터 소스
+  final S3RemoteDataSource remoteDataSource;
 
   @override
   Future<pod.GeneratePresignedUploadUrlResponseDto> generatePresignedUploadUrl(
     pod.GeneratePresignedUploadUrlRequestDto request,
   ) async {
-    return await remoteDataSource.generatePresignedUploadUrl(request);
+    return remoteDataSource.generatePresignedUploadUrl(request);
   }
 
   @override
@@ -21,7 +25,7 @@ class S3RepositoryImpl implements S3Repository {
     required List<int> fileBytes,
     required String contentType,
   }) async {
-    return await remoteDataSource.uploadFile(
+    return remoteDataSource.uploadFile(
       presignedUrl: presignedUrl,
       fileBytes: fileBytes,
       contentType: contentType,

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../di/chat_providers.dart';
-import '../provider/chat_notifier.dart';
-import '../widget/chat_item_widget.dart';
+import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_item_widget.dart';
 
 /// 채팅 목록 화면
 /// Presentation Layer: UI
 class ChatListScreen extends ConsumerStatefulWidget {
+  /// ChatListScreen 생성자
   const ChatListScreen({super.key});
 
   @override
@@ -78,4 +79,3 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     );
   }
 }
-

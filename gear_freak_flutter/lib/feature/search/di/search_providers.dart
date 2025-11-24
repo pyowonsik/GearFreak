@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/datasource/search_remote_datasource.dart';
-import '../data/repository/search_repository_impl.dart';
-import '../domain/repository/search_repository.dart';
-import '../domain/usecase/search_products_usecase.dart';
-import '../presentation/provider/search_notifier.dart';
-import '../presentation/provider/search_state.dart';
+import 'package:gear_freak_flutter/feature/search/data/datasource/search_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/search/data/repository/search_repository_impl.dart';
+import 'package:gear_freak_flutter/feature/search/domain/repository/search_repository.dart';
+import 'package:gear_freak_flutter/feature/search/domain/usecase/search_products_usecase.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/provider/search_notifier.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
 
 /// Search Remote DataSource Provider
 final searchRemoteDataSourceProvider = Provider<SearchRemoteDataSource>((ref) {

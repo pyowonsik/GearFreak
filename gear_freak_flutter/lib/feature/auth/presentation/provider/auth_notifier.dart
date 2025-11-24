@@ -1,19 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/usecase/login_usecase.dart';
-import '../../domain/usecase/signup_usecase.dart';
-import '../../../../common/service/pod_service.dart';
-import 'auth_state.dart';
+import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 
 /// 인증 Notifier
 class AuthNotifier extends StateNotifier<AuthState> {
-  final LoginUseCase loginUseCase;
-  final SignupUseCase signupUseCase;
-
+  /// AuthNotifier 생성자
+  ///
+  /// [loginUseCase]는 로그인 UseCase 인스턴스입니다.
+  /// [signupUseCase]는 회원가입 UseCase 인스턴스입니다.
   AuthNotifier(this.loginUseCase, this.signupUseCase)
       : super(const AuthInitial()) {
     // 앱 시작 시 세션 확인
     _checkSession();
   }
+
+  /// 로그인 UseCase 인스턴스
+  final LoginUseCase loginUseCase;
+
+  /// 회원가입 UseCase 인스턴스
+  final SignupUseCase signupUseCase;
 
   /// 앱 시작 시 세션 확인
   Future<void> _checkSession() async {
@@ -86,7 +93,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = const AuthUnauthenticated();
     } catch (e) {
-      state = AuthError('로그아웃에 실패했습니다.');
+      state = const AuthError('로그아웃에 실패했습니다.');
     }
   }
 }

@@ -1,30 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/utils/pagination_scroll_mixin.dart';
-import '../provider/product_state.dart';
-import 'product_card_widget.dart';
+import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
 
 /// 페이지네이션된 상품 목록 위젯
 class PaginatedProductsListWidget extends ConsumerStatefulWidget {
-  final String title;
-  final ProviderListenable<ProductState> productStateProvider;
-  final VoidCallback onLoadMore;
-  final Future<void> Function() onRefresh;
-  final VoidCallback onRetry;
-  final String screenName;
-  final Future<void> Function(pod.ProductSortBy)? onSortChanged;
-
+  /// PaginatedProductsListWidget 생성자
+  ///
+  /// [title]는 상품 목록 제목입니다.
+  /// [productStateProvider]는 상품 목록 상태 제공자입니다.
+  /// [onLoadMore]는 더 많은 상품을 로드하는 콜백입니다.
+  /// [onRefresh]는 상품 목록을 새로고침하는 콜백입니다.
+  /// [onRetry]는 상품 목록을 다시 시도하는 콜백입니다.
+  /// [screenName]는 화면 이름입니다.
+  /// [onSortChanged]는 상품 정렬 옵션을 변경하는 콜백입니다.
   const PaginatedProductsListWidget({
-    super.key,
     required this.title,
     required this.productStateProvider,
     required this.onLoadMore,
     required this.onRefresh,
     required this.onRetry,
     required this.screenName,
+    super.key,
     this.onSortChanged,
   });
+
+  /// 상품 목록 제목
+  final String title;
+
+  /// 상품 목록 상태 제공자
+  final ProviderListenable<ProductState> productStateProvider;
+
+  /// 더 많은 상품을 로드하는 콜백
+  final VoidCallback onLoadMore;
+
+  /// 상품 목록을 새로고침하는 콜백
+  final Future<void> Function() onRefresh;
+
+  /// 상품 목록을 다시 시도하는 콜백
+  final VoidCallback onRetry;
+
+  /// 화면 이름
+  final String screenName;
+
+  /// 상품 정렬 옵션을 변경하는 콜백
+  final Future<void> Function(pod.ProductSortBy)? onSortChanged;
 
   @override
   ConsumerState<PaginatedProductsListWidget> createState() =>
@@ -172,12 +194,13 @@ class _PaginatedProductsListWidgetState
                     controller: scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount:
-                        products.length + (pagination.hasMore == true ? 1 : 0),
+                        products.length + 
+                        ((pagination.hasMore ?? false) ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == products.length) {
                         // 마지막에 로딩 인디케이터 표시
                         return const Padding(
-                          padding: EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(16),
                           child: Center(
                             child: CircularProgressIndicator(),
                           ),
@@ -196,7 +219,7 @@ class _PaginatedProductsListWidgetState
                 if (index == products.length) {
                   // 로딩 중 인디케이터 표시
                   return const Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(16),
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),

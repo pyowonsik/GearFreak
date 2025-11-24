@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/datasource/s3_remote_datasource.dart';
-import '../data/repository/s3_repository_impl.dart';
-import '../domain/repository/s3_repository.dart';
-import '../domain/usecase/upload_image_usecase.dart';
+import 'package:gear_freak_flutter/common/s3/data/datasource/s3_remote_datasource.dart';
+import 'package:gear_freak_flutter/common/s3/data/repository/s3_repository_impl.dart';
+import 'package:gear_freak_flutter/common/s3/domain/repository/s3_repository.dart';
+import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
 
 /// S3 Remote DataSource Provider
 final s3RemoteDataSourceProvider = Provider<S3RemoteDataSource>((ref) {

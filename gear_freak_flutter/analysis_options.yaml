@@ -1,28 +1,35 @@
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
-#
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
+##################################################################################
+##                      모든 패키지에 대한 린터 규칙                                 ##
+##                      -----------------------------                           ##
+## 패키지마다 별도의 analysis-options.yaml 파일을 정의할 필요가 없습니다.               ##
+## 해당 파일이 패키지에서 찾을 수 없으면 자동으로 상위 디렉토리로 이동합니다. 자세한 내용은 여기를 참조하십시오: ##
+## https://dart.dev/guides/language/analysis-options#the-analysis-options-file  ##
+##################################################################################
 
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
-include: package:flutter_lints/flutter.yaml
+include: package:very_good_analysis/analysis_options.yaml
 
 linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at
-  # https://dart-lang.github.io/linter/lints/index.html.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+    no_default_cases: true
+
+##
+# 개발자 API가 없는 앱 (예: 명령 줄 도구 및 플러터 애플리케이션)에 사용할 린트 규칙입니다.
+##
+
+analyzer:
+  errors:
+    discarded_futures: ignore
+
+  # 자동 생성된 파일을 Dart 분석에서 제외합니다.
+  exclude:
+    - '**/**.freezed.dart'
+    - '**/**.config.dart'
+    - '**/**.module.dart'
+    - '**/**.mock.dart'
+    - '**/**.gr.dart'
+    - '**/**.gm.dart'
+    - '**/**.freezed.dart'
+    - '**/**.g.dart'
+    - '**/**._test.dart'
+    - '**/injector.module.dart'
+    - 'package/pdfrx/**'

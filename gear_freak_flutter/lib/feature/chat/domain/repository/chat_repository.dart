@@ -1,4 +1,4 @@
-import '../entity/chat_message.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/entity/chat_message.dart';
 
 /// 채팅 Repository 인터페이스
 /// Domain Layer: 데이터 소스 추상화
@@ -18,4 +18,3 @@ abstract class ChatRepository {
   /// 메시지 읽음 처리
   Future<void> markAsRead(String messageId);
 }
-

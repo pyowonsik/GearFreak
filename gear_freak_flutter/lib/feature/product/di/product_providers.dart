@@ -1,20 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../data/datasource/product_remote_datasource.dart';
-import '../data/repository/product_repository_impl.dart';
-import '../domain/repository/product_repository.dart';
-import '../domain/usecase/get_paginated_products_usecase.dart';
-import '../domain/usecase/get_product_detail_usecase.dart';
-import '../domain/usecase/toggle_favorite_usecase.dart';
-import '../domain/usecase/is_favorite_usecase.dart';
-import '../presentation/provider/product_notifier.dart';
-import '../presentation/provider/product_state.dart';
-import '../presentation/provider/product_detail_notifier.dart';
-import '../presentation/provider/product_detail_state.dart';
-import '../presentation/provider/create_product_notifier.dart';
-import '../presentation/provider/create_product_state.dart';
-import '../../profile/di/profile_providers.dart';
-import '../../../common/s3/di/s3_providers.dart';
+import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
+import 'package:gear_freak_flutter/feature/product/data/datasource/product_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/product/data/repository/product_repository_impl.dart';
+import 'package:gear_freak_flutter/feature/product/domain/repository/product_repository.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_notifier.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_notifier.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_notifier.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
+import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 
 /// Product Remote DataSource Provider
 final productRemoteDataSourceProvider =
@@ -107,9 +107,8 @@ final categoryProductsNotifierProvider = StateNotifierProvider.autoDispose
 });
 
 /// Create Product Notifier Provider (상품 등록 화면용)
-final createProductNotifierProvider =
-    StateNotifierProvider.autoDispose<CreateProductNotifier,
-        CreateProductState>((ref) {
+final createProductNotifierProvider = StateNotifierProvider.autoDispose<
+    CreateProductNotifier, CreateProductState>((ref) {
   final uploadImageUseCase = ref.watch(uploadImageUseCaseProvider);
   return CreateProductNotifier(uploadImageUseCase);
 });

@@ -1,13 +1,14 @@
 /// 사용자 프로필 엔티티
 class UserProfile {
-  final String id;
-  final String nickname;
-  final String email;
-  final String? profileImageUrl;
-  final int sellingCount;
-  final int soldCount;
-  final int favoriteCount;
-
+  /// UserProfile 생성자
+  ///
+  /// [id]는 사용자 ID입니다.
+  /// [nickname]는 사용자 닉네임입니다.
+  /// [email]는 사용자 이메일입니다.
+  /// [profileImageUrl]는 사용자 프로필 이미지 URL입니다.
+  /// [sellingCount]는 판매 건수입니다.
+  /// [soldCount]는 판매 건수입니다.
+  /// [favoriteCount]는 찜 건수입니다.
   const UserProfile({
     required this.id,
     required this.nickname,
@@ -18,6 +19,28 @@ class UserProfile {
     this.favoriteCount = 0,
   });
 
+  /// 사용자 ID
+  final String id;
+
+  /// 사용자 닉네임
+  final String nickname;
+
+  /// 사용자 이메일
+  final String email;
+
+  /// 사용자 프로필 이미지 URL
+  final String? profileImageUrl;
+
+  /// 판매 건수
+  final int sellingCount;
+
+  /// 판매 건수
+  final int soldCount;
+
+  /// 찜 건수
+  final int favoriteCount;
+
+  /// UserProfile 복사
   UserProfile copyWith({
     String? id,
     String? nickname,
@@ -38,4 +61,3 @@ class UserProfile {
     );
   }
 }
-

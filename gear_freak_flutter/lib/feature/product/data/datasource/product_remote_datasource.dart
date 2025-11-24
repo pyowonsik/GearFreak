@@ -1,10 +1,12 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/service/pod_service.dart';
+import 'package:gear_freak_flutter/common/service/pod_service.dart';
 
 /// 상품 원격 데이터 소스
 class ProductRemoteDataSource {
+  /// ProductRemoteDataSource 생성자
   const ProductRemoteDataSource();
 
+  /// Serverpod Client
   pod.Client get _client => PodService.instance.client;
 
   /// 페이지네이션된 상품 목록 조회

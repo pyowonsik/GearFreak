@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:gear_freak_flutter/common/utils/format_utils.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/entity/chat_message.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../common/utils/format_utils.dart';
-import '../../domain/entity/chat_message.dart';
 
 /// 채팅 아이템 위젯
 /// Presentation Layer: 재사용 가능한 위젯
 class ChatItemWidget extends StatelessWidget {
-  final ChatMessage chat;
-
+  /// ChatItemWidget 생성자
+  ///
+  /// [chat]는 채팅 메시지 엔티티입니다.
   const ChatItemWidget({
-    super.key,
     required this.chat,
+    super.key,
   });
+
+  /// 채팅 메시지 엔티티
+  final ChatMessage chat;
 
   @override
   Widget build(BuildContext context) {
@@ -81,4 +85,3 @@ class ChatItemWidget extends StatelessWidget {
     );
   }
 }
-

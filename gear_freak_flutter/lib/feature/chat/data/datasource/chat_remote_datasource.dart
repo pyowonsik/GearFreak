@@ -1,11 +1,13 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/service/pod_service.dart';
+import 'package:gear_freak_flutter/common/service/pod_service.dart';
 
 /// 채팅 원격 데이터 소스
 /// Data Layer: Serverpod Client를 사용한 API 호출
 class ChatRemoteDataSource {
+  /// ChatRemoteDataSource 생성자
   const ChatRemoteDataSource();
 
+  /// Serverpod Client
   pod.Client get _client => PodService.instance.client;
 
   /// 채팅 목록 조회

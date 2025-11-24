@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'common/route/router_provider.dart';
-import 'common/service/pod_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/route/router_provider.dart';
+
+import 'package:gear_freak_flutter/common/service/pod_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +23,7 @@ Future<void> main() async {
   // SessionManager가 SharedPreferences에서 인증 정보를 읽어올 시간을 줍니다
   // kobic 스타일: 네이티브에서는 initialize()를 호출하지 않지만,
   // SharedPreferences에서 정보를 읽어오는 것을 기다려야 합니다
-  await Future.delayed(const Duration(milliseconds: 200));
+  await Future<void>.delayed(const Duration(milliseconds: 200));
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -37,7 +38,10 @@ Future<void> main() async {
   );
 }
 
+/// 앱 메인 위젯
 class MyApp extends ConsumerWidget {
+  /// MyApp 생성자
+  /// [key]는 위젯의 키입니다.
   const MyApp({super.key});
 
   @override

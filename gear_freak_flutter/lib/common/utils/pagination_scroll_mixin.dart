@@ -6,7 +6,8 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 ///
 /// 사용 예시:
 /// ```dart
-/// class _MyScreenState extends ConsumerState<MyScreen> with PaginationScrollMixin {
+/// class _MyScreenState extends ConsumerState<MyScreen>
+/// with PaginationScrollMixin {
 ///   @override
 ///   void initState() {
 ///     super.initState();
@@ -82,32 +83,34 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
     if (position.pixels >= threshold && position.pixels > 0) {
       // 디바운스: 이전 타이머 취소
       _debounceTimer?.cancel();
-      print('🔥 디바운스 타이머 취소');
+      debugPrint('🔥 디바운스 타이머 취소');
 
       // 300ms 후에 실행 (디바운스)
       _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-        print('🔥 디바운스 타이머 실행');
+        debugPrint('🔥 디바운스 타이머 실행');
         final pagination = _getPagination?.call();
         final isLoading = _isLoading?.call() ?? false;
 
         // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 실행
-        if (!isLoading && pagination != null && pagination.hasMore == true) {
+        if (!isLoading && pagination != null && (pagination.hasMore ?? false)) {
           _hasLoggedNoMoreData = false; // 데이터가 있으면 플래그 리셋
 
           final screenName = _screenName ?? 'Screen';
-          print(
-              '📜 [$screenName] 스크롤 감지: pixels=${position.pixels.toStringAsFixed(0)}, maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(0)}, threshold=${threshold.toStringAsFixed(0)}');
-          print(
-              '📦 [$screenName] 현재 페이지: ${pagination.page}, 전체: ${pagination.totalCount}, hasMore: ${pagination.hasMore}');
+          debugPrint('📜 [$screenName] 스크롤 감지: '
+              'pixels=${position.pixels.toStringAsFixed(0)}, '
+              'maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(0)}, '
+              'threshold=${threshold.toStringAsFixed(0)}');
+          debugPrint('📦 [$screenName] 현재 페이지: ${pagination.page}, '
+              '전체: ${pagination.totalCount}, hasMore: ${pagination.hasMore}');
 
           _onLoadMore?.call();
         } else if (pagination != null &&
-            pagination.hasMore != true &&
+            !(pagination.hasMore ?? false) &&
             !_hasLoggedNoMoreData) {
           // 더 이상 데이터가 없을 때 한 번만 로그 출력
           _hasLoggedNoMoreData = true;
           final screenName = _screenName ?? 'Screen';
-          print('✅ [$screenName] 더 이상 불러올 데이터가 없습니다.');
+          debugPrint('✅ [$screenName] 더 이상 불러올 데이터가 없습니다.');
         }
       });
     }

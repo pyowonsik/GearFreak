@@ -1,19 +1,28 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kpostal/kpostal.dart';
-import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../utils/product_enum_helper.dart';
 
-class CreateProductScreen extends StatefulWidget {
+/// 상품 등록 화면
+class CreateProductScreen extends ConsumerStatefulWidget {
+  /// 상품 등록 화면 생성자
+  ///
+  /// [key]는 상품 등록 화면의 키입니다.
   const CreateProductScreen({super.key});
 
   @override
-  State<CreateProductScreen> createState() => _CreateProductScreenState();
+  ConsumerState<CreateProductScreen> createState() =>
+      _CreateProductScreenState();
 }
 
-class _CreateProductScreenState extends State<CreateProductScreen> {
+class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
@@ -38,6 +47,33 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 업로드 상태 변화 감시하여 스낵바 표시
+    ref.listen<CreateProductState>(
+      createProductNotifierProvider,
+      (previous, next) {
+        if (!mounted) return;
+
+        if (next is CreateProductUploadError) {
+          // 에러 상태일 때 스낵바 표시
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.error),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } else if (next is CreateProductUploadSuccess &&
+            previous is CreateProductUploading) {
+          // 업로드 성공 시 스낵바 표시 (이전 상태가 업로드 중일 때만)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('이미지 업로드가 완료되었습니다'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      },
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('상품 등록'),
@@ -90,8 +126,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                         scrollDirection: Axis.horizontal,
                         children: [
                           _buildAddImageButton(),
-                          ..._selectedImages
-                              .map((img) => _buildImagePreview(img)),
+                          ..._selectedImages.map(_buildImagePreview),
                         ],
                       ),
                     ),
@@ -341,9 +376,9 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Icon(
               Icons.camera_alt,
               size: 32,
@@ -454,15 +489,27 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
     }
 
     try {
-      final XFile? image = await _imagePicker.pickImage(
+      final image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 85,
       );
 
       if (image != null) {
-        setState(() {
-          _selectedImages.add(image);
-        });
+        // 이미지 선택 후 S3에 업로드
+        final notifier = ref.read(createProductNotifierProvider.notifier);
+        await notifier.uploadImage(
+          imageFile: File(image.path),
+          prefix: 'product',
+          bucketType: 'public',
+        );
+
+        // 업로드 성공 시 이미지 목록에 추가
+        final currentState = ref.read(createProductNotifierProvider);
+        if (currentState is CreateProductUploadSuccess) {
+          setState(() {
+            _selectedImages.add(image);
+          });
+        }
       }
     } catch (e) {
       if (mounted) {

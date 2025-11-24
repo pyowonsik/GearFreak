@@ -1,4 +1,4 @@
-import '../../../domain/failure/failure.dart';
+import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
 
 /// S3 실패 추상 클래스
 abstract class S3Failure extends Failure {
@@ -12,8 +12,11 @@ abstract class S3Failure extends Failure {
 /// Presigned URL 생성 실패
 class GeneratePresignedUrlFailure extends S3Failure {
   /// GeneratePresignedUrlFailure 생성자
-  const GeneratePresignedUrlFailure(super.message,
-      {super.exception, super.stackTrace});
+  const GeneratePresignedUrlFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'GeneratePresignedUrlFailure: $message';
@@ -27,4 +30,3 @@ class UploadFileFailure extends S3Failure {
   @override
   String toString() => 'UploadFileFailure: $message';
 }
-

@@ -1,14 +1,18 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/domain/usecase/usecase.dart';
-import '../domain.dart';
+import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/domain.dart';
 
 /// 상품 상세 조회 UseCase
 class GetProductDetailUseCase
     implements UseCase<pod.Product, int, ProductRepository> {
-  final ProductRepository repository;
-
+  /// 상품 상세 조회 UseCase 생성자
+  ///
+  /// [repository]는 상품 Repository 인스턴스입니다.
   const GetProductDetailUseCase(this.repository);
+
+  /// 상품 Repository 인스턴스
+  final ProductRepository repository;
 
   @override
   ProductRepository get repo => repository;
@@ -28,4 +32,3 @@ class GetProductDetailUseCase
     }
   }
 }
-

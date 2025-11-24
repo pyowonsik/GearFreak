@@ -1,4 +1,4 @@
-import '../../../../common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
 
 /// 인증 실패 추상 클래스
 abstract class AuthFailure extends Failure {
@@ -21,8 +21,11 @@ class LoginFailure extends AuthFailure {
 /// 인증 토큰 실패
 class AuthenticationTokenFailure extends AuthFailure {
   /// AuthenticationTokenFailure 생성자
-  const AuthenticationTokenFailure(super.message,
-      {super.exception, super.stackTrace});
+  const AuthenticationTokenFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'AuthenticationTokenFailure: $message';
@@ -37,9 +40,13 @@ class LogoutFailure extends AuthFailure {
   String toString() => 'LogoutFailure: $message';
 }
 
-// 회원가입 실패
+/// 회원가입 실패
 class SignupFailure extends AuthFailure {
   /// SignupFailure 생성자
+  ///
+  /// [message]는 실패 메시지입니다.
+  /// [exception]는 예외입니다.
+  /// [stackTrace]는 스택 트레이스입니다.
   const SignupFailure(super.message, {super.exception, super.stackTrace});
 
   @override

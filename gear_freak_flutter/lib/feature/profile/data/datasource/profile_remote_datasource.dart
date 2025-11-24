@@ -1,8 +1,9 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../../common/service/pod_service.dart';
+import 'package:gear_freak_flutter/common/service/pod_service.dart';
 
 /// 프로필 원격 데이터 소스
 class ProfileRemoteDataSource {
+  /// ProfileRemoteDataSource 생성자
   const ProfileRemoteDataSource();
 
   pod.Client get _client => PodService.instance.client;
@@ -21,7 +22,8 @@ class ProfileRemoteDataSource {
     };
   }
 
+  /// 사용자 ID로 사용자 정보 조회
   Future<pod.User> getUserById(int id) async {
-    return await _client.user.getUserById(id);
+    return _client.user.getUserById(id);
   }
 }

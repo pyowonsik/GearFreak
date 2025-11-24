@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/feature/auth/data/datasource/auth_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/auth/data/repository/auth_repository_impl.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/repository/auth_repository.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_notifier.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
-import '../data/datasource/auth_remote_datasource.dart';
-import '../data/repository/auth_repository_impl.dart';
-import '../domain/repository/auth_repository.dart';
-import '../domain/usecase/login_usecase.dart';
-import '../domain/usecase/signup_usecase.dart';
-import '../presentation/provider/auth_notifier.dart';
 
 /// Auth Remote DataSource Provider
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {

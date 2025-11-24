@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../common/utils/pagination_scroll_mixin.dart';
-import '../provider/search_state.dart';
-import '../../di/search_providers.dart';
-import '../../../product/presentation/widget/product_card_widget.dart';
+import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
+import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
 
 /// 검색 화면
 class SearchScreen extends ConsumerStatefulWidget {
+  /// SearchScreen 생성자
+  ///
+  /// [key]는 위젯의 키입니다.
   const SearchScreen({super.key});
 
   @override
@@ -178,12 +181,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
               controller: scrollController,
               padding: const EdgeInsets.all(16),
               itemCount: result.products.length +
-                  (result.pagination.hasMore == true ? 1 : 0),
+                  (true == result.pagination.hasMore ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == result.products.length) {
                   // 마지막에 로딩 인디케이터 표시
                   return const Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(16),
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
@@ -201,7 +204,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             if (index == result.products.length) {
               // 로딩 중 인디케이터 표시
               return const Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16),
                 child: Center(
                   child: CircularProgressIndicator(),
                 ),

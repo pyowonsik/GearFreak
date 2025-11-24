@@ -24,29 +24,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  serverpod_flutter: 2.9.2
-  serverpod_auth_client: 2.9.2
-  serverpod_auth_shared_flutter: 2.9.2
+  cupertino_icons: ^1.0.5
+  dartz: ^0.10.1
+  file_picker: ^8.0.1
+  flutter_dotenv: ^5.1.0
+  flutter_riverpod: ^2.6.1
   gear_freak_client:
     path: ../gear_freak_client
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.5
-  flutter_riverpod: ^2.6.1
-  shared_preferences: ^2.5.3
   go_router: ^15.1.2
-  dartz: ^0.10.1
-  flutter_dotenv: ^5.1.0
+  http: ^1.1.0
   image_picker: ^1.1.2
   kpostal: ^1.1.0
-  file_picker: ^8.0.1
-  http: ^1.1.0
+  serverpod_auth_client: 2.9.2
+  serverpod_auth_shared_flutter: 2.9.2
+  serverpod_flutter: 2.9.2
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'
   flutter_test:
     sdk: flutter
+  very_good_analysis: ^5.1.0
 
 # serverpod_auth_shared_flutter가 image_cropper를 의존하므로 호환 버전으로 오버라이드
 # Flutter 3.24 호환을 위해 8.x 버전 사용 (11.0.0은 Flutter 3.28+ 필요)

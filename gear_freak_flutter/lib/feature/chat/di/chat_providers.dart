@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/datasource/chat_remote_datasource.dart';
-import '../data/repository/chat_repository_impl.dart';
-import '../domain/repository/chat_repository.dart';
-import '../domain/usecase/get_chat_list_usecase.dart';
-import '../presentation/provider/chat_notifier.dart';
+import 'package:gear_freak_flutter/feature/chat/data/datasource/chat_remote_datasource.dart';
+import 'package:gear_freak_flutter/feature/chat/data/repository/chat_repository_impl.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/repository/chat_repository.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_list_usecase.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_notifier.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 
 /// Chat Remote DataSource Provider
 final chatRemoteDataSourceProvider = Provider<ChatRemoteDataSource>((ref) {

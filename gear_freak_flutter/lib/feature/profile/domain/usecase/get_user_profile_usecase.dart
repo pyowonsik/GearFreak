@@ -1,13 +1,17 @@
 import 'package:dartz/dartz.dart';
-import '../../../../common/domain/usecase/usecase.dart';
-import '../domain.dart';
+import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/domain.dart';
 
 /// 사용자 프로필 조회 UseCase
 class GetUserProfileUseCase
     implements UseCase<UserProfile, void, ProfileRepository> {
-  final ProfileRepository repository;
-
+  /// GetUserProfileUseCase 생성자
+  ///
+  /// [repository]는 프로필 Repository 인스턴스입니다.
   const GetUserProfileUseCase(this.repository);
+
+  /// 프로필 Repository 인스턴스
+  final ProfileRepository repository;
 
   @override
   ProfileRepository get repo => repository;

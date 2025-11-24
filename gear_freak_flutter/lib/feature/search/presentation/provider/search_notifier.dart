@@ -1,13 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../domain/domain.dart';
-import 'search_state.dart';
+import 'package:gear_freak_flutter/feature/search/domain/domain.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
 
 /// 검색 Notifier
 class SearchNotifier extends StateNotifier<SearchState> {
-  final SearchProductsUseCase searchProductsUseCase;
-
+  /// SearchNotifier 생성자
+  ///
+  /// [searchProductsUseCase]는 상품 검색 UseCase 인스턴스입니다.
   SearchNotifier(this.searchProductsUseCase) : super(const SearchInitial());
+
+  /// 상품 검색 UseCase 인스턴스
+  final SearchProductsUseCase searchProductsUseCase;
 
   /// 상품 검색 (첫 페이지)
   Future<void> searchProducts(String query) async {
@@ -18,19 +23,22 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
     state = SearchLoading(query);
 
-    print('🔄 [SearchNotifier] 검색 요청: query="$query", page=1, limit=20');
+    debugPrint('🔄 [SearchNotifier] 검색 요청: query="$query", page=1, limit=20');
     final result = await searchProductsUseCase(
-      SearchProductsParams(query: query, page: 1, limit: 20),
+      SearchProductsParams(query: query),
     );
 
     result.fold(
       (failure) {
-        print('❌ [SearchNotifier] 검색 실패: ${failure.message}');
+        debugPrint('❌ [SearchNotifier] 검색 실패: ${failure.message}');
         state = SearchError(failure.message, query: query);
       },
       (searchResult) {
-        print(
-            '✅ [SearchNotifier] 검색 성공: query="$query", page=${searchResult.pagination.page}, totalCount=${searchResult.pagination.totalCount}, hasMore=${searchResult.pagination.hasMore}, products=${searchResult.products.length}개');
+        debugPrint('✅ [SearchNotifier] 검색 성공: query="$query", '
+            'page=${searchResult.pagination.page}, '
+            'totalCount=${searchResult.pagination.totalCount}, '
+            'hasMore=${searchResult.pagination.hasMore}, '
+            'products=${searchResult.products.length}개');
         state = SearchLoaded(
           result: searchResult,
           query: query,
@@ -43,8 +51,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
   Future<void> loadMoreProducts() async {
     final currentState = state;
     if (currentState is! SearchLoaded) {
-      print(
-          '⚠️ [SearchNotifier] loadMoreProducts: 현재 상태가 SearchLoaded가 아닙니다. (${currentState.runtimeType})');
+      debugPrint(
+          '⚠️ [SearchNotifier] loadMoreProducts: 현재 상태가 SearchLoaded가 아닙니다. '
+          '(${currentState.runtimeType})');
       return;
     }
 
@@ -53,20 +62,21 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
     // 더 불러올 데이터가 없으면 리턴
     if (pagination.hasMore != true) {
-      print('⚠️ [SearchNotifier] loadMoreProducts: 더 이상 불러올 데이터가 없습니다.');
+      debugPrint('⚠️ [SearchNotifier] loadMoreProducts: 더 이상 불러올 데이터가 없습니다.');
       return;
     }
 
     // 이미 로딩 중이면 리턴
     if (state is SearchLoadingMore) {
-      print('⚠️ [SearchNotifier] loadMoreProducts: 이미 로딩 중입니다.');
+      debugPrint('⚠️ [SearchNotifier] loadMoreProducts: 이미 로딩 중입니다.');
       return;
     }
 
     // 다음 페이지 요청
     final nextPage = pagination.page + 1;
-    print(
-        '🔄 [SearchNotifier] 다음 페이지 로드: query="${currentState.query}", page=$nextPage (현재: ${pagination.page}, 전체: ${pagination.totalCount})');
+    debugPrint('🔄 [SearchNotifier] 다음 페이지 로드: query="${currentState.query}", '
+        'page=$nextPage (현재: ${pagination.page}, '
+        '전체: ${pagination.totalCount})');
 
     // 로딩 중 상태로 변경 (기존 데이터 유지)
     state = SearchLoadingMore(
@@ -78,13 +88,12 @@ class SearchNotifier extends StateNotifier<SearchState> {
       SearchProductsParams(
         query: currentState.query,
         page: nextPage,
-        limit: 20,
       ),
     );
 
     result.fold(
       (failure) {
-        print('❌ [SearchNotifier] 다음 페이지 로드 실패: ${failure.message}');
+        debugPrint('❌ [SearchNotifier] 다음 페이지 로드 실패: ${failure.message}');
         // 에러 발생 시 이전 상태로 복구
         state = SearchLoaded(
           result: currentResult,
@@ -101,8 +110,12 @@ class SearchNotifier extends StateNotifier<SearchState> {
           ],
         );
 
-        print(
-            '✅ [SearchNotifier] 다음 페이지 로드 성공: query="${currentState.query}", page=${newResult.pagination.page}, 추가된 상품=${newResult.products.length}개, 총 상품=${updatedResult.products.length}개, hasMore=${newResult.pagination.hasMore}');
+        debugPrint(
+            '✅ [SearchNotifier] 다음 페이지 로드 성공: query="${currentState.query}", '
+            'page=${newResult.pagination.page}, '
+            '추가된 상품=${newResult.products.length}개, '
+            '총 상품=${updatedResult.products.length}개, '
+            'hasMore=${newResult.pagination.hasMore}');
 
         state = SearchLoaded(
           result: updatedResult,

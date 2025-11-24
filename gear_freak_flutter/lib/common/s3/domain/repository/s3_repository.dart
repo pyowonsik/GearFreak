@@ -14,4 +14,3 @@ abstract class S3Repository {
     required String contentType,
   });
 }
-

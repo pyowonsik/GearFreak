@@ -1,42 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entity/chat_message.dart';
-import '../../domain/usecase/get_chat_list_usecase.dart';
-
-/// Chat 상태
-class ChatState {
-  final List<ChatMessage> chatList;
-  final bool isLoading;
-  final String? error;
-
-  const ChatState({
-    this.chatList = const [],
-    this.isLoading = false,
-    this.error,
-  });
-
-  ChatState copyWith({
-    List<ChatMessage>? chatList,
-    bool? isLoading,
-    String? error,
-  }) {
-    return ChatState(
-      chatList: chatList ?? this.chatList,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
-    );
-  }
-}
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_list_usecase.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 
 /// Chat Notifier
 /// Presentation Layer: Riverpod 상태 관리
 class ChatNotifier extends StateNotifier<ChatState> {
-  final GetChatListUseCase getChatListUseCase;
-
+  /// ChatNotifier 생성자
+  ///
+  /// [getChatListUseCase]는 채팅 목록 조회 UseCase 인스턴스입니다.
   ChatNotifier(this.getChatListUseCase) : super(const ChatState());
+
+  /// 채팅 목록 조회 UseCase 인스턴스
+  final GetChatListUseCase getChatListUseCase;
 
   /// 채팅 목록 조회
   Future<void> loadChatList() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true);
 
     final result = await getChatListUseCase(null);
 

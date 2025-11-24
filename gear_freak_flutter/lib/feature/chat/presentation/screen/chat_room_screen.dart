@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
+/// 채팅방 화면을 표시하는 위젯입니다.
+///
+/// 특정 채팅방의 메시지를 표시하고 새로운 메시지를 전송할 수 있습니다.
 class ChatRoomScreen extends StatefulWidget {
-  final String chatId;
-  
+  /// 채팅방 화면을 생성합니다.
+  ///
+  /// [chatId]는 채팅방을 식별하는 고유한 문자열입니다.
   const ChatRoomScreen({
-    super.key,
     required this.chatId,
+    super.key,
   });
+
+  /// 채팅방의 고유 식별자
+  final String chatId;
 
   @override
   State<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -87,12 +94,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           // 상품 정보 카드
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(
                 bottom: BorderSide(
-                  color: const Color(0xFFE5E7EB),
-                  width: 1,
+                  color: Color(0xFFE5E7EB),
                 ),
               ),
             ),
@@ -112,10 +118,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         '리프팅 벨트 (사이즈 M) 거의 새것',
                         style: TextStyle(
@@ -149,9 +155,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               itemBuilder: (context, index) {
                 final message = _messages[index];
                 return _buildMessageBubble(
-                  message['text'],
-                  message['isMine'],
-                  message['time'],
+                  message['text'] as String,
+                  message['isMine'] as bool,
+                  message['time'] as String,
                 );
               },
             ),
@@ -264,7 +270,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 vertical: 12,
               ),
               decoration: BoxDecoration(
-                color: isMine ? const Color(0xFF2563EB) : const Color(0xFFF3F4F6),
+                color:
+                    isMine ? const Color(0xFF2563EB) : const Color(0xFFF3F4F6),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Text(
@@ -292,4 +299,3 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     );
   }
 }
-

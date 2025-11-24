@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:go_router/go_router.dart';
-import '../../feature/auth/di/auth_providers.dart';
-import '../../feature/auth/presentation/provider/auth_state.dart';
 
 /// 앱의 인증 상태에 따른 라우트 가드 클래스
 ///

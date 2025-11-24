@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import '../../../product/di/product_providers.dart';
-import '../../../product/presentation/provider/product_state.dart';
-import '../../../product/presentation/widget/product_card_widget.dart';
-import '../widget/category_item_widget.dart';
+import 'package:gear_freak_flutter/feature/home/presentation/widget/category_item_widget.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
+import 'package:go_router/go_router.dart';
 
 /// 홈 화면
 class HomeScreen extends ConsumerStatefulWidget {
+  /// HomeScreen 생성자
   const HomeScreen({super.key});
 
   @override
@@ -121,7 +122,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               category: category,
                               onTap: () {
                                 context.push(
-                                    '/product/category/${category.index}');
+                                  '/product/category/${category.index}',
+                                );
                               },
                             );
                           }).toList(),
@@ -158,7 +160,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 onPressed: () {
                                   ref
                                       .read(
-                                          homeProductsNotifierProvider.notifier)
+                                        homeProductsNotifierProvider.notifier,
+                                      )
                                       .loadRandomProducts();
                                 },
                                 tooltip: '새로고침',
@@ -175,29 +178,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      products.isEmpty
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(32.0),
-                                child: Text(
-                                  '등록된 상품이 없습니다',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xFF9CA3AF),
-                                  ),
-                                ),
+                      if (products.isEmpty)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Text(
+                              '등록된 상품이 없습니다',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF9CA3AF),
                               ),
-                            )
-                          : ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: products.length,
-                              itemBuilder: (context, index) {
-                                return ProductCardWidget(
-                                  product: products[index],
-                                );
-                              },
                             ),
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            return ProductCardWidget(
+                              product: products[index],
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),
@@ -237,7 +241,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               category: category,
                               onTap: () {
                                 context.push(
-                                    '/product/category/${category.index}');
+                                  '/product/category/${category.index}',
+                                );
                               },
                             );
                           }).toList(),
@@ -274,7 +279,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 onPressed: () {
                                   ref
                                       .read(
-                                          homeProductsNotifierProvider.notifier)
+                                        homeProductsNotifierProvider.notifier,
+                                      )
                                       .loadRandomProducts();
                                 },
                                 tooltip: '새로고침',
@@ -291,29 +297,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      products.isEmpty
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(32.0),
-                                child: Text(
-                                  '등록된 상품이 없습니다',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xFF9CA3AF),
-                                  ),
-                                ),
+                      if (products.isEmpty)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Text(
+                              '등록된 상품이 없습니다',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF9CA3AF),
                               ),
-                            )
-                          : ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: products.length,
-                              itemBuilder: (context, index) {
-                                return ProductCardWidget(
-                                  product: products[index],
-                                );
-                              },
                             ),
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            return ProductCardWidget(
+                              product: products[index],
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),
@@ -328,35 +335,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(String label, IconData icon, Color color) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, color: color, size: 32),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF4B5563),
-            ),
-          ),
-        ],
       ),
     );
   }

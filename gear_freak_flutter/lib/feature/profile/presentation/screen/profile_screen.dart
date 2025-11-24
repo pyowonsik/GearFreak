@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/component/confirmation_dialog.dart';
+import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:go_router/go_router.dart';
-import '../../di/profile_providers.dart';
-import '../../../auth/di/auth_providers.dart';
-import '../../../../common/component/confirmation_dialog.dart';
 
 /// 프로필 화면
 class ProfileScreen extends ConsumerStatefulWidget {
+  /// ProfileScreen 생성자
+  ///
+  /// [key]는 화면 키입니다.
   const ProfileScreen({super.key});
 
   @override
@@ -105,35 +108,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _buildStatItem(
-                                '판매중', '${profileState.profile!.sellingCount}'),
+                              '판매중',
+                              '${profileState.profile!.sellingCount}',
+                            ),
                             _buildStatItem(
-                                '거래완료', '${profileState.profile!.soldCount}'),
-                            _buildStatItem('관심목록',
-                                '${profileState.profile!.favoriteCount}'),
+                              '거래완료',
+                              '${profileState.profile!.soldCount}',
+                            ),
+                            _buildStatItem(
+                              '관심목록',
+                              '${profileState.profile!.favoriteCount}',
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 8),
                       // 메뉴 리스트c
-                      Container(
-                        color: Colors.white,
-                        child: Column(
-                          children: [
-                            _buildMenuItem(
-                                Icons.shopping_bag_outlined, '내 상품 관리'),
-                            _buildMenuItem(
-                                Icons.receipt_long_outlined, '거래 내역'),
-                            _buildMenuItem(Icons.favorite_outline, '관심 목록'),
-                            _buildMenuItem(Icons.star_outline, '후기 관리'),
-                            _buildMenuItem(Icons.help_outline, '고객 센터'),
-                            _buildMenuItem(Icons.info_outline, '앱 정보'),
-                            _buildMenuItem(
-                              Icons.logout_outlined,
-                              '로그아웃',
-                              onTap: _handleLogout,
-                            ),
-                          ],
-                        ),
+                      Column(
+                        children: [
+                          _buildMenuItem(
+                            Icons.shopping_bag_outlined,
+                            '내 상품 관리',
+                          ),
+                          _buildMenuItem(Icons.receipt_long_outlined, '거래 내역'),
+                          _buildMenuItem(Icons.favorite_outline, '관심 목록'),
+                          _buildMenuItem(Icons.star_outline, '후기 관리'),
+                          _buildMenuItem(Icons.help_outline, '고객 센터'),
+                          _buildMenuItem(Icons.info_outline, '앱 정보'),
+                          _buildMenuItem(
+                            Icons.logout_outlined,
+                            '로그아웃',
+                            onTap: _handleLogout,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -194,7 +201,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       title: '로그아웃',
       content: '정말 로그아웃 하시겠습니까?',
-      cancelText: '취소',
       confirmText: '로그아웃',
       confirmColor: Colors.red,
     );
@@ -224,7 +230,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           content: Text('로그아웃 실패: $e'),
           backgroundColor: Colors.red,
         ),
-    );
+      );
     }
   }
 }

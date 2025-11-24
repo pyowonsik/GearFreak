@@ -1,12 +1,16 @@
 import 'package:dartz/dartz.dart';
-import '../../../../common/domain/usecase/usecase.dart';
-import '../domain.dart';
+import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/domain.dart';
 
 /// 찜 상태 조회 UseCase
 class IsFavoriteUseCase implements UseCase<bool, int, ProductRepository> {
-  final ProductRepository repository;
-
+  /// 찜 상태 조회 UseCase 생성자
+  ///
+  /// [repository]는 상품 Repository 인스턴스입니다.
   const IsFavoriteUseCase(this.repository);
+
+  /// 상품 Repository 인스턴스
+  final ProductRepository repository;
 
   @override
   ProductRepository get repo => repository;

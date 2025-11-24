@@ -4,12 +4,16 @@ import 'package:go_router/go_router.dart';
 /// 메인 화면 (탭 네비게이션)
 /// StatefulShellRoute의 builder에서 사용되는 페이지
 class AppRouterPage extends StatelessWidget {
-  final StatefulNavigationShell navigationShell;
-
+  /// AppRouterPage 생성자
+  ///
+  /// [navigationShell]는 네비게이션 쉘입니다.
   const AppRouterPage({
-    super.key,
     required this.navigationShell,
+    super.key,
   });
+
+  /// 네비게이션 쉘
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
