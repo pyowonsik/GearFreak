@@ -50,6 +50,24 @@ class EndpointS3 extends _i1.EndpointRef {
             'generatePresignedUploadUrl',
             {'request': request},
           );
+
+  /// S3 파일 삭제
+  ///
+  /// [session] - Serverpod 세션
+  /// [fileKey] - 삭제할 파일 키 (예: temp/product/1/xxx.png)
+  /// [bucketType] - 버킷 타입 ('public' 또는 'private')
+  _i2.Future<void> deleteS3File(
+    String fileKey,
+    String bucketType,
+  ) =>
+      caller.callServerEndpoint<void>(
+        's3',
+        'deleteS3File',
+        {
+          'fileKey': fileKey,
+          'bucketType': bucketType,
+        },
+      );
 }
 
 /// 인증 엔드포인트

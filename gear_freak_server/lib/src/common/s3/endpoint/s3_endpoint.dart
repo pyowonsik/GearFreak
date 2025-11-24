@@ -26,4 +26,21 @@ class S3Endpoint extends Endpoint with AuthenticatedMixin {
       user.id!,
     );
   }
+
+  /// S3 파일 삭제
+  ///
+  /// [session] - Serverpod 세션
+  /// [fileKey] - 삭제할 파일 키 (예: temp/product/1/xxx.png)
+  /// [bucketType] - 버킷 타입 ('public' 또는 'private')
+  Future<void> deleteS3File(
+    Session session,
+    String fileKey,
+    String bucketType,
+  ) async {
+    // 사용자 인증 확인 (AuthenticatedMixin으로 자동 처리)
+    await UserService.getMe(session);
+
+    // Service에서 삭제 처리
+    await S3Service.deleteS3Object(session, fileKey, bucketType);
+  }
 }

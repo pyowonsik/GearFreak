@@ -1,6 +1,7 @@
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:gear_freak_server/src/feature/product/util/product_filter_util.dart';
+import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 
 class ProductService {
   /// 상품 생성
@@ -11,6 +12,7 @@ class ProductService {
   ) async {
     final now = DateTime.now().toUtc();
 
+    // 1. 상품 먼저 생성하여 productId 획득
     final product = Product(
       sellerId: sellerId,
       title: request.title,
@@ -21,7 +23,7 @@ class ProductService {
       tradeMethod: request.tradeMethod,
       baseAddress: request.baseAddress,
       detailAddress: request.detailAddress,
-      imageUrls: request.imageUrls,
+      imageUrls: request.imageUrls, // 임시로 원본 URL 저장
       viewCount: 0,
       favoriteCount: 0,
       chatCount: 0,
@@ -29,7 +31,61 @@ class ProductService {
       updatedAt: now,
     );
 
-    return await Product.db.insertRow(session, product);
+    final createdProduct = await Product.db.insertRow(session, product);
+    final productId = createdProduct.id!;
+
+    // 2. 이미지 파일들을 temp에서 실제 경로로 이동
+    if (request.imageUrls != null && request.imageUrls!.isNotEmpty) {
+      final movedImageUrls = <String>[];
+
+      for (final imageUrl in request.imageUrls!) {
+        try {
+          // URL에서 파일 키 추출
+          final sourceKey = S3Service.extractKeyFromUrl(imageUrl);
+
+          // temp 경로인지 확인
+          if (sourceKey.startsWith('temp/product/')) {
+            // temp/product/{userId}/{file} -> product/{productId}/{file}
+            final destinationKey =
+                S3Service.convertTempKeyToProductKey(sourceKey, productId);
+
+            // S3에서 파일 이동
+            final movedUrl = await S3Service.moveS3Object(
+              session,
+              sourceKey,
+              destinationKey,
+              'public', // 상품 이미지는 public 버킷
+            );
+
+            movedImageUrls.add(movedUrl);
+          } else {
+            // 이미 이동된 파일이거나 다른 경로면 그대로 사용
+            movedImageUrls.add(imageUrl);
+          }
+        } catch (e) {
+          session.log(
+            'Failed to move image: $imageUrl - $e',
+            level: LogLevel.warning,
+          );
+          // 이동 실패 시 원본 URL 유지
+          movedImageUrls.add(imageUrl);
+        }
+      }
+
+      // 3. 이동된 URL로 상품 업데이트
+      if (movedImageUrls.isNotEmpty) {
+        await Product.db.updateRow(
+          session,
+          createdProduct.copyWith(imageUrls: movedImageUrls),
+          columns: (t) => [t.imageUrls],
+        );
+      }
+
+      // 이동된 URL로 반환
+      return createdProduct.copyWith(imageUrls: movedImageUrls);
+    }
+
+    return createdProduct;
   }
 
   // 상품 조회

@@ -72,7 +72,31 @@ class Endpoints extends _i1.EndpointDispatch {
             session,
             params['request'],
           ),
-        )
+        ),
+        'deleteS3File': _i1.MethodConnector(
+          name: 'deleteS3File',
+          params: {
+            'fileKey': _i1.ParameterDescription(
+              name: 'fileKey',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'bucketType': _i1.ParameterDescription(
+              name: 'bucketType',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['s3'] as _i2.S3Endpoint).deleteS3File(
+            session,
+            params['fileKey'],
+            params['bucketType'],
+          ),
+        ),
       },
     );
     connectors['auth'] = _i1.EndpointConnector(

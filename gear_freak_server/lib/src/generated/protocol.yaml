@@ -1,5 +1,6 @@
 s3:
   - generatePresignedUploadUrl:
+  - deleteS3File:
 auth:
   - signupWithoutEmailVerification:
 product:
