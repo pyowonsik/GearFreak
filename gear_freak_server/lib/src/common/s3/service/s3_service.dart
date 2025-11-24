@@ -3,6 +3,7 @@ import 'package:serverpod/serverpod.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
 import 'package:aws_common/aws_common.dart' hide LogLevel;
 import 'package:gear_freak_server/src/generated/protocol.dart';
+import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 
 /// S3 서비스 (Presigned URL 생성)
 class S3Service {
@@ -36,13 +37,13 @@ class S3Service {
     }
 
     // 버킷 이름 가져오기
-    final bucketName = getBucketName(session, request.bucketType);
+    final bucketName = S3Util.getBucketName(session, request.bucketType);
 
     // 파일 키 생성 (업로드 시 temp/{prefix}/... 형태로 저장)
     // 예: temp/product/1/..., temp/chatRoom/1/..., temp/profile/1/...
     final tempPrefix =
         request.prefix != null ? 'temp/${request.prefix}' : 'temp';
-    final fileKey = generateFileKey(
+    final fileKey = S3Util.generateFileKey(
       userId: userId,
       fileName: request.fileName,
       prefix: tempPrefix,
@@ -133,39 +134,6 @@ class S3Service {
     return presignedUrl.toString();
   }
 
-  /// 고유한 파일 키 생성
-  /// 형식: {prefix}/{userId}/{timestamp}-{random}.{extension}
-  static String generateFileKey({
-    required int userId,
-    required String fileName,
-    String? prefix,
-  }) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final random = DateTime.now().microsecondsSinceEpoch % 100000;
-
-    // 파일 확장자 추출
-    final extension = fileName.split('.').last;
-
-    // prefix가 있으면 추가
-    final prefixPath = prefix != null ? '$prefix/' : '';
-
-    return '$prefixPath$userId/$timestamp-$random.$extension';
-  }
-
-  /// 버킷 이름 가져오기 (.envrc로 관리)
-  static String getBucketName(Session session, String bucketType) {
-    if (bucketType == 'public') {
-      return Platform.environment['S3_PUBLIC_BUCKET_NAME'] ??
-          'gear-freak-public-storage-3059875';
-    } else if (bucketType == 'private') {
-      return Platform.environment['S3_PRIVATE_BUCKET_NAME'] ??
-          'gear-freak-private-storage-3059875';
-    } else {
-      throw Exception(
-          'Invalid bucket type: $bucketType. Use "public" or "private"');
-    }
-  }
-
   /// S3 파일 이동 (copy + delete)
   ///
   /// [session] - Serverpod 세션
@@ -180,7 +148,7 @@ class S3Service {
     String destinationKey,
     String bucketType,
   ) async {
-    final bucketName = getBucketName(session, bucketType);
+    final bucketName = S3Util.getBucketName(session, bucketType);
     final region = Platform.environment['AWS_REGION'] ??
         Platform.environment['AWS_DEFAULT_REGION'] ??
         'ap-northeast-2';
@@ -264,36 +232,6 @@ class S3Service {
     return 'https://$bucketName.s3.$region.amazonaws.com/$destinationKey';
   }
 
-  /// URL에서 파일 키 추출
-  ///
-  /// 예: https://bucket.s3.region.amazonaws.com/temp/product/1/xxx.png
-  /// -> temp/product/1/xxx.png
-  static String extractKeyFromUrl(String url) {
-    final uri = Uri.parse(url);
-    // path에서 첫 번째 '/' 제거
-    return uri.path.startsWith('/') ? uri.path.substring(1) : uri.path;
-  }
-
-  /// 파일 키에서 temp 경로를 실제 경로로 변환
-  ///
-  /// 예: temp/product/1/xxx.png, productId=123
-  /// -> product/123/xxx.png
-  static String convertTempKeyToProductKey(
-    String tempKey,
-    int productId,
-  ) {
-    // temp/product/1/xxx.png -> product/123/xxx.png
-    if (tempKey.startsWith('temp/product/')) {
-      final parts = tempKey.split('/');
-      if (parts.length >= 4) {
-        // temp, product, userId, filename
-        final filename = parts.sublist(3).join('/');
-        return 'product/$productId/$filename';
-      }
-    }
-    throw Exception('Invalid temp key format: $tempKey');
-  }
-
   /// S3 파일 삭제
   ///
   /// [session] - Serverpod 세션
@@ -304,7 +242,7 @@ class S3Service {
     String fileKey,
     String bucketType,
   ) async {
-    final bucketName = getBucketName(session, bucketType);
+    final bucketName = S3Util.getBucketName(session, bucketType);
     final region = Platform.environment['AWS_REGION'] ??
         Platform.environment['AWS_DEFAULT_REGION'] ??
         'ap-northeast-2';

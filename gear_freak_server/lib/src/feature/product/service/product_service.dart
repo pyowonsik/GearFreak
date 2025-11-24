@@ -2,6 +2,7 @@ import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:gear_freak_server/src/feature/product/util/product_filter_util.dart';
 import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
+import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 
 class ProductService {
   /// 상품 생성
@@ -41,13 +42,13 @@ class ProductService {
       for (final imageUrl in request.imageUrls!) {
         try {
           // URL에서 파일 키 추출
-          final sourceKey = S3Service.extractKeyFromUrl(imageUrl);
+          final sourceKey = S3Util.extractKeyFromUrl(imageUrl);
 
           // temp 경로인지 확인
           if (sourceKey.startsWith('temp/product/')) {
             // temp/product/{userId}/{file} -> product/{productId}/{file}
             final destinationKey =
-                S3Service.convertTempKeyToProductKey(sourceKey, productId);
+                S3Util.convertTempKeyToProductKey(sourceKey, productId);
 
             // S3에서 파일 이동
             final movedUrl = await S3Service.moveS3Object(
