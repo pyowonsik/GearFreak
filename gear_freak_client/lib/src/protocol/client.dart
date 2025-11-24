@@ -11,17 +11,45 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:gear_freak_client/src/protocol/feature/user/model/user.dart'
+import 'package:gear_freak_client/src/protocol/common/s3/model/dto/generate_presigned_upload_url_response.dto.dart'
     as _i3;
-import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
+import 'package:gear_freak_client/src/protocol/common/s3/model/dto/generate_presigned_upload_url_request.dto.dart'
     as _i4;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/user/model/user.dart'
     as _i5;
-import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
     as _i6;
-import 'package:gear_freak_client/src/protocol/greeting.dart' as _i7;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i8;
-import 'protocol.dart' as _i9;
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
+    as _i7;
+import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
+    as _i8;
+import 'package:gear_freak_client/src/protocol/greeting.dart' as _i9;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i10;
+import 'protocol.dart' as _i11;
+
+/// S3 엔드포인트 (공통 사용)
+/// {@category Endpoint}
+class EndpointS3 extends _i1.EndpointRef {
+  EndpointS3(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 's3';
+
+  /// Presigned URL 생성 (업로드용)
+  ///
+  /// [session] - Serverpod 세션
+  /// [request] - 업로드 요청 정보
+  ///
+  /// 반환: Presigned URL 및 파일 키
+  _i2.Future<_i3.GeneratePresignedUploadUrlResponseDto>
+      generatePresignedUploadUrl(
+              _i4.GeneratePresignedUploadUrlRequestDto request) =>
+          caller.callServerEndpoint<_i3.GeneratePresignedUploadUrlResponseDto>(
+            's3',
+            'generatePresignedUploadUrl',
+            {'request': request},
+          );
+}
 
 /// 인증 엔드포인트
 /// {@category Endpoint}
@@ -32,12 +60,12 @@ class EndpointAuth extends _i1.EndpointRef {
   String get name => 'auth';
 
   /// 개발용: 이메일 인증 없이 바로 회원가입
-  _i2.Future<_i3.User> signupWithoutEmailVerification({
+  _i2.Future<_i5.User> signupWithoutEmailVerification({
     required String userName,
     required String email,
     required String password,
   }) =>
-      caller.callServerEndpoint<_i3.User>(
+      caller.callServerEndpoint<_i5.User>(
         'auth',
         'signupWithoutEmailVerification',
         {
@@ -56,17 +84,17 @@ class EndpointProduct extends _i1.EndpointRef {
   @override
   String get name => 'product';
 
-  _i2.Future<_i4.Product> getProduct(int id) =>
-      caller.callServerEndpoint<_i4.Product>(
+  _i2.Future<_i6.Product> getProduct(int id) =>
+      caller.callServerEndpoint<_i6.Product>(
         'product',
         'getProduct',
         {'id': id},
       );
 
   /// 페이지네이션된 상품 목록 조회
-  _i2.Future<_i5.PaginatedProductsResponseDto> getPaginatedProducts(
-          _i6.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i5.PaginatedProductsResponseDto>(
+  _i2.Future<_i7.PaginatedProductsResponseDto> getPaginatedProducts(
+          _i8.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i7.PaginatedProductsResponseDto>(
         'product',
         'getPaginatedProducts',
         {'pagination': pagination},
@@ -98,15 +126,15 @@ class EndpointUser extends _i1.EndpointRef {
   String get name => 'user';
 
   /// 현재 로그인한 사용자 정보를 가져옵니다
-  _i2.Future<_i3.User> getMe() => caller.callServerEndpoint<_i3.User>(
+  _i2.Future<_i5.User> getMe() => caller.callServerEndpoint<_i5.User>(
         'user',
         'getMe',
         {},
       );
 
   /// 사용자 Id로 사용자 정보를 가져옵니다
-  _i2.Future<_i3.User> getUserById(int id) =>
-      caller.callServerEndpoint<_i3.User>(
+  _i2.Future<_i5.User> getUserById(int id) =>
+      caller.callServerEndpoint<_i5.User>(
         'user',
         'getUserById',
         {'id': id},
@@ -131,8 +159,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i7.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i7.Greeting>(
+  _i2.Future<_i9.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i9.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -141,10 +169,10 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i8.Caller(client);
+    auth = _i10.Caller(client);
   }
 
-  late final _i8.Caller auth;
+  late final _i10.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -163,7 +191,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i9.Protocol(),
+          _i11.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -173,12 +201,15 @@ class Client extends _i1.ServerpodClientShared {
           disconnectStreamsOnLostInternetConnection:
               disconnectStreamsOnLostInternetConnection,
         ) {
+    s3 = EndpointS3(this);
     auth = EndpointAuth(this);
     product = EndpointProduct(this);
     user = EndpointUser(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
+
+  late final EndpointS3 s3;
 
   late final EndpointAuth auth;
 
@@ -192,6 +223,7 @@ class Client extends _i1.ServerpodClientShared {
 
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
+        's3': s3,
         'auth': auth,
         'product': product,
         'user': user,

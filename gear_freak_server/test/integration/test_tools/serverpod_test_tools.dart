@@ -14,15 +14,19 @@
 import 'package:serverpod_test/serverpod_test.dart' as _i1;
 import 'package:serverpod/serverpod.dart' as _i2;
 import 'dart:async' as _i3;
-import 'package:gear_freak_server/src/generated/feature/user/model/user.dart'
+import 'package:gear_freak_server/src/generated/common/s3/model/dto/generate_presigned_upload_url_response.dto.dart'
     as _i4;
-import 'package:gear_freak_server/src/generated/feature/product/model/product.dart'
+import 'package:gear_freak_server/src/generated/common/s3/model/dto/generate_presigned_upload_url_request.dto.dart'
     as _i5;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/paginated_products_response.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/user/model/user.dart'
     as _i6;
-import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/product.dart'
     as _i7;
-import 'package:gear_freak_server/src/generated/greeting.dart' as _i8;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/paginated_products_response.dto.dart'
+    as _i8;
+import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+    as _i9;
+import 'package:gear_freak_server/src/generated/greeting.dart' as _i10;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -109,6 +113,8 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final _S3Endpoint s3;
+
   late final _AuthEndpoint auth;
 
   late final _ProductEndpoint product;
@@ -125,6 +131,10 @@ class _InternalTestEndpoints extends TestEndpoints
     _i2.SerializationManager serializationManager,
     _i2.EndpointDispatch endpoints,
   ) {
+    s3 = _S3Endpoint(
+      endpoints,
+      serializationManager,
+    );
     auth = _AuthEndpoint(
       endpoints,
       serializationManager,
@@ -144,6 +154,47 @@ class _InternalTestEndpoints extends TestEndpoints
   }
 }
 
+class _S3Endpoint {
+  _S3Endpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i4.GeneratePresignedUploadUrlResponseDto>
+      generatePresignedUploadUrl(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i5.GeneratePresignedUploadUrlRequestDto request,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 's3',
+        method: 'generatePresignedUploadUrl',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 's3',
+          methodName: 'generatePresignedUploadUrl',
+          parameters: _i1.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i4.GeneratePresignedUploadUrlResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _AuthEndpoint {
   _AuthEndpoint(
     this._endpointDispatch,
@@ -154,7 +205,7 @@ class _AuthEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i4.User> signupWithoutEmailVerification(
+  _i3.Future<_i6.User> signupWithoutEmailVerification(
     _i1.TestSessionBuilder sessionBuilder, {
     required String userName,
     required String email,
@@ -181,7 +232,7 @@ class _AuthEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i4.User>);
+        ) as _i3.Future<_i6.User>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -200,7 +251,7 @@ class _ProductEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i5.Product> getProduct(
+  _i3.Future<_i7.Product> getProduct(
     _i1.TestSessionBuilder sessionBuilder,
     int id,
   ) async {
@@ -221,7 +272,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i5.Product>);
+        ) as _i3.Future<_i7.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -229,9 +280,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i6.PaginatedProductsResponseDto> getPaginatedProducts(
+  _i3.Future<_i8.PaginatedProductsResponseDto> getPaginatedProducts(
     _i1.TestSessionBuilder sessionBuilder,
-    _i7.PaginationDto pagination,
+    _i9.PaginationDto pagination,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -250,7 +301,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i6.PaginatedProductsResponseDto>);
+        ) as _i3.Future<_i8.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -327,7 +378,7 @@ class _UserEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i4.User> getMe(_i1.TestSessionBuilder sessionBuilder) async {
+  _i3.Future<_i6.User> getMe(_i1.TestSessionBuilder sessionBuilder) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -345,7 +396,7 @@ class _UserEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i4.User>);
+        ) as _i3.Future<_i6.User>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -353,7 +404,7 @@ class _UserEndpoint {
     });
   }
 
-  _i3.Future<_i4.User> getUserById(
+  _i3.Future<_i6.User> getUserById(
     _i1.TestSessionBuilder sessionBuilder,
     int id,
   ) async {
@@ -374,7 +425,7 @@ class _UserEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i4.User>);
+        ) as _i3.Future<_i6.User>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -420,7 +471,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i8.Greeting> hello(
+  _i3.Future<_i10.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -441,7 +492,7 @@ class _GreetingEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i8.Greeting>);
+        ) as _i3.Future<_i10.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

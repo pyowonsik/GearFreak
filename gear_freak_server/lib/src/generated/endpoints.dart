@@ -10,43 +10,76 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import '../feature/auth/endpoint/auth_endpoint.dart' as _i2;
-import '../feature/product/endpoint/product_endpoint.dart' as _i3;
-import '../feature/user/endpoint/user_endpoint.dart' as _i4;
-import '../greeting_endpoint.dart' as _i5;
+import '../common/s3/endpoint/s3_endpoint.dart' as _i2;
+import '../feature/auth/endpoint/auth_endpoint.dart' as _i3;
+import '../feature/product/endpoint/product_endpoint.dart' as _i4;
+import '../feature/user/endpoint/user_endpoint.dart' as _i5;
+import '../greeting_endpoint.dart' as _i6;
+import 'package:gear_freak_server/src/generated/common/s3/model/dto/generate_presigned_upload_url_request.dto.dart'
+    as _i7;
 import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
-    as _i6;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i7;
+    as _i8;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i9;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
   void initializeEndpoints(_i1.Server server) {
     var endpoints = <String, _i1.Endpoint>{
-      'auth': _i2.AuthEndpoint()
+      's3': _i2.S3Endpoint()
+        ..initialize(
+          server,
+          's3',
+          null,
+        ),
+      'auth': _i3.AuthEndpoint()
         ..initialize(
           server,
           'auth',
           null,
         ),
-      'product': _i3.ProductEndpoint()
+      'product': _i4.ProductEndpoint()
         ..initialize(
           server,
           'product',
           null,
         ),
-      'user': _i4.UserEndpoint()
+      'user': _i5.UserEndpoint()
         ..initialize(
           server,
           'user',
           null,
         ),
-      'greeting': _i5.GreetingEndpoint()
+      'greeting': _i6.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
           null,
         ),
     };
+    connectors['s3'] = _i1.EndpointConnector(
+      name: 's3',
+      endpoint: endpoints['s3']!,
+      methodConnectors: {
+        'generatePresignedUploadUrl': _i1.MethodConnector(
+          name: 'generatePresignedUploadUrl',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i7.GeneratePresignedUploadUrlRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['s3'] as _i2.S3Endpoint).generatePresignedUploadUrl(
+            session,
+            params['request'],
+          ),
+        )
+      },
+    );
     connectors['auth'] = _i1.EndpointConnector(
       name: 'auth',
       endpoint: endpoints['auth']!,
@@ -74,7 +107,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['auth'] as _i2.AuthEndpoint)
+              (endpoints['auth'] as _i3.AuthEndpoint)
                   .signupWithoutEmailVerification(
             session,
             userName: params['userName'],
@@ -101,7 +134,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i3.ProductEndpoint).getProduct(
+              (endpoints['product'] as _i4.ProductEndpoint).getProduct(
             session,
             params['id'],
           ),
@@ -111,7 +144,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i6.PaginationDto>(),
+              type: _i1.getType<_i8.PaginationDto>(),
               nullable: false,
             )
           },
@@ -119,7 +152,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i3.ProductEndpoint)
+              (endpoints['product'] as _i4.ProductEndpoint)
                   .getPaginatedProducts(
             session,
             params['pagination'],
@@ -138,7 +171,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i3.ProductEndpoint).toggleFavorite(
+              (endpoints['product'] as _i4.ProductEndpoint).toggleFavorite(
             session,
             params['productId'],
           ),
@@ -156,7 +189,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i3.ProductEndpoint).isFavorite(
+              (endpoints['product'] as _i4.ProductEndpoint).isFavorite(
             session,
             params['productId'],
           ),
@@ -174,7 +207,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i4.UserEndpoint).getMe(session),
+              (endpoints['user'] as _i5.UserEndpoint).getMe(session),
         ),
         'getUserById': _i1.MethodConnector(
           name: 'getUserById',
@@ -189,7 +222,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i4.UserEndpoint).getUserById(
+              (endpoints['user'] as _i5.UserEndpoint).getUserById(
             session,
             params['id'],
           ),
@@ -201,7 +234,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i4.UserEndpoint).getUserScopes(session),
+              (endpoints['user'] as _i5.UserEndpoint).getUserScopes(session),
         ),
       },
     );
@@ -222,13 +255,13 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['greeting'] as _i5.GreetingEndpoint).hello(
+              (endpoints['greeting'] as _i6.GreetingEndpoint).hello(
             session,
             params['name'],
           ),
         )
       },
     );
-    modules['serverpod_auth'] = _i7.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i9.Endpoints()..initializeEndpoints(server);
   }
 }

@@ -13,18 +13,24 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import 'package:serverpod/protocol.dart' as _i2;
 import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i3;
 import 'common/model/pagination_dto.dart' as _i4;
-import 'feature/product/model/dto/create_product_request.dto.dart' as _i5;
-import 'feature/product/model/dto/paginated_products_response.dto.dart' as _i6;
-import 'feature/product/model/dto/update_product_request.dto.dart' as _i7;
-import 'feature/product/model/favorite.dart' as _i8;
-import 'feature/product/model/product.dart' as _i9;
-import 'feature/product/model/product_category.dart' as _i10;
-import 'feature/product/model/product_condition.dart' as _i11;
-import 'feature/product/model/product_sort_by.dart' as _i12;
-import 'feature/product/model/trade_method.dart' as _i13;
-import 'feature/user/model/user.dart' as _i14;
-import 'greeting.dart' as _i15;
+import 'common/s3/model/dto/generate_presigned_upload_url_request.dto.dart'
+    as _i5;
+import 'common/s3/model/dto/generate_presigned_upload_url_response.dto.dart'
+    as _i6;
+import 'feature/product/model/dto/create_product_request.dto.dart' as _i7;
+import 'feature/product/model/dto/paginated_products_response.dto.dart' as _i8;
+import 'feature/product/model/dto/update_product_request.dto.dart' as _i9;
+import 'feature/product/model/favorite.dart' as _i10;
+import 'feature/product/model/product.dart' as _i11;
+import 'feature/product/model/product_category.dart' as _i12;
+import 'feature/product/model/product_condition.dart' as _i13;
+import 'feature/product/model/product_sort_by.dart' as _i14;
+import 'feature/product/model/trade_method.dart' as _i15;
+import 'feature/user/model/user.dart' as _i16;
+import 'greeting.dart' as _i17;
 export 'common/model/pagination_dto.dart';
+export 'common/s3/model/dto/generate_presigned_upload_url_request.dto.dart';
+export 'common/s3/model/dto/generate_presigned_upload_url_response.dto.dart';
 export 'feature/product/model/dto/create_product_request.dto.dart';
 export 'feature/product/model/dto/paginated_products_response.dto.dart';
 export 'feature/product/model/dto/update_product_request.dto.dart';
@@ -422,81 +428,97 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i4.PaginationDto) {
       return _i4.PaginationDto.fromJson(data) as T;
     }
-    if (t == _i5.CreateProductRequestDto) {
-      return _i5.CreateProductRequestDto.fromJson(data) as T;
+    if (t == _i5.GeneratePresignedUploadUrlRequestDto) {
+      return _i5.GeneratePresignedUploadUrlRequestDto.fromJson(data) as T;
     }
-    if (t == _i6.PaginatedProductsResponseDto) {
-      return _i6.PaginatedProductsResponseDto.fromJson(data) as T;
+    if (t == _i6.GeneratePresignedUploadUrlResponseDto) {
+      return _i6.GeneratePresignedUploadUrlResponseDto.fromJson(data) as T;
     }
-    if (t == _i7.UpdateProductRequestDto) {
-      return _i7.UpdateProductRequestDto.fromJson(data) as T;
+    if (t == _i7.CreateProductRequestDto) {
+      return _i7.CreateProductRequestDto.fromJson(data) as T;
     }
-    if (t == _i8.Favorite) {
-      return _i8.Favorite.fromJson(data) as T;
+    if (t == _i8.PaginatedProductsResponseDto) {
+      return _i8.PaginatedProductsResponseDto.fromJson(data) as T;
     }
-    if (t == _i9.Product) {
-      return _i9.Product.fromJson(data) as T;
+    if (t == _i9.UpdateProductRequestDto) {
+      return _i9.UpdateProductRequestDto.fromJson(data) as T;
     }
-    if (t == _i10.ProductCategory) {
-      return _i10.ProductCategory.fromJson(data) as T;
+    if (t == _i10.Favorite) {
+      return _i10.Favorite.fromJson(data) as T;
     }
-    if (t == _i11.ProductCondition) {
-      return _i11.ProductCondition.fromJson(data) as T;
+    if (t == _i11.Product) {
+      return _i11.Product.fromJson(data) as T;
     }
-    if (t == _i12.ProductSortBy) {
-      return _i12.ProductSortBy.fromJson(data) as T;
+    if (t == _i12.ProductCategory) {
+      return _i12.ProductCategory.fromJson(data) as T;
     }
-    if (t == _i13.TradeMethod) {
-      return _i13.TradeMethod.fromJson(data) as T;
+    if (t == _i13.ProductCondition) {
+      return _i13.ProductCondition.fromJson(data) as T;
     }
-    if (t == _i14.User) {
-      return _i14.User.fromJson(data) as T;
+    if (t == _i14.ProductSortBy) {
+      return _i14.ProductSortBy.fromJson(data) as T;
     }
-    if (t == _i15.Greeting) {
-      return _i15.Greeting.fromJson(data) as T;
+    if (t == _i15.TradeMethod) {
+      return _i15.TradeMethod.fromJson(data) as T;
+    }
+    if (t == _i16.User) {
+      return _i16.User.fromJson(data) as T;
+    }
+    if (t == _i17.Greeting) {
+      return _i17.Greeting.fromJson(data) as T;
     }
     if (t == _i1.getType<_i4.PaginationDto?>()) {
       return (data != null ? _i4.PaginationDto.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i5.CreateProductRequestDto?>()) {
-      return (data != null ? _i5.CreateProductRequestDto.fromJson(data) : null)
-          as T;
-    }
-    if (t == _i1.getType<_i6.PaginatedProductsResponseDto?>()) {
+    if (t == _i1.getType<_i5.GeneratePresignedUploadUrlRequestDto?>()) {
       return (data != null
-          ? _i6.PaginatedProductsResponseDto.fromJson(data)
+          ? _i5.GeneratePresignedUploadUrlRequestDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i7.UpdateProductRequestDto?>()) {
-      return (data != null ? _i7.UpdateProductRequestDto.fromJson(data) : null)
+    if (t == _i1.getType<_i6.GeneratePresignedUploadUrlResponseDto?>()) {
+      return (data != null
+          ? _i6.GeneratePresignedUploadUrlResponseDto.fromJson(data)
+          : null) as T;
+    }
+    if (t == _i1.getType<_i7.CreateProductRequestDto?>()) {
+      return (data != null ? _i7.CreateProductRequestDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i8.Favorite?>()) {
-      return (data != null ? _i8.Favorite.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i8.PaginatedProductsResponseDto?>()) {
+      return (data != null
+          ? _i8.PaginatedProductsResponseDto.fromJson(data)
+          : null) as T;
     }
-    if (t == _i1.getType<_i9.Product?>()) {
-      return (data != null ? _i9.Product.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.UpdateProductRequestDto?>()) {
+      return (data != null ? _i9.UpdateProductRequestDto.fromJson(data) : null)
+          as T;
     }
-    if (t == _i1.getType<_i10.ProductCategory?>()) {
-      return (data != null ? _i10.ProductCategory.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.Favorite?>()) {
+      return (data != null ? _i10.Favorite.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.ProductCondition?>()) {
-      return (data != null ? _i11.ProductCondition.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.Product?>()) {
+      return (data != null ? _i11.Product.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.ProductSortBy?>()) {
-      return (data != null ? _i12.ProductSortBy.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.ProductCategory?>()) {
+      return (data != null ? _i12.ProductCategory.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.TradeMethod?>()) {
-      return (data != null ? _i13.TradeMethod.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.ProductCondition?>()) {
+      return (data != null ? _i13.ProductCondition.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.User?>()) {
-      return (data != null ? _i14.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.ProductSortBy?>()) {
+      return (data != null ? _i14.ProductSortBy.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.Greeting?>()) {
-      return (data != null ? _i15.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.TradeMethod?>()) {
+      return (data != null ? _i15.TradeMethod.fromJson(data) : null) as T;
     }
-    if (t == List<_i9.Product>) {
-      return (data as List).map((e) => deserialize<_i9.Product>(e)).toList()
+    if (t == _i1.getType<_i16.User?>()) {
+      return (data != null ? _i16.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i17.Greeting?>()) {
+      return (data != null ? _i17.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == List<_i11.Product>) {
+      return (data as List).map((e) => deserialize<_i11.Product>(e)).toList()
           as T;
     }
     if (t == _i1.getType<List<String>?>()) {
@@ -523,37 +545,43 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i4.PaginationDto) {
       return 'PaginationDto';
     }
-    if (data is _i5.CreateProductRequestDto) {
+    if (data is _i5.GeneratePresignedUploadUrlRequestDto) {
+      return 'GeneratePresignedUploadUrlRequestDto';
+    }
+    if (data is _i6.GeneratePresignedUploadUrlResponseDto) {
+      return 'GeneratePresignedUploadUrlResponseDto';
+    }
+    if (data is _i7.CreateProductRequestDto) {
       return 'CreateProductRequestDto';
     }
-    if (data is _i6.PaginatedProductsResponseDto) {
+    if (data is _i8.PaginatedProductsResponseDto) {
       return 'PaginatedProductsResponseDto';
     }
-    if (data is _i7.UpdateProductRequestDto) {
+    if (data is _i9.UpdateProductRequestDto) {
       return 'UpdateProductRequestDto';
     }
-    if (data is _i8.Favorite) {
+    if (data is _i10.Favorite) {
       return 'Favorite';
     }
-    if (data is _i9.Product) {
+    if (data is _i11.Product) {
       return 'Product';
     }
-    if (data is _i10.ProductCategory) {
+    if (data is _i12.ProductCategory) {
       return 'ProductCategory';
     }
-    if (data is _i11.ProductCondition) {
+    if (data is _i13.ProductCondition) {
       return 'ProductCondition';
     }
-    if (data is _i12.ProductSortBy) {
+    if (data is _i14.ProductSortBy) {
       return 'ProductSortBy';
     }
-    if (data is _i13.TradeMethod) {
+    if (data is _i15.TradeMethod) {
       return 'TradeMethod';
     }
-    if (data is _i14.User) {
+    if (data is _i16.User) {
       return 'User';
     }
-    if (data is _i15.Greeting) {
+    if (data is _i17.Greeting) {
       return 'Greeting';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -576,38 +604,46 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'PaginationDto') {
       return deserialize<_i4.PaginationDto>(data['data']);
     }
+    if (dataClassName == 'GeneratePresignedUploadUrlRequestDto') {
+      return deserialize<_i5.GeneratePresignedUploadUrlRequestDto>(
+          data['data']);
+    }
+    if (dataClassName == 'GeneratePresignedUploadUrlResponseDto') {
+      return deserialize<_i6.GeneratePresignedUploadUrlResponseDto>(
+          data['data']);
+    }
     if (dataClassName == 'CreateProductRequestDto') {
-      return deserialize<_i5.CreateProductRequestDto>(data['data']);
+      return deserialize<_i7.CreateProductRequestDto>(data['data']);
     }
     if (dataClassName == 'PaginatedProductsResponseDto') {
-      return deserialize<_i6.PaginatedProductsResponseDto>(data['data']);
+      return deserialize<_i8.PaginatedProductsResponseDto>(data['data']);
     }
     if (dataClassName == 'UpdateProductRequestDto') {
-      return deserialize<_i7.UpdateProductRequestDto>(data['data']);
+      return deserialize<_i9.UpdateProductRequestDto>(data['data']);
     }
     if (dataClassName == 'Favorite') {
-      return deserialize<_i8.Favorite>(data['data']);
+      return deserialize<_i10.Favorite>(data['data']);
     }
     if (dataClassName == 'Product') {
-      return deserialize<_i9.Product>(data['data']);
+      return deserialize<_i11.Product>(data['data']);
     }
     if (dataClassName == 'ProductCategory') {
-      return deserialize<_i10.ProductCategory>(data['data']);
+      return deserialize<_i12.ProductCategory>(data['data']);
     }
     if (dataClassName == 'ProductCondition') {
-      return deserialize<_i11.ProductCondition>(data['data']);
+      return deserialize<_i13.ProductCondition>(data['data']);
     }
     if (dataClassName == 'ProductSortBy') {
-      return deserialize<_i12.ProductSortBy>(data['data']);
+      return deserialize<_i14.ProductSortBy>(data['data']);
     }
     if (dataClassName == 'TradeMethod') {
-      return deserialize<_i13.TradeMethod>(data['data']);
+      return deserialize<_i15.TradeMethod>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i14.User>(data['data']);
+      return deserialize<_i16.User>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i15.Greeting>(data['data']);
+      return deserialize<_i17.Greeting>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -635,12 +671,12 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i8.Favorite:
-        return _i8.Favorite.t;
-      case _i9.Product:
-        return _i9.Product.t;
-      case _i14.User:
-        return _i14.User.t;
+      case _i10.Favorite:
+        return _i10.Favorite.t;
+      case _i11.Product:
+        return _i11.Product.t;
+      case _i16.User:
+        return _i16.User.t;
     }
     return null;
   }
