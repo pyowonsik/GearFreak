@@ -11,5 +11,3 @@ user:
   - getMe:
   - getUserById:
   - getUserScopes:
-greeting:
-  - hello:

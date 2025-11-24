@@ -1,7 +1,6 @@
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
-import '../../user/service/user_service.dart';
-import '../util/product_filter_util.dart';
+import 'package:gear_freak_server/src/feature/product/util/product_filter_util.dart';
 
 class ProductService {
   // 상품 조회
@@ -17,7 +16,8 @@ class ProductService {
 
   /// 찜 추가/제거 (토글)
   /// 반환값: true = 찜 추가됨, false = 찜 제거됨
-  Future<bool> toggleFavorite(Session session, int userId, int productId) async {
+  Future<bool> toggleFavorite(
+      Session session, int userId, int productId) async {
     // 상품 존재 확인
     final product = await Product.db.findById(session, productId);
     if (product == null) {
@@ -33,7 +33,7 @@ class ProductService {
     if (existingFavorite != null) {
       // 찜 제거
       await Favorite.db.deleteRow(session, existingFavorite);
-      
+
       // favoriteCount 감소
       final currentCount = product.favoriteCount ?? 0;
       final newCount = (currentCount - 1).clamp(0, double.infinity).toInt();
@@ -42,7 +42,7 @@ class ProductService {
         product.copyWith(favoriteCount: newCount),
         columns: (t) => [t.favoriteCount],
       );
-      
+
       return false; // 찜 제거됨
     } else {
       // 찜 추가
@@ -52,7 +52,7 @@ class ProductService {
         createdAt: DateTime.now(),
       );
       await Favorite.db.insertRow(session, favorite);
-      
+
       // favoriteCount 증가
       final currentCount = product.favoriteCount ?? 0;
       await Product.db.updateRow(
@@ -60,7 +60,7 @@ class ProductService {
         product.copyWith(favoriteCount: currentCount + 1),
         columns: (t) => [t.favoriteCount],
       );
-      
+
       return true; // 찜 추가됨
     }
   }

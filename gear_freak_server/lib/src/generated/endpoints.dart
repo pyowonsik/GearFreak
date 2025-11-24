@@ -14,12 +14,11 @@ import '../common/s3/endpoint/s3_endpoint.dart' as _i2;
 import '../feature/auth/endpoint/auth_endpoint.dart' as _i3;
 import '../feature/product/endpoint/product_endpoint.dart' as _i4;
 import '../feature/user/endpoint/user_endpoint.dart' as _i5;
-import '../greeting_endpoint.dart' as _i6;
 import 'package:gear_freak_server/src/generated/common/s3/model/dto/generate_presigned_upload_url_request.dto.dart'
-    as _i7;
+    as _i6;
 import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
-    as _i8;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i9;
+    as _i7;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i8;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -49,12 +48,6 @@ class Endpoints extends _i1.EndpointDispatch {
           'user',
           null,
         ),
-      'greeting': _i6.GreetingEndpoint()
-        ..initialize(
-          server,
-          'greeting',
-          null,
-        ),
     };
     connectors['s3'] = _i1.EndpointConnector(
       name: 's3',
@@ -65,7 +58,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i7.GeneratePresignedUploadUrlRequestDto>(),
+              type: _i1.getType<_i6.GeneratePresignedUploadUrlRequestDto>(),
               nullable: false,
             )
           },
@@ -144,7 +137,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i8.PaginationDto>(),
+              type: _i1.getType<_i7.PaginationDto>(),
               nullable: false,
             )
           },
@@ -238,30 +231,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    connectors['greeting'] = _i1.EndpointConnector(
-      name: 'greeting',
-      endpoint: endpoints['greeting']!,
-      methodConnectors: {
-        'hello': _i1.MethodConnector(
-          name: 'hello',
-          params: {
-            'name': _i1.ParameterDescription(
-              name: 'name',
-              type: _i1.getType<String>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['greeting'] as _i6.GreetingEndpoint).hello(
-            session,
-            params['name'],
-          ),
-        )
-      },
-    );
-    modules['serverpod_auth'] = _i9.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i8.Endpoints()..initializeEndpoints(server);
   }
 }

@@ -13,14 +13,14 @@
 
 include: package:lints/recommended.yaml
 
-# Uncomment the following section to specify additional rules.
-
 linter:
   rules:
     unawaited_futures: true
     avoid_print: true
 
 analyzer:
+  errors:
+    discarded_futures: ignore
   exclude:
     - lib/src/generated/**
     - test/integration/test_tools/serverpod_test_tools.dart
