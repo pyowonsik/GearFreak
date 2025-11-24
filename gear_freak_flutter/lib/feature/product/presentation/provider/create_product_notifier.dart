@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/s3/domain/usecase/delete_image_usecase.dart';
 import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
@@ -11,14 +12,19 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
   /// 상품 등록 Notifier 생성자
   ///
   /// [uploadImageUseCase]는 이미지 업로드 UseCase 인스턴스입니다.
+  /// [deleteImageUseCase]는 이미지 삭제 UseCase 인스턴스입니다.
   /// [createProductUseCase]는 상품 생성 UseCase 인스턴스입니다.
   CreateProductNotifier(
     this.uploadImageUseCase,
+    this.deleteImageUseCase,
     this.createProductUseCase,
   ) : super(const CreateProductInitial());
 
   /// 이미지 업로드 UseCase
   final UploadImageUseCase uploadImageUseCase;
+
+  /// 이미지 삭제 UseCase
+  final DeleteImageUseCase deleteImageUseCase;
 
   /// 상품 생성 UseCase
   final CreateProductUseCase createProductUseCase;
@@ -101,13 +107,48 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
     }
   }
 
-  /// 업로드된 파일 키 제거
-  void removeUploadedFileKey(String fileKey) {
-    final updatedKeys =
-        state.uploadedFileKeys.where((key) => key != fileKey).toList();
-    state = CreateProductUploadSuccess(
-      uploadedFileKeys: updatedKeys,
-    );
+  /// 업로드된 파일 키 제거 (S3에서도 삭제)
+  Future<void> removeUploadedFileKey(String fileKey) async {
+    try {
+      // S3에서 파일 삭제
+      final result = await deleteImageUseCase(
+        DeleteImageParams(
+          fileKey: fileKey,
+          bucketType: 'public',
+        ),
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint('❌ 이미지 삭제 실패: ${failure.message}');
+          // S3 삭제 실패해도 로컬 상태는 제거 (사용자 경험)
+          final updatedKeys =
+              state.uploadedFileKeys.where((key) => key != fileKey).toList();
+          state = CreateProductUploadError(
+            uploadedFileKeys: updatedKeys,
+            error: '이미지 삭제 중 오류가 발생했습니다: ${failure.message}',
+          );
+        },
+        (_) {
+          // 상태에서도 제거
+          final updatedKeys =
+              state.uploadedFileKeys.where((key) => key != fileKey).toList();
+          state = CreateProductUploadSuccess(
+            uploadedFileKeys: updatedKeys,
+          );
+          debugPrint('✅ 이미지 제거 성공: $fileKey');
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ 이미지 제거 예외: $e');
+      // 예외 발생 시에도 로컬 상태는 제거
+      final updatedKeys =
+          state.uploadedFileKeys.where((key) => key != fileKey).toList();
+      state = CreateProductUploadError(
+        uploadedFileKeys: updatedKeys,
+        error: '이미지 삭제 중 오류가 발생했습니다: $e',
+      );
+    }
   }
 
   /// 상품 생성
@@ -125,7 +166,7 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
       // 업로드된 이미지 URL 목록 생성
       final imageUrls = state.uploadedFileKeys
           .map((key) =>
-              'https://gear-freak-public.s3.ap-northeast-2.amazonaws.com/$key')
+              'https://gear-freak-public-storage-3059875.s3.ap-northeast-2.amazonaws.com/$key')
           .toList();
 
       // CreateProductRequestDto 생성

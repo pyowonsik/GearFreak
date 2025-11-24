@@ -30,3 +30,12 @@ class UploadFileFailure extends S3Failure {
   @override
   String toString() => 'UploadFileFailure: $message';
 }
+
+/// 파일 삭제 실패
+class DeleteFileFailure extends S3Failure {
+  /// DeleteFileFailure 생성자
+  const DeleteFileFailure(super.message, {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'DeleteFileFailure: $message';
+}

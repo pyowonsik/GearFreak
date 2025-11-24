@@ -179,38 +179,37 @@ class _PaginatedProductsListWidgetState
                 ],
               ),
             ),
-          ProductPaginatedLoaded(:final products, :final pagination) =>
-            products.isEmpty
-                ? const Center(
-                    child: Text(
-                      '등록된 상품이 없습니다',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF9CA3AF),
-                      ),
+          ProductPaginatedLoaded(:final products, :final pagination) => products
+                  .isEmpty
+              ? const Center(
+                  child: Text(
+                    '등록된 상품이 없습니다',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF9CA3AF),
                     ),
-                  )
-                : ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount:
-                        products.length + 
-                        ((pagination.hasMore ?? false) ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == products.length) {
-                        // 마지막에 로딩 인디케이터 표시
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-                      return ProductCardWidget(
-                        product: products[index],
-                      );
-                    },
                   ),
+                )
+              : ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount:
+                      products.length + ((pagination.hasMore ?? false) ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == products.length) {
+                      // 마지막에 로딩 인디케이터 표시
+                      return const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+                    return ProductCardWidget(
+                      product: products[index],
+                    );
+                  },
+                ),
           ProductPaginatedLoadingMore(:final products) => ListView.builder(
               controller: scrollController,
               padding: const EdgeInsets.all(16),

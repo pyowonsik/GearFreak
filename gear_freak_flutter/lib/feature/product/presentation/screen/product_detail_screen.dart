@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
@@ -28,13 +29,23 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  late PageController _pageController;
+  int _currentPageIndex = 0;
+
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final id = int.parse(widget.productId);
       ref.read(productDetailNotifierProvider.notifier).loadProductDetail(id);
     });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -109,32 +120,77 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 상품 이미지
-            Container(
-              width: double.infinity,
-              height: 320,
-              color: const Color(0xFFF3F4F6),
-              child: true == productData.imageUrls?.isNotEmpty
-                  ? Image.network(
-                      productData.imageUrls!.first,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
+            // 상품 이미지 (스와이프 가능)
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 320,
+                  color: const Color(0xFFF3F4F6),
+                  child: (productData.imageUrls?.isNotEmpty ?? false)
+                      ? PageView.builder(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentPageIndex = index;
+                            });
+                          },
+                          itemCount: productData.imageUrls!.length,
+                          itemBuilder: (context, index) {
+                            return CachedNetworkImage(
+                              imageUrl: productData.imageUrls![index],
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF9CA3AF),
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Center(
+                                child: Icon(
+                                  Icons.shopping_bag,
+                                  size: 120,
+                                  color: Color(0xFF9CA3AF),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
                           child: Icon(
                             Icons.shopping_bag,
                             size: 120,
                             color: Color(0xFF9CA3AF),
                           ),
-                        );
-                      },
-                    )
-                  : const Center(
-                      child: Icon(
-                        Icons.shopping_bag,
-                        size: 120,
-                        color: Color(0xFF9CA3AF),
+                        ),
+                ),
+                // 이미지 인디케이터 (여러 이미지가 있을 때만 표시)
+                if ((productData.imageUrls?.length ?? 0) > 1)
+                  Positioned(
+                    bottom: 16,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        productData.imageUrls!.length,
+                        (index) => Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentPageIndex == index
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.5),
+                          ),
+                        ),
                       ),
                     ),
+                  ),
+              ],
             ),
             // 상품 정보
             Padding(

@@ -450,7 +450,27 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
             top: 4,
             right: 4,
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
+                // 이미지 인덱스 찾기
+                final imageIndex = _selectedImages.indexOf(imageFile);
+                if (imageIndex == -1) {
+                  // 이미지가 없으면 그냥 제거
+                  setState(() {
+                    _selectedImages.remove(imageFile);
+                  });
+                  return;
+                }
+
+                // S3에서 파일 삭제
+                final currentState = ref.read(createProductNotifierProvider);
+                if (imageIndex < currentState.uploadedFileKeys.length) {
+                  final fileKey = currentState.uploadedFileKeys[imageIndex];
+                  final notifier =
+                      ref.read(createProductNotifierProvider.notifier);
+                  await notifier.removeUploadedFileKey(fileKey);
+                }
+
+                // 로컬 이미지 목록에서 제거
                 setState(() {
                   _selectedImages.remove(imageFile);
                 });

@@ -74,4 +74,21 @@ class S3RemoteDataSource {
       throw Exception('파일 업로드에 실패했습니다: $e');
     }
   }
+
+  /// S3 파일 삭제
+  ///
+  /// [fileKey] - 삭제할 파일 키 (예: temp/product/1/xxx.png)
+  /// [bucketType] - 버킷 타입 ('public' 또는 'private')
+  Future<void> deleteFile({
+    required String fileKey,
+    required String bucketType,
+  }) async {
+    try {
+      await _client.s3.deleteS3File(fileKey, bucketType);
+      debugPrint('✅ S3 파일 삭제 성공: $fileKey');
+    } catch (e) {
+      debugPrint('❌ S3 파일 삭제 실패: $e');
+      throw Exception('파일 삭제에 실패했습니다: $e');
+    }
+  }
 }

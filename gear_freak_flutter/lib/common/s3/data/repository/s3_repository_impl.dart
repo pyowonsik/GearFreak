@@ -31,4 +31,15 @@ class S3RepositoryImpl implements S3Repository {
       contentType: contentType,
     );
   }
+
+  @override
+  Future<void> deleteFile({
+    required String fileKey,
+    required String bucketType,
+  }) async {
+    return remoteDataSource.deleteFile(
+      fileKey: fileKey,
+      bucketType: bucketType,
+    );
+  }
 }

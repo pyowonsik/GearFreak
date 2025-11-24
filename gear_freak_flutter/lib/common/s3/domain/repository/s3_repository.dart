@@ -13,4 +13,10 @@ abstract class S3Repository {
     required List<int> fileBytes,
     required String contentType,
   });
+
+  /// S3 파일 삭제
+  Future<void> deleteFile({
+    required String fileKey,
+    required String bucketType,
+  });
 }

@@ -117,6 +117,11 @@ final categoryProductsNotifierProvider = StateNotifierProvider.autoDispose
 final createProductNotifierProvider = StateNotifierProvider.autoDispose<
     CreateProductNotifier, CreateProductState>((ref) {
   final uploadImageUseCase = ref.watch(uploadImageUseCaseProvider);
+  final deleteImageUseCase = ref.watch(deleteImageUseCaseProvider);
   final createProductUseCase = ref.watch(createProductUseCaseProvider);
-  return CreateProductNotifier(uploadImageUseCase, createProductUseCase);
+  return CreateProductNotifier(
+    uploadImageUseCase,
+    deleteImageUseCase,
+    createProductUseCase,
+  );
 });

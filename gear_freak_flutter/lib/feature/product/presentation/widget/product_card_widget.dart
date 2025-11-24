@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/utils/format_utils.dart';
@@ -32,6 +33,7 @@ class ProductCardWidget extends StatelessWidget {
         ),
         child: Row(
           children: [
+            // 상품 이미지 또는 플레이스홀더
             Container(
               width: 100,
               height: 100,
@@ -42,10 +44,40 @@ class ProductCardWidget extends StatelessWidget {
                   bottomLeft: Radius.circular(12),
                 ),
               ),
-              child: const Icon(
-                Icons.shopping_bag,
-                size: 48,
-                color: Color(0xFF9CA3AF),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+                child: (product.imageUrls?.isNotEmpty ?? false)
+                    ? CachedNetworkImage(
+                        imageUrl: product.imageUrls!.first,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF9CA3AF),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(
+                            Icons.shopping_bag,
+                            size: 48,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                        ),
+                      )
+                    : const Center(
+                        child: Icon(
+                          Icons.shopping_bag,
+                          size: 48,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                      ),
               ),
             ),
             Expanded(
