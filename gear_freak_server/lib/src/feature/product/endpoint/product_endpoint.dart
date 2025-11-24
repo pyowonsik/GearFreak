@@ -8,6 +8,15 @@ import 'package:serverpod/serverpod.dart';
 class ProductEndpoint extends Endpoint with AuthenticatedMixin {
   final ProductService productService = ProductService();
 
+  /// 상품 생성
+  Future<Product> createProduct(
+    Session session,
+    CreateProductRequestDto request,
+  ) async {
+    final user = await UserService.getMe(session);
+    return await productService.createProduct(session, user.id!, request);
+  }
+
   Future<Product> getProduct(Session session, int id) async {
     return await productService.getProductById(session, id);
   }

@@ -3,6 +3,35 @@ import 'package:serverpod/serverpod.dart';
 import 'package:gear_freak_server/src/feature/product/util/product_filter_util.dart';
 
 class ProductService {
+  /// 상품 생성
+  Future<Product> createProduct(
+    Session session,
+    int sellerId,
+    CreateProductRequestDto request,
+  ) async {
+    final now = DateTime.now().toUtc();
+
+    final product = Product(
+      sellerId: sellerId,
+      title: request.title,
+      category: request.category,
+      price: request.price,
+      condition: request.condition,
+      description: request.description,
+      tradeMethod: request.tradeMethod,
+      baseAddress: request.baseAddress,
+      detailAddress: request.detailAddress,
+      imageUrls: request.imageUrls,
+      viewCount: 0,
+      favoriteCount: 0,
+      chatCount: 0,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    return await Product.db.insertRow(session, product);
+  }
+
   // 상품 조회
   Future<Product> getProductById(Session session, int id) async {
     final product = await Product.db.findById(session, id);

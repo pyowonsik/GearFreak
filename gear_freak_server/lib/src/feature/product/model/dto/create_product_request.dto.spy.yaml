@@ -1,1 +1,22 @@
+### 상품 생성 요청 DTO
 class: CreateProductRequestDto
+
+fields:
+  ### 상품명
+  title: String
+  ### 카테고리
+  category: ProductCategory
+  ### 가격
+  price: int
+  ### 상품 상태
+  condition: ProductCondition
+  ### 상품 설명
+  description: String
+  ### 거래 방법
+  tradeMethod: TradeMethod
+  ### 기본 주소 (kpostal에서 검색한 주소)
+  baseAddress: String?
+  ### 상세 주소 (동/호수 등)
+  detailAddress: String?
+  ### 상품 이미지 URL 목록
+  imageUrls: List<String>?

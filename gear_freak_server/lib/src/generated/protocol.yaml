@@ -3,6 +3,7 @@ s3:
 auth:
   - signupWithoutEmailVerification:
 product:
+  - createProduct:
   - getProduct:
   - getPaginatedProducts:
   - toggleFavorite:
