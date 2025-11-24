@@ -47,4 +47,13 @@ class ProductRemoteDataSource {
       throw Exception('찜 상태를 조회하는데 실패했습니다: $e');
     }
   }
+
+  /// 상품 생성
+  Future<pod.Product> createProduct(pod.CreateProductRequestDto request) async {
+    try {
+      return await _client.product.createProduct(request);
+    } catch (e) {
+      throw Exception('상품을 생성하는데 실패했습니다: $e');
+    }
+  }
 }

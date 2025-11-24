@@ -54,3 +54,34 @@ class CreateProductUploadError extends CreateProductState {
   /// 업로드 실패 메시지
   final String error;
 }
+
+/// 상품 생성 중 상태
+class CreateProductCreating extends CreateProductState {
+  /// CreateProductCreating 생성자
+  ///
+  /// [uploadedFileKeys]는 업로드된 파일 키 목록입니다.
+  const CreateProductCreating({required super.uploadedFileKeys});
+}
+
+/// 상품 생성 성공 상태
+class CreateProductCreated extends CreateProductState {
+  /// CreateProductCreated 생성자
+  ///
+  /// [uploadedFileKeys]는 업로드된 파일 키 목록입니다.
+  const CreateProductCreated({required super.uploadedFileKeys});
+}
+
+/// 상품 생성 실패 상태
+class CreateProductCreateError extends CreateProductState {
+  /// CreateProductCreateError 생성자
+  ///
+  /// [uploadedFileKeys]는 업로드된 파일 키 목록입니다.
+  /// [error]는 생성 실패 메시지입니다.
+  const CreateProductCreateError({
+    required super.uploadedFileKeys,
+    required this.error,
+  });
+
+  /// 생성 실패 메시지
+  final String error;
+}

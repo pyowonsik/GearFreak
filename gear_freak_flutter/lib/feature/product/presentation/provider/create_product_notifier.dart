@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
 
 /// 상품 등록 Notifier
@@ -10,11 +11,17 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
   /// 상품 등록 Notifier 생성자
   ///
   /// [uploadImageUseCase]는 이미지 업로드 UseCase 인스턴스입니다.
-  CreateProductNotifier(this.uploadImageUseCase)
-      : super(const CreateProductInitial());
+  /// [createProductUseCase]는 상품 생성 UseCase 인스턴스입니다.
+  CreateProductNotifier(
+    this.uploadImageUseCase,
+    this.createProductUseCase,
+  ) : super(const CreateProductInitial());
 
   /// 이미지 업로드 UseCase
   final UploadImageUseCase uploadImageUseCase;
+
+  /// 상품 생성 UseCase
+  final CreateProductUseCase createProductUseCase;
 
   /// 이미지 업로드
   Future<void> uploadImage({
@@ -101,6 +108,77 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
     state = CreateProductUploadSuccess(
       uploadedFileKeys: updatedKeys,
     );
+  }
+
+  /// 상품 생성
+  Future<void> createProduct({
+    required String title,
+    required pod.ProductCategory category,
+    required int price,
+    required pod.ProductCondition condition,
+    required String description,
+    required pod.TradeMethod tradeMethod,
+    String? baseAddress,
+    String? detailAddress,
+  }) async {
+    try {
+      // 업로드된 이미지 URL 목록 생성
+      final imageUrls = state.uploadedFileKeys
+          .map((key) =>
+              'https://gear-freak-public.s3.ap-northeast-2.amazonaws.com/$key')
+          .toList();
+
+      // CreateProductRequestDto 생성
+      final request = pod.CreateProductRequestDto(
+        title: title,
+        category: category,
+        price: price,
+        condition: condition,
+        description: description,
+        tradeMethod: tradeMethod,
+        baseAddress: baseAddress,
+        detailAddress: detailAddress,
+        imageUrls: imageUrls.isEmpty ? null : imageUrls,
+      );
+
+      // 생성 시작
+      state = CreateProductCreating(
+        uploadedFileKeys: state.uploadedFileKeys,
+      );
+
+      // UseCase 호출
+      final result = await createProductUseCase(request);
+
+      result.fold(
+        (failure) {
+          debugPrint('❌ 상품 생성 실패: ${failure.message}');
+          if (failure.exception != null) {
+            debugPrint('❌ 상세: ${failure.exception}');
+          }
+
+          final errorMessage = failure.exception != null
+              ? '${failure.message}\n상세: ${failure.exception}'
+              : failure.message;
+          state = CreateProductCreateError(
+            uploadedFileKeys: state.uploadedFileKeys,
+            error: errorMessage,
+          );
+        },
+        (product) {
+          debugPrint('✅ 상품 생성 성공: ${product.id}');
+          state = CreateProductCreated(
+            uploadedFileKeys: state.uploadedFileKeys,
+          );
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ 상품 생성 예외: $e');
+
+      state = CreateProductCreateError(
+        uploadedFileKeys: state.uploadedFileKeys,
+        error: '상품 생성 중 오류가 발생했습니다: $e',
+      );
+    }
   }
 
   /// 상태 초기화

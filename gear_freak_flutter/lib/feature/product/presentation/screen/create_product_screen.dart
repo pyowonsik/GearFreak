@@ -47,29 +47,31 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 업로드 상태 변화 감시하여 스낵바 표시
+    // 상태 변화 감시하여 스낵바 표시
     ref.listen<CreateProductState>(
       createProductNotifierProvider,
       (previous, next) {
         if (!mounted) return;
 
         if (next is CreateProductUploadError) {
-          // 에러 상태일 때 스낵바 표시
+          // 업로드 에러 상태일 때만 스낵바 표시
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(next.error),
               backgroundColor: Colors.red,
             ),
           );
-        } else if (next is CreateProductUploadSuccess &&
-            previous is CreateProductUploading) {
-          // 업로드 성공 시 스낵바 표시 (이전 상태가 업로드 중일 때만)
+        } else if (next is CreateProductCreateError) {
+          // 상품 생성 에러 상태일 때 스낵바 표시
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('이미지 업로드가 완료되었습니다'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Text(next.error),
+              backgroundColor: Colors.red,
             ),
           );
+        } else if (next is CreateProductCreated) {
+          // 상품 생성 성공 시 화면 닫기 (화면 전환 자체가 피드백)
+          context.pop();
         }
       },
     );
@@ -78,15 +80,31 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
       appBar: AppBar(
         title: const Text('상품 등록'),
         actions: [
-          TextButton(
-            onPressed: _submitProduct,
-            child: const Text(
-              '완료',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final state = ref.watch(createProductNotifierProvider);
+              final isCreating = state is CreateProductCreating;
+              return TextButton(
+                onPressed: isCreating ? null : _submitProduct,
+                child: isCreating
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        '완료',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              );
+            },
           ),
         ],
       ),
@@ -459,7 +477,7 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
   /// 주소 검색
   Future<void> _searchAddress() async {
     try {
-      final Kpostal? result = await Navigator.push(
+      final result = await Navigator.push<Kpostal?>(
         context,
         MaterialPageRoute(
           builder: (_) => KpostalView(),
@@ -481,7 +499,8 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
   }
 
   Future<void> _addImage() async {
-    if (_selectedImages.length >= 10) {
+    final remainingSlots = 10 - _selectedImages.length;
+    if (remainingSlots <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('이미지는 최대 10장까지 추가할 수 있습니다')),
       );
@@ -489,14 +508,30 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
     }
 
     try {
-      final image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
+      // 여러 이미지 선택
+      final images = await _imagePicker.pickMultiImage(
         imageQuality: 85,
       );
 
-      if (image != null) {
-        // 이미지 선택 후 S3에 업로드
-        final notifier = ref.read(createProductNotifierProvider.notifier);
+      if (images.isEmpty) {
+        return;
+      }
+
+      // 남은 슬롯만큼만 선택
+      final imagesToAdd = images.take(remainingSlots).toList();
+      if (images.length > remainingSlots) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '이미지는 최대 10장까지 추가할 수 있습니다. $remainingSlots장만 추가됩니다.',
+            ),
+          ),
+        );
+      }
+
+      // 선택한 이미지들을 순차적으로 업로드
+      final notifier = ref.read(createProductNotifierProvider.notifier);
+      for (final image in imagesToAdd) {
         await notifier.uploadImage(
           imageFile: File(image.path),
           prefix: 'product',
@@ -509,6 +544,15 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
           setState(() {
             _selectedImages.add(image);
           });
+        } else if (currentState is CreateProductUploadError) {
+          // 업로드 실패 시 해당 이미지 건너뛰기
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${image.name} 업로드 실패: ${currentState.error}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          break; // 실패 시 중단
         }
       }
     } catch (e) {
@@ -520,36 +564,57 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
     }
   }
 
-  void _submitProduct() {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedImages.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('최소 1장의 이미지를 추가해주세요')),
-        );
-        return;
-      }
-
-      if (isDirectTrade(_selectedTradeMethod) &&
-          (_baseAddress == null || _baseAddress!.isEmpty)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('주소를 검색해주세요')),
-        );
-        return;
-      }
-
-      // 전체 주소 조합 (기본 주소 + 상세 주소)
-      final fullAddress =
-          _baseAddress != null && _detailAddressController.text.isNotEmpty
-              ? '$_baseAddress ${_detailAddressController.text}'
-              : _baseAddress ?? '';
-
-      // TODO: 서버에 상품 등록 API 호출
-      // fullAddress를 사용하여 주소 정보 전송
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('상품이 등록되었습니다')),
-      );
-      context.pop();
+  Future<void> _submitProduct() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+
+    if (_selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('최소 1장의 이미지를 추가해주세요')),
+      );
+      return;
+    }
+
+    if (isDirectTrade(_selectedTradeMethod) &&
+        (_baseAddress == null || _baseAddress!.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('주소를 검색해주세요')),
+      );
+      return;
+    }
+
+    // 가격 파싱
+    final price = int.tryParse(_priceController.text);
+    if (price == null || price <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('올바른 가격을 입력해주세요')),
+      );
+      return;
+    }
+
+    // 업로드된 이미지가 있는지 확인
+    final currentState = ref.read(createProductNotifierProvider);
+    if (currentState.uploadedFileKeys.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이미지 업로드를 완료해주세요')),
+      );
+      return;
+    }
+
+    // 상품 생성 API 호출
+    final notifier = ref.read(createProductNotifierProvider.notifier);
+    await notifier.createProduct(
+      title: _titleController.text,
+      category: _selectedCategory,
+      price: price,
+      condition: _selectedCondition,
+      description: _descriptionController.text,
+      tradeMethod: _selectedTradeMethod,
+      baseAddress: _baseAddress,
+      detailAddress: _detailAddressController.text.isEmpty
+          ? null
+          : _detailAddressController.text,
+    );
   }
 }

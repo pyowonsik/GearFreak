@@ -52,3 +52,13 @@ class IsFavoriteFailure extends ProductFailure {
   @override
   String toString() => 'IsFavoriteFailure: $message';
 }
+
+/// 상품 생성 실패
+class CreateProductFailure extends ProductFailure {
+  /// CreateProductFailure 생성자
+  const CreateProductFailure(super.message,
+      {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'CreateProductFailure: $message';
+}

@@ -4,6 +4,7 @@ import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/product/data/datasource/product_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/product/data/repository/product_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/product/domain/repository/product_repository.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
@@ -52,6 +53,12 @@ final toggleFavoriteUseCaseProvider = Provider<ToggleFavoriteUseCase>((ref) {
 final isFavoriteUseCaseProvider = Provider<IsFavoriteUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
   return IsFavoriteUseCase(repository);
+});
+
+/// Create Product UseCase Provider
+final createProductUseCaseProvider = Provider<CreateProductUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return CreateProductUseCase(repository);
 });
 
 /// Home Products Notifier Provider (홈 화면용 - 최근 상품 5개)
@@ -110,5 +117,6 @@ final categoryProductsNotifierProvider = StateNotifierProvider.autoDispose
 final createProductNotifierProvider = StateNotifierProvider.autoDispose<
     CreateProductNotifier, CreateProductState>((ref) {
   final uploadImageUseCase = ref.watch(uploadImageUseCaseProvider);
-  return CreateProductNotifier(uploadImageUseCase);
+  final createProductUseCase = ref.watch(createProductUseCaseProvider);
+  return CreateProductNotifier(uploadImageUseCase, createProductUseCase);
 });

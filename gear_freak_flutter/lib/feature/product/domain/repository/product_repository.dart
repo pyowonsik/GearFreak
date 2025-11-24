@@ -16,4 +16,7 @@ abstract class ProductRepository {
 
   /// 찜 상태 조회
   Future<bool> isFavorite(int productId);
+
+  /// 상품 생성
+  Future<pod.Product> createProduct(pod.CreateProductRequestDto request);
 }
