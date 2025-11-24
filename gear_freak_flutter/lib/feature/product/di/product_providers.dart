@@ -11,7 +11,10 @@ import '../presentation/provider/product_notifier.dart';
 import '../presentation/provider/product_state.dart';
 import '../presentation/provider/product_detail_notifier.dart';
 import '../presentation/provider/product_detail_state.dart';
+import '../presentation/provider/create_product_notifier.dart';
+import '../presentation/provider/create_product_state.dart';
 import '../../profile/di/profile_providers.dart';
+import '../../../common/s3/di/s3_providers.dart';
 
 /// Product Remote DataSource Provider
 final productRemoteDataSourceProvider =
@@ -101,4 +104,12 @@ final categoryProductsNotifierProvider = StateNotifierProvider.autoDispose
     getPaginatedProductsUseCase,
     getProductDetailUseCase,
   );
+});
+
+/// Create Product Notifier Provider (상품 등록 화면용)
+final createProductNotifierProvider =
+    StateNotifierProvider.autoDispose<CreateProductNotifier,
+        CreateProductState>((ref) {
+  final uploadImageUseCase = ref.watch(uploadImageUseCaseProvider);
+  return CreateProductNotifier(uploadImageUseCase);
 });
