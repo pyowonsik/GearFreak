@@ -18,9 +18,11 @@ import 'package:gear_freak_server/src/generated/common/s3/model/dto/generate_pre
     as _i6;
 import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
     as _i7;
-import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
     as _i8;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i9;
+import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+    as _i9;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i10;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -158,6 +160,24 @@ class Endpoints extends _i1.EndpointDispatch {
             params['request'],
           ),
         ),
+        'updateProduct': _i1.MethodConnector(
+          name: 'updateProduct',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i8.UpdateProductRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i4.ProductEndpoint).updateProduct(
+            session,
+            params['request'],
+          ),
+        ),
         'getProduct': _i1.MethodConnector(
           name: 'getProduct',
           params: {
@@ -181,7 +201,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i8.PaginationDto>(),
+              type: _i1.getType<_i9.PaginationDto>(),
               nullable: false,
             )
           },
@@ -275,6 +295,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth'] = _i9.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i10.Endpoints()..initializeEndpoints(server);
   }
 }

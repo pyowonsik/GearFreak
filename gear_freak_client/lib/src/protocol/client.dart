@@ -21,12 +21,14 @@ import 'package:gear_freak_client/src/protocol/feature/product/model/product.dar
     as _i6;
 import 'package:gear_freak_client/src/protocol/feature/product/model/dto/create_product_request.dto.dart'
     as _i7;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_request.dto.dart'
     as _i8;
-import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
     as _i9;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i10;
-import 'protocol.dart' as _i11;
+import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
+    as _i10;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i11;
+import 'protocol.dart' as _i12;
 
 /// S3 엔드포인트 (공통 사용)
 /// {@category Endpoint}
@@ -111,6 +113,14 @@ class EndpointProduct extends _i1.EndpointRef {
         {'request': request},
       );
 
+  /// 상품 수정
+  _i2.Future<_i6.Product> updateProduct(_i8.UpdateProductRequestDto request) =>
+      caller.callServerEndpoint<_i6.Product>(
+        'product',
+        'updateProduct',
+        {'request': request},
+      );
+
   _i2.Future<_i6.Product> getProduct(int id) =>
       caller.callServerEndpoint<_i6.Product>(
         'product',
@@ -119,9 +129,9 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 페이지네이션된 상품 목록 조회
-  _i2.Future<_i8.PaginatedProductsResponseDto> getPaginatedProducts(
-          _i9.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i8.PaginatedProductsResponseDto>(
+  _i2.Future<_i9.PaginatedProductsResponseDto> getPaginatedProducts(
+          _i10.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i9.PaginatedProductsResponseDto>(
         'product',
         'getPaginatedProducts',
         {'pagination': pagination},
@@ -178,10 +188,10 @@ class EndpointUser extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i10.Caller(client);
+    auth = _i11.Caller(client);
   }
 
-  late final _i10.Caller auth;
+  late final _i11.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -200,7 +210,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i11.Protocol(),
+          _i12.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

@@ -5,6 +5,7 @@ auth:
   - signupWithoutEmailVerification:
 product:
   - createProduct:
+  - updateProduct:
   - getProduct:
   - getPaginatedProducts:
   - toggleFavorite:

@@ -89,6 +89,119 @@ class ProductService {
     return createdProduct;
   }
 
+  /// 상품 수정
+  Future<Product> updateProduct(
+    Session session,
+    int productId,
+    int sellerId,
+    UpdateProductRequestDto request,
+  ) async {
+    // 1. 기존 상품 조회
+    final existingProduct = await Product.db.findById(session, productId);
+    if (existingProduct == null) {
+      throw Exception('Product not found');
+    }
+
+    // 2. 권한 확인 (판매자만 수정 가능)
+    if (existingProduct.sellerId != sellerId) {
+      throw Exception('Unauthorized: Only the seller can update this product');
+    }
+
+    final now = DateTime.now().toUtc();
+    final originalImageUrls = existingProduct.imageUrls ?? [];
+    final finalImageUrls = request.imageUrls ?? [];
+
+    // 3. 삭제할 이미지 식별 (원본에 있지만 최종 목록에 없는 것)
+    final imagesToDelete = originalImageUrls
+        .where((url) => !finalImageUrls.contains(url))
+        .toList();
+
+    // 4. 삭제할 이미지들을 S3에서 삭제
+    for (final imageUrl in imagesToDelete) {
+      try {
+        final fileKey = S3Util.extractKeyFromUrl(imageUrl);
+        // product 경로의 이미지만 삭제 (temp 경로는 나중에 이동 처리)
+        if (fileKey.startsWith('product/')) {
+          await S3Service.deleteS3Object(session, fileKey, 'public');
+          session.log('Deleted image: $fileKey', level: LogLevel.info);
+        }
+      } catch (e) {
+        session.log(
+          'Failed to delete image: $imageUrl - $e',
+          level: LogLevel.warning,
+        );
+        // 삭제 실패해도 계속 진행
+      }
+    }
+
+    // 5. 새로 추가한 이미지 (temp 경로)를 product 경로로 이동
+    final movedImageUrls = <String>[];
+    for (final imageUrl in finalImageUrls) {
+      try {
+        final sourceKey = S3Util.extractKeyFromUrl(imageUrl);
+
+        if (sourceKey.startsWith('temp/product/')) {
+          // temp/product/{userId}/{file} -> product/{productId}/{file}
+          final destinationKey =
+              S3Util.convertTempKeyToProductKey(sourceKey, productId);
+
+          // S3에서 파일 이동
+          final movedUrl = await S3Service.moveS3Object(
+            session,
+            sourceKey,
+            destinationKey,
+            'public',
+          );
+
+          movedImageUrls.add(movedUrl);
+        } else {
+          // 이미 product 경로에 있거나 다른 경로면 그대로 사용
+          movedImageUrls.add(imageUrl);
+        }
+      } catch (e) {
+        session.log(
+          'Failed to move image: $imageUrl - $e',
+          level: LogLevel.warning,
+        );
+        // 이동 실패 시 원본 URL 유지
+        movedImageUrls.add(imageUrl);
+      }
+    }
+
+    // 6. 상품 정보 업데이트
+    final updatedProduct = existingProduct.copyWith(
+      title: request.title,
+      category: request.category,
+      price: request.price,
+      condition: request.condition,
+      description: request.description,
+      tradeMethod: request.tradeMethod,
+      baseAddress: request.baseAddress,
+      detailAddress: request.detailAddress,
+      imageUrls: movedImageUrls.isEmpty ? null : movedImageUrls,
+      updatedAt: now,
+    );
+
+    final result = await Product.db.updateRow(
+      session,
+      updatedProduct,
+      columns: (t) => [
+        t.title,
+        t.category,
+        t.price,
+        t.condition,
+        t.description,
+        t.tradeMethod,
+        t.baseAddress,
+        t.detailAddress,
+        t.imageUrls,
+        t.updatedAt,
+      ],
+    );
+
+    return result;
+  }
+
   // 상품 조회
   Future<Product> getProductById(Session session, int id) async {
     final product = await Product.db.findById(session, id);

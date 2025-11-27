@@ -17,6 +17,20 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
     return await productService.createProduct(session, user.id!, request);
   }
 
+  /// 상품 수정
+  Future<Product> updateProduct(
+    Session session,
+    UpdateProductRequestDto request,
+  ) async {
+    final user = await UserService.getMe(session);
+    return await productService.updateProduct(
+      session,
+      request.productId,
+      user.id!,
+      request,
+    );
+  }
+
   Future<Product> getProduct(Session session, int id) async {
     return await productService.getProductById(session, id);
   }
