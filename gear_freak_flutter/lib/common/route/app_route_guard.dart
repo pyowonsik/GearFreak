@@ -24,15 +24,13 @@ class AppRouteGuard {
 
   /// 로그인이 필요한 페이지인지 확인하는 메서드
   bool _requiresAuthentication(String path) {
-    // 로그인이 필요한 페이지들
-    final authRequiredPages = [
-      '/main',
-      '/product',
-      '/chat',
-      // 추가 로그인 필요 페이지들
-    ];
+    // 로그인 화면과 스플래시 화면은 인증 불필요
+    if (path == '/login' || path == '/signup' || path == '/splash') {
+      return false;
+    }
 
-    return authRequiredPages.any((requiredPage) => path.contains(requiredPage));
+    // 그 외 모든 페이지는 인증 필요
+    return true;
   }
 
   /// 인증 가드 메서드
@@ -77,24 +75,24 @@ class AppRouteGuard {
       AuthUnauthenticated() => switch (true) {
           // 로그인/회원가입 페이지 접근 시 허용
           _ when isLoginScreen => null,
-          // 로그인이 필요한 페이지 접근 시 로그인 페이지로 리디렉션
-          _ when requiresAuth => loginPath,
           // 스플래시 화면에서 미인증 시 로그인 페이지로 이동
           _ when isSplashScreen => loginPath,
-          // 그 외 공개 페이지는 모두 허용
-          _ => null,
+          // 로그인이 필요한 페이지 접근 시 로그인 페이지로 리디렉션 (딥링크 정보 포함)
+          _ when requiresAuth => _buildLoginPathWithRedirect(currentPath),
+          // 그 외는 허용하지 않음 (인증 필요)
+          _ => loginPath,
         },
 
       // 인증 실패 상태: 미인증과 동일하게 처리
       AuthError() => switch (true) {
           // 로그인/회원가입 페이지 접근 시 허용
           _ when isLoginScreen => null,
-          // 로그인이 필요한 페이지 접근 시 로그인 페이지로 리디렉션
-          _ when requiresAuth => loginPath,
           // 스플래시 화면에서 인증 실패 시 로그인 페이지로 이동
           _ when isSplashScreen => loginPath,
-          // 그 외 공개 페이지는 모두 허용
-          _ => null,
+          // 로그인이 필요한 페이지 접근 시 로그인 페이지로 리디렉션 (딥링크 정보 포함)
+          _ when requiresAuth => _buildLoginPathWithRedirect(currentPath),
+          // 그 외는 허용하지 않음 (인증 필요)
+          _ => loginPath,
         },
 
       // 인증 상태: 리디렉션
@@ -113,5 +111,19 @@ class AppRouteGuard {
     }
 
     return redirectTo;
+  }
+
+  /// 로그인 경로에 리다이렉트 정보 추가
+  ///
+  /// [currentPath]는 현재 경로입니다.
+  /// 딥링크로 들어온 경우 로그인 후 원래 페이지로 돌아갈 수 있도록 쿼리 파라미터를 추가합니다.
+  String _buildLoginPathWithRedirect(String currentPath) {
+    // 스플래시나 로그인 화면이 아닌 경우에만 리다이렉트 정보 추가
+    if (currentPath != '/splash' &&
+        currentPath != '/login' &&
+        currentPath != '/signup') {
+      return '/login?redirect=${Uri.encodeComponent(currentPath)}';
+    }
+    return '/login';
   }
 }

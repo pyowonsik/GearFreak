@@ -49,5 +49,17 @@
 	<string>상품 이미지를 업로드하기 위해 갤러리 접근 권한이 필요합니다.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>상품 이미지를 저장하기 위해 갤러리 접근 권한이 필요합니다.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Custom URL Scheme (딥링크용) -->
+				<string>gearfreak</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

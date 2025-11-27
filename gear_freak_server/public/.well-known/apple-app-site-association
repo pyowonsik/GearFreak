@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "J26F9UUXYM.com.pyowonsik.gearFreakFlutter",
+        "paths": [
+          "/product/*",
+          "/product"
+        ]
+      }
+    ]
+  }
+}

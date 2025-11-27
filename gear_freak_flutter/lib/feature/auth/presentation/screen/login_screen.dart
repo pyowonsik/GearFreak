@@ -46,8 +46,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.read(authNotifierProvider);
     switch (authState) {
       case AuthAuthenticated():
-        // 로그인 성공 후 메인 화면으로 이동
-        context.go('/main/home');
+        // 로그인 성공 후 리다이렉트 처리
+        final redirectPath = Uri.base.queryParameters['redirect'];
+        if (redirectPath != null && redirectPath.isNotEmpty) {
+          // 딥링크에서 온 경우 원래 경로로 이동
+          context.go(redirectPath);
+        } else {
+          // 일반 로그인인 경우 메인 화면으로 이동
+          context.go('/main/home');
+        }
       case AuthError(:final message):
         // 에러 메시지 표시
         ScaffoldMessenger.of(context).showSnackBar(

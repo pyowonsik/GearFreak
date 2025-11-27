@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>장비충 - 상품 보기</title>
+    <meta name="description" content="장비충에서 상품을 확인하세요" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gear-freaks.com/product/" />
+    <meta property="og:title" content="장비충 - 상품 보기" />
+    <meta property="og:description" content="장비충에서 상품을 확인하세요" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://gear-freaks.com/product/" />
+    <meta property="twitter:title" content="장비충 - 상품 보기" />
+    <meta
+      property="twitter:description"
+      content="장비충에서 상품을 확인하세요"
+    />
+  </head>
+  <body>
+    <!-- UI 제거: JavaScript만 실행하여 바로 리다이렉트 -->
+
+    <script>
+      // URL에서 상품 ID 추출
+      function getProductId() {
+        const path = window.location.pathname;
+        const match = path.match(/\/product\/(\d+)/);
+        return match ? match[1] : null;
+      }
+
+      // User-Agent 감지
+      function detectEnvironment() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        return {
+          isKakaoTalk: userAgent.includes('kakaotalk'),
+          isFacebook: userAgent.includes('fban') || userAgent.includes('fbav'),
+          isInstagram: userAgent.includes('instagram'),
+          isLine: userAgent.includes('line'),
+          isAndroid: /android/i.test(userAgent),
+          isIOS: /iphone|ipad|ipod/i.test(userAgent),
+          isInAppBrowser:
+            userAgent.includes('kakaotalk') ||
+            userAgent.includes('fban') ||
+            userAgent.includes('fbav') ||
+            userAgent.includes('instagram') ||
+            userAgent.includes('line'),
+        };
+      }
+
+      // 딥링크 처리 시작
+      function setupAppLinks() {
+        const productId = getProductId();
+        const env = detectEnvironment();
+
+        if (productId) {
+          // 딥링크 처리
+          handleDeepLink(productId, env);
+        } else {
+          // 상품 ID가 없으면 바로 스토어로
+          redirectToStore(env);
+        }
+      }
+
+      // 딥링크 처리 (카카오톡 등 인앱 브라우저 대응)
+      function handleDeepLink(productId, env) {
+        if (!productId) return;
+
+        const universalLink = `https://gear-freaks.com/product/${productId}`;
+        const customScheme = `gearfreak://product/${productId}`;
+
+        // 인앱 브라우저인 경우 (카카오톡, 페이스북, 인스타그램 등)
+        if (env.isInAppBrowser) {
+          console.log('인앱 브라우저 감지:', {
+            kakao: env.isKakaoTalk,
+            facebook: env.isFacebook,
+            instagram: env.isInstagram,
+            line: env.isLine,
+          });
+
+          // 1단계: 커스텀 스킴 시도
+          console.log('커스텀 스킴 시도:', customScheme);
+          window.location.href = customScheme;
+
+          // 2단계: 1.5초 후 앱이 안 열렸으면 외부 브라우저로 열기 시도 (카카오톡만)
+          if (env.isKakaoTalk) {
+            setTimeout(() => {
+              console.log('외부 브라우저로 열기 시도:', universalLink);
+              try {
+                // 카카오톡 외부 브라우저 호출 (비공식 기능)
+                window.location.href =
+                  'kakaotalk://web/openExternal?url=' +
+                  encodeURIComponent(universalLink);
+              } catch (e) {
+                console.error('외부 브라우저 호출 실패:', e);
+                redirectToStore(env);
+              }
+            }, 1500);
+          } else {
+            // 다른 인앱 브라우저는 바로 스토어로
+            setTimeout(() => {
+              redirectToStore(env);
+            }, 1500);
+          }
+
+          // 3단계: 3초 후에도 안 되면 스토어로 이동
+          setTimeout(() => {
+            redirectToStore(env);
+          }, 3000);
+        } else {
+          // 일반 브라우저인 경우
+          // 여기 도달했다면 App Links/Universal Links가 작동하지 않은 것
+          // = 앱이 설치되지 않았거나, 이미 앱이 열렸을 가능성
+          console.log('일반 브라우저 - 앱 미설치로 판단, 스토어로 이동');
+
+          // Universal Link 재시도는 불필요 (이미 작동했어야 함)
+          // 바로 스토어로 이동
+          setTimeout(() => {
+            redirectToStore(env);
+          }, 1000); // 1초 정도만 대기
+        }
+      }
+
+      // 스토어로 리다이렉트
+      function redirectToStore(env) {
+        const storeUrl = env.isIOS
+          ? 'https://apps.apple.com/app/your-app-id' // TODO: 실제 App Store 링크로 교체
+          : 'https://play.google.com/store/apps/details?id=com.example.gear_freak_flutter'; // TODO: 실제 Play Store 링크로 교체
+
+        console.log('스토어로 이동:', storeUrl);
+        // 즉시 리다이렉트 (UI 없이)
+        window.location.replace(storeUrl);
+      }
+
+      // 페이지 로드 시 실행
+      setupAppLinks();
+
+      // Universal Links 감지 (iOS)
+      if (window.location.search.includes('app-installed')) {
+        const productId = getProductId();
+        if (productId) {
+          // 앱 설치 후 딥링크로 리다이렉트 시도
+          window.location.href = `https://gear-freaks.com/product/${productId}`;
+        }
+      }
+    </script>
+  </body>
+</html>

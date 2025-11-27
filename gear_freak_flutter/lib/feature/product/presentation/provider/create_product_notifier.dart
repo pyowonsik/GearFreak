@@ -165,8 +165,10 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
     try {
       // 업로드된 이미지 URL 목록 생성
       final imageUrls = state.uploadedFileKeys
-          .map((key) =>
-              'https://gear-freak-public-storage-3059875.s3.ap-northeast-2.amazonaws.com/$key')
+          .map(
+            (key) =>
+                'https://gear-freak-public-storage-3059875.s3.ap-northeast-2.amazonaws.com/$key',
+          )
           .toList();
 
       // CreateProductRequestDto 생성

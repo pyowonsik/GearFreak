@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/product_utils.dart';
+import 'package:gear_freak_flutter/common/utils/share_utils.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
@@ -105,10 +106,30 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   ) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              // 스택에 이전 화면이 없으면 홈으로 이동
+              context.go('/main/home');
+            }
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            onPressed: () {},
+            onPressed: () {
+              if (productData.id != null) {
+                ShareUtils.shareProduct(
+                  productId: productData.id!.toString(),
+                  title: productData.title,
+                  price: productData.price,
+                  imageUrl: productData.imageUrls?.first,
+                );
+              }
+            },
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
@@ -123,10 +144,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             // 상품 이미지 (스와이프 가능)
             Stack(
               children: [
-                Container(
-                  width: double.infinity,
-                  height: 320,
-                  color: const Color(0xFFF3F4F6),
+            Container(
+              width: double.infinity,
+              height: 320,
+              color: const Color(0xFFF3F4F6),
                   child: (productData.imageUrls?.isNotEmpty ?? false)
                       ? PageView.builder(
                           controller: _pageController,
@@ -139,7 +160,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           itemBuilder: (context, index) {
                             return CachedNetworkImage(
                               imageUrl: productData.imageUrls![index],
-                              fit: BoxFit.cover,
+                      fit: BoxFit.cover,
                               placeholder: (context, url) => const Center(
                                 child: CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -149,22 +170,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ),
                               errorWidget: (context, url, error) =>
                                   const Center(
-                                child: Icon(
-                                  Icons.shopping_bag,
-                                  size: 120,
-                                  color: Color(0xFF9CA3AF),
-                                ),
-                              ),
-                            );
-                          },
-                        )
-                      : const Center(
                           child: Icon(
                             Icons.shopping_bag,
                             size: 120,
                             color: Color(0xFF9CA3AF),
+                                ),
                           ),
-                        ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.shopping_bag,
+                        size: 120,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ),
                 ),
                 // 이미지 인디케이터 (여러 이미지가 있을 때만 표시)
                 if ((productData.imageUrls?.length ?? 0) > 1)

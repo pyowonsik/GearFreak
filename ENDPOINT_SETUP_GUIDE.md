@@ -113,6 +113,6 @@ class UserEndpoint extends Endpoint with AuthenticatedMixin {
 엔드포인트 설정이 완료되면:
 1. 사용자 모델 정의 (`.spy.yaml`)
 2. 인증 엔드포인트 구현
-3. 클라이언트 코드 생성
+3. `serverpod generate` 실행하여 클라이언트 코드 생성
 
 

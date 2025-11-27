@@ -73,9 +73,9 @@ class ProductCardWidget extends StatelessWidget {
                       )
                     : const Center(
                         child: Icon(
-                          Icons.shopping_bag,
-                          size: 48,
-                          color: Color(0xFF9CA3AF),
+                Icons.shopping_bag,
+                size: 48,
+                color: Color(0xFF9CA3AF),
                         ),
                       ),
               ),

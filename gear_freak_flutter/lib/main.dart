@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/route/router_provider.dart';
+import 'package:gear_freak_flutter/common/service/deep_link_service.dart';
 
 import 'package:gear_freak_flutter/common/service/pod_service.dart';
 
@@ -21,7 +22,6 @@ Future<void> main() async {
   PodService.initialize(baseUrl: baseUrl);
 
   // SessionManager가 SharedPreferences에서 인증 정보를 읽어올 시간을 줍니다
-  // kobic 스타일: 네이티브에서는 initialize()를 호출하지 않지만,
   // SharedPreferences에서 정보를 읽어오는 것을 기다려야 합니다
   await Future<void>.delayed(const Duration(milliseconds: 200));
 
@@ -39,13 +39,33 @@ Future<void> main() async {
 }
 
 /// 앱 메인 위젯
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   /// MyApp 생성자
   /// [key]는 위젯의 키입니다.
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // 딥링크 서비스 초기화 (라우터가 준비된 후)
+    // 여러 프레임을 기다려서 라우터가 완전히 준비될 때까지 대기
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          final router = ref.read(routerProvider);
+          DeepLinkService.instance.initialize(router);
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
