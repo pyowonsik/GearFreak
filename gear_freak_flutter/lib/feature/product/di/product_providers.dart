@@ -9,12 +9,15 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_notifier.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 
 /// Product Remote DataSource Provider
@@ -59,6 +62,12 @@ final isFavoriteUseCaseProvider = Provider<IsFavoriteUseCase>((ref) {
 final createProductUseCaseProvider = Provider<CreateProductUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
   return CreateProductUseCase(repository);
+});
+
+/// Update Product UseCase Provider
+final updateProductUseCaseProvider = Provider<UpdateProductUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return UpdateProductUseCase(repository);
 });
 
 /// Home Products Notifier Provider (홈 화면용 - 최근 상품 5개)
@@ -123,5 +132,20 @@ final createProductNotifierProvider = StateNotifierProvider.autoDispose<
     uploadImageUseCase,
     deleteImageUseCase,
     createProductUseCase,
+  );
+});
+
+/// Update Product Notifier Provider (상품 수정 화면용)
+final updateProductNotifierProvider = StateNotifierProvider.autoDispose<
+    UpdateProductNotifier, UpdateProductState>((ref) {
+  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  final uploadImageUseCase = ref.watch(uploadImageUseCaseProvider);
+  final deleteImageUseCase = ref.watch(deleteImageUseCaseProvider);
+  final updateProductUseCase = ref.watch(updateProductUseCaseProvider);
+  return UpdateProductNotifier(
+    getProductDetailUseCase,
+    uploadImageUseCase,
+    deleteImageUseCase,
+    updateProductUseCase,
   );
 });

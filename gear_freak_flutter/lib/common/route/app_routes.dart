@@ -8,6 +8,7 @@ import 'package:gear_freak_flutter/feature/product/presentation/screen/all_produ
 import 'package:gear_freak_flutter/feature/product/presentation/screen/category_product_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/create_product_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
 import 'package:go_router/go_router.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -52,6 +53,16 @@ abstract final class AppRoutes {
           path: '/product/create',
           name: 'create-product',
           builder: (context, state) => const CreateProductScreen(),
+        ),
+
+        // 상품 수정 화면
+        GoRoute(
+          path: '/product/edit/:id',
+          name: 'update-product',
+          builder: (context, state) {
+            final productId = state.pathParameters['id'] ?? '';
+            return UpdateProductScreen(productId: productId);
+          },
         ),
 
         // 전체 상품 목록 화면

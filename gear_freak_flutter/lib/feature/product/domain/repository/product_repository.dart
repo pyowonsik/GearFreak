@@ -19,4 +19,7 @@ abstract class ProductRepository {
 
   /// 상품 생성
   Future<pod.Product> createProduct(pod.CreateProductRequestDto request);
+
+  /// 상품 수정
+  Future<pod.Product> updateProduct(pod.UpdateProductRequestDto request);
 }

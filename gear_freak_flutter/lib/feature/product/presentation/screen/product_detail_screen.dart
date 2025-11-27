@@ -5,6 +5,8 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/product_utils.dart';
 import 'package:gear_freak_flutter/common/utils/share_utils.dart';
+import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
@@ -47,6 +49,60 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  /// 본인이 등록한 상품인지 확인
+  bool _isMyProduct(pod.Product productData) {
+    final authState = ref.read(authNotifierProvider);
+    if (authState is! AuthAuthenticated) {
+      return false;
+    }
+    final currentUserId = authState.user.id;
+    // sellerId는 항상 존재하므로 직접 사용
+    return currentUserId == productData.sellerId;
+  }
+
+  /// 수정 처리
+  void _handleEdit(pod.Product productData) {
+    if (productData.id != null) {
+      context.push('/product/edit/${productData.id}');
+    }
+  }
+
+  /// 삭제 처리
+  void _handleDelete(BuildContext context, pod.Product productData) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('상품 삭제'),
+          content: const Text('정말로 이 상품을 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                // TODO: 삭제 API 호출
+                // ref.read(productDetailNotifierProvider.notifier).deleteProduct(productData.id!);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('상품이 삭제되었습니다')),
+                );
+                context.pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('삭제'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -131,10 +187,42 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               }
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
+          if (_isMyProduct(productData))
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              onSelected: (value) {
+                switch (value) {
+                  case 'edit':
+                    _handleEdit(productData);
+                    break;
+                  case 'delete':
+                    _handleDelete(context, productData);
+                    break;
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 20),
+                      SizedBox(width: 8),
+                      Text('수정'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('삭제', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -144,10 +232,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             // 상품 이미지 (스와이프 가능)
             Stack(
               children: [
-            Container(
-              width: double.infinity,
-              height: 320,
-              color: const Color(0xFFF3F4F6),
+                Container(
+                  width: double.infinity,
+                  height: 320,
+                  color: const Color(0xFFF3F4F6),
                   child: (productData.imageUrls?.isNotEmpty ?? false)
                       ? PageView.builder(
                           controller: _pageController,
@@ -160,7 +248,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           itemBuilder: (context, index) {
                             return CachedNetworkImage(
                               imageUrl: productData.imageUrls![index],
-                      fit: BoxFit.cover,
+                              fit: BoxFit.cover,
                               placeholder: (context, url) => const Center(
                                 child: CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -170,22 +258,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               ),
                               errorWidget: (context, url, error) =>
                                   const Center(
+                                child: Icon(
+                                  Icons.shopping_bag,
+                                  size: 120,
+                                  color: Color(0xFF9CA3AF),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
                           child: Icon(
                             Icons.shopping_bag,
                             size: 120,
                             color: Color(0xFF9CA3AF),
-                                ),
                           ),
-                        );
-                      },
-                    )
-                  : const Center(
-                      child: Icon(
-                        Icons.shopping_bag,
-                        size: 120,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                    ),
+                        ),
                 ),
                 // 이미지 인디케이터 (여러 이미지가 있을 때만 표시)
                 if ((productData.imageUrls?.length ?? 0) > 1)

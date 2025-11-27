@@ -154,7 +154,8 @@ class DeepLinkService {
 
       debugPrint('📍 최종 딥링크 경로: $routePath');
       debugPrint(
-          '📍 현재 라우터 위치: ${_router!.routerDelegate.currentConfiguration.uri}');
+        '📍 현재 라우터 위치: ${_router!.routerDelegate.currentConfiguration.uri}',
+      );
 
       // 라우팅 실행 (약간의 지연을 두어 라우터가 준비될 시간을 줌)
       Future.delayed(const Duration(milliseconds: 100), () {

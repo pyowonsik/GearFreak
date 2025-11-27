@@ -38,4 +38,9 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<pod.Product> createProduct(pod.CreateProductRequestDto request) async {
     return remoteDataSource.createProduct(request);
   }
+
+  @override
+  Future<pod.Product> updateProduct(pod.UpdateProductRequestDto request) async {
+    return remoteDataSource.updateProduct(request);
+  }
 }

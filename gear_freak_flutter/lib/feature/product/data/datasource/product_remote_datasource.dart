@@ -56,4 +56,13 @@ class ProductRemoteDataSource {
       throw Exception('상품을 생성하는데 실패했습니다: $e');
     }
   }
+
+  /// 상품 수정
+  Future<pod.Product> updateProduct(pod.UpdateProductRequestDto request) async {
+    try {
+      return await _client.product.updateProduct(request);
+    } catch (e) {
+      throw Exception('상품을 수정하는데 실패했습니다: $e');
+    }
+  }
 }

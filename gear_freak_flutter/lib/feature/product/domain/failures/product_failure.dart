@@ -62,3 +62,13 @@ class CreateProductFailure extends ProductFailure {
   @override
   String toString() => 'CreateProductFailure: $message';
 }
+
+/// 상품 수정 실패
+class UpdateProductFailure extends ProductFailure {
+  /// UpdateProductFailure 생성자
+  const UpdateProductFailure(super.message,
+      {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'UpdateProductFailure: $message';
+}
