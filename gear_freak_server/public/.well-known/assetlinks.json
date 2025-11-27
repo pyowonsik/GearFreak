@@ -3,7 +3,7 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.example.gear_freak_flutter",
+      "package_name": "com.pyowonsik.gearFreakFlutter",
       "sha256_cert_fingerprints": [
         "55:81:B1:91:26:94:FD:76:60:F0:3A:21:A1:13:DC:00:C5:91:CC:FB:D1:6B:26:BC:36:62:C4:CA:E7:32:7E:63"
       ]

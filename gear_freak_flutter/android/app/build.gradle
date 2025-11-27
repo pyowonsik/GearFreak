@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gear_freak_flutter"
+    namespace = "com.pyowonsik.gearFreakFlutter"
     compileSdk = 35
     // NDK 버전 명시적 지정
     // 플러그인들(connectivity_plus, file_picker, image_cropper 등)이 NDK 26.1.10909125를 요구
@@ -26,7 +26,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.gear_freak_flutter"
+        applicationId = "com.pyowonsik.gearFreakFlutter"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 21
