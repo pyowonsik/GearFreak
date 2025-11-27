@@ -251,6 +251,24 @@ class Endpoints extends _i1.EndpointDispatch {
             params['productId'],
           ),
         ),
+        'deleteProduct': _i1.MethodConnector(
+          name: 'deleteProduct',
+          params: {
+            'productId': _i1.ParameterDescription(
+              name: 'productId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i4.ProductEndpoint).deleteProduct(
+            session,
+            params['productId'],
+          ),
+        ),
       },
     );
     connectors['user'] = _i1.EndpointConnector(

@@ -273,6 +273,57 @@ class ProductService {
     return favorite != null;
   }
 
+  /// 상품 삭제
+  Future<void> deleteProduct(
+    Session session,
+    int productId,
+    int userId,
+  ) async {
+    // 1. 기존 상품 조회
+    final product = await Product.db.findById(session, productId);
+    if (product == null) {
+      throw Exception('Product not found');
+    }
+
+    // 2. 권한 확인 (판매자만 삭제 가능)
+    if (product.sellerId != userId) {
+      throw Exception('Unauthorized: Only the seller can delete this product');
+    }
+
+    // 3. 상품 이미지들을 S3에서 삭제
+    if (product.imageUrls != null && product.imageUrls!.isNotEmpty) {
+      for (final imageUrl in product.imageUrls!) {
+        try {
+          final fileKey = S3Util.extractKeyFromUrl(imageUrl);
+          // product 경로의 이미지만 삭제
+          if (fileKey.startsWith('product/')) {
+            await S3Service.deleteS3Object(session, fileKey, 'public');
+            session.log('Deleted image: $fileKey', level: LogLevel.info);
+          }
+        } catch (e) {
+          session.log(
+            'Failed to delete image: $imageUrl - $e',
+            level: LogLevel.warning,
+          );
+          // 삭제 실패해도 계속 진행
+        }
+      }
+    }
+
+    // 4. 관련된 찜 데이터 삭제
+    final favorites = await Favorite.db.find(
+      session,
+      where: (f) => f.productId.equals(productId),
+    );
+
+    for (final favorite in favorites) {
+      await Favorite.db.deleteRow(session, favorite);
+    }
+
+    // 5. 상품 삭제
+    await Product.db.deleteRow(session, product);
+  }
+
   /// 페이지네이션된 상품 목록 조회
   Future<PaginatedProductsResponseDto> getPaginatedProducts(
     Session session,

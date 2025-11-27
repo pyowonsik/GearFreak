@@ -80,19 +80,55 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop();
+                dialogContext.pop();
               },
               child: const Text('취소'),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                // TODO: 삭제 API 호출
-                // ref.read(productDetailNotifierProvider.notifier).deleteProduct(productData.id!);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('상품이 삭제되었습니다')),
-                );
-                context.pop();
+              onPressed: () async {
+                dialogContext.pop();
+
+                if (productData.id == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('상품 ID가 유효하지 않습니다'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                // 삭제 API 호출
+                final deleteResult = await ref
+                    .read(productDetailNotifierProvider.notifier)
+                    .deleteProduct(productData.id!);
+
+                if (mounted) {
+                  if (deleteResult) {
+                    // 삭제 성공 시 이벤트는 ProductDetailNotifier에서 자동 발행됨
+                    // 모든 목록 Provider가 자동으로 해당 상품을 제거합니다
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('상품이 삭제되었습니다'),
+                      ),
+                    );
+                    // 상품 상세 화면 닫기
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      // 스택에 이전 화면이 없으면 홈으로 이동
+                      context.go('/main/home');
+                    }
+                  } else {
+                    // 삭제 실패
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('상품 삭제에 실패했습니다'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,

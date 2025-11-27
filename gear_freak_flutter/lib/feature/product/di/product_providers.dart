@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/product/data/datasource/product_remot
 import 'package:gear_freak_flutter/feature/product/data/repository/product_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/product/domain/repository/product_repository.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
@@ -70,6 +71,17 @@ final updateProductUseCaseProvider = Provider<UpdateProductUseCase>((ref) {
   return UpdateProductUseCase(repository);
 });
 
+/// Delete Product UseCase Provider
+final deleteProductUseCaseProvider = Provider<DeleteProductUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return DeleteProductUseCase(repository);
+});
+
+/// 삭제된 상품 ID 이벤트 Provider (단일 소스)
+/// 상품 삭제 시 이 Provider에 productId를 설정하면
+/// 모든 목록 Provider가 자동으로 해당 상품을 제거합니다.
+final deletedProductIdProvider = StateProvider<int?>((ref) => null);
+
 /// Home Products Notifier Provider (홈 화면용 - 최근 상품 5개)
 final homeProductsNotifierProvider =
     StateNotifierProvider.autoDispose<ProductNotifier, ProductState>((ref) {
@@ -77,6 +89,7 @@ final homeProductsNotifierProvider =
       ref.watch(getPaginatedProductsUseCaseProvider);
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ProductNotifier(
+    ref,
     getPaginatedProductsUseCase,
     getProductDetailUseCase,
   );
@@ -89,6 +102,7 @@ final allProductsNotifierProvider =
       ref.watch(getPaginatedProductsUseCaseProvider);
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ProductNotifier(
+    ref,
     getPaginatedProductsUseCase,
     getProductDetailUseCase,
   );
@@ -101,11 +115,14 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
   final toggleFavoriteUseCase = ref.watch(toggleFavoriteUseCaseProvider);
   final isFavoriteUseCase = ref.watch(isFavoriteUseCaseProvider);
   final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
+  final deleteProductUseCase = ref.watch(deleteProductUseCaseProvider);
   return ProductDetailNotifier(
+    ref,
     getProductDetailUseCase,
     toggleFavoriteUseCase,
     isFavoriteUseCase,
     getUserByIdUseCase,
+    deleteProductUseCase,
   );
 });
 
@@ -117,6 +134,7 @@ final categoryProductsNotifierProvider = StateNotifierProvider.autoDispose
       ref.watch(getPaginatedProductsUseCaseProvider);
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ProductNotifier(
+    ref,
     getPaginatedProductsUseCase,
     getProductDetailUseCase,
   );

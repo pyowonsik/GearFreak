@@ -152,6 +152,14 @@ class EndpointProduct extends _i1.EndpointRef {
         'isFavorite',
         {'productId': productId},
       );
+
+  /// 상품 삭제
+  _i2.Future<void> deleteProduct(int productId) =>
+      caller.callServerEndpoint<void>(
+        'product',
+        'deleteProduct',
+        {'productId': productId},
+      );
 }
 
 /// 사용자 엔드포인트

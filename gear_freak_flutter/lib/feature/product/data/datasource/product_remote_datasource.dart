@@ -65,4 +65,13 @@ class ProductRemoteDataSource {
       throw Exception('상품을 수정하는데 실패했습니다: $e');
     }
   }
+
+  /// 상품 삭제
+  Future<void> deleteProduct(int productId) async {
+    try {
+      return await _client.product.deleteProduct(productId);
+    } catch (e) {
+      throw Exception('상품을 삭제하는데 실패했습니다: $e');
+    }
+  }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
@@ -10,16 +12,23 @@ import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id
 class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
   /// ProductDetailNotifier 생성자
   ///
+  /// [ref]는 Riverpod의 Ref 인스턴스입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase 인스턴스입니다.
   /// [toggleFavoriteUseCase]는 찜 토글 UseCase 인스턴스입니다.
   /// [isFavoriteUseCase]는 찜 상태 조회 UseCase 인스턴스입니다.
   /// [getUserByIdUseCase]는 사용자 ID로 사용자 정보 조회 UseCase 인스턴스입니다.
+  /// [deleteProductUseCase]는 상품 삭제 UseCase 인스턴스입니다.
   ProductDetailNotifier(
+    this.ref,
     this.getProductDetailUseCase,
     this.toggleFavoriteUseCase,
     this.isFavoriteUseCase,
     this.getUserByIdUseCase,
+    this.deleteProductUseCase,
   ) : super(const ProductDetailInitial());
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 상품 상세 조회 UseCase 인스턴스
   final GetProductDetailUseCase getProductDetailUseCase;
@@ -32,6 +41,9 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
 
   /// 사용자 ID로 사용자 정보 조회 UseCase 인스턴스
   final GetUserByIdUseCase getUserByIdUseCase;
+
+  /// 상품 삭제 UseCase 인스턴스
+  final DeleteProductUseCase deleteProductUseCase;
 
   /// 상품 상세 조회
   Future<void> loadProductDetail(int id) async {
@@ -116,6 +128,29 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
             );
           },
         );
+      },
+    );
+  }
+
+  /// 상품 삭제
+  /// 반환값: true = 삭제 성공, false = 삭제 실패
+  Future<bool> deleteProduct(int productId) async {
+    final result = await deleteProductUseCase(productId);
+
+    return result.fold(
+      (failure) {
+        debugPrint('상품 삭제 실패: ${failure.message}');
+        return false;
+      },
+      (_) {
+        debugPrint('상품 삭제 성공: $productId');
+        // 삭제 성공 시 이벤트 발행 (모든 목록 Provider가 자동으로 반응)
+        ref.read(deletedProductIdProvider.notifier).state = productId;
+        // 이벤트 처리 후 초기화 (다음 삭제를 위해)
+        Future.microtask(() {
+          ref.read(deletedProductIdProvider.notifier).state = null;
+        });
+        return true;
       },
     );
   }

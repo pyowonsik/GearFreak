@@ -22,4 +22,7 @@ abstract class ProductRepository {
 
   /// 상품 수정
   Future<pod.Product> updateProduct(pod.UpdateProductRequestDto request);
+
+  /// 상품 삭제
+  Future<void> deleteProduct(int productId);
 }

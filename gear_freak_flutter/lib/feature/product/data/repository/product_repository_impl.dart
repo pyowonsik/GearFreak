@@ -43,4 +43,9 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<pod.Product> updateProduct(pod.UpdateProductRequestDto request) async {
     return remoteDataSource.updateProduct(request);
   }
+
+  @override
+  Future<void> deleteProduct(int productId) async {
+    return remoteDataSource.deleteProduct(productId);
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
@@ -9,12 +10,24 @@ import 'package:gear_freak_flutter/feature/product/presentation/provider/product
 class ProductNotifier extends StateNotifier<ProductState> {
   /// ProductNotifier 생성자
   ///
+  /// [ref]는 Riverpod의 Ref 인스턴스입니다.
   /// [getPaginatedProductsUseCase]는 페이지네이션된 상품 목록 조회 UseCase 인스턴스입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase 인스턴스입니다.
   ProductNotifier(
+    this.ref,
     this.getPaginatedProductsUseCase,
     this.getProductDetailUseCase,
-  ) : super(const ProductInitial());
+  ) : super(const ProductInitial()) {
+    // 삭제 이벤트 감지하여 자동으로 목록에서 제거
+    ref.listen<int?>(deletedProductIdProvider, (previous, next) {
+      if (next != null) {
+        _removeProduct(next);
+      }
+    });
+  }
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 페이지네이션된 상품 목록 조회 UseCase 인스턴스
   final GetPaginatedProductsUseCase getPaginatedProductsUseCase;
@@ -198,5 +211,34 @@ class ProductNotifier extends StateNotifier<ProductState> {
       },
       (product) => product,
     );
+  }
+
+  /// 목록에서 상품 제거 (삭제 이벤트에 의해 자동 호출)
+  void _removeProduct(int productId) {
+    final currentState = state;
+    if (currentState is ProductPaginatedLoaded) {
+      final updatedProducts = currentState.products
+          .where((product) => product.id != productId)
+          .toList();
+
+      // 상품이 실제로 제거되었는지 확인
+      if (updatedProducts.length < currentState.products.length) {
+        debugPrint('🗑️ [ProductNotifier] 상품 제거: productId=$productId '
+            '(${currentState.products.length}개 → ${updatedProducts.length}개)');
+
+        // totalCount도 감소
+        final updatedTotalCount = (currentState.pagination.totalCount ?? 0) - 1;
+
+        state = ProductPaginatedLoaded(
+          products: updatedProducts,
+          pagination: currentState.pagination.copyWith(
+            totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+            hasMore: updatedProducts.length < updatedTotalCount,
+          ),
+          category: currentState.category,
+          sortBy: currentState.sortBy,
+        );
+      }
+    }
   }
 }

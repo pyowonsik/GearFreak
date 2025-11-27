@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>장비충 - 상품 보기</title>
     <meta name="description" content="장비충에서 상품을 확인하세요" />
-
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://gear-freaks.com/product/" />
     <meta property="og:title" content="장비충 - 상품 보기" />
     <meta property="og:description" content="장비충에서 상품을 확인하세요" />
-
+    
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://gear-freaks.com/product/" />
@@ -20,18 +20,18 @@
       property="twitter:description"
       content="장비충에서 상품을 확인하세요"
     />
-  </head>
-  <body>
+</head>
+<body>
     <!-- UI 제거: JavaScript만 실행하여 바로 리다이렉트 -->
-
+    
     <script>
-      // URL에서 상품 ID 추출
-      function getProductId() {
-        const path = window.location.pathname;
-        const match = path.match(/\/product\/(\d+)/);
-        return match ? match[1] : null;
-      }
-
+        // URL에서 상품 ID 추출
+        function getProductId() {
+            const path = window.location.pathname;
+            const match = path.match(/\/product\/(\d+)/);
+            return match ? match[1] : null;
+        }
+        
       // User-Agent 감지
       function detectEnvironment() {
         const userAgent = navigator.userAgent.toLowerCase();
@@ -52,8 +52,8 @@
       }
 
       // 딥링크 처리 시작
-      function setupAppLinks() {
-        const productId = getProductId();
+        function setupAppLinks() {
+            const productId = getProductId();
         const env = detectEnvironment();
 
         if (productId) {
@@ -115,7 +115,7 @@
           // 여기 도달했다면 App Links/Universal Links가 작동하지 않은 것
           // = 앱이 설치되지 않았거나, 이미 앱이 열렸을 가능성
           console.log('일반 브라우저 - 앱 미설치로 판단, 스토어로 이동');
-
+                
           // Universal Link 재시도는 불필요 (이미 작동했어야 함)
           // 바로 스토어로 이동
           setTimeout(() => {
@@ -133,19 +133,19 @@
         console.log('스토어로 이동:', storeUrl);
         // 즉시 리다이렉트 (UI 없이)
         window.location.replace(storeUrl);
-      }
-
-      // 페이지 로드 시 실행
-      setupAppLinks();
-
-      // Universal Links 감지 (iOS)
-      if (window.location.search.includes('app-installed')) {
-        const productId = getProductId();
-        if (productId) {
-          // 앱 설치 후 딥링크로 리다이렉트 시도
-          window.location.href = `https://gear-freaks.com/product/${productId}`;
         }
-      }
+        
+        // 페이지 로드 시 실행
+        setupAppLinks();
+        
+        // Universal Links 감지 (iOS)
+        if (window.location.search.includes('app-installed')) {
+            const productId = getProductId();
+            if (productId) {
+                // 앱 설치 후 딥링크로 리다이렉트 시도
+                window.location.href = `https://gear-freaks.com/product/${productId}`;
+            }
+        }
     </script>
-  </body>
+</body>
 </html>
