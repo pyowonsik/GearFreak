@@ -69,7 +69,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: '장비충',
+      title: '운동은 장비충',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

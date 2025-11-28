@@ -92,7 +92,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    '장비충',
+                    '운동은 장비충',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 32,

@@ -87,21 +87,9 @@ final deletedProductIdProvider = StateProvider<int?>((ref) => null);
 /// 모든 목록 Provider가 자동으로 해당 상품을 업데이트합니다.
 final updatedProductProvider = StateProvider<pod.Product?>((ref) => null);
 
-/// Home Products Notifier Provider (홈 화면용 - 최근 상품 5개)
-final homeProductsNotifierProvider =
-    StateNotifierProvider.autoDispose<ProductNotifier, ProductState>((ref) {
-  final getPaginatedProductsUseCase =
-      ref.watch(getPaginatedProductsUseCaseProvider);
-  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
-  return ProductNotifier(
-    ref,
-    getPaginatedProductsUseCase,
-    getProductDetailUseCase,
-  );
-});
-
-/// All Products Notifier Provider (전체 상품 화면용 - 페이지네이션)
-final allProductsNotifierProvider =
+/// Product Notifier Provider (메인 상품 목록용)
+/// 홈 화면에서 전체/카테고리별 상품 목록, 정렬, 무한 스크롤 관리
+final productNotifierProvider =
     StateNotifierProvider.autoDispose<ProductNotifier, ProductState>((ref) {
   final getPaginatedProductsUseCase =
       ref.watch(getPaginatedProductsUseCaseProvider);
@@ -128,20 +116,6 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
     isFavoriteUseCase,
     getUserByIdUseCase,
     deleteProductUseCase,
-  );
-});
-
-/// Category Products Notifier Provider (카테고리별 상품 화면용 - 페이지네이션)
-final categoryProductsNotifierProvider = StateNotifierProvider.autoDispose
-    .family<ProductNotifier, ProductState, pod.ProductCategory>(
-        (ref, category) {
-  final getPaginatedProductsUseCase =
-      ref.watch(getPaginatedProductsUseCaseProvider);
-  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
-  return ProductNotifier(
-    ref,
-    getPaginatedProductsUseCase,
-    getProductDetailUseCase,
   );
 });
 

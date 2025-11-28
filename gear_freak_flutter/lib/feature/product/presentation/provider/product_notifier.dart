@@ -18,6 +18,8 @@ class ProductNotifier extends StateNotifier<ProductState> {
     this.getPaginatedProductsUseCase,
     this.getProductDetailUseCase,
   ) : super(const ProductInitial()) {
+    debugPrint('🔵 [ProductNotifier] 생성됨');
+
     // 삭제 이벤트 감지하여 자동으로 목록에서 제거
     ref
       ..listen<int?>(deletedProductIdProvider, (previous, next) {
@@ -32,6 +34,12 @@ class ProductNotifier extends StateNotifier<ProductState> {
           _updateProduct(next);
         }
       });
+  }
+
+  @override
+  void dispose() {
+    debugPrint('🔴 [ProductNotifier] dispose됨');
+    super.dispose();
   }
 
   /// Riverpod Ref 인스턴스

@@ -1,3 +1,5 @@
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+
 /// 상품 등록 상태
 sealed class CreateProductState {
   /// CreateProductState 생성자
@@ -67,8 +69,15 @@ class CreateProductCreating extends CreateProductState {
 class CreateProductCreated extends CreateProductState {
   /// CreateProductCreated 생성자
   ///
+  /// [product]는 생성된 상품입니다.
   /// [uploadedFileKeys]는 업로드된 파일 키 목록입니다.
-  const CreateProductCreated({required super.uploadedFileKeys});
+  const CreateProductCreated({
+    required this.product,
+    required super.uploadedFileKeys,
+  });
+
+  /// 생성된 상품
+  final pod.Product product;
 }
 
 /// 상품 생성 실패 상태

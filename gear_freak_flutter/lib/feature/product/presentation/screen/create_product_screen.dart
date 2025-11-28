@@ -69,8 +69,20 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
             ),
           );
         } else if (next is CreateProductCreated) {
-          // 상품 생성 성공 시 화면 닫기 (화면 전환 자체가 피드백)
-          context.pop();
+          // 상품 생성 성공 시 생성된 상품의 상세 페이지로 이동
+          final product = next.product;
+          if (product.id != null) {
+            context.go('/product/${product.id}');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('상품이 등록되었습니다'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            // id가 없으면 홈으로
+            context.pop();
+          }
         }
       },
     );

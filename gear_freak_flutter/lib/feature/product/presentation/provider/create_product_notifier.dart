@@ -210,6 +210,7 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
         (product) {
           debugPrint('✅ 상품 생성 성공: ${product.id}');
           state = CreateProductCreated(
+            product: product,
             uploadedFileKeys: state.uploadedFileKeys,
           );
         },
