@@ -19,11 +19,19 @@ class ProductNotifier extends StateNotifier<ProductState> {
     this.getProductDetailUseCase,
   ) : super(const ProductInitial()) {
     // 삭제 이벤트 감지하여 자동으로 목록에서 제거
-    ref.listen<int?>(deletedProductIdProvider, (previous, next) {
-      if (next != null) {
-        _removeProduct(next);
-      }
-    });
+    ref
+      ..listen<int?>(deletedProductIdProvider, (previous, next) {
+        if (next != null) {
+          _removeProduct(next);
+        }
+      })
+
+      // 수정 이벤트 감지하여 자동으로 목록에서 업데이트
+      ..listen<pod.Product?>(updatedProductProvider, (previous, next) {
+        if (next != null) {
+          _updateProduct(next);
+        }
+      });
   }
 
   /// Riverpod Ref 인스턴스
@@ -235,6 +243,76 @@ class ProductNotifier extends StateNotifier<ProductState> {
             totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
             hasMore: updatedProducts.length < updatedTotalCount,
           ),
+          category: currentState.category,
+          sortBy: currentState.sortBy,
+        );
+      }
+    } else if (currentState is ProductPaginatedLoadingMore) {
+      // 로딩 중 상태에서도 제거 처리
+      final updatedProducts = currentState.products
+          .where((product) => product.id != productId)
+          .toList();
+
+      if (updatedProducts.length < currentState.products.length) {
+        debugPrint('🗑️ [ProductNotifier] 상품 제거 (로딩 중): productId=$productId '
+            '(${currentState.products.length}개 → ${updatedProducts.length}개)');
+
+        final updatedTotalCount = (currentState.pagination.totalCount ?? 0) - 1;
+
+        state = ProductPaginatedLoadingMore(
+          products: updatedProducts,
+          pagination: currentState.pagination.copyWith(
+            totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+            hasMore: updatedProducts.length < updatedTotalCount,
+          ),
+          category: currentState.category,
+          sortBy: currentState.sortBy,
+        );
+      }
+    }
+  }
+
+  /// 목록에서 상품 수정 (수정 이벤트에 의해 자동 호출)
+  void _updateProduct(pod.Product updatedProduct) {
+    final currentState = state;
+
+    if (currentState is ProductPaginatedLoaded) {
+      final updatedProducts = currentState.products.map((product) {
+        // 같은 ID면 새 데이터로 교체
+        return product.id == updatedProduct.id ? updatedProduct : product;
+      }).toList();
+
+      // 실제로 변경이 있었는지 확인
+      final hasChanges =
+          currentState.products.any((p) => p.id == updatedProduct.id);
+
+      if (hasChanges) {
+        debugPrint(
+            '✏️ [ProductNotifier] 상품 수정: productId=${updatedProduct.id}');
+
+        state = ProductPaginatedLoaded(
+          products: updatedProducts,
+          pagination: currentState.pagination,
+          category: currentState.category,
+          sortBy: currentState.sortBy,
+        );
+      }
+    } else if (currentState is ProductPaginatedLoadingMore) {
+      // 로딩 중 상태에서도 수정 처리
+      final updatedProducts = currentState.products.map((product) {
+        return product.id == updatedProduct.id ? updatedProduct : product;
+      }).toList();
+
+      final hasChanges =
+          currentState.products.any((p) => p.id == updatedProduct.id);
+
+      if (hasChanges) {
+        debugPrint(
+            '✏️ [ProductNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}');
+
+        state = ProductPaginatedLoadingMore(
+          products: updatedProducts,
+          pagination: currentState.pagination,
           category: currentState.category,
           sortBy: currentState.sortBy,
         );

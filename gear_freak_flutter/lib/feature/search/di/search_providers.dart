@@ -27,5 +27,5 @@ final searchProductsUseCaseProvider = Provider<SearchProductsUseCase>((ref) {
 final searchNotifierProvider =
     StateNotifierProvider<SearchNotifier, SearchState>((ref) {
   final searchProductsUseCase = ref.watch(searchProductsUseCaseProvider);
-  return SearchNotifier(searchProductsUseCase);
+  return SearchNotifier(ref, searchProductsUseCase);
 });

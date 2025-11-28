@@ -82,6 +82,11 @@ final deleteProductUseCaseProvider = Provider<DeleteProductUseCase>((ref) {
 /// 모든 목록 Provider가 자동으로 해당 상품을 제거합니다.
 final deletedProductIdProvider = StateProvider<int?>((ref) => null);
 
+/// 수정된 상품 이벤트 Provider (단일 소스)
+/// 상품 수정 시 이 Provider에 product를 설정하면
+/// 모든 목록 Provider가 자동으로 해당 상품을 업데이트합니다.
+final updatedProductProvider = StateProvider<pod.Product?>((ref) => null);
+
 /// Home Products Notifier Provider (홈 화면용 - 최근 상품 5개)
 final homeProductsNotifierProvider =
     StateNotifierProvider.autoDispose<ProductNotifier, ProductState>((ref) {
@@ -161,6 +166,7 @@ final updateProductNotifierProvider = StateNotifierProvider.autoDispose<
   final deleteImageUseCase = ref.watch(deleteImageUseCaseProvider);
   final updateProductUseCase = ref.watch(updateProductUseCaseProvider);
   return UpdateProductNotifier(
+    ref, // Ref 추가
     getProductDetailUseCase,
     uploadImageUseCase,
     deleteImageUseCase,

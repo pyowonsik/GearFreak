@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/s3/domain/usecase/delete_image_usecase.dart';
 import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
@@ -13,16 +14,21 @@ import 'package:gear_freak_flutter/feature/product/presentation/provider/update_
 class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
   /// 상품 수정 Notifier 생성자
   ///
+  /// [ref]는 Riverpod의 Ref 인스턴스입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase 인스턴스입니다.
   /// [uploadImageUseCase]는 이미지 업로드 UseCase 인스턴스입니다.
   /// [deleteImageUseCase]는 이미지 삭제 UseCase 인스턴스입니다.
   /// [updateProductUseCase]는 상품 수정 UseCase 인스턴스입니다.
   UpdateProductNotifier(
+    this.ref,
     this.getProductDetailUseCase,
     this.uploadImageUseCase,
     this.deleteImageUseCase,
     this.updateProductUseCase,
   ) : super(const UpdateProductInitial());
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 상품 상세 조회 UseCase
   final GetProductDetailUseCase getProductDetailUseCase;
@@ -54,7 +60,6 @@ class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
           debugPrint('✅ 상품 데이터 로딩 성공: ${product.id}');
           state = UpdateProductLoaded(
             product: product,
-            uploadedFileKeys: const [],
           );
         },
       );
@@ -221,9 +226,9 @@ class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
     required pod.ProductCondition condition,
     required String description,
     required pod.TradeMethod tradeMethod,
+    required List<String> existingImageUrls,
     String? baseAddress,
     String? detailAddress,
-    required List<String> existingImageUrls,
   }) async {
     final currentState = state;
     if (currentState is! UpdateProductLoaded) {
@@ -288,6 +293,13 @@ class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
             product: product,
             uploadedFileKeys: const [],
           );
+
+          // 수정 성공 시 이벤트 발행 (모든 목록 Provider가 자동으로 반응)
+          ref.read(updatedProductProvider.notifier).state = product;
+          // 이벤트 처리 후 초기화 (다음 수정을 위해)
+          Future.microtask(() {
+            ref.read(updatedProductProvider.notifier).state = null;
+          });
         },
       );
     } catch (e) {

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/search/domain/domain.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
 
@@ -8,8 +9,30 @@ import 'package:gear_freak_flutter/feature/search/presentation/provider/search_s
 class SearchNotifier extends StateNotifier<SearchState> {
   /// SearchNotifier 생성자
   ///
+  /// [ref]는 Riverpod의 Ref 인스턴스입니다.
   /// [searchProductsUseCase]는 상품 검색 UseCase 인스턴스입니다.
-  SearchNotifier(this.searchProductsUseCase) : super(const SearchInitial());
+  SearchNotifier(
+    this.ref,
+    this.searchProductsUseCase,
+  ) : super(const SearchInitial()) {
+    // 삭제 이벤트 감지하여 자동으로 목록에서 제거
+    ref
+      ..listen<int?>(deletedProductIdProvider, (previous, next) {
+        if (next != null) {
+          _removeProduct(next);
+        }
+      })
+
+      // 수정 이벤트 감지하여 자동으로 목록에서 업데이트
+      ..listen<pod.Product?>(updatedProductProvider, (previous, next) {
+        if (next != null) {
+          _updateProduct(next);
+        }
+      });
+  }
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 상품 검색 UseCase 인스턴스
   final SearchProductsUseCase searchProductsUseCase;
@@ -128,5 +151,117 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// 검색 초기화
   void clearSearch() {
     state = const SearchInitial();
+  }
+
+  /// 목록에서 상품 제거 (삭제 이벤트에 의해 자동 호출)
+  void _removeProduct(int productId) {
+    final currentState = state;
+    if (currentState is SearchLoaded) {
+      final updatedProducts = currentState.result.products
+          .where((product) => product.id != productId)
+          .toList();
+
+      // 상품이 실제로 제거되었는지 확인
+      if (updatedProducts.length < currentState.result.products.length) {
+        debugPrint('🗑️ [SearchNotifier] 상품 제거: productId=$productId '
+            '(${currentState.result.products.length}개 → ${updatedProducts.length}개)');
+
+        // totalCount도 감소
+        final updatedTotalCount =
+            (currentState.result.pagination.totalCount ?? 0) - 1;
+
+        // 업데이트된 결과 생성
+        final updatedResult = pod.PaginatedProductsResponseDto(
+          pagination: currentState.result.pagination.copyWith(
+            totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+            hasMore: updatedProducts.length < updatedTotalCount,
+          ),
+          products: updatedProducts,
+        );
+
+        state = SearchLoaded(
+          result: updatedResult,
+          query: currentState.query,
+        );
+      }
+    } else if (currentState is SearchLoadingMore) {
+      // 로딩 중 상태에서도 제거 처리
+      final updatedProducts = currentState.result.products
+          .where((product) => product.id != productId)
+          .toList();
+
+      if (updatedProducts.length < currentState.result.products.length) {
+        debugPrint('🗑️ [SearchNotifier] 상품 제거 (로딩 중): productId=$productId');
+
+        final updatedTotalCount =
+            (currentState.result.pagination.totalCount ?? 0) - 1;
+
+        final updatedResult = pod.PaginatedProductsResponseDto(
+          pagination: currentState.result.pagination.copyWith(
+            totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+            hasMore: updatedProducts.length < updatedTotalCount,
+          ),
+          products: updatedProducts,
+        );
+
+        state = SearchLoadingMore(
+          result: updatedResult,
+          query: currentState.query,
+        );
+      }
+    }
+  }
+
+  /// 목록에서 상품 수정 (수정 이벤트에 의해 자동 호출)
+  void _updateProduct(pod.Product updatedProduct) {
+    final currentState = state;
+
+    if (currentState is SearchLoaded) {
+      final updatedProducts = currentState.result.products.map((product) {
+        // 같은 ID면 새 데이터로 교체
+        return product.id == updatedProduct.id ? updatedProduct : product;
+      }).toList();
+
+      // 실제로 변경이 있었는지 확인
+      final hasChanges =
+          currentState.result.products.any((p) => p.id == updatedProduct.id);
+
+      if (hasChanges) {
+        debugPrint('✏️ [SearchNotifier] 상품 수정: productId=${updatedProduct.id}');
+
+        final updatedResult = pod.PaginatedProductsResponseDto(
+          pagination: currentState.result.pagination,
+          products: updatedProducts,
+        );
+
+        state = SearchLoaded(
+          result: updatedResult,
+          query: currentState.query,
+        );
+      }
+    } else if (currentState is SearchLoadingMore) {
+      // 로딩 중 상태에서도 수정 처리
+      final updatedProducts = currentState.result.products.map((product) {
+        return product.id == updatedProduct.id ? updatedProduct : product;
+      }).toList();
+
+      final hasChanges =
+          currentState.result.products.any((p) => p.id == updatedProduct.id);
+
+      if (hasChanges) {
+        debugPrint(
+            '✏️ [SearchNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}');
+
+        final updatedResult = pod.PaginatedProductsResponseDto(
+          pagination: currentState.result.pagination,
+          products: updatedProducts,
+        );
+
+        state = SearchLoadingMore(
+          result: updatedResult,
+          query: currentState.query,
+        );
+      }
+    }
   }
 }
