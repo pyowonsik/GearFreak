@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gear_freak_flutter/common/route/app_router_page.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_list_screen.dart';
 import 'package:gear_freak_flutter/feature/home/presentation/screen/home_screen.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/screen/create_product_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_screen.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/screen/search_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,10 @@ abstract class AppRoute {
   static final GlobalKey<NavigatorState> searchTabNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'search_tab');
 
+  /// - createTabNavigatorKey: 등록 탭 네비게이터 키
+  static final GlobalKey<NavigatorState> createTabNavigatorKey =
+      GlobalKey<NavigatorState>(debugLabel: 'create_tab');
+
   /// - chatTabNavigatorKey: 채팅 탭 네비게이터 키
   static final GlobalKey<NavigatorState> chatTabNavigatorKey =
       GlobalKey<NavigatorState>(debugLabel: 'chat_tab');
@@ -32,8 +37,9 @@ abstract class AppRoute {
   static List<GlobalKey<NavigatorState>> get branchNavigatorKeys => [
         homeTabNavigatorKey, // 인덱스 0: 홈 탭
         searchTabNavigatorKey, // 인덱스 1: 검색 탭
-        chatTabNavigatorKey, // 인덱스 2: 채팅 탭
-        profileTabNavigatorKey, // 인덱스 3: 프로필 탭
+        createTabNavigatorKey, // 인덱스 2: 등록 탭
+        chatTabNavigatorKey, // 인덱스 3: 채팅 탭
+        profileTabNavigatorKey, // 인덱스 4: 프로필 탭
       ];
 
   /// 메인 라우터 라우트 반환
@@ -42,11 +48,12 @@ abstract class AppRoute {
   /// StatefulShellRoute 정의 - 탭 간 화면 상태를 유지하는 라우트
   ///
   /// IndexedStack을 사용하여 각 탭의 상태를 유지하며,
-  /// 다음 4개의 주요 브랜치(탭)으로 구성됩니다:
+  /// 다음 5개의 주요 브랜치(탭)으로 구성됩니다:
   /// - 홈 탭 (인덱스 0)
   /// - 검색 탭 (인덱스 1)
-  /// - 채팅 탭 (인덱스 2)
-  /// - 프로필 탭 (인덱스 3)
+  /// - 등록 탭 (인덱스 2)
+  /// - 채팅 탭 (인덱스 3)
+  /// - 프로필 탭 (인덱스 4)
   static final RouteBase _statefulShellRoute = StatefulShellRoute.indexedStack(
     branches: [
       // 홈 탭 (인덱스 0)
@@ -75,7 +82,20 @@ abstract class AppRoute {
         ],
       ),
 
-      // 채팅 탭 (인덱스 2)
+      // 등록 탭 (인덱스 2)
+      StatefulShellBranch(
+        initialLocation: '/main/create',
+        navigatorKey: createTabNavigatorKey,
+        routes: [
+          GoRoute(
+            path: '/main/create',
+            name: 'create-product-tab',
+            builder: (context, state) => const CreateProductScreen(),
+          ),
+        ],
+      ),
+
+      // 채팅 탭 (인덱스 3)
       StatefulShellBranch(
         initialLocation: '/main/chat',
         navigatorKey: chatTabNavigatorKey,
@@ -88,7 +108,7 @@ abstract class AppRoute {
         ],
       ),
 
-      // 프로필 탭 (인덱스 3)
+      // 프로필 탭 (인덱스 4)
       StatefulShellBranch(
         initialLocation: '/main/profile',
         navigatorKey: profileTabNavigatorKey,

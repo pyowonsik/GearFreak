@@ -50,6 +50,11 @@ class AppRouterPage extends StatelessWidget {
               label: '검색',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_outline, size: 32),
+              activeIcon: Icon(Icons.add_circle, size: 32),
+              label: '등록',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.chat_bubble_outline),
               activeIcon: Icon(Icons.chat_bubble),
               label: '채팅',

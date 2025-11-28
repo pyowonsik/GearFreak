@@ -13,6 +13,7 @@ class SearchRemoteDataSource {
     required String query,
     int page = 1,
     int limit = 20,
+    pod.ProductSortBy? sortBy,
   }) async {
     try {
       // getPaginatedProducts를 재사용하여 title로 필터링
@@ -20,6 +21,7 @@ class SearchRemoteDataSource {
         page: page,
         limit: limit,
         title: query.trim().isNotEmpty ? query.trim() : null,
+        sortBy: sortBy,
       );
 
       return await _client.product.getPaginatedProducts(pagination);

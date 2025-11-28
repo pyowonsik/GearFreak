@@ -17,11 +17,13 @@ class SearchRepositoryImpl implements SearchRepository {
     required String query,
     int page = 1,
     int limit = 20,
+    pod.ProductSortBy? sortBy,
   }) async {
     return remoteDataSource.searchProducts(
       query: query,
       page: page,
       limit: limit,
+      sortBy: sortBy,
     );
   }
 }

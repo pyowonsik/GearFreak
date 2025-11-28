@@ -28,6 +28,7 @@ class SearchProductsUseCase
         query: param.query,
         page: param.page,
         limit: param.limit,
+        sortBy: param.sortBy, // ⭐ sortBy 전달 추가
       );
       return Right(result);
     } on Exception catch (e) {
@@ -48,10 +49,12 @@ class SearchProductsParams {
   /// [query]는 검색 쿼리입니다.
   /// [page]는 페이지 번호입니다.
   /// [limit]는 페이지당 아이템 수입니다.
+  /// [sortBy]는 정렬 기준입니다.
   const SearchProductsParams({
     required this.query,
     this.page = 1,
     this.limit = 20,
+    this.sortBy,
   });
 
   /// 검색 쿼리
@@ -62,4 +65,7 @@ class SearchProductsParams {
 
   /// 페이지당 아이템 수
   final int limit;
+
+  /// 정렬 기준
+  final pod.ProductSortBy? sortBy;
 }

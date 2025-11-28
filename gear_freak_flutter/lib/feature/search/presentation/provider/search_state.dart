@@ -28,9 +28,11 @@ class SearchLoaded extends SearchState {
   ///
   /// [result]는 검색 결과입니다.
   /// [query]는 검색 쿼리입니다.
+  /// [sortBy]는 정렬 기준입니다.
   const SearchLoaded({
     required this.result,
     required this.query,
+    this.sortBy,
   });
 
   /// 검색 결과
@@ -38,6 +40,9 @@ class SearchLoaded extends SearchState {
 
   /// 검색 쿼리
   final String query;
+
+  /// 정렬 기준
+  final pod.ProductSortBy? sortBy;
 }
 
 /// 검색 추가 로딩 중 상태 (기존 데이터 유지)
@@ -46,9 +51,11 @@ class SearchLoadingMore extends SearchState {
   ///
   /// [result]는 검색 결과입니다.
   /// [query]는 검색 쿼리입니다.
+  /// [sortBy]는 정렬 기준입니다.
   const SearchLoadingMore({
     required this.result,
     required this.query,
+    this.sortBy,
   });
 
   /// 검색 결과
@@ -56,6 +63,9 @@ class SearchLoadingMore extends SearchState {
 
   /// 검색 쿼리
   final String query;
+
+  /// 정렬 기준
+  final pod.ProductSortBy? sortBy;
 }
 
 /// 검색 실패 상태

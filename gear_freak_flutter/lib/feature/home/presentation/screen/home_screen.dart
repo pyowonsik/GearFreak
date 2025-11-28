@@ -738,13 +738,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ProductInitial() => const Center(child: CircularProgressIndicator()),
       },
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/product/create');
-        },
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
   }
 }

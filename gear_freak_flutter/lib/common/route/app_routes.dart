@@ -3,7 +3,6 @@ import 'package:gear_freak_flutter/feature/auth/presentation/screen/login_screen
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/signup_screen.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_screen.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_screen.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/screen/create_product_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -44,13 +43,6 @@ abstract final class AppRoutes {
 
         // 메인 화면 (탭 네비게이션) - StatefulShellRoute
         AppRoute.base,
-
-        // 상품 등록 화면 (동적 라우트보다 먼저 정의해야 함)
-        GoRoute(
-          path: '/product/create',
-          name: 'create-product',
-          builder: (context, state) => const CreateProductScreen(),
-        ),
 
         // 상품 수정 화면
         GoRoute(

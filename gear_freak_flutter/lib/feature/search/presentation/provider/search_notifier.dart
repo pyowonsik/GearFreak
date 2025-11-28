@@ -38,7 +38,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
   final SearchProductsUseCase searchProductsUseCase;
 
   /// 상품 검색 (첫 페이지)
-  Future<void> searchProducts(String query) async {
+  Future<void> searchProducts(String query, {pod.ProductSortBy? sortBy}) async {
     if (query.trim().isEmpty) {
       state = const SearchInitial();
       return;
@@ -46,9 +46,10 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
     state = SearchLoading(query);
 
-    debugPrint('🔄 [SearchNotifier] 검색 요청: query="$query", page=1, limit=20');
+    debugPrint(
+        '🔄 [SearchNotifier] 검색 요청: query="$query", page=1, limit=20, sortBy=$sortBy');
     final result = await searchProductsUseCase(
-      SearchProductsParams(query: query),
+      SearchProductsParams(query: query, sortBy: sortBy),
     );
 
     result.fold(
@@ -65,6 +66,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = SearchLoaded(
           result: searchResult,
           query: query,
+          sortBy: sortBy,
         );
       },
     );
@@ -105,12 +107,14 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = SearchLoadingMore(
       result: currentResult,
       query: currentState.query,
+      sortBy: currentState.sortBy,
     );
 
     final result = await searchProductsUseCase(
       SearchProductsParams(
         query: currentState.query,
         page: nextPage,
+        sortBy: currentState.sortBy,
       ),
     );
 
@@ -121,6 +125,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = SearchLoaded(
           result: currentResult,
           query: currentState.query,
+          sortBy: currentState.sortBy,
         );
       },
       (newResult) {
@@ -143,6 +148,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = SearchLoaded(
           result: updatedResult,
           query: currentState.query,
+          sortBy: currentState.sortBy,
         );
       },
     );
@@ -182,6 +188,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = SearchLoaded(
           result: updatedResult,
           query: currentState.query,
+          sortBy: currentState.sortBy,
         );
       }
     } else if (currentState is SearchLoadingMore) {
@@ -207,6 +214,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = SearchLoadingMore(
           result: updatedResult,
           query: currentState.query,
+          sortBy: currentState.sortBy,
         );
       }
     }
@@ -237,6 +245,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = SearchLoaded(
           result: updatedResult,
           query: currentState.query,
+          sortBy: currentState.sortBy,
         );
       }
     } else if (currentState is SearchLoadingMore) {
@@ -260,6 +269,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = SearchLoadingMore(
           result: updatedResult,
           query: currentState.query,
+          sortBy: currentState.sortBy,
         );
       }
     }
