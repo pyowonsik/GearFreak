@@ -26,6 +26,51 @@ showDialog(
 );
 ```
 
+## SnackBar 사용 규칙
+
+- 프로젝트에서 사용하는 모든 스낵바는 `GbSnackBar`를 사용해야 합니다.
+- `ScaffoldMessenger.of(context).showSnackBar()`와 `SnackBar`를 직접 사용하지 말고, `GbSnackBar`의 static 메서드를 사용하세요.
+- `GbSnackBar`는 `lib/common/component/gb_snackbar.dart`에 위치합니다.
+
+### 사용 예시
+
+```dart
+// ✅ 올바른 사용 - 성공 메시지
+GbSnackBar.showSuccess(context, '상품이 등록되었습니다');
+
+// ✅ 올바른 사용 - 에러 메시지
+GbSnackBar.showError(context, '상품 삭제에 실패했습니다');
+
+// ✅ 올바른 사용 - 경고 메시지
+GbSnackBar.showWarning(context, '최소 1장의 이미지를 추가해주세요');
+
+// ✅ 올바른 사용 - 정보 메시지
+GbSnackBar.showInfo(context, '이미지는 최대 10장까지 추가할 수 있습니다');
+
+// ✅ 올바른 사용 - 커스텀 타입 및 duration
+GbSnackBar.show(
+  context,
+  '메시지',
+  type: GbSnackBarType.success,
+  duration: const Duration(seconds: 3),
+);
+
+// ❌ 잘못된 사용
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: Text('메시지'),
+    backgroundColor: Colors.red,
+  ),
+);
+```
+
+### 스낵바 타입
+
+- `GbSnackBar.showSuccess()`: 성공 메시지 (초록색, 체크 아이콘)
+- `GbSnackBar.showError()`: 에러 메시지 (빨간색, 에러 아이콘, 기본 3초)
+- `GbSnackBar.showWarning()`: 경고 메시지 (주황색, 경고 아이콘)
+- `GbSnackBar.showInfo()`: 정보 메시지 (파란색, 정보 아이콘)
+
 ## Clean Architecture 패턴
 
 프로젝트는 **Clean Architecture**를 엄격하게 따릅니다. 모든 API 호출은 다음 레이어 구조를 따라야 합니다:

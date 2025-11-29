@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
@@ -98,20 +99,10 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
 
         if (next is UpdateProductUploadError) {
           // 업로드 에러 상태일 때만 스낵바 표시
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(next.error),
-              backgroundColor: Colors.red,
-            ),
-          );
+          GbSnackBar.showError(context, next.error);
         } else if (next is UpdateProductUpdateError) {
           // 수정 에러 상태일 때 스낵바 표시
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(next.error),
-              backgroundColor: Colors.red,
-            ),
-          );
+          GbSnackBar.showError(context, next.error);
         } else if (next is UpdateProductUpdated) {
           // 상품 수정 성공 시 상세 화면 상태 새로고침 후 화면 닫기
           final productId = int.tryParse(widget.productId);
@@ -285,11 +276,9 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
         });
       } else if (currentState is UpdateProductUploadError) {
         // 업로드 실패 시 해당 이미지 건너뛰기
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${image.name} 업로드 실패: ${currentState.error}'),
-            backgroundColor: Colors.red,
-          ),
+        GbSnackBar.showError(
+          context,
+          '${image.name} 업로드 실패: ${currentState.error}',
         );
         break; // 실패 시 중단
       }
@@ -343,35 +332,27 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
 
     final totalImageCount = _existingImageUrls.length + _newImageFiles.length;
     if (totalImageCount == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('최소 1장의 이미지를 추가해주세요')),
-      );
+      GbSnackBar.showWarning(context, '최소 1장의 이미지를 추가해주세요');
       return;
     }
 
     if (isDirectTrade(_selectedTradeMethod) &&
         (_baseAddress == null || _baseAddress!.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('주소를 검색해주세요')),
-      );
+      GbSnackBar.showWarning(context, '주소를 검색해주세요');
       return;
     }
 
     // 가격 파싱
     final price = int.tryParse(_priceController.text);
     if (price == null || price <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('올바른 가격을 입력해주세요')),
-      );
+      GbSnackBar.showWarning(context, '올바른 가격을 입력해주세요');
       return;
     }
 
     // 상품 수정 API 호출
     final productId = int.tryParse(widget.productId);
     if (productId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('상품 ID가 유효하지 않습니다')),
-      );
+      GbSnackBar.showError(context, '상품 ID가 유효하지 않습니다');
       return;
     }
 

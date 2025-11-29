@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/component/gb_dialog.dart';
+import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -225,12 +226,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       // 로그아웃 실패 시 에러 메시지 표시
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('로그아웃 실패: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      GbSnackBar.showError(context, '로그아웃 실패: $e');
     }
   }
 }

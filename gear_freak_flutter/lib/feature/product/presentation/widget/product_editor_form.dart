@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/product_basic_info_section_widget.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/product_image_section_widget.dart';
@@ -132,9 +133,7 @@ class _ProductEditorFormState extends State<ProductEditorForm> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('주소 검색 중 오류가 발생했습니다: $e')),
-        );
+        GbSnackBar.showError(context, '주소 검색 중 오류가 발생했습니다: $e');
       }
     }
   }
@@ -145,9 +144,7 @@ class _ProductEditorFormState extends State<ProductEditorForm> {
         widget.existingImageUrls.length + widget.newImageFiles.length;
     final remainingSlots = 10 - totalImageCount;
     if (remainingSlots <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지는 최대 10장까지 추가할 수 있습니다')),
-      );
+      GbSnackBar.showWarning(context, '이미지는 최대 10장까지 추가할 수 있습니다');
       return;
     }
 
@@ -164,12 +161,9 @@ class _ProductEditorFormState extends State<ProductEditorForm> {
       // 남은 슬롯만큼만 선택
       final imagesToAdd = images.take(remainingSlots).toList();
       if (images.length > remainingSlots) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '이미지는 최대 10장까지 추가할 수 있습니다. $remainingSlots장만 추가됩니다.',
-            ),
-          ),
+        GbSnackBar.showInfo(
+          context,
+          '이미지는 최대 10장까지 추가할 수 있습니다. $remainingSlots장만 추가됩니다.',
         );
       }
 
@@ -177,9 +171,7 @@ class _ProductEditorFormState extends State<ProductEditorForm> {
       await widget.onAddImage(imagesToAdd);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('이미지를 선택하는 중 오류가 발생했습니다: $e')),
-        );
+        GbSnackBar.showError(context, '이미지를 선택하는 중 오류가 발생했습니다: $e');
       }
     }
   }

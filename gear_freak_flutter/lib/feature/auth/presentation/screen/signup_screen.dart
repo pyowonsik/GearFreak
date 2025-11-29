@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:go_router/go_router.dart';
@@ -41,11 +42,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
 
     if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('서비스 약관 및 개인정보 처리방침에 동의해주세요'),
-          backgroundColor: Color(0xFFEF4444),
-        ),
+      GbSnackBar.showWarning(
+        context,
+        '서비스 약관 및 개인정보 처리방침에 동의해주세요',
       );
       return;
     }
@@ -68,12 +67,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         context.go('/main/home');
       case AuthError(:final message):
         // 에러 메시지 표시
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('회원가입 실패: $message'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
-        );
+        GbSnackBar.showError(context, '회원가입 실패: $message');
       case AuthInitial():
       case AuthLoading():
       case AuthUnauthenticated():

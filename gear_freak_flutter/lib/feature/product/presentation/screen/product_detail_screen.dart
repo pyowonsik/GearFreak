@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/component/gb_dialog.dart';
+import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/product_utils.dart';
 import 'package:gear_freak_flutter/common/utils/share_utils.dart';
@@ -87,12 +88,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     if (productData.id == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('상품 ID가 유효하지 않습니다'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        GbSnackBar.showError(context, '상품 ID가 유효하지 않습니다');
       }
       return;
     }
@@ -106,11 +102,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       if (deleteResult) {
         // 삭제 성공 시 이벤트는 ProductDetailNotifier에서 자동 발행됨
         // 모든 목록 Provider가 자동으로 해당 상품을 제거합니다
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('상품이 삭제되었습니다'),
-          ),
-        );
+        GbSnackBar.showSuccess(context, '상품이 삭제되었습니다');
         // 상품 상세 화면 닫기
         if (context.canPop()) {
           context.pop();
@@ -120,12 +112,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         }
       } else {
         // 삭제 실패
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('상품 삭제에 실패했습니다'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        GbSnackBar.showError(context, '상품 삭제에 실패했습니다');
       }
     }
   }

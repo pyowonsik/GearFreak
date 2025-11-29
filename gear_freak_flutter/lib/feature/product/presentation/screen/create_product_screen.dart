@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
@@ -54,31 +55,16 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
 
         if (next is CreateProductUploadError) {
           // 업로드 에러 상태일 때만 스낵바 표시
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(next.error),
-              backgroundColor: Colors.red,
-            ),
-          );
+          GbSnackBar.showError(context, next.error);
         } else if (next is CreateProductCreateError) {
           // 상품 생성 에러 상태일 때 스낵바 표시
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(next.error),
-              backgroundColor: Colors.red,
-            ),
-          );
+          GbSnackBar.showError(context, next.error);
         } else if (next is CreateProductCreated) {
           // 상품 생성 성공 시 생성된 상품의 상세 페이지로 이동
           final product = next.product;
           if (product.id != null) {
             context.go('/product/${product.id}');
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('상품이 등록되었습니다'),
-                duration: Duration(seconds: 2),
-              ),
-            );
+            GbSnackBar.showSuccess(context, '상품이 등록되었습니다');
           } else {
             // id가 없으면 홈으로
             context.pop();
@@ -185,11 +171,9 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
         });
       } else if (currentState is CreateProductUploadError) {
         // 업로드 실패 시 해당 이미지 건너뛰기
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${image.name} 업로드 실패: ${currentState.error}'),
-            backgroundColor: Colors.red,
-          ),
+        GbSnackBar.showError(
+          context,
+          '${image.name} 업로드 실패: ${currentState.error}',
         );
         break; // 실패 시 중단
       }
@@ -223,35 +207,27 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
     }
 
     if (_selectedImages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('최소 1장의 이미지를 추가해주세요')),
-      );
+      GbSnackBar.showWarning(context, '최소 1장의 이미지를 추가해주세요');
       return;
     }
 
     if (isDirectTrade(_selectedTradeMethod) &&
         (_baseAddress == null || _baseAddress!.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('주소를 검색해주세요')),
-      );
+      GbSnackBar.showWarning(context, '주소를 검색해주세요');
       return;
     }
 
     // 가격 파싱
     final price = int.tryParse(_priceController.text);
     if (price == null || price <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('올바른 가격을 입력해주세요')),
-      );
+      GbSnackBar.showWarning(context, '올바른 가격을 입력해주세요');
       return;
     }
 
     // 업로드된 이미지가 있는지 확인
     final currentState = ref.read(createProductNotifierProvider);
     if (currentState.uploadedFileKeys.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지 업로드를 완료해주세요')),
-      );
+      GbSnackBar.showWarning(context, '이미지 업로드를 완료해주세요');
       return;
     }
 
