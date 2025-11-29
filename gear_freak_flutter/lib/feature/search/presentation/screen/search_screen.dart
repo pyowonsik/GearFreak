@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/view/gb_empty_view.dart';
 import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
 import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/home/presentation/component/product_sort_header_component.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
@@ -25,38 +25,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   bool _showRecentSearches = false;
-
-  /// 정렬 옵션 문자열을 ProductSortBy enum으로 변환
-  pod.ProductSortBy? _getSortByFromString(String sortString) {
-    switch (sortString) {
-      case '최신순':
-        return pod.ProductSortBy.latest;
-      case '인기순':
-        return pod.ProductSortBy.popular;
-      case '낮은 가격순':
-        return pod.ProductSortBy.priceAsc;
-      case '높은 가격순':
-        return pod.ProductSortBy.priceDesc;
-      default:
-        return null;
-    }
-  }
-
-  /// ProductSortBy enum을 문자열로 변환
-  String _getStringFromSortBy(pod.ProductSortBy? sortBy) {
-    switch (sortBy) {
-      case pod.ProductSortBy.latest:
-        return '최신순';
-      case pod.ProductSortBy.popular:
-        return '인기순';
-      case pod.ProductSortBy.priceAsc:
-        return '낮은 가격순';
-      case pod.ProductSortBy.priceDesc:
-        return '높은 가격순';
-      default:
-        return '최신순';
-    }
-  }
 
   @override
   void initState() {
@@ -322,125 +290,70 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             }
           },
         ),
-      SearchLoaded(:final result, :final query, :final sortBy) => result
-              .products.isEmpty
-          ? const GbEmptyView(
-              icon: Icons.search_off,
-              message: '검색 결과가 없습니다',
-            )
-          : RefreshIndicator(
-              onRefresh: () async {
-                await ref
-                    .read(searchNotifierProvider.notifier)
-                    .searchProducts(query, sortBy: sortBy);
-              },
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 검색 결과 목록
-                    Container(
-                      color: Colors.white,
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '전체 ${result.pagination.totalCount ?? 0}개',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1F2937),
-                                ),
-                              ),
-                              PopupMenuButton<String>(
-                                initialValue: _getStringFromSortBy(sortBy),
-                                onSelected: (value) async {
-                                  final newSortBy = _getSortByFromString(value);
-                                  await ref
-                                      .read(searchNotifierProvider.notifier)
-                                      .searchProducts(query, sortBy: newSortBy);
-                                },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(
-                                    value: '최신순',
-                                    child: Text('최신순'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: '인기순',
-                                    child: Text('인기순'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: '낮은 가격순',
-                                    child: Text('낮은 가격순'),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: '높은 가격순',
-                                    child: Text('높은 가격순'),
-                                  ),
-                                ],
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        _getStringFromSortBy(sortBy),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xFF2563EB),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      const Icon(
-                                        Icons.arrow_drop_down,
-                                        size: 20,
-                                        color: Color(0xFF2563EB),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: result.products.length,
-                            itemBuilder: (context, index) {
-                              final product = result.products[index];
-                              return ProductCardWidget(product: product);
-                            },
-                          ),
-                          // 더 불러올 데이터가 있으면 로딩 인디케이터 표시
-                          if (result.pagination.hasMore ?? false)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              ),
+      SearchLoaded(:final result, :final query, :final sortBy) =>
+        result.products.isEmpty
+            ? const GbEmptyView(
+                icon: Icons.search_off,
+                message: '검색 결과가 없습니다',
+              )
+            : RefreshIndicator(
+                onRefresh: () async {
+                  await ref
+                      .read(searchNotifierProvider.notifier)
+                      .searchProducts(query, sortBy: sortBy);
+                },
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 검색 결과 목록
+                      Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ProductSortHeaderComponent(
+                              totalCount: result.pagination.totalCount ?? 0,
+                              sortBy: sortBy,
+                              onSortChanged: (newSortBy) async {
+                                await ref
+                                    .read(searchNotifierProvider.notifier)
+                                    .searchProducts(query, sortBy: newSortBy);
+                              },
                             ),
-                        ],
+                            const SizedBox(height: 12),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: result.products.length,
+                              itemBuilder: (context, index) {
+                                final product = result.products[index];
+                                return ProductCardWidget(product: product);
+                              },
+                            ),
+                            // 더 불러올 데이터가 있으면 로딩 인디케이터 표시
+                            if (result.pagination.hasMore ?? false)
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
       SearchLoadingMore(:final result, :final query, :final sortBy) =>
         RefreshIndicator(
           onRefresh: () async {
@@ -460,69 +373,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '전체 ${result.pagination.totalCount ?? 0}개',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937),
-                            ),
-                          ),
-                          PopupMenuButton<String>(
-                            initialValue: _getStringFromSortBy(sortBy),
-                            onSelected: (value) async {
-                              final newSortBy = _getSortByFromString(value);
-                              await ref
-                                  .read(searchNotifierProvider.notifier)
-                                  .searchProducts(query, sortBy: newSortBy);
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: '최신순',
-                                child: Text('최신순'),
-                              ),
-                              const PopupMenuItem(
-                                value: '인기순',
-                                child: Text('인기순'),
-                              ),
-                              const PopupMenuItem(
-                                value: '낮은 가격순',
-                                child: Text('낮은 가격순'),
-                              ),
-                              const PopupMenuItem(
-                                value: '높은 가격순',
-                                child: Text('높은 가격순'),
-                              ),
-                            ],
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    _getStringFromSortBy(sortBy),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF2563EB),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(
-                                    Icons.arrow_drop_down,
-                                    size: 20,
-                                    color: Color(0xFF2563EB),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                      ProductSortHeaderComponent(
+                        totalCount: result.pagination.totalCount ?? 0,
+                        sortBy: sortBy,
+                        onSortChanged: (newSortBy) async {
+                          await ref
+                              .read(searchNotifierProvider.notifier)
+                              .searchProducts(query, sortBy: newSortBy);
+                        },
                       ),
                       const SizedBox(height: 12),
                       ListView.builder(

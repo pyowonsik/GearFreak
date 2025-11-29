@@ -1,0 +1,78 @@
+import 'package:flutter/material.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/domain.dart';
+
+/// 프로필 정보 섹션 위젯
+class ProfileInfoSectionWidget extends StatelessWidget {
+  /// ProfileInfoSectionWidget 생성자
+  ///
+  /// [profile]는 프로필 정보입니다.
+  /// [onEditProfile]는 프로필 편집 버튼 클릭 콜백입니다.
+  const ProfileInfoSectionWidget({
+    required this.profile,
+    this.onEditProfile,
+    super.key,
+  });
+
+  /// 프로필 정보
+  final UserProfile profile;
+
+  /// 프로필 편집 버튼 클릭 콜백
+  final VoidCallback? onEditProfile;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 40,
+            backgroundColor: const Color(0xFFF3F4F6),
+            child: Icon(
+              Icons.person,
+              size: 48,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  profile.nickname,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  profile.email,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: onEditProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('프로필 편집'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
