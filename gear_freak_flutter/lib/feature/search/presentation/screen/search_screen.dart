@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_empty_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_error_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
@@ -172,25 +175,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     if (searchState is SearchInitial) {
       final recentSearches = searchState.recentSearches;
       if (recentSearches.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.search,
-                size: 64,
-                color: Colors.grey.shade300,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '상품을 검색해보세요',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-            ],
-          ),
+        return const GbEmptyView(
+          icon: Icons.search,
+          message: '상품을 검색해보세요',
         );
       }
       return _buildRecentSearchesList(recentSearches);
@@ -201,28 +188,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       future: ref.read(searchNotifierProvider.notifier).getRecentSearches(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const GbLoadingView();
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.search,
-                  size: 64,
-                  color: Colors.grey.shade300,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '상품을 검색해보세요',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-              ],
-            ),
+          return const GbEmptyView(
+            icon: Icons.search,
+            message: '상품을 검색해보세요',
           );
         }
         return _buildRecentSearchesList(snapshot.data!);
@@ -340,52 +311,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             ],
           ),
         ),
-      SearchLoading() => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      SearchError(:final message, :final query) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '에러: $message',
-                style: const TextStyle(color: Colors.red),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  if (query != null) {
-                    ref
-                        .read(searchNotifierProvider.notifier)
-                        .searchProducts(query, sortBy: null);
-                  }
-                },
-                child: const Text('다시 시도'),
-              ),
-            ],
-          ),
+      SearchLoading() => const GbLoadingView(),
+      SearchError(:final message, :final query) => GbErrorView(
+          message: '에러: $message',
+          onRetry: () {
+            if (query != null) {
+              ref
+                  .read(searchNotifierProvider.notifier)
+                  .searchProducts(query, sortBy: null);
+            }
+          },
         ),
       SearchLoaded(:final result, :final query, :final sortBy) => result
               .products.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 64,
-                    color: Colors.grey.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '검색 결과가 없습니다',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ],
-              ),
+          ? const GbEmptyView(
+              icon: Icons.search_off,
+              message: '검색 결과가 없습니다',
             )
           : RefreshIndicator(
               onRefresh: () async {

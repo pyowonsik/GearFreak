@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_empty_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_error_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
-import 'package:go_router/go_router.dart';
 
 /// 홈 화면
 class HomeScreen extends ConsumerStatefulWidget {
@@ -198,28 +200,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ],
       ),
       body: switch (productState) {
-        ProductLoading() => const Center(child: CircularProgressIndicator()),
-        ProductError(:final message) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  message,
-                  style: const TextStyle(fontSize: 16, color: Colors.red),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    ref
-                        .read(productNotifierProvider.notifier)
-                        .loadPaginatedProducts(limit: 20);
-                  },
-                  child: const Text('다시 시도'),
-                ),
-              ],
-            ),
+        ProductLoading() => const GbLoadingView(),
+        ProductError(:final message) => GbErrorView(
+            message: message,
+            onRetry: () {
+              ref
+                  .read(productNotifierProvider.notifier)
+                  .loadPaginatedProducts(limit: 20);
+            },
           ),
         ProductPaginatedLoaded(
           :final products,
@@ -434,16 +422,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                         if (products.isEmpty)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(32),
-                              child: Text(
-                                '등록된 상품이 없습니다',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF9CA3AF),
-                                ),
-                              ),
+                          const Padding(
+                            padding: EdgeInsets.all(32),
+                            child: const GbEmptyView(
+                              message: '등록된 상품이 없습니다',
                             ),
                           )
                         else
@@ -695,16 +677,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         const SizedBox(height: 12),
                         if (products.isEmpty)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(32),
-                              child: Text(
-                                '등록된 상품이 없습니다',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF9CA3AF),
-                                ),
-                              ),
+                          const Padding(
+                            padding: EdgeInsets.all(32),
+                            child: const GbEmptyView(
+                              message: '등록된 상품이 없습니다',
                             ),
                           )
                         else
@@ -736,7 +712,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
           ),
-        ProductInitial() => const Center(child: CircularProgressIndicator()),
+        ProductInitial() => const GbLoadingView(),
       },
     );
   }

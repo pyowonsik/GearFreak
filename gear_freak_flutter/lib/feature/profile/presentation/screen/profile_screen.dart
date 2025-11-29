@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/component/gb_dialog.dart';
+import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
 import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
@@ -41,7 +42,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ],
       ),
       body: profileState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const GbLoadingView()
           : profileState.profile == null
               ? const Center(child: Text('프로필을 불러올 수 없습니다'))
               : SingleChildScrollView(

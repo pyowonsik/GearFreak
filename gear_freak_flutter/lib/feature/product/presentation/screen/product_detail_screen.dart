@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/component/gb_dialog.dart';
+import 'package:gear_freak_flutter/common/component/gb_error_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
 import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/product_utils.dart';
@@ -72,7 +74,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   /// 삭제 처리
-  Future<void> _handleDelete(BuildContext context, pod.Product productData) async {
+  Future<void> _handleDelete(
+      BuildContext context, pod.Product productData) async {
     final shouldDelete = await GbDialog.show(
       context: context,
       title: '상품 삭제',
@@ -124,32 +127,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     return switch (productDetailState) {
       ProductDetailLoading() => Scaffold(
           appBar: AppBar(),
-          body: const Center(child: CircularProgressIndicator()),
+          body: const GbLoadingView(),
         ),
       ProductDetailError(:final message) => Scaffold(
           appBar: AppBar(),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  message,
-                  style: const TextStyle(fontSize: 16, color: Colors.red),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    final id = int.parse(widget.productId);
-                    ref
-                        .read(productDetailNotifierProvider.notifier)
-                        .loadProductDetail(id);
-                  },
-                  child: const Text('다시 시도'),
-                ),
-              ],
-            ),
+          body: GbErrorView(
+            message: message,
+            onRetry: () {
+              final id = int.parse(widget.productId);
+              ref
+                  .read(productDetailNotifierProvider.notifier)
+                  .loadProductDetail(id);
+            },
           ),
         ),
       ProductDetailLoaded(:final product, :final seller, :final isFavorite) =>
@@ -161,7 +150,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ),
       ProductDetailInitial() => Scaffold(
           appBar: AppBar(),
-          body: const Center(child: CircularProgressIndicator()),
+          body: const GbLoadingView(),
         ),
     };
   }

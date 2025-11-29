@@ -71,6 +71,140 @@ ScaffoldMessenger.of(context).showSnackBar(
 - `GbSnackBar.showWarning()`: 경고 메시지 (주황색, 경고 아이콘)
 - `GbSnackBar.showInfo()`: 정보 메시지 (파란색, 정보 아이콘)
 
+## ErrorView 사용 규칙
+
+- 프로젝트에서 사용하는 모든 에러 상태 표시는 `GbErrorView`를 사용해야 합니다.
+- 에러 아이콘, 메시지, "다시 시도" 버튼을 직접 구성하지 말고, `GbErrorView` 위젯을 사용하세요.
+- `GbErrorView`는 `lib/common/component/gb_error_view.dart`에 위치합니다.
+
+### 사용 예시
+
+```dart
+// ✅ 올바른 사용 - 기본 에러 뷰
+GbErrorView(
+  message: '상품을 불러올 수 없습니다',
+  onRetry: () {
+    ref.read(productNotifierProvider.notifier).loadProducts();
+  },
+)
+
+// ✅ 올바른 사용 - 제목과 뒤로 가기 버튼 포함
+GbErrorView(
+  title: '오류가 발생했습니다',
+  message: '상품을 불러오는 중 오류가 발생했습니다',
+  onRetry: () {
+    ref.read(productNotifierProvider.notifier).loadProduct(id);
+  },
+  showBackButton: true,
+  onBack: () => context.pop(),
+)
+
+// ❌ 잘못된 사용
+Center(
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(Icons.error_outline, size: 64, color: Colors.red),
+      Text('에러 메시지'),
+      ElevatedButton(
+        onPressed: () {},
+        child: Text('다시 시도'),
+      ),
+    ],
+  ),
+)
+```
+
+### GbErrorView 파라미터
+
+- `message` (필수): 에러 메시지
+- `onRetry` (필수): 다시 시도 버튼 클릭 시 호출되는 콜백
+- `title` (선택): 에러 제목
+- `showBackButton` (선택, 기본값: false): 뒤로 가기 버튼 표시 여부
+- `onBack` (선택): 뒤로 가기 버튼 클릭 시 호출되는 콜백 (showBackButton이 true일 때 필수)
+- `icon` (선택, 기본값: Icons.error_outline): 에러 아이콘
+- `iconSize` (선택, 기본값: 64): 아이콘 크기
+- `iconColor` (선택, 기본값: Colors.red): 아이콘 색상
+
+**참고**: 제목과 메시지 스타일은 프로젝트 전반에서 통일된 스타일을 사용합니다.
+- 제목: `TextStyle(fontSize: 20, fontWeight: FontWeight.bold)`
+- 메시지: `TextStyle(fontSize: 16, color: Colors.red)`
+
+## EmptyView 사용 규칙
+
+- 프로젝트에서 사용하는 모든 빈 상태 표시는 `GbEmptyView`를 사용해야 합니다.
+- 빈 상태 아이콘, 메시지를 직접 구성하지 말고, `GbEmptyView` 위젯을 사용하세요.
+- `GbEmptyView`는 `lib/common/component/gb_empty_view.dart`에 위치합니다.
+
+### 사용 예시
+
+```dart
+// ✅ 올바른 사용 - 아이콘과 메시지
+const GbEmptyView(
+  icon: Icons.search,
+  message: '상품을 검색해보세요',
+)
+
+// ✅ 올바른 사용 - 메시지만 (아이콘 없음)
+const GbEmptyView(
+  message: '등록된 상품이 없습니다',
+)
+
+// ✅ 올바른 사용 - 커스텀 아이콘 색상
+const GbEmptyView(
+  icon: Icons.search_off,
+  message: '검색 결과가 없습니다',
+  iconSize: 64,
+  iconColor: Colors.grey,
+)
+
+// ❌ 잘못된 사용
+Center(
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(Icons.search, size: 64, color: Colors.grey.shade300),
+      const SizedBox(height: 16),
+      Text('상품을 검색해보세요'),
+    ],
+  ),
+)
+```
+
+### GbEmptyView 파라미터
+
+- `message` (필수): 빈 상태 메시지
+- `icon` (선택): 빈 상태 아이콘 (없으면 아이콘 표시 안 함)
+- `iconSize` (선택, 기본값: 64): 아이콘 크기
+- `iconColor` (선택, 기본값: Colors.grey.shade300): 아이콘 색상
+
+**참고**: 메시지 스타일은 프로젝트 전반에서 통일된 스타일을 사용합니다 (fontSize: 16, color: Color(0xFF9CA3AF)).
+
+## LoadingView 사용 규칙
+
+- 프로젝트에서 사용하는 모든 전체 화면 로딩 표시는 `GbLoadingView`를 사용해야 합니다.
+- `Center(child: CircularProgressIndicator())`를 직접 사용하지 말고, `GbLoadingView` 위젯을 사용하세요.
+- `GbLoadingView`는 `lib/common/component/gb_loading_view.dart`에 위치합니다.
+
+### 사용 예시
+
+```dart
+// ✅ 올바른 사용 - 기본 로딩 뷰
+const GbLoadingView()
+
+// ✅ 올바른 사용 - 메시지가 있는 로딩 뷰
+const GbLoadingView(
+  message: '데이터를 불러오는 중...',
+)
+
+// ❌ 잘못된 사용
+Center(child: CircularProgressIndicator())
+```
+
+### GbLoadingView 파라미터
+
+- `message` (선택): 로딩 메시지 (없으면 CircularProgressIndicator만 표시)
+
 ## Clean Architecture 패턴
 
 프로젝트는 **Clean Architecture**를 엄격하게 따릅니다. 모든 API 호출은 다음 레이어 구조를 따라야 합니다:

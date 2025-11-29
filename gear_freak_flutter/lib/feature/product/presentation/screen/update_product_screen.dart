@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_error_view.dart';
 import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
@@ -165,49 +166,29 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
           ],
         ),
         body: switch (state) {
-        UpdateProductInitial() => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        UpdateProductLoading() => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        UpdateProductLoaded() => _buildForm(),
-        UpdateProductLoadError(:final error) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '오류가 발생했습니다',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    final productId = int.tryParse(widget.productId);
-                    if (productId != null) {
-                      ref
-                          .read(updateProductNotifierProvider.notifier)
-                          .loadProduct(productId);
-                    }
-                  },
-                  child: const Text('다시 시도'),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () => context.pop(),
-                  child: const Text('뒤로 가기'),
-                ),
-              ],
+          UpdateProductInitial() => const Center(
+              child: CircularProgressIndicator(),
             ),
-          ),
-      },
-    ),
+          UpdateProductLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+          UpdateProductLoaded() => _buildForm(),
+          UpdateProductLoadError(:final error) => GbErrorView(
+              title: '오류가 발생했습니다',
+              message: error,
+              onRetry: () {
+                final productId = int.tryParse(widget.productId);
+                if (productId != null) {
+                  ref
+                      .read(updateProductNotifierProvider.notifier)
+                      .loadProduct(productId);
+                }
+              },
+              showBackButton: true,
+              onBack: () => context.pop(),
+            ),
+        },
+      ),
     );
   }
 

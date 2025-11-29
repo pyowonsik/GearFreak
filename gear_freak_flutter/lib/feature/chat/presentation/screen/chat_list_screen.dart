@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/component/gb_empty_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_error_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_item_widget.dart';
@@ -38,30 +41,21 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   Widget _buildBody(ChatState state) {
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const GbLoadingView();
     }
 
     if (state.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('에러: ${state.error}'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                ref.read(chatNotifierProvider.notifier).loadChatList();
-              },
-              child: const Text('다시 시도'),
-            ),
-          ],
-        ),
+      return GbErrorView(
+        message: '에러: ${state.error}',
+        onRetry: () {
+          ref.read(chatNotifierProvider.notifier).loadChatList();
+        },
       );
     }
 
     if (state.chatList.isEmpty) {
-      return const Center(
-        child: Text('채팅 목록이 없습니다'),
+      return const GbEmptyView(
+        message: '채팅 목록이 없습니다',
       );
     }
 

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_empty_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_error_view.dart';
+import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
@@ -160,35 +163,15 @@ class _PaginatedProductsListWidgetState
       body: RefreshIndicator(
         onRefresh: widget.onRefresh,
         child: switch (productState) {
-          ProductLoading() => const Center(child: CircularProgressIndicator()),
-          ProductError(:final message) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    message,
-                    style: const TextStyle(fontSize: 16, color: Colors.red),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: widget.onRetry,
-                    child: const Text('다시 시도'),
-                  ),
-                ],
-              ),
+          ProductLoading() => const GbLoadingView(),
+          ProductError(:final message) => GbErrorView(
+              message: message,
+              onRetry: widget.onRetry,
             ),
           ProductPaginatedLoaded(:final products, :final pagination) => products
                   .isEmpty
-              ? const Center(
-                  child: Text(
-                    '등록된 상품이 없습니다',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ),
+              ? const GbEmptyView(
+                  message: '등록된 상품이 없습니다',
                 )
               : ListView.builder(
                   controller: scrollController,
@@ -229,7 +212,7 @@ class _PaginatedProductsListWidgetState
                 );
               },
             ),
-          ProductInitial() => const Center(child: CircularProgressIndicator()),
+          ProductInitial() => const GbLoadingView(),
         },
       ),
     );
