@@ -1,0 +1,228 @@
+# Gear Freak 프로젝트 Cursor Rules
+
+## Dialog 사용 규칙
+
+- 프로젝트에서 사용하는 모든 다이얼로그는 `GbDialog`를 사용해야 합니다.
+- `AlertDialog`를 직접 사용하지 말고, `GbDialog.show()`를 사용하세요.
+- `GbDialog`는 `lib/common/component/gb_dialog.dart`에 위치합니다.
+
+### 사용 예시
+
+```dart
+// ✅ 올바른 사용
+final shouldDelete = await GbDialog.show(
+  context: context,
+  title: '상품 삭제',
+  content: '정말로 이 상품을 삭제하시겠습니까?',
+  confirmText: '삭제',
+  cancelText: '취소',
+  confirmColor: Colors.red,
+);
+
+// ❌ 잘못된 사용
+showDialog(
+  context: context,
+  builder: (context) => AlertDialog(...),
+);
+```
+
+## Clean Architecture 패턴
+
+프로젝트는 **Clean Architecture**를 엄격하게 따릅니다. 모든 API 호출은 다음 레이어 구조를 따라야 합니다:
+
+### 레이어 구조
+
+```
+Presentation (Provider/Notifier)
+    ↓
+Domain (UseCase)
+    ↓
+Domain (Repository Interface)
+    ↑
+Data (Repository Implementation)
+    ↓
+Data (DataSource)
+```
+
+### 1. Data Layer (데이터 소스)
+
+**위치**: `lib/feature/{feature}/data/`
+
+- **DataSource**: Serverpod Client를 사용한 API 호출만 담당
+  - 파일: `datasource/{feature}_remote_datasource.dart`
+  - Serverpod Client 직접 호출
+  - Exception을 throw (Either 사용 안 함)
+
+```dart
+// ✅ 올바른 DataSource
+class ProductRemoteDataSource {
+  pod.Client get _client => PodService.instance.client;
+  
+  Future<pod.Product> getProductDetail(int id) async {
+    try {
+      return await _client.product.getProduct(id);
+    } catch (e) {
+      throw Exception('상품 상세를 불러오는데 실패했습니다: $e');
+    }
+  }
+}
+
+// ❌ 잘못된 사용 - UseCase나 Repository를 DataSource에서 직접 호출
+```
+
+- **Repository Implementation**: Domain의 Repository 인터페이스를 구현
+  - 파일: `repository/{feature}_repository_impl.dart`
+  - DataSource를 사용하여 데이터 가져오기
+  - Domain의 Repository 인터페이스 구현
+
+```dart
+// ✅ 올바른 Repository Implementation
+class ProductRepositoryImpl implements ProductRepository {
+  final ProductRemoteDataSource remoteDataSource;
+  
+  @override
+  Future<pod.Product> getProductDetail(int id) async {
+    return remoteDataSource.getProductDetail(id);
+  }
+}
+```
+
+### 2. Domain Layer (비즈니스 로직)
+
+**위치**: `lib/feature/{feature}/domain/`
+
+- **Repository Interface**: 데이터 소스 추상화
+  - 파일: `repository/{feature}_repository.dart`
+  - 추상 클래스로 정의
+  - 외부 의존성 없음 (순수 Dart)
+
+```dart
+// ✅ 올바른 Repository Interface
+abstract class ProductRepository {
+  Future<pod.Product> getProductDetail(int id);
+  Future<void> deleteProduct(int productId);
+}
+```
+
+- **UseCase**: 단일 책임 비즈니스 로직
+  - 파일: `usecase/{action}_{feature}_usecase.dart`
+  - Repository 인터페이스를 사용 (구현체가 아님)
+  - `Either<Failure, T>` 패턴 사용
+  - `UseCase<T, Params, Repo>` 인터페이스 구현
+
+```dart
+// ✅ 올바른 UseCase
+class GetProductDetailUseCase
+    implements UseCase<pod.Product, int, ProductRepository> {
+  final ProductRepository repository;
+  
+  @override
+  Future<Either<Failure, pod.Product>> call(int param) async {
+    try {
+      final result = await repository.getProductDetail(param);
+      return Right(result);
+    } on Exception catch (e) {
+      return Left(GetProductDetailFailure('상품을 불러올 수 없습니다.', exception: e));
+    }
+  }
+}
+
+// ❌ 잘못된 사용 - DataSource를 직접 사용
+class GetProductDetailUseCase {
+  final ProductRemoteDataSource dataSource; // ❌
+}
+```
+
+### 3. Presentation Layer (UI)
+
+**위치**: `lib/feature/{feature}/presentation/`
+
+- **Provider/Notifier**: Riverpod 상태 관리
+  - 파일: `provider/{feature}_notifier.dart`
+  - UseCase만 사용 (Repository나 DataSource 직접 사용 금지)
+  - `StateNotifier` 또는 `Notifier` 사용
+
+```dart
+// ✅ 올바른 Notifier
+class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
+  final GetProductDetailUseCase getProductDetailUseCase;
+  
+  Future<void> loadProductDetail(int productId) async {
+    final result = await getProductDetailUseCase(productId);
+    result.fold(
+      (failure) => state = ProductDetailError(failure.message),
+      (product) => state = ProductDetailLoaded(product),
+    );
+  }
+}
+
+// ❌ 잘못된 사용 - Repository나 DataSource 직접 사용
+class ProductDetailNotifier {
+  final ProductRepository repository; // ❌
+  final ProductRemoteDataSource dataSource; // ❌
+}
+```
+
+### 의존성 규칙
+
+1. **Presentation → Domain**: Presentation은 Domain(UseCase)만 의존
+2. **Data → Domain**: Data는 Domain(Repository Interface)를 구현
+3. **Domain → 외부 없음**: Domain은 외부 의존성이 없어야 함
+4. **직접 호출 금지**: 
+   - ❌ Presentation에서 Repository나 DataSource 직접 사용 금지
+   - ❌ UseCase에서 DataSource 직접 사용 금지
+   - ❌ DataSource에서 다른 DataSource나 UseCase 사용 금지
+
+### 파일 구조 예시
+
+```
+lib/feature/product/
+├── data/
+│   ├── datasource/
+│   │   └── product_remote_datasource.dart  # Serverpod Client 호출
+│   └── repository/
+│       └── product_repository_impl.dart    # Repository 인터페이스 구현
+├── domain/
+│   ├── repository/
+│   │   └── product_repository.dart         # Repository 인터페이스
+│   └── usecase/
+│       └── get_product_detail_usecase.dart # 비즈니스 로직
+└── presentation/
+    └── provider/
+        └── product_detail_notifier.dart    # UseCase 사용
+```
+
+### Provider 설정
+
+모든 의존성은 Riverpod Provider로 주입됩니다:
+
+```dart
+// ✅ 올바른 Provider 구조
+final productRemoteDataSourceProvider = Provider<ProductRemoteDataSource>((ref) {
+  return const ProductRemoteDataSource();
+});
+
+final productRepositoryProvider = Provider<ProductRepository>((ref) {
+  final remoteDataSource = ref.watch(productRemoteDataSourceProvider);
+  return ProductRepositoryImpl(remoteDataSource);
+});
+
+final getProductDetailUseCaseProvider = Provider<GetProductDetailUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return GetProductDetailUseCase(repository);
+});
+
+final productDetailNotifierProvider = StateNotifierProvider<ProductDetailNotifier, ProductDetailState>((ref) {
+  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  return ProductDetailNotifier(getProductDetailUseCase);
+});
+```
+
+### 요약
+
+- ✅ **DataSource**: Serverpod Client 직접 호출
+- ✅ **Repository Implementation**: DataSource 사용, Domain 인터페이스 구현
+- ✅ **Repository Interface**: Domain에 정의, 추상 클래스
+- ✅ **UseCase**: Repository 인터페이스 사용, Either 패턴
+- ✅ **Notifier**: UseCase만 사용, 상태 관리
+- ❌ **레이어 건너뛰기 금지**: 각 레이어는 바로 아래 레이어만 의존

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/component/gb_dialog.dart';
 import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/product_utils.dart';
 import 'package:gear_freak_flutter/common/utils/share_utils.dart';
@@ -70,75 +71,63 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   /// 삭제 처리
-  void _handleDelete(BuildContext context, pod.Product productData) {
-    showDialog<void>(
+  Future<void> _handleDelete(BuildContext context, pod.Product productData) async {
+    final shouldDelete = await GbDialog.show(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('상품 삭제'),
-          content: const Text('정말로 이 상품을 삭제하시겠습니까?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                dialogContext.pop();
-              },
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () async {
-                dialogContext.pop();
-
-                if (productData.id == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('상품 ID가 유효하지 않습니다'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                // 삭제 API 호출
-                final deleteResult = await ref
-                    .read(productDetailNotifierProvider.notifier)
-                    .deleteProduct(productData.id!);
-
-                if (mounted) {
-                  if (deleteResult) {
-                    // 삭제 성공 시 이벤트는 ProductDetailNotifier에서 자동 발행됨
-                    // 모든 목록 Provider가 자동으로 해당 상품을 제거합니다
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('상품이 삭제되었습니다'),
-                      ),
-                    );
-                    // 상품 상세 화면 닫기
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      // 스택에 이전 화면이 없으면 홈으로 이동
-                      context.go('/main/home');
-                    }
-                  } else {
-                    // 삭제 실패
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('상품 삭제에 실패했습니다'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-              ),
-              child: const Text('삭제'),
-            ),
-          ],
-        );
-      },
+      title: '상품 삭제',
+      content: '정말로 이 상품을 삭제하시겠습니까?',
+      confirmText: '삭제',
+      cancelText: '취소',
+      confirmColor: Colors.red,
     );
+
+    if (shouldDelete != true) {
+      return;
+    }
+
+    if (productData.id == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('상품 ID가 유효하지 않습니다'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // 삭제 API 호출
+    final deleteResult = await ref
+        .read(productDetailNotifierProvider.notifier)
+        .deleteProduct(productData.id!);
+
+    if (mounted) {
+      if (deleteResult) {
+        // 삭제 성공 시 이벤트는 ProductDetailNotifier에서 자동 발행됨
+        // 모든 목록 Provider가 자동으로 해당 상품을 제거합니다
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('상품이 삭제되었습니다'),
+          ),
+        );
+        // 상품 상세 화면 닫기
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          // 스택에 이전 화면이 없으면 홈으로 이동
+          context.go('/main/home');
+        }
+      } else {
+        // 삭제 실패
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('상품 삭제에 실패했습니다'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/component/confirmation_dialog.dart';
+import 'package:gear_freak_flutter/common/component/gb_dialog.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -197,7 +197,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// 로그아웃 처리
   Future<void> _handleLogout() async {
     // 로그아웃 확인 다이얼로그 표시
-    final shouldLogout = await ConfirmationDialog.show(
+    final shouldLogout = await GbDialog.show(
       context: context,
       title: '로그아웃',
       content: '정말 로그아웃 하시겠습니까?',

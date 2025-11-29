@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// 확인 대화 상자
-class ConfirmationDialog extends StatelessWidget {
-  /// ConfirmationDialog 생성자
+/// Gear Freak 공통 대화 상자
+/// 프로젝트에서 사용하는 모든 다이얼로그는 이 클래스를 사용합니다.
+class GbDialog extends StatelessWidget {
+  /// GbDialog 생성자
   ///
-  /// [title]은 대화 상잸의 제목입니다.
+  /// [title]은 대화 상자의 제목입니다.
   /// [content]은 대화 상자의 내용입니다.
   /// [cancelText]은 취소 버튼의 텍스트입니다.
   /// [confirmText]은 확인 버튼의 텍스트입니다.
   /// [confirmColor]은 확인 버튼의 색상입니다.
   /// [onCancel]은 취소 버튼의 콜백입니다.
   /// [onConfirm]은 확인 버튼의 콜백입니다.
-  const ConfirmationDialog({
+  const GbDialog({
     required this.title,
     required this.content,
     required this.confirmText,
@@ -67,6 +68,15 @@ class ConfirmationDialog extends StatelessWidget {
   }
 
   /// 간편하게 사용할 수 있는 static method
+  ///
+  /// [context]는 BuildContext입니다.
+  /// [title]은 대화 상자의 제목입니다.
+  /// [content]은 대화 상자의 내용입니다.
+  /// [confirmText]은 확인 버튼의 텍스트입니다.
+  /// [cancelText]은 취소 버튼의 텍스트입니다. (기본값: '취소')
+  /// [confirmColor]은 확인 버튼의 색상입니다.
+  ///
+  /// 반환값: Future<bool?> - 확인 버튼을 누르면 true, 취소 버튼을 누르면 false, null은 다이얼로그가 닫힌 경우
   static Future<bool?> show({
     required BuildContext context,
     required String title,
@@ -77,7 +87,7 @@ class ConfirmationDialog extends StatelessWidget {
   }) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => GbDialog(
         title: title,
         content: content,
         cancelText: cancelText,
