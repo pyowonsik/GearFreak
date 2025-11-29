@@ -134,41 +134,46 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('상품 수정'),
-        actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final state = ref.watch(updateProductNotifierProvider);
-              final isUploading = state is UpdateProductUploading;
-              final isUpdating = state is UpdateProductUpdating;
-              final isLoading = isUploading || isUpdating;
-              return TextButton(
-                onPressed: isLoading ? null : _submitProduct,
-                child: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+    return GestureDetector(
+      onTap: () {
+        // 키보드 내리기
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('상품 수정'),
+          actions: [
+            Consumer(
+              builder: (context, ref, child) {
+                final state = ref.watch(updateProductNotifierProvider);
+                final isUploading = state is UpdateProductUploading;
+                final isUpdating = state is UpdateProductUpdating;
+                final isLoading = isUploading || isUpdating;
+                return TextButton(
+                  onPressed: isLoading ? null : _submitProduct,
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          '완료',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      )
-                    : const Text(
-                        '완료',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: switch (state) {
+                );
+              },
+            ),
+          ],
+        ),
+        body: switch (state) {
         UpdateProductInitial() => const Center(
             child: CircularProgressIndicator(),
           ),
@@ -211,6 +216,7 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
             ),
           ),
       },
+    ),
     );
   }
 

@@ -87,75 +87,81 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
       },
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('상품 등록'),
-        actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final state = ref.watch(createProductNotifierProvider);
-              final isCreating = state is CreateProductCreating;
-              return TextButton(
-                onPressed: isCreating ? null : _submitProduct,
-                child: isCreating
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+    return GestureDetector(
+      onTap: () {
+        // 키보드 내리기
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('상품 등록'),
+          actions: [
+            Consumer(
+              builder: (context, ref, child) {
+                final state = ref.watch(createProductNotifierProvider);
+                final isCreating = state is CreateProductCreating;
+                return TextButton(
+                  onPressed: isCreating ? null : _submitProduct,
+                  child: isCreating
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          '완료',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      )
-                    : const Text(
-                        '완료',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: ProductEditorForm(
-        formKey: _formKey,
-        titleController: _titleController,
-        priceController: _priceController,
-        descriptionController: _descriptionController,
-        detailAddressController: _detailAddressController,
-        selectedCategory: _selectedCategory,
-        selectedCondition: _selectedCondition,
-        selectedTradeMethod: _selectedTradeMethod,
-        newImageFiles: _selectedImages,
-        baseAddress: _baseAddress,
-        onCategoryChanged: (category) {
-          setState(() {
-            _selectedCategory = category;
-          });
-        },
-        onConditionChanged: (condition) {
-          setState(() {
-            _selectedCondition = condition;
-          });
-        },
-        onTradeMethodChanged: (method) {
-          setState(() {
-            _selectedTradeMethod = method;
-          });
-        },
-        onBaseAddressChanged: (address) {
-          setState(() {
-            _baseAddress = address;
-          });
-        },
-        onAddImage: _addImage,
-        onRemoveNewImage: _removeNewImage,
-        getUploadedFileKeys: () {
-          final currentState = ref.read(createProductNotifierProvider);
-          return currentState.uploadedFileKeys;
-        },
+                );
+              },
+            ),
+          ],
+        ),
+        body: ProductEditorForm(
+          formKey: _formKey,
+          titleController: _titleController,
+          priceController: _priceController,
+          descriptionController: _descriptionController,
+          detailAddressController: _detailAddressController,
+          selectedCategory: _selectedCategory,
+          selectedCondition: _selectedCondition,
+          selectedTradeMethod: _selectedTradeMethod,
+          newImageFiles: _selectedImages,
+          baseAddress: _baseAddress,
+          onCategoryChanged: (category) {
+            setState(() {
+              _selectedCategory = category;
+            });
+          },
+          onConditionChanged: (condition) {
+            setState(() {
+              _selectedCondition = condition;
+            });
+          },
+          onTradeMethodChanged: (method) {
+            setState(() {
+              _selectedTradeMethod = method;
+            });
+          },
+          onBaseAddressChanged: (address) {
+            setState(() {
+              _baseAddress = address;
+            });
+          },
+          onAddImage: _addImage,
+          onRemoveNewImage: _removeNewImage,
+          getUploadedFileKeys: () {
+            final currentState = ref.read(createProductNotifierProvider);
+            return currentState.uploadedFileKeys;
+          },
+        ),
       ),
     );
   }
