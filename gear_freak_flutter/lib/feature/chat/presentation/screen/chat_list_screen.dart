@@ -5,7 +5,7 @@ import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
 import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_item_widget.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/view/chat_list_loaded_view.dart';
 
 /// 채팅 목록 화면
 /// Presentation Layer: UI
@@ -59,17 +59,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(chatNotifierProvider.notifier).loadChatList();
-      },
-      child: ListView.builder(
-        itemCount: state.chatList.length,
-        itemBuilder: (context, index) {
-          final chat = state.chatList[index];
-          return ChatItemWidget(chat: chat);
-        },
-      ),
-    );
+    return ChatListLoadedView(chatList: state.chatList);
   }
 }
