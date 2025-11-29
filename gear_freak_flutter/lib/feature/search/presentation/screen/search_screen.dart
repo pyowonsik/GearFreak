@@ -20,6 +20,8 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen>
     with PaginationScrollMixin {
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  bool _showRecentSearches = false;
 
   /// 정렬 옵션 문자열을 ProductSortBy enum으로 변환
   pod.ProductSortBy? _getSortByFromString(String sortString) {
@@ -56,6 +58,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   @override
   void initState() {
     super.initState();
+    // 포커스 상태 리스너 추가
+    _searchFocusNode.addListener(() {
+      setState(() {
+        _showRecentSearches = _searchFocusNode.hasFocus;
+      });
+    });
     initPaginationScroll(
       onLoadMore: () {
         ref.read(searchNotifierProvider.notifier).loadMoreProducts();
@@ -79,6 +87,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   void dispose() {
     disposePaginationScroll();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -90,55 +99,219 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       appBar: AppBar(
         title: const Text('검색'),
       ),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: '리프팅 벨트, 보충제, 운동복을 검색해보세요',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          ref
-                              .read(searchNotifierProvider.notifier)
-                              .clearSearch();
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: const Color(0xFFF3F4F6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      body: GestureDetector(
+        onTap: () {
+          // 키보드 내리기
+          FocusScope.of(context).unfocus();
+        },
+        child: Column(
+          children: [
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                decoration: InputDecoration(
+                  hintText: '리프팅 벨트, 보충제, 운동복을 검색해보세요',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            ref
+                                .read(searchNotifierProvider.notifier)
+                                .clearSearch();
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: const Color(0xFFF3F4F6),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    final searchState = ref.read(searchNotifierProvider);
+                    final currentSortBy =
+                        searchState is SearchLoaded ? searchState.sortBy : null;
+                    ref
+                        .read(searchNotifierProvider.notifier)
+                        .searchProducts(value, sortBy: currentSortBy);
+                    _searchFocusNode.unfocus(); // 검색 시 포커스 해제
+                  }
+                },
+                onChanged: (value) {
+                  setState(() {}); // suffixIcon 업데이트를 위해
+                },
+              ),
+            ),
+            Expanded(
+              child: _showRecentSearches
+                  ? _buildRecentSearchesScreen()
+                  : _buildBody(searchState),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 최근 검색어 화면 위젯
+  Widget _buildRecentSearchesScreen() {
+    final searchState = ref.watch(searchNotifierProvider);
+
+    // SearchInitial 상태면 바로 사용, 아니면 FutureBuilder로 가져오기
+    if (searchState is SearchInitial) {
+      final recentSearches = searchState.recentSearches;
+      if (recentSearches.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.search,
+                size: 64,
+                color: Colors.grey.shade300,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '상품을 검색해보세요',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade500,
                 ),
               ),
-              onSubmitted: (value) {
-                if (value.trim().isNotEmpty) {
-                  final searchState = ref.read(searchNotifierProvider);
-                  final currentSortBy =
-                      searchState is SearchLoaded ? searchState.sortBy : null;
-                  ref
-                      .read(searchNotifierProvider.notifier)
-                      .searchProducts(value, sortBy: currentSortBy);
-                }
-              },
-              onChanged: (value) {
-                setState(() {}); // suffixIcon 업데이트를 위해
-              },
+            ],
+          ),
+        );
+      }
+      return _buildRecentSearchesList(recentSearches);
+    }
+
+    // 다른 상태일 때는 FutureBuilder로 최근 검색어 가져오기
+    return FutureBuilder<List<String>>(
+      future: ref.read(searchNotifierProvider.notifier).getRecentSearches(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search,
+                  size: 64,
+                  color: Colors.grey.shade300,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '상품을 검색해보세요',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return _buildRecentSearchesList(snapshot.data!);
+      },
+    );
+  }
+
+  /// 최근 검색어 리스트 위젯
+  Widget _buildRecentSearchesList(List<String> recentSearches) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 헤더
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  '최근 검색어',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    ref
+                        .read(searchNotifierProvider.notifier)
+                        .clearAllRecentSearches();
+                  },
+                  child: const Text(
+                    '전체 삭제',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          const Divider(height: 1),
+          // 최근 검색어 목록
           Expanded(
-            child: _buildBody(searchState),
+            child: ListView.builder(
+              itemCount: recentSearches.length,
+              itemBuilder: (context, index) {
+                final query = recentSearches[index];
+                return ListTile(
+                  leading: const Icon(
+                    Icons.history,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                  title: Text(
+                    query,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: Color(0xFF9CA3AF),
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      ref
+                          .read(searchNotifierProvider.notifier)
+                          .deleteRecentSearch(query);
+                    },
+                  ),
+                  onTap: () {
+                    // 검색어 입력
+                    _searchController.text = query;
+                    // 검색 실행
+                    ref
+                        .read(searchNotifierProvider.notifier)
+                        .searchProducts(query);
+                    // 포커스 해제
+                    _searchFocusNode.unfocus();
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/service/recent_search_service.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/search/domain/domain.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
@@ -15,6 +16,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
     this.ref,
     this.searchProductsUseCase,
   ) : super(const SearchInitial()) {
+    // 초기화 시 최근 검색어 로드
+    _loadRecentSearches();
+
     // 삭제 이벤트 감지하여 자동으로 목록에서 제거
     ref
       ..listen<int?>(deletedProductIdProvider, (previous, next) {
@@ -37,12 +41,31 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// 상품 검색 UseCase 인스턴스
   final SearchProductsUseCase searchProductsUseCase;
 
+  /// 최근 검색어 서비스
+  final RecentSearchService _recentSearchService = RecentSearchService();
+
+  /// 최근 검색어 로드
+  Future<void> _loadRecentSearches() async {
+    final recentSearches = await _recentSearchService.getRecentSearches();
+    if (state is SearchInitial) {
+      state = SearchInitial(recentSearches: recentSearches);
+    }
+  }
+
+  /// 최근 검색어 가져오기 (public)
+  Future<List<String>> getRecentSearches() async {
+    return await _recentSearchService.getRecentSearches();
+  }
+
   /// 상품 검색 (첫 페이지)
   Future<void> searchProducts(String query, {pod.ProductSortBy? sortBy}) async {
     if (query.trim().isEmpty) {
-      state = const SearchInitial();
+      await _loadRecentSearches();
       return;
     }
+
+    // 최근 검색어 저장
+    await _recentSearchService.saveSearch(query);
 
     state = SearchLoading(query);
 
@@ -155,8 +178,20 @@ class SearchNotifier extends StateNotifier<SearchState> {
   }
 
   /// 검색 초기화
-  void clearSearch() {
-    state = const SearchInitial();
+  Future<void> clearSearch() async {
+    await _loadRecentSearches();
+  }
+
+  /// 특정 최근 검색어 삭제
+  Future<void> deleteRecentSearch(String query) async {
+    await _recentSearchService.deleteSearch(query);
+    await _loadRecentSearches();
+  }
+
+  /// 모든 최근 검색어 삭제
+  Future<void> clearAllRecentSearches() async {
+    await _recentSearchService.clearAll();
+    state = const SearchInitial(recentSearches: []);
   }
 
   /// 목록에서 상품 제거 (삭제 이벤트에 의해 자동 호출)

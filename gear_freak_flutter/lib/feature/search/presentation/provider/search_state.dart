@@ -8,7 +8,12 @@ sealed class SearchState {
 /// 초기 상태
 class SearchInitial extends SearchState {
   /// SearchInitial 생성자
-  const SearchInitial();
+  ///
+  /// [recentSearches]는 최근 검색어 목록입니다.
+  const SearchInitial({this.recentSearches = const []});
+
+  /// 최근 검색어 목록
+  final List<String> recentSearches;
 }
 
 /// 검색 중 상태
