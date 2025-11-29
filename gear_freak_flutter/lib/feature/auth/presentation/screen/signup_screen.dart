@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/common/presentation/component/gb_text_form_field.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_loading_button.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/widget/login_link_widget.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/widget/terms_agreement_widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 회원가입 화면
@@ -266,61 +269,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   const SizedBox(height: 24),
 
                   // Terms Agreement
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: Checkbox(
-                          value: _agreeToTerms,
-                          onChanged: (value) {
-                            setState(() {
-                              _agreeToTerms = value ?? false;
-                            });
-                          },
-                          activeColor: const Color(0xFF2563EB),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            text: '서비스 약관',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF2563EB),
-                              decoration: TextDecoration.underline,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: ' 및 ',
-                                style: TextStyle(
-                                  color: Color(0xFF6B7280),
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                              TextSpan(
-                                text: '개인정보 처리방침',
-                                style: TextStyle(
-                                  color: Color(0xFF2563EB),
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                              TextSpan(
-                                text: '에 동의합니다',
-                                style: TextStyle(
-                                  color: Color(0xFF6B7280),
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                  TermsAgreementWidget(
+                    agreed: _agreeToTerms,
+                    onChanged: (value) {
+                      setState(() {
+                        _agreeToTerms = value;
+                      });
+                    },
                   ),
                   const SizedBox(height: 32),
 
@@ -330,69 +285,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       final authState = ref.watch(authNotifierProvider);
                       final isLoading = authState is AuthLoading;
 
-                      return SizedBox(
-                        width: double.infinity,
+                      return AuthLoadingButton(
+                        text: '회원가입',
+                        isLoading: isLoading,
+                        onPressed: _handleSignup,
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
                         height: 56,
-                        child: ElevatedButton(
-                          onPressed: isLoading ? null : _handleSignup,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2563EB),
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor: const Color(0xFF9CA3AF),
-                            elevation: 0,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : const Text(
-                                  '회원가입',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                        ),
                       );
                     },
                   ),
                   const SizedBox(height: 24),
 
                   // Login Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        '이미 계정이 있으신가요? ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.pop(),
-                        child: const Text(
-                          '로그인',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF2563EB),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  const LoginLinkWidget(),
                   const SizedBox(height: 24),
                 ],
               ),

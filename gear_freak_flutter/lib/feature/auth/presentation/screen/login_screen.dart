@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/gb_snackbar.dart';
 import 'package:gear_freak_flutter/common/presentation/component/gb_text_form_field.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_logo_section.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_loading_button.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/widget/signup_link_widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 로그인 화면
@@ -87,21 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // 로고
-                    Icon(
-                      Icons.shopping_bag,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      '운동은 장비충',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F2937),
-                      ),
-                    ),
+                    const AuthLogoSection(),
                     const SizedBox(height: 48),
 
                     // 이메일 입력
@@ -160,65 +149,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         final authState = ref.watch(authNotifierProvider);
                         final isLoading = authState is AuthLoading;
 
-                        return ElevatedButton(
-                          onPressed: isLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : const Text(
-                                  '로그인',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                        return AuthLoadingButton(
+                          text: '로그인',
+                          isLoading: isLoading,
+                          onPressed: _handleLogin,
                         );
                       },
                     ),
                     const SizedBox(height: 16),
 
                     // 회원가입 링크
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          '계정이 없으신가요? ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            context.push('/signup');
-                          },
-                          child: const Text(
-                            '회원가입',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SignupLinkWidget(),
                   ],
                 ),
               ),
