@@ -1,5 +1,71 @@
 # Gear Freak 프로젝트 Cursor Rules
 
+## Presentation Layer 구조 규칙
+
+프로젝트의 Presentation Layer는 다음과 같은 구조를 따릅니다:
+
+### 디렉토리 구조
+
+```
+presentation/
+├── screen/          # Screen (라우팅 단위)
+├── view/            # View (상태별 UI: LoadingView, DataView, ErrorView)
+├── component/       # Component (재사용 가능한 위젯, 여러 feature에서 사용 가능)
+├── widget/          # Widget (특정 화면에서만 사용하는 작은 단위)
+├── provider/        # Provider/Notifier (상태 관리)
+└── utils/           # Utils (유틸리티 함수)
+```
+
+### 구분 기준
+
+- **Screen**: 라우팅이 되는 화면 단위 (Route)
+- **View**: 네트워크 상태에 따른 인터페이스 (error, loading, data 상태별 UI)
+- **Component**: 재사용 가능한 독립적인 UI 컴포넌트 (여러 feature에서 사용 가능)
+- **Widget**: 특정 화면에서만 사용하는 작은 단위 위젯
+
+### Common 폴더 구조
+
+```
+common/
+├── component/       # 공통 재사용 가능한 UI 컴포넌트
+│   ├── gb_dialog.dart
+│   ├── gb_snackbar.dart
+│   └── gb_text_form_field.dart
+├── view/            # 공통 상태별 UI
+│   ├── gb_error_view.dart
+│   ├── gb_empty_view.dart
+│   └── gb_loading_view.dart
+└── ...
+```
+
+### 예시
+
+```dart
+// Screen: 라우팅 단위
+class ProductDetailScreen extends ConsumerStatefulWidget {
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(productDetailNotifierProvider);
+    return state.when(
+      loading: () => ProductDetailLoadingView(),  // View
+      data: (data) => ProductDetailView(model: data),  // View
+      error: (error) => ProductDetailErrorView(...),  // View
+    );
+  }
+}
+
+// View: 상태별 UI
+class ProductDetailLoadingView extends StatelessWidget { ... }
+class ProductDetailView extends StatelessWidget { ... }
+class ProductDetailErrorView extends StatelessWidget { ... }
+
+// Component: 재사용 가능한 위젯
+class ProductCardWidget extends StatelessWidget { ... }
+
+// Widget: 특정 화면에서만 사용
+class ProductBasicInfoSectionWidget extends StatelessWidget { ... }
+```
+
 ## Dialog 사용 규칙
 
 - 프로젝트에서 사용하는 모든 다이얼로그는 `GbDialog`를 사용해야 합니다.
@@ -75,7 +141,7 @@ ScaffoldMessenger.of(context).showSnackBar(
 
 - 프로젝트에서 사용하는 모든 에러 상태 표시는 `GbErrorView`를 사용해야 합니다.
 - 에러 아이콘, 메시지, "다시 시도" 버튼을 직접 구성하지 말고, `GbErrorView` 위젯을 사용하세요.
-- `GbErrorView`는 `lib/common/component/gb_error_view.dart`에 위치합니다.
+- `GbErrorView`는 `lib/common/view/gb_error_view.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -130,11 +196,100 @@ Center(
 - 제목: `TextStyle(fontSize: 20, fontWeight: FontWeight.bold)`
 - 메시지: `TextStyle(fontSize: 16, color: Colors.red)`
 
+## TextFormField 사용 규칙
+
+- 프로젝트에서 사용하는 모든 TextFormField는 `GbTextFormField`를 사용해야 합니다.
+- `TextFormField`를 직접 사용하지 말고, `GbTextFormField` 위젯을 사용하세요.
+- `GbTextFormField`는 `lib/common/component/gb_text_form_field.dart`에 위치합니다.
+
+### 사용 예시
+
+```dart
+// ✅ 올바른 사용 - 기본 스타일 (login, product 스타일)
+GbTextFormField(
+  controller: _emailController,
+  labelText: '이메일',
+  hintText: 'example@email.com',
+  prefixIcon: const Icon(Icons.email_outlined),
+  keyboardType: TextInputType.emailAddress,
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return '이메일을 입력해주세요';
+    }
+    return null;
+  },
+)
+
+// ✅ 올바른 사용 - Filled 스타일 (signup 스타일)
+GbTextFormField(
+  controller: _nameController,
+  hintText: '사용할 닉네임을 입력하세요',
+  filled: true, // 이 파라미터로 filled 스타일 활성화
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return '닉네임을 입력해주세요';
+    }
+    return null;
+  },
+)
+
+// ✅ 올바른 사용 - 비밀번호 필드
+GbTextFormField(
+  controller: _passwordController,
+  obscureText: !_isPasswordVisible,
+  labelText: '비밀번호',
+  hintText: '비밀번호를 입력하세요',
+  prefixIcon: const Icon(Icons.lock_outlined),
+  suffixIcon: IconButton(
+    icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+    onPressed: () {
+      setState(() {
+        _isPasswordVisible = !_isPasswordVisible;
+      });
+    },
+  ),
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return '비밀번호를 입력해주세요';
+    }
+    return null;
+  },
+)
+
+// ❌ 잘못된 사용
+TextFormField(
+  controller: _emailController,
+  decoration: InputDecoration(
+    labelText: '이메일',
+    border: OutlineInputBorder(),
+  ),
+)
+```
+
+### GbTextFormField 파라미터
+
+- `controller` (선택): TextEditingController
+- `labelText` (선택): 라벨 텍스트
+- `hintText` (선택): 힌트 텍스트
+- `prefixIcon` (선택): 접두사 아이콘
+- `suffixIcon` (선택): 접미사 아이콘
+- `suffixText` (선택): 접미사 텍스트
+- `keyboardType` (선택): 키보드 타입
+- `obscureText` (선택, 기본값: false): 비밀번호 모드
+- `maxLines` (선택, 기본값: 1): 최대 라인 수
+- `validator` (선택): 유효성 검사 함수
+- `filled` (선택, 기본값: false): Filled 스타일 사용 여부 (signup 스타일)
+- `decoration` (선택): 커스텀 InputDecoration (기본 스타일을 덮어씀)
+
+**참고**: 
+- `filled: false` (기본값): 기본 스타일 사용 (login, product 스타일)
+- `filled: true`: Filled 스타일 사용 (signup 스타일) - 자동으로 상세한 border 스타일과 contentPadding 적용
+
 ## EmptyView 사용 규칙
 
 - 프로젝트에서 사용하는 모든 빈 상태 표시는 `GbEmptyView`를 사용해야 합니다.
 - 빈 상태 아이콘, 메시지를 직접 구성하지 말고, `GbEmptyView` 위젯을 사용하세요.
-- `GbEmptyView`는 `lib/common/component/gb_empty_view.dart`에 위치합니다.
+- `GbEmptyView`는 `lib/common/view/gb_empty_view.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -184,7 +339,7 @@ Center(
 
 - 프로젝트에서 사용하는 모든 전체 화면 로딩 표시는 `GbLoadingView`를 사용해야 합니다.
 - `Center(child: CircularProgressIndicator())`를 직접 사용하지 말고, `GbLoadingView` 위젯을 사용하세요.
-- `GbLoadingView`는 `lib/common/component/gb_loading_view.dart`에 위치합니다.
+- `GbLoadingView`는 `lib/common/view/gb_loading_view.dart`에 위치합니다.
 
 ### 사용 예시
 

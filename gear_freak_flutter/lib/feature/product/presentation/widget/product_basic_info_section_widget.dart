@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/component/gb_text_form_field.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 
 /// 상품 기본 정보 섹션 위젯
@@ -54,13 +55,10 @@ class ProductBasicInfoSectionWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          TextFormField(
+          GbTextFormField(
             controller: titleController,
-            decoration: const InputDecoration(
-              labelText: '상품명',
-              hintText: '상품명을 입력해주세요',
-              border: OutlineInputBorder(),
-            ),
+            labelText: '상품명',
+            hintText: '상품명을 입력해주세요',
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return '상품명을 입력해주세요';
@@ -88,14 +86,11 @@ class ProductBasicInfoSectionWidget extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          TextFormField(
+          GbTextFormField(
             controller: priceController,
-            decoration: const InputDecoration(
-              labelText: '가격',
-              hintText: '가격을 입력해주세요',
-              border: OutlineInputBorder(),
-              suffixText: '원',
-            ),
+            labelText: '가격',
+            hintText: '가격을 입력해주세요',
+            suffixText: '원',
             keyboardType: TextInputType.number,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -124,13 +119,10 @@ class ProductBasicInfoSectionWidget extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          TextFormField(
+          GbTextFormField(
             controller: descriptionController,
-            decoration: const InputDecoration(
-              labelText: '상품 설명',
-              hintText: '상품에 대한 설명을 입력해주세요',
-              border: OutlineInputBorder(),
-            ),
+            labelText: '상품 설명',
+            hintText: '상품에 대한 설명을 입력해주세요',
             maxLines: 5,
             validator: (value) {
               if (value == null || value.isEmpty) {

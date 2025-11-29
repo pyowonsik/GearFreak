@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/component/gb_text_form_field.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 
 /// 상품 거래 정보 섹션 위젯
@@ -120,14 +121,11 @@ class ProductTradeInfoSectionWidget extends StatelessWidget {
               ),
             const SizedBox(height: 16),
             // 상세 주소 입력
-            TextFormField(
+            GbTextFormField(
               controller: detailAddressController,
-              decoration: const InputDecoration(
-                labelText: '상세 주소',
-                hintText: '예: 101동 201호',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.home),
-              ),
+              labelText: '상세 주소',
+              hintText: '예: 101동 201호',
+              prefixIcon: const Icon(Icons.home),
               validator: (value) {
                 if (isDirect &&
                     baseAddress != null &&

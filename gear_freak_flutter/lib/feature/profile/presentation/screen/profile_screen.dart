@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/component/gb_dialog.dart';
-import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
-import 'package:gear_freak_flutter/common/component/gb_snackbar.dart';
+import 'package:gear_freak_flutter/common/presentation/component/gb_dialog.dart';
+import 'package:gear_freak_flutter/common/presentation/component/gb_snackbar.dart';
+import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:go_router/go_router.dart';

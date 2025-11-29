@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/component/gb_empty_view.dart';
-import 'package:gear_freak_flutter/common/component/gb_error_view.dart';
-import 'package:gear_freak_flutter/common/component/gb_loading_view.dart';
+import 'package:gear_freak_flutter/common/presentation/view/gb_empty_view.dart';
+import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
+import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_item_widget.dart';
