@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/entity/chat_message.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_item_widget.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
 
 /// 채팅 목록이 로드된 상태의 View
 class ChatListLoadedView extends ConsumerWidget {

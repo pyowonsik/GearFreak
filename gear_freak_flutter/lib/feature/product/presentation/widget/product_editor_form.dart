@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/component/gb_snackbar.dart';
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/product_basic_info_section_widget.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/product_image_section_widget.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/product_trade_info_section_widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
+
+
 import 'package:image_picker/image_picker.dart';
 import 'package:kpostal/kpostal.dart';
 

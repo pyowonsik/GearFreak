@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_message_bubble_widget.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_message_input_widget.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_product_info_card_widget.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_room_app_bar_widget.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
 
 /// 채팅방 화면을 표시하는 위젯입니다.
 ///

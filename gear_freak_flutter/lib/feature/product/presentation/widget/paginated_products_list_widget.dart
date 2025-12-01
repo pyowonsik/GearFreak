@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/gb_empty_view.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/product_card_widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
 
 /// 페이지네이션된 상품 목록 위젯
 class PaginatedProductsListWidget extends ConsumerStatefulWidget {

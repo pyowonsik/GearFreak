@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/view/search_initial_view.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/view/search_loaded_view.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/view/search_recent_searches_view.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/widget/search_text_field_widget.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/view/view.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/widget/widget.dart';
 
 /// 검색 화면
 class SearchScreen extends ConsumerStatefulWidget {

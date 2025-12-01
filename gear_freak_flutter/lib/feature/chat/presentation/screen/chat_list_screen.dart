@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_empty_view.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/view/chat_list_loaded_view.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/view/view.dart';
 
 /// 채팅 목록 화면
 /// Presentation Layer: UI

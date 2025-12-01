@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/component/gb_snackbar.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/product_editor_form.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 

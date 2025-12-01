@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/view/home_loaded_view.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/home_app_bar_widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/view/view.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
 
 /// 홈 화면
 class HomeScreen extends ConsumerStatefulWidget {

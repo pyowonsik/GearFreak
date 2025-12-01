@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/component/gb_dialog.dart';
-import 'package:gear_freak_flutter/common/presentation/component/gb_snackbar.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_empty_view.dart';
-import 'package:gear_freak_flutter/common/presentation/view/gb_loading_view.dart';
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/view/profile_loaded_view.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/widget/profile_app_bar_widget.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/view/view.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 프로필 화면
