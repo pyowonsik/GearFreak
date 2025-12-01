@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// 프로필 화면 AppBar 위젯
-class ProfileAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+class ProfileAppBarWidget extends StatelessWidget
+    implements PreferredSizeWidget {
   /// ProfileAppBarWidget 생성자
   ///
   /// [onSettingsPressed]는 설정 버튼 클릭 콜백입니다.
@@ -29,4 +30,3 @@ class ProfileAppBarWidget extends StatelessWidget implements PreferredSizeWidget
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-

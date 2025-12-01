@@ -54,7 +54,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
   /// 최근 검색어 가져오기 (public)
   Future<List<String>> getRecentSearches() async {
-    return await _recentSearchService.getRecentSearches();
+    return _recentSearchService.getRecentSearches();
   }
 
   /// 상품 검색 (첫 페이지)
@@ -69,8 +69,8 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
     state = SearchLoading(query);
 
-    debugPrint(
-        '🔄 [SearchNotifier] 검색 요청: query="$query", page=1, limit=20, sortBy=$sortBy');
+    debugPrint('🔄 [SearchNotifier] 검색 요청: query="$query", '
+        'page=1, limit=20, sortBy=$sortBy');
     final result = await searchProductsUseCase(
       SearchProductsParams(query: query, sortBy: sortBy),
     );
@@ -191,7 +191,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// 모든 최근 검색어 삭제
   Future<void> clearAllRecentSearches() async {
     await _recentSearchService.clearAll();
-    state = const SearchInitial(recentSearches: []);
+    state = const SearchInitial();
   }
 
   /// 목록에서 상품 제거 (삭제 이벤트에 의해 자동 호출)
@@ -205,7 +205,8 @@ class SearchNotifier extends StateNotifier<SearchState> {
       // 상품이 실제로 제거되었는지 확인
       if (updatedProducts.length < currentState.result.products.length) {
         debugPrint('🗑️ [SearchNotifier] 상품 제거: productId=$productId '
-            '(${currentState.result.products.length}개 → ${updatedProducts.length}개)');
+            '(${currentState.result.products.length}개 → '
+            '${updatedProducts.length}개)');
 
         // totalCount도 감소
         final updatedTotalCount =
@@ -293,8 +294,8 @@ class SearchNotifier extends StateNotifier<SearchState> {
           currentState.result.products.any((p) => p.id == updatedProduct.id);
 
       if (hasChanges) {
-        debugPrint(
-            '✏️ [SearchNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}');
+        debugPrint('✏️ [SearchNotifier] 상품 수정 (로딩 중):'
+            ' productId=${updatedProduct.id}');
 
         final updatedResult = pod.PaginatedProductsResponseDto(
           pagination: currentState.result.pagination,

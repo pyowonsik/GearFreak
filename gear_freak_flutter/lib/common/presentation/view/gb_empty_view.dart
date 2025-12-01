@@ -3,6 +3,20 @@ import 'package:flutter/material.dart';
 /// Gear Freak 공통 빈 상태 뷰
 /// 프로젝트에서 사용하는 모든 빈 상태 표시는 이 위젯을 사용합니다.
 class GbEmptyView extends StatelessWidget {
+  /// GbEmptyView 생성자
+  ///
+  /// [message]는 빈 상태 메시지입니다.
+  /// [icon]는 아이콘입니다.
+  /// [iconSize]는 아이콘 크기입니다.
+  /// [iconColor]는 아이콘 색상입니다.
+  const GbEmptyView({
+    required this.message,
+    super.key,
+    this.icon,
+    this.iconSize = 64,
+    this.iconColor,
+  });
+
   /// 빈 상태 메시지
   final String message;
 
@@ -14,14 +28,6 @@ class GbEmptyView extends StatelessWidget {
 
   /// 아이콘 색상
   final Color? iconColor;
-
-  const GbEmptyView({
-    required this.message,
-    super.key,
-    this.icon,
-    this.iconSize = 64,
-    this.iconColor,
-  });
 
   @override
   Widget build(BuildContext context) {

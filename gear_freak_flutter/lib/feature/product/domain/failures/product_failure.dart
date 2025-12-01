@@ -56,8 +56,11 @@ class IsFavoriteFailure extends ProductFailure {
 /// 상품 생성 실패
 class CreateProductFailure extends ProductFailure {
   /// CreateProductFailure 생성자
-  const CreateProductFailure(super.message,
-      {super.exception, super.stackTrace});
+  const CreateProductFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'CreateProductFailure: $message';
@@ -66,8 +69,11 @@ class CreateProductFailure extends ProductFailure {
 /// 상품 수정 실패
 class UpdateProductFailure extends ProductFailure {
   /// UpdateProductFailure 생성자
-  const UpdateProductFailure(super.message,
-      {super.exception, super.stackTrace});
+  const UpdateProductFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'UpdateProductFailure: $message';
@@ -76,8 +82,11 @@ class UpdateProductFailure extends ProductFailure {
 /// 상품 삭제 실패
 class DeleteProductFailure extends ProductFailure {
   /// DeleteProductFailure 생성자
-  const DeleteProductFailure(super.message,
-      {super.exception, super.stackTrace});
+  const DeleteProductFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'DeleteProductFailure: $message';

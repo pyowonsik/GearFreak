@@ -29,4 +29,3 @@ class SearchInitialView extends StatelessWidget {
     );
   }
 }
-

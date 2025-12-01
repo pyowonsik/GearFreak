@@ -13,8 +13,8 @@ class ProfileLoadedView extends StatelessWidget {
   /// [onLogout]는 로그아웃 메뉴 클릭 콜백입니다.
   const ProfileLoadedView({
     required this.profile,
-    this.onEditProfile,
     required this.onLogout,
+    this.onEditProfile,
     super.key,
   });
 

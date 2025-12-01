@@ -139,4 +139,3 @@ class CategoryFilterSectionComponent extends StatelessWidget {
     );
   }
 }
-

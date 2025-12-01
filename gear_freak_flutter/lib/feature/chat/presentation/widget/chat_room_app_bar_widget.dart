@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// 채팅방 AppBar 위젯
-class ChatRoomAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+class ChatRoomAppBarWidget extends StatelessWidget
+    implements PreferredSizeWidget {
   /// ChatRoomAppBarWidget 생성자
   ///
   /// [nickname]는 상대방 닉네임입니다.
@@ -51,4 +52,3 @@ class ChatRoomAppBarWidget extends StatelessWidget implements PreferredSizeWidge
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-

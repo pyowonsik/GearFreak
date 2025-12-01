@@ -75,4 +75,3 @@ class ProfileInfoSectionWidget extends StatelessWidget {
     );
   }
 }
-

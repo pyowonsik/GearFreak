@@ -14,10 +14,10 @@ class SearchRecentSearchesView extends ConsumerWidget {
   /// [onClearAll]는 전체 삭제 버튼 클릭 콜백입니다.
   /// [onDelete]는 개별 삭제 버튼 클릭 콜백입니다.
   const SearchRecentSearchesView({
-    this.recentSearches,
     required this.onSearchTap,
-    this.onClearAll,
     required this.onDelete,
+    this.recentSearches,
+    this.onClearAll,
     super.key,
   });
 
@@ -74,4 +74,3 @@ class SearchRecentSearchesView extends ConsumerWidget {
     );
   }
 }
-

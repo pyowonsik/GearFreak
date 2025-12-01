@@ -160,7 +160,6 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
       await notifier.uploadImage(
         imageFile: File(image.path),
         prefix: 'product',
-        bucketType: 'public',
       );
 
       // 업로드 성공 시 이미지 목록에 추가
@@ -170,6 +169,7 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
           _selectedImages.add(image);
         });
       } else if (currentState is CreateProductUploadError) {
+        if (!mounted) return;
         // 업로드 실패 시 해당 이미지 건너뛰기
         GbSnackBar.showError(
           context,

@@ -101,7 +101,7 @@ class GbSnackBar {
     String message, {
     Duration duration = const Duration(seconds: 2),
   }) {
-    show(context, message, type: GbSnackBarType.info, duration: duration);
+    show(context, message, duration: duration);
   }
 
   /// 경고 메시지 표시

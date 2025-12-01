@@ -144,9 +144,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           message: '에러: $message',
           onRetry: () {
             if (query != null) {
-              ref
-                  .read(searchNotifierProvider.notifier)
-                  .searchProducts(query, sortBy: null);
+              ref.read(searchNotifierProvider.notifier).searchProducts(query);
             }
           },
         ),
@@ -158,7 +156,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           query: query,
           sortBy: sortBy,
           scrollController: scrollController!,
-          isLoadingMore: false,
           onSortChanged: (pod.ProductSortBy? newSortBy) async {
             await ref
                 .read(searchNotifierProvider.notifier)

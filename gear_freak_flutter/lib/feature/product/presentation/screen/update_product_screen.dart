@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
 import 'package:gear_freak_flutter/common/presentation/component/gb_snackbar.dart';
+import 'package:gear_freak_flutter/common/presentation/view/gb_error_view.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
@@ -246,7 +246,6 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
       await notifier.uploadImage(
         imageFile: File(image.path),
         prefix: 'product',
-        bucketType: 'public',
       );
 
       // 업로드 성공 시 이미지 목록에 추가
@@ -256,6 +255,7 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
           _newImageFiles.add(image);
         });
       } else if (currentState is UpdateProductUploadError) {
+        if (!mounted) return;
         // 업로드 실패 시 해당 이미지 건너뛰기
         GbSnackBar.showError(
           context,

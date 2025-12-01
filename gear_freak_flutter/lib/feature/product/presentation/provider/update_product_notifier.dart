@@ -143,7 +143,7 @@ class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
           // 업로드 성공 시 fileKey 추가
           final updatedKeys = [
             ...currentState.uploadedFileKeys,
-            response.fileKey
+            response.fileKey,
           ];
           state = UpdateProductUploadSuccess(
             product: currentState.product,

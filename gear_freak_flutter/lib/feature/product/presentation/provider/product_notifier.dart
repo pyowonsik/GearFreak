@@ -296,7 +296,8 @@ class ProductNotifier extends StateNotifier<ProductState> {
 
       if (hasChanges) {
         debugPrint(
-            '✏️ [ProductNotifier] 상품 수정: productId=${updatedProduct.id}');
+          '✏️ [ProductNotifier] 상품 수정: productId=${updatedProduct.id}',
+        );
 
         state = ProductPaginatedLoaded(
           products: updatedProducts,
@@ -316,7 +317,8 @@ class ProductNotifier extends StateNotifier<ProductState> {
 
       if (hasChanges) {
         debugPrint(
-            '✏️ [ProductNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}');
+          '✏️ [ProductNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}',
+        );
 
         state = ProductPaginatedLoadingMore(
           products: updatedProducts,

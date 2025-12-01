@@ -161,6 +161,7 @@ class _ProductEditorFormState extends State<ProductEditorForm> {
       // 남은 슬롯만큼만 선택
       final imagesToAdd = images.take(remainingSlots).toList();
       if (images.length > remainingSlots) {
+        if (!mounted) return;
         GbSnackBar.showInfo(
           context,
           '이미지는 최대 10장까지 추가할 수 있습니다. $remainingSlots장만 추가됩니다.',

@@ -74,14 +74,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   /// 삭제 처리
-  Future<void> _handleDelete(
-      BuildContext context, pod.Product productData) async {
+  Future<void> _handleDelete(pod.Product productData) async {
+    if (!mounted) return;
+
     final shouldDelete = await GbDialog.show(
       context: context,
       title: '상품 삭제',
       content: '정말로 이 상품을 삭제하시겠습니까?',
       confirmText: '삭제',
-      cancelText: '취소',
       confirmColor: Colors.red,
     );
 
@@ -90,9 +90,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
 
     if (productData.id == null) {
-      if (mounted) {
-        GbSnackBar.showError(context, '상품 ID가 유효하지 않습니다');
-      }
+      if (!mounted) return;
+      GbSnackBar.showError(context, '상품 ID가 유효하지 않습니다');
       return;
     }
 
@@ -101,22 +100,27 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         .read(productDetailNotifierProvider.notifier)
         .deleteProduct(productData.id!);
 
-    if (mounted) {
-      if (deleteResult) {
-        // 삭제 성공 시 이벤트는 ProductDetailNotifier에서 자동 발행됨
-        // 모든 목록 Provider가 자동으로 해당 상품을 제거합니다
-        GbSnackBar.showSuccess(context, '상품이 삭제되었습니다');
-        // 상품 상세 화면 닫기
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          // 스택에 이전 화면이 없으면 홈으로 이동
-          context.go('/main/home');
-        }
+    if (!mounted) return;
+
+    if (deleteResult) {
+      // 삭제 성공 시 이벤트는 ProductDetailNotifier에서 자동 발행됨
+      // 모든 목록 Provider가 자동으로 해당 상품을 제거합니다
+
+      if (!mounted) return;
+      GbSnackBar.showSuccess(context, '상품이 삭제되었습니다');
+
+      // 상품 상세 화면 닫기
+      if (!mounted) return;
+      if (context.canPop()) {
+        context.pop();
       } else {
-        // 삭제 실패
-        GbSnackBar.showError(context, '상품 삭제에 실패했습니다');
+        // 스택에 이전 화면이 없으면 홈으로 이동
+        context.go('/main/home');
       }
+    } else {
+      // 삭제 실패
+      if (!mounted) return;
+      GbSnackBar.showError(context, '상품 삭제에 실패했습니다');
     }
   }
 
@@ -195,10 +199,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 switch (value) {
                   case 'edit':
                     _handleEdit(productData);
-                    break;
                   case 'delete':
-                    _handleDelete(context, productData);
-                    break;
+                    _handleDelete(productData);
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[

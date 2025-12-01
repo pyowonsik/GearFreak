@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// 공유 유틸리티
@@ -36,7 +37,7 @@ class ShareUtils {
     } catch (e) {
       // 공유 실패 시 에러 로그만 출력 (사용자에게는 에러 표시 안 함)
       // share_plus는 사용자가 공유를 취소할 수도 있으므로 에러로 처리하지 않음
-      print('❌ 상품 공유 실패: $e');
+      debugPrint('❌ 상품 공유 실패: $e');
     }
   }
 

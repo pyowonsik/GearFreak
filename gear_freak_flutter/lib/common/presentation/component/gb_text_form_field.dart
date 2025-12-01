@@ -3,6 +3,50 @@ import 'package:flutter/material.dart';
 /// Gear Freak 공통 TextFormField
 /// 프로젝트에서 사용하는 모든 TextFormField는 이 위젯을 사용합니다.
 class GbTextFormField extends StatelessWidget {
+  /// GbTextFormField 생성자
+  ///
+  /// [controller]는 컨트롤러입니다.
+  /// [labelText]는 라벨 텍스트입니다.
+  /// [hintText]는 힌트 텍스트입니다.
+  /// [hintStyle]는 힌트 스타일입니다.
+  /// [prefixIcon]는 접두사 아이콘입니다.
+  /// [suffixIcon]는 접미사 아이콘입니다.
+  /// [suffixText]는 접미사 텍스트입니다.
+  /// [keyboardType]는 키보드 타입입니다.
+  /// [obscureText]는 비밀번호 모드입니다.
+  /// [maxLines]는 최대 라인 수입니다.
+  /// [minLines]는 최소 라인 수입니다.
+  /// [validator]는 유효성 검사 함수입니다.
+  /// [onChanged]는 입력 변경 콜백입니다.
+  /// [focusNode]는 포커스 노드입니다.
+  /// [readOnly]는 읽기 전용 여부입니다.
+  /// [filled]는 채워진 스타일 사용 여부입니다.
+  /// [fillColor]는 채워진 색상입니다.
+  /// [contentPadding]는 컨텐츠 패딩입니다.
+  /// [decoration]는 커스텀 InputDecoration입니다.
+  const GbTextFormField({
+    super.key,
+    this.controller,
+    this.labelText,
+    this.hintText,
+    this.hintStyle,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.suffixText,
+    this.keyboardType,
+    this.obscureText = false,
+    this.maxLines = 1,
+    this.minLines,
+    this.validator,
+    this.onChanged,
+    this.focusNode,
+    this.readOnly = false,
+    this.filled = false,
+    this.fillColor,
+    this.contentPadding,
+    this.decoration,
+  });
+
   /// 컨트롤러
   final TextEditingController? controller;
 
@@ -59,29 +103,6 @@ class GbTextFormField extends StatelessWidget {
 
   /// 커스텀 InputDecoration (기본 스타일을 덮어씀)
   final InputDecoration? decoration;
-
-  const GbTextFormField({
-    super.key,
-    this.controller,
-    this.labelText,
-    this.hintText,
-    this.hintStyle,
-    this.prefixIcon,
-    this.suffixIcon,
-    this.suffixText,
-    this.keyboardType,
-    this.obscureText = false,
-    this.maxLines = 1,
-    this.minLines,
-    this.validator,
-    this.onChanged,
-    this.focusNode,
-    this.readOnly = false,
-    this.filled = false,
-    this.fillColor,
-    this.contentPadding,
-    this.decoration,
-  });
 
   @override
   Widget build(BuildContext context) {

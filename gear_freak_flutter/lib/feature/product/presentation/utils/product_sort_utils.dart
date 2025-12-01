@@ -23,15 +23,14 @@ class ProductSortUtils {
     switch (sortBy) {
       case pod.ProductSortBy.latest:
         return '최신순';
-      case pod.ProductSortBy.popular:
-        return '인기순';
       case pod.ProductSortBy.priceAsc:
         return '낮은 가격순';
       case pod.ProductSortBy.priceDesc:
         return '높은 가격순';
-      default:
+      case pod.ProductSortBy.popular:
+        return '인기순';
+      case null:
         return '최신순';
     }
   }
 }
-

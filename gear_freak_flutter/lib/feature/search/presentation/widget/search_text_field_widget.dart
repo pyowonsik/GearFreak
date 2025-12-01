@@ -90,4 +90,3 @@ class _SearchTextFieldWidgetState extends State<SearchTextFieldWidget> {
     );
   }
 }
-

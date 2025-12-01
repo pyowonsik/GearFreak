@@ -11,8 +11,8 @@ class SearchRecentSearchesListWidget extends StatelessWidget {
   const SearchRecentSearchesListWidget({
     required this.recentSearches,
     required this.onSearchTap,
-    this.onClearAll,
     required this.onDelete,
+    this.onClearAll,
     super.key,
   });
 
@@ -30,79 +30,74 @@ class SearchRecentSearchesListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 헤더
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  '최근 검색어',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 헤더
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '최근 검색어',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+              if (onClearAll != null)
+                TextButton(
+                  onPressed: onClearAll,
+                  child: const Text(
+                    '전체 삭제',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        // 최근 검색어 목록
+        Expanded(
+          child: ListView.builder(
+            itemCount: recentSearches.length,
+            itemBuilder: (context, index) {
+              final query = recentSearches[index];
+              return ListTile(
+                leading: const Icon(
+                  Icons.history,
+                  color: Color(0xFF9CA3AF),
+                ),
+                title: Text(
+                  query,
+                  style: const TextStyle(
+                    fontSize: 16,
                     color: Color(0xFF1F2937),
                   ),
                 ),
-                if (onClearAll != null)
-                  TextButton(
-                    onPressed: onClearAll,
-                    child: const Text(
-                      '전체 삭제',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF9CA3AF),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          // 최근 검색어 목록
-          Expanded(
-            child: ListView.builder(
-              itemCount: recentSearches.length,
-              itemBuilder: (context, index) {
-                final query = recentSearches[index];
-                return ListTile(
-                  leading: const Icon(
-                    Icons.history,
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.close,
                     color: Color(0xFF9CA3AF),
+                    size: 20,
                   ),
-                  title: Text(
-                    query,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF1F2937),
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      color: Color(0xFF9CA3AF),
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      onDelete(query);
-                    },
-                  ),
-                  onTap: () {
-                    onSearchTap(query);
+                  onPressed: () {
+                    onDelete(query);
                   },
-                );
-              },
-            ),
+                ),
+                onTap: () {
+                  onSearchTap(query);
+                },
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
-
-

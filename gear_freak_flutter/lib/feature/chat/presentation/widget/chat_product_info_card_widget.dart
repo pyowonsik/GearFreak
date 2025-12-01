@@ -77,4 +77,3 @@ class ChatProductInfoCardWidget extends StatelessWidget {
     );
   }
 }
-

@@ -66,7 +66,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           .read(productNotifierProvider.notifier)
           .loadPaginatedProductsByCategory(
             category: _selectedCategory!,
-            limit: 20,
             sortBy: sortBy,
           );
     }
@@ -151,4 +150,3 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 }
-
