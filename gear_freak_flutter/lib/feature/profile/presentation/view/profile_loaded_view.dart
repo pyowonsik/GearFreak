@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/feature/profile/domain/domain.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
-
-
 
 /// 프로필 화면이 로드된 상태의 View
 class ProfileLoadedView extends StatelessWidget {
   /// ProfileLoadedView 생성자
   ///
-  /// [profile]는 프로필 정보입니다.
+  /// [user]는 사용자 정보입니다.
   /// [onEditProfile]는 프로필 편집 버튼 클릭 콜백입니다.
   /// [onLogout]는 로그아웃 메뉴 클릭 콜백입니다.
   const ProfileLoadedView({
-    required this.profile,
+    required this.user,
     required this.onLogout,
     this.onEditProfile,
     super.key,
   });
 
-  /// 프로필 정보
-  final UserProfile profile;
+  /// 사용자 정보
+  final pod.User user;
 
   /// 프로필 편집 버튼 클릭 콜백
   final VoidCallback? onEditProfile;
@@ -34,15 +32,15 @@ class ProfileLoadedView extends StatelessWidget {
         children: [
           // 프로필 정보
           ProfileInfoSectionWidget(
-            profile: profile,
+            user: user,
             onEditProfile: onEditProfile,
           ),
           const SizedBox(height: 8),
           // 활동 통계
-          ProfileStatsSectionWidget(
-            sellingCount: profile.sellingCount,
-            soldCount: profile.soldCount,
-            favoriteCount: profile.favoriteCount,
+          const ProfileStatsSectionWidget(
+            sellingCount: 0, // TODO: 실제 데이터로 교체
+            soldCount: 0, // TODO: 실제 데이터로 교체
+            favoriteCount: 0, // TODO: 실제 데이터로 교체
           ),
           const SizedBox(height: 8),
           // 메뉴 리스트

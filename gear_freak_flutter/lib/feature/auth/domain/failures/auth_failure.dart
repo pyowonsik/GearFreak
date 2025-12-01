@@ -52,3 +52,16 @@ class SignupFailure extends AuthFailure {
   @override
   String toString() => 'SignupFailure: $message';
 }
+
+/// 현재 사용자 정보 조회 실패
+class GetMeFailure extends AuthFailure {
+  /// GetMeFailure 생성자
+  ///
+  /// [message]는 실패 메시지입니다.
+  /// [exception]는 예외입니다.
+  /// [stackTrace]는 스택 트레이스입니다.
+  const GetMeFailure(super.message, {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'GetMeFailure: $message';
+}

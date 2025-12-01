@@ -1,20 +1,20 @@
-import 'package:gear_freak_flutter/feature/profile/domain/domain.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
 /// 프로필 상태
 class ProfileState {
   /// ProfileState 생성자
   ///
-  /// [profile]는 사용자 프로필입니다.
+  /// [user]는 사용자 정보입니다.
   /// [isLoading]는 로딩 상태입니다.
   /// [error]는 에러 메시지입니다.
   const ProfileState({
-    this.profile,
+    this.user,
     this.isLoading = false,
     this.error,
   });
 
-  /// 사용자 프로필
-  final UserProfile? profile;
+  /// 사용자 정보
+  final pod.User? user;
 
   /// 로딩 상태
   final bool isLoading;
@@ -24,12 +24,12 @@ class ProfileState {
 
   /// ProfileState 복사
   ProfileState copyWith({
-    UserProfile? profile,
+    pod.User? user,
     bool? isLoading,
     String? error,
   }) {
     return ProfileState(
-      profile: profile ?? this.profile,
+      user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );

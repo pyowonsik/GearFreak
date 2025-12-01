@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/component/component.dart';
-
+import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_loading_button.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_logo_section.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/widget/signup_link_widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 로그인 화면

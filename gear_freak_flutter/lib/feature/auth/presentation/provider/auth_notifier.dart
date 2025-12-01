@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
@@ -8,13 +8,20 @@ import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state
 class AuthNotifier extends StateNotifier<AuthState> {
   /// AuthNotifier 생성자
   ///
+  /// [getMeUseCase]는 현재 사용자 정보 조회 UseCase 인스턴스입니다.
   /// [loginUseCase]는 로그인 UseCase 인스턴스입니다.
   /// [signupUseCase]는 회원가입 UseCase 인스턴스입니다.
-  AuthNotifier(this.loginUseCase, this.signupUseCase)
-      : super(const AuthInitial()) {
+  AuthNotifier(
+    this.getMeUseCase,
+    this.loginUseCase,
+    this.signupUseCase,
+  ) : super(const AuthInitial()) {
     // 앱 시작 시 세션 확인
     _checkSession();
   }
+
+  /// 현재 사용자 정보 조회 UseCase 인스턴스
+  final GetMeUseCase getMeUseCase;
 
   /// 로그인 UseCase 인스턴스
   final LoginUseCase loginUseCase;
@@ -26,14 +33,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> _checkSession() async {
     state = const AuthLoading();
 
-    try {
-      // 서버에서 세션 유효성 확인
-      final user = await PodService.instance.client.user.getMe();
-      state = AuthAuthenticated(user);
-    } catch (e) {
-      // 세션이 없거나 만료된 경우
-      state = const AuthUnauthenticated();
-    }
+    final result = await getMeUseCase(null);
+
+    result.fold(
+      (failure) {
+        // 세션이 없거나 만료된 경우
+        state = const AuthUnauthenticated();
+      },
+      (user) {
+        if (user != null) {
+          state = AuthAuthenticated(user);
+        } else {
+          state = const AuthUnauthenticated();
+        }
+      },
+    );
   }
 
   /// 회원가입

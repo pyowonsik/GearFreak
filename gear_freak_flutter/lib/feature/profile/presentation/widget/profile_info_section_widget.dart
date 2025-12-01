@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/feature/profile/domain/domain.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
 /// 프로필 정보 섹션 위젯
 class ProfileInfoSectionWidget extends StatelessWidget {
   /// ProfileInfoSectionWidget 생성자
   ///
-  /// [profile]는 프로필 정보입니다.
+  /// [user]는 사용자 정보입니다.
   /// [onEditProfile]는 프로필 편집 버튼 클릭 콜백입니다.
   const ProfileInfoSectionWidget({
-    required this.profile,
+    required this.user,
     this.onEditProfile,
     super.key,
   });
 
-  /// 프로필 정보
-  final UserProfile profile;
+  /// 사용자 정보
+  final pod.User user;
 
   /// 프로필 편집 버튼 클릭 콜백
   final VoidCallback? onEditProfile;
@@ -41,7 +41,7 @@ class ProfileInfoSectionWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  profile.nickname,
+                  user.nickname ?? '',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -50,7 +50,7 @@ class ProfileInfoSectionWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  profile.email,
+                  user.userInfo?.email ?? '',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/auth/data/datasource/auth_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/auth/data/repository/auth_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/repository/auth_repository.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_notifier.dart';
@@ -16,6 +17,12 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
   return AuthRepositoryImpl(remoteDataSource);
+});
+
+/// Get Me UseCase Provider
+final getMeUseCaseProvider = Provider<GetMeUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return GetMeUseCase(repository);
 });
 
 /// Login UseCase Provider
@@ -33,8 +40,9 @@ final signupUseCaseProvider = Provider<SignupUseCase>((ref) {
 /// Auth Notifier Provider
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+  final getMeUseCase = ref.watch(getMeUseCaseProvider);
   final loginUseCase = ref.watch(loginUseCaseProvider);
   final signupUseCase = ref.watch(signupUseCaseProvider);
 
-  return AuthNotifier(loginUseCase, signupUseCase);
+  return AuthNotifier(getMeUseCase, loginUseCase, signupUseCase);
 });

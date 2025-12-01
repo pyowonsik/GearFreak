@@ -35,8 +35,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.didChangeDependencies();
     // 프로필 정보가 로드되면 컨트롤러 업데이트
     final profileState = ref.read(profileNotifierProvider);
-    if (profileState.profile != null && _nicknameController.text.isEmpty) {
-      _nicknameController.text = profileState.profile!.nickname;
+    if (profileState.user != null && _nicknameController.text.isEmpty) {
+      _nicknameController.text = profileState.user!.nickname ?? '';
     }
   }
 
@@ -166,8 +166,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       );
     }
 
-    final profile = profileState.profile;
-    if (profile == null) {
+    final user = profileState.user;
+    if (user == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('프로필 편집')),
         body: GbErrorView(
@@ -182,8 +182,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
 
     // 프로필 정보가 있으면 컨트롤러 업데이트
-    if (_nicknameController.text != profile.nickname) {
-      _nicknameController.text = profile.nickname;
+    if (_nicknameController.text != (user.nickname ?? '')) {
+      _nicknameController.text = user.nickname ?? '';
     }
 
     return Scaffold(
@@ -217,27 +217,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               const SizedBox(height: 32),
               // 프로필 이미지
               Center(
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundColor: const Color(0xFFF3F4F6),
-                      backgroundImage: _selectedImage != null
-                          ? FileImage(_selectedImage!)
-                          : null,
-                      child: _selectedImage == null
-                          ? Icon(
-                              Icons.person,
-                              size: 64,
-                              color: Colors.grey.shade500,
-                            )
-                          : null,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _pickImage,
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundColor: const Color(0xFFF3F4F6),
+                        backgroundImage: _selectedImage != null
+                            ? FileImage(_selectedImage!)
+                            : null,
+                        child: _selectedImage == null
+                            ? Icon(
+                                Icons.person,
+                                size: 64,
+                                color: Colors.grey.shade500,
+                              )
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -255,8 +255,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 40),

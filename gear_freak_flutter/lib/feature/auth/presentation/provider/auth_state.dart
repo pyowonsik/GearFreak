@@ -1,7 +1,6 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
 /// 인증 상태 (Sealed Class 방식)
-/// BLoC의 State 추상 클래스와 유사한 패턴
 sealed class AuthState {
   const AuthState();
 }

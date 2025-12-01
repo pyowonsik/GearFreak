@@ -38,14 +38,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<pod.User?> getMe() async {
-    // Serverpod SessionManager를 통해 현재 로그인 상태 확인
-    if (!_sessionManager.isSignedIn) {
-      return null;
-    }
-
+    // SessionManager.isSignedIn은 로컬 SharedPreferences를 확인하는 것이므로
+    // 비동기로 로드되기 전에 false를 반환할 수 있습니다.
+    // 따라서 isSignedIn 체크를 제거하고 바로 API 호출 시도
+    // 서버에서 인증 키를 검증하므로 실제 인증 상태를 확인할 수 있습니다.
     try {
       // 서버에서 현재 사용자 정보 조회 (User 클래스 반환)
-      return await _client.user.getMe();
+      // 인증 키가 있으면 자동으로 헤더에 포함되어 서버에서 검증됩니다
+      final user = await _client.user.getMe();
+      return user;
     } catch (e) {
       // 로그인 상태가 아니거나 오류 발생 시 null 반환
       return null;

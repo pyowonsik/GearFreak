@@ -36,12 +36,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: const ProfileAppBarWidget(),
       body: profileState.isLoading
           ? const GbLoadingView()
-          : profileState.profile == null
+          : profileState.user == null
               ? const GbEmptyView(
                   message: '프로필을 불러올 수 없습니다',
                 )
               : ProfileLoadedView(
-                  profile: profileState.profile!,
+                  user: profileState.user!,
                   onLogout: _handleLogout,
                   onEditProfile: _handleEditProfile,
                 ),
