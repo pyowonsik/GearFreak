@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_scree
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -72,6 +73,13 @@ abstract final class AppRoutes {
             final chatId = state.pathParameters['id'] ?? '';
             return ChatRoomScreen(chatId: chatId);
           },
+        ),
+
+        // 프로필 편집 화면
+        GoRoute(
+          path: '/profile/edit',
+          name: 'edit-profile',
+          builder: (context, state) => const EditProfileScreen(),
         ),
       ];
 }

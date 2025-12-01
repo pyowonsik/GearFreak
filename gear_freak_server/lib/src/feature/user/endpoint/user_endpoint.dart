@@ -20,4 +20,9 @@ class UserEndpoint extends Endpoint
   Future<List<String>> getUserScopes(Session session) async {
     return await UserService.getUserScopes(session);
   }
+
+  // // 사용자 프로필 수정
+  // Future<User> updateUserProfile(Session session, UpdateUserProfileRequestDto request) async {
+  //   return await UserService.updateUserProfile(session, request);
+  // }
 }

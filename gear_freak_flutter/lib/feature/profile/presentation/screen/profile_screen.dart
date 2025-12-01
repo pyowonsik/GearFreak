@@ -45,6 +45,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               : ProfileLoadedView(
                   profile: profileState.profile!,
                   onLogout: _handleLogout,
+                  onEditProfile: _handleEditProfile,
                 ),
     );
   }
@@ -82,5 +83,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       GbSnackBar.showError(context, '로그아웃 실패: $e');
     }
+  }
+
+  /// 프로필 편집 처리
+  void _handleEditProfile() {
+    context.push('/profile/edit');
   }
 }
