@@ -147,3 +147,4 @@ class CategoryItemWidget extends StatelessWidget {
     }
   }
 }
+

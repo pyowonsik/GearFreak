@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/home/presentation/utils/category_utils.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/utils/category_utils.dart';
 
 /// 카테고리 필터링 섹션 컴포넌트
 /// 여러 feature에서 재사용 가능한 컴포넌트
@@ -139,3 +139,4 @@ class CategoryFilterSectionComponent extends StatelessWidget {
     );
   }
 }
+

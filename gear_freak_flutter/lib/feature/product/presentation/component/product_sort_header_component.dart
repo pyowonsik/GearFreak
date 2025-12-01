@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/home/presentation/utils/product_sort_utils.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/utils/product_sort_utils.dart';
 
 /// 상품 목록 정렬 헤더 컴포넌트
 /// 여러 feature에서 재사용 가능한 컴포넌트
@@ -92,3 +92,4 @@ class ProductSortHeaderComponent extends StatelessWidget {
     );
   }
 }
+
