@@ -17,6 +17,8 @@ class ProfileLoadedView extends StatelessWidget {
     this.onEditProfile,
     this.onAppInfo,
     this.onCustomerCenter,
+    this.onMyProducts,
+    this.onMyFavorite,
     super.key,
   });
 
@@ -34,6 +36,12 @@ class ProfileLoadedView extends StatelessWidget {
 
   /// 고객 센터 메뉴 클릭 콜백
   final VoidCallback? onCustomerCenter;
+
+  /// 내 상품 관리 메뉴 클릭 콜백
+  final VoidCallback? onMyProducts;
+
+  /// 관심 목록 메뉴 클릭 콜백
+  final VoidCallback? onMyFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -56,17 +64,19 @@ class ProfileLoadedView extends StatelessWidget {
           // 메뉴 리스트
           Column(
             children: [
-              const ProfileMenuItemWidget(
+              ProfileMenuItemWidget(
                 icon: Icons.shopping_bag_outlined,
                 title: '내 상품 관리',
+                onTap: onMyProducts,
               ),
               const ProfileMenuItemWidget(
                 icon: Icons.receipt_long_outlined,
                 title: '거래 내역',
               ),
-              const ProfileMenuItemWidget(
+              ProfileMenuItemWidget(
                 icon: Icons.favorite_outline,
                 title: '관심 목록',
+                onTap: onMyFavorite,
               ),
               const ProfileMenuItemWidget(
                 icon: Icons.star_outline,

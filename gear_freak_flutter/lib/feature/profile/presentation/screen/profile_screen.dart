@@ -50,6 +50,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onEditProfile: _handleEditProfile,
             onAppInfo: _handleAppInfo,
             onCustomerCenter: _handleCustomerCenter,
+            onMyProducts: _handleMyProducts,
+            onMyFavorite: _handleMyFavorite,
           ),
       },
     );
@@ -103,5 +105,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// 고객센터 화면 이동
   void _handleCustomerCenter() {
     context.push('/profile/customer-center');
+  }
+
+  /// 내 상품 관리 화면 이동
+  void _handleMyProducts() {
+    context.push('/profile/my-products');
+  }
+
+  /// 관심 목록 화면 이동
+  void _handleMyFavorite() {
+    context.push('/profile/my-favorite');
   }
 }

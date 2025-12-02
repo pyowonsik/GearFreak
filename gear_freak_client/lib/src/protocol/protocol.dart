@@ -23,11 +23,12 @@ import 'feature/product/model/product.dart' as _i9;
 import 'feature/product/model/product_category.dart' as _i10;
 import 'feature/product/model/product_condition.dart' as _i11;
 import 'feature/product/model/product_sort_by.dart' as _i12;
-import 'feature/product/model/trade_method.dart' as _i13;
-import 'feature/user/model/dto/update_user_profile_request.dto.dart' as _i14;
-import 'feature/user/model/user.dart' as _i15;
-import 'greeting.dart' as _i16;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i17;
+import 'feature/product/model/product_status.dart' as _i13;
+import 'feature/product/model/trade_method.dart' as _i14;
+import 'feature/user/model/dto/update_user_profile_request.dto.dart' as _i15;
+import 'feature/user/model/user.dart' as _i16;
+import 'greeting.dart' as _i17;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i18;
 export 'common/model/pagination_dto.dart';
 export 'common/s3/model/dto/generate_presigned_upload_url_request.dto.dart';
 export 'common/s3/model/dto/generate_presigned_upload_url_response.dto.dart';
@@ -39,6 +40,7 @@ export 'feature/product/model/product.dart';
 export 'feature/product/model/product_category.dart';
 export 'feature/product/model/product_condition.dart';
 export 'feature/product/model/product_sort_by.dart';
+export 'feature/product/model/product_status.dart';
 export 'feature/product/model/trade_method.dart';
 export 'feature/user/model/dto/update_user_profile_request.dto.dart';
 export 'feature/user/model/user.dart';
@@ -91,17 +93,20 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i12.ProductSortBy) {
       return _i12.ProductSortBy.fromJson(data) as T;
     }
-    if (t == _i13.TradeMethod) {
-      return _i13.TradeMethod.fromJson(data) as T;
+    if (t == _i13.ProductStatus) {
+      return _i13.ProductStatus.fromJson(data) as T;
     }
-    if (t == _i14.UpdateUserProfileRequestDto) {
-      return _i14.UpdateUserProfileRequestDto.fromJson(data) as T;
+    if (t == _i14.TradeMethod) {
+      return _i14.TradeMethod.fromJson(data) as T;
     }
-    if (t == _i15.User) {
-      return _i15.User.fromJson(data) as T;
+    if (t == _i15.UpdateUserProfileRequestDto) {
+      return _i15.UpdateUserProfileRequestDto.fromJson(data) as T;
     }
-    if (t == _i16.Greeting) {
-      return _i16.Greeting.fromJson(data) as T;
+    if (t == _i16.User) {
+      return _i16.User.fromJson(data) as T;
+    }
+    if (t == _i17.Greeting) {
+      return _i17.Greeting.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.PaginationDto?>()) {
       return (data != null ? _i2.PaginationDto.fromJson(data) : null) as T;
@@ -144,19 +149,22 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i12.ProductSortBy?>()) {
       return (data != null ? _i12.ProductSortBy.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.TradeMethod?>()) {
-      return (data != null ? _i13.TradeMethod.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.ProductStatus?>()) {
+      return (data != null ? _i13.ProductStatus.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.UpdateUserProfileRequestDto?>()) {
+    if (t == _i1.getType<_i14.TradeMethod?>()) {
+      return (data != null ? _i14.TradeMethod.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i15.UpdateUserProfileRequestDto?>()) {
       return (data != null
-          ? _i14.UpdateUserProfileRequestDto.fromJson(data)
+          ? _i15.UpdateUserProfileRequestDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i15.User?>()) {
-      return (data != null ? _i15.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.User?>()) {
+      return (data != null ? _i16.User.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i16.Greeting?>()) {
-      return (data != null ? _i16.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i17.Greeting?>()) {
+      return (data != null ? _i17.Greeting.fromJson(data) : null) as T;
     }
     if (t == _i1.getType<List<String>?>()) {
       return (data != null
@@ -181,7 +189,7 @@ class Protocol extends _i1.SerializationManager {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     try {
-      return _i17.Protocol().deserialize<T>(data, t);
+      return _i18.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -223,19 +231,22 @@ class Protocol extends _i1.SerializationManager {
     if (data is _i12.ProductSortBy) {
       return 'ProductSortBy';
     }
-    if (data is _i13.TradeMethod) {
+    if (data is _i13.ProductStatus) {
+      return 'ProductStatus';
+    }
+    if (data is _i14.TradeMethod) {
       return 'TradeMethod';
     }
-    if (data is _i14.UpdateUserProfileRequestDto) {
+    if (data is _i15.UpdateUserProfileRequestDto) {
       return 'UpdateUserProfileRequestDto';
     }
-    if (data is _i15.User) {
+    if (data is _i16.User) {
       return 'User';
     }
-    if (data is _i16.Greeting) {
+    if (data is _i17.Greeting) {
       return 'Greeting';
     }
-    className = _i17.Protocol().getClassNameForObject(data);
+    className = _i18.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth.$className';
     }
@@ -283,21 +294,24 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'ProductSortBy') {
       return deserialize<_i12.ProductSortBy>(data['data']);
     }
+    if (dataClassName == 'ProductStatus') {
+      return deserialize<_i13.ProductStatus>(data['data']);
+    }
     if (dataClassName == 'TradeMethod') {
-      return deserialize<_i13.TradeMethod>(data['data']);
+      return deserialize<_i14.TradeMethod>(data['data']);
     }
     if (dataClassName == 'UpdateUserProfileRequestDto') {
-      return deserialize<_i14.UpdateUserProfileRequestDto>(data['data']);
+      return deserialize<_i15.UpdateUserProfileRequestDto>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i15.User>(data['data']);
+      return deserialize<_i16.User>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i16.Greeting>(data['data']);
+      return deserialize<_i17.Greeting>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth.')) {
       data['className'] = dataClassName.substring(15);
-      return _i17.Protocol().deserializeByClassName(data);
+      return _i18.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }

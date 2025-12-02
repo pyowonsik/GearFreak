@@ -48,4 +48,18 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> deleteProduct(int productId) async {
     return remoteDataSource.deleteProduct(productId);
   }
+
+  @override
+  Future<pod.PaginatedProductsResponseDto> getMyProducts(
+    pod.PaginationDto pagination,
+  ) async {
+    return remoteDataSource.getMyProducts(pagination);
+  }
+
+  @override
+  Future<pod.PaginatedProductsResponseDto> getMyFavoriteProducts(
+    pod.PaginationDto pagination,
+  ) async {
+    return remoteDataSource.getMyFavoriteProducts(pagination);
+  }
 }

@@ -14,6 +14,7 @@ import '../../../feature/user/model/user.dart' as _i2;
 import '../../../feature/product/model/product_category.dart' as _i3;
 import '../../../feature/product/model/product_condition.dart' as _i4;
 import '../../../feature/product/model/trade_method.dart' as _i5;
+import '../../../feature/product/model/product_status.dart' as _i6;
 
 /// 상품 정보
 abstract class Product implements _i1.SerializableModel {
@@ -35,6 +36,7 @@ abstract class Product implements _i1.SerializableModel {
     this.chatCount,
     this.createdAt,
     this.updatedAt,
+    this.status,
   });
 
   factory Product({
@@ -55,6 +57,7 @@ abstract class Product implements _i1.SerializableModel {
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    _i6.ProductStatus? status,
   }) = _ProductImpl;
 
   factory Product.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -88,6 +91,9 @@ abstract class Product implements _i1.SerializableModel {
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+      status: jsonSerialization['status'] == null
+          ? null
+          : _i6.ProductStatus.fromJson((jsonSerialization['status'] as int)),
     );
   }
 
@@ -143,6 +149,9 @@ abstract class Product implements _i1.SerializableModel {
   /// 상품 수정일
   DateTime? updatedAt;
 
+  /// 판매 상태
+  _i6.ProductStatus? status;
+
   /// Returns a shallow copy of this [Product]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -164,6 +173,7 @@ abstract class Product implements _i1.SerializableModel {
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    _i6.ProductStatus? status,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -185,6 +195,7 @@ abstract class Product implements _i1.SerializableModel {
       if (chatCount != null) 'chatCount': chatCount,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
+      if (status != null) 'status': status?.toJson(),
     };
   }
 
@@ -215,6 +226,7 @@ class _ProductImpl extends Product {
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    _i6.ProductStatus? status,
   }) : super._(
           id: id,
           sellerId: sellerId,
@@ -233,6 +245,7 @@ class _ProductImpl extends Product {
           chatCount: chatCount,
           createdAt: createdAt,
           updatedAt: updatedAt,
+          status: status,
         );
 
   /// Returns a shallow copy of this [Product]
@@ -257,6 +270,7 @@ class _ProductImpl extends Product {
     Object? chatCount = _Undefined,
     Object? createdAt = _Undefined,
     Object? updatedAt = _Undefined,
+    Object? status = _Undefined,
   }) {
     return Product(
       id: id is int? ? id : this.id,
@@ -279,6 +293,7 @@ class _ProductImpl extends Product {
       chatCount: chatCount is int? ? chatCount : this.chatCount,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
       updatedAt: updatedAt is DateTime? ? updatedAt : this.updatedAt,
+      status: status is _i6.ProductStatus? ? status : this.status,
     );
   }
 }

@@ -25,10 +25,11 @@ import 'feature/product/model/product.dart' as _i11;
 import 'feature/product/model/product_category.dart' as _i12;
 import 'feature/product/model/product_condition.dart' as _i13;
 import 'feature/product/model/product_sort_by.dart' as _i14;
-import 'feature/product/model/trade_method.dart' as _i15;
-import 'feature/user/model/dto/update_user_profile_request.dto.dart' as _i16;
-import 'feature/user/model/user.dart' as _i17;
-import 'greeting.dart' as _i18;
+import 'feature/product/model/product_status.dart' as _i15;
+import 'feature/product/model/trade_method.dart' as _i16;
+import 'feature/user/model/dto/update_user_profile_request.dto.dart' as _i17;
+import 'feature/user/model/user.dart' as _i18;
+import 'greeting.dart' as _i19;
 export 'common/model/pagination_dto.dart';
 export 'common/s3/model/dto/generate_presigned_upload_url_request.dto.dart';
 export 'common/s3/model/dto/generate_presigned_upload_url_response.dto.dart';
@@ -40,6 +41,7 @@ export 'feature/product/model/product.dart';
 export 'feature/product/model/product_category.dart';
 export 'feature/product/model/product_condition.dart';
 export 'feature/product/model/product_sort_by.dart';
+export 'feature/product/model/product_status.dart';
 export 'feature/product/model/trade_method.dart';
 export 'feature/user/model/dto/update_user_profile_request.dto.dart';
 export 'feature/user/model/user.dart';
@@ -243,6 +245,12 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.timestampWithoutTimeZone,
           isNullable: true,
           dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'status',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'protocol:ProductStatus?',
         ),
       ],
       foreignKeys: [
@@ -466,17 +474,20 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i14.ProductSortBy) {
       return _i14.ProductSortBy.fromJson(data) as T;
     }
-    if (t == _i15.TradeMethod) {
-      return _i15.TradeMethod.fromJson(data) as T;
+    if (t == _i15.ProductStatus) {
+      return _i15.ProductStatus.fromJson(data) as T;
     }
-    if (t == _i16.UpdateUserProfileRequestDto) {
-      return _i16.UpdateUserProfileRequestDto.fromJson(data) as T;
+    if (t == _i16.TradeMethod) {
+      return _i16.TradeMethod.fromJson(data) as T;
     }
-    if (t == _i17.User) {
-      return _i17.User.fromJson(data) as T;
+    if (t == _i17.UpdateUserProfileRequestDto) {
+      return _i17.UpdateUserProfileRequestDto.fromJson(data) as T;
     }
-    if (t == _i18.Greeting) {
-      return _i18.Greeting.fromJson(data) as T;
+    if (t == _i18.User) {
+      return _i18.User.fromJson(data) as T;
+    }
+    if (t == _i19.Greeting) {
+      return _i19.Greeting.fromJson(data) as T;
     }
     if (t == _i1.getType<_i4.PaginationDto?>()) {
       return (data != null ? _i4.PaginationDto.fromJson(data) : null) as T;
@@ -519,19 +530,22 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i14.ProductSortBy?>()) {
       return (data != null ? _i14.ProductSortBy.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.TradeMethod?>()) {
-      return (data != null ? _i15.TradeMethod.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.ProductStatus?>()) {
+      return (data != null ? _i15.ProductStatus.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i16.UpdateUserProfileRequestDto?>()) {
+    if (t == _i1.getType<_i16.TradeMethod?>()) {
+      return (data != null ? _i16.TradeMethod.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i17.UpdateUserProfileRequestDto?>()) {
       return (data != null
-          ? _i16.UpdateUserProfileRequestDto.fromJson(data)
+          ? _i17.UpdateUserProfileRequestDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i17.User?>()) {
-      return (data != null ? _i17.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.User?>()) {
+      return (data != null ? _i18.User.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.Greeting?>()) {
-      return (data != null ? _i18.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i19.Greeting?>()) {
+      return (data != null ? _i19.Greeting.fromJson(data) : null) as T;
     }
     if (t == _i1.getType<List<String>?>()) {
       return (data != null
@@ -601,16 +615,19 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i14.ProductSortBy) {
       return 'ProductSortBy';
     }
-    if (data is _i15.TradeMethod) {
+    if (data is _i15.ProductStatus) {
+      return 'ProductStatus';
+    }
+    if (data is _i16.TradeMethod) {
       return 'TradeMethod';
     }
-    if (data is _i16.UpdateUserProfileRequestDto) {
+    if (data is _i17.UpdateUserProfileRequestDto) {
       return 'UpdateUserProfileRequestDto';
     }
-    if (data is _i17.User) {
+    if (data is _i18.User) {
       return 'User';
     }
-    if (data is _i18.Greeting) {
+    if (data is _i19.Greeting) {
       return 'Greeting';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -665,17 +682,20 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'ProductSortBy') {
       return deserialize<_i14.ProductSortBy>(data['data']);
     }
+    if (dataClassName == 'ProductStatus') {
+      return deserialize<_i15.ProductStatus>(data['data']);
+    }
     if (dataClassName == 'TradeMethod') {
-      return deserialize<_i15.TradeMethod>(data['data']);
+      return deserialize<_i16.TradeMethod>(data['data']);
     }
     if (dataClassName == 'UpdateUserProfileRequestDto') {
-      return deserialize<_i16.UpdateUserProfileRequestDto>(data['data']);
+      return deserialize<_i17.UpdateUserProfileRequestDto>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i17.User>(data['data']);
+      return deserialize<_i18.User>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i18.Greeting>(data['data']);
+      return deserialize<_i19.Greeting>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -707,8 +727,8 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i10.Favorite.t;
       case _i11.Product:
         return _i11.Product.t;
-      case _i17.User:
-        return _i17.User.t;
+      case _i18.User:
+        return _i18.User.t;
     }
     return null;
   }

@@ -36,11 +36,13 @@ class ProductPaginatedLoaded extends ProductState {
   /// [pagination]는 페이지네이션 정보입니다.
   /// [category]는 카테고리 정보입니다.
   /// [sortBy]는 정렬 기준입니다.
+  /// [profileType]는 프로필 화면 타입입니다. "myProducts" 또는 "myFavorite" (선택적)
   const ProductPaginatedLoaded({
     required this.products,
     required this.pagination,
     this.category,
     this.sortBy,
+    this.profileType,
   });
 
   /// 상품 목록
@@ -54,6 +56,9 @@ class ProductPaginatedLoaded extends ProductState {
 
   /// 정렬 기준
   final pod.ProductSortBy? sortBy; // 원래 요청 시 사용한 정렬 기준
+
+  /// 프로필 화면 타입
+  final String? profileType; // "myProducts" 또는 "myFavorite"
 }
 
 /// 페이지네이션 추가 로딩 중 상태 (기존 데이터 유지)
@@ -64,11 +69,13 @@ class ProductPaginatedLoadingMore extends ProductState {
   /// [pagination]는 페이지네이션 정보입니다.
   /// [category]는 카테고리 정보입니다.
   /// [sortBy]는 정렬 기준입니다.
+  /// [profileType]는 프로필 화면 타입입니다. "myProducts" 또는 "myFavorite" (선택적)
   const ProductPaginatedLoadingMore({
     required this.products,
     required this.pagination,
     this.category,
     this.sortBy,
+    this.profileType,
   });
 
   /// 상품 목록
@@ -82,4 +89,7 @@ class ProductPaginatedLoadingMore extends ProductState {
 
   /// 정렬 기준
   final pod.ProductSortBy? sortBy; // 원래 요청 시 사용한 정렬 기준
+
+  /// 프로필 화면 타입
+  final String? profileType; // "myProducts" 또는 "myFavorite"
 }

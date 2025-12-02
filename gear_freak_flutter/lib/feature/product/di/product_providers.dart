@@ -6,6 +6,8 @@ import 'package:gear_freak_flutter/feature/product/data/repository/product_repos
 import 'package:gear_freak_flutter/feature/product/domain/repository/product_repository.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_favorite_products_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
@@ -77,6 +79,19 @@ final deleteProductUseCaseProvider = Provider<DeleteProductUseCase>((ref) {
   return DeleteProductUseCase(repository);
 });
 
+/// Get My Products UseCase Provider
+final getMyProductsUseCaseProvider = Provider<GetMyProductsUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return GetMyProductsUseCase(repository);
+});
+
+/// Get My Favorite Products UseCase Provider
+final getMyFavoriteProductsUseCaseProvider =
+    Provider<GetMyFavoriteProductsUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return GetMyFavoriteProductsUseCase(repository);
+});
+
 /// 삭제된 상품 ID 이벤트 Provider (단일 소스)
 /// 상품 삭제 시 이 Provider에 productId를 설정하면
 /// 모든 목록 Provider가 자동으로 해당 상품을 제거합니다.
@@ -145,5 +160,24 @@ final updateProductNotifierProvider = StateNotifierProvider.autoDispose<
     uploadImageUseCase,
     deleteImageUseCase,
     updateProductUseCase,
+  );
+});
+
+/// Profile Product Notifier Provider (프로필 화면용)
+/// type: "myProducts" (내 상품) 또는 "myFavorite" (찜 목록)
+final profileProductNotifierProvider = StateNotifierProvider.autoDispose
+    .family<ProductNotifier, ProductState, String>((ref, type) {
+  final getPaginatedProductsUseCase =
+      ref.watch(getPaginatedProductsUseCaseProvider);
+  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  final getMyProductsUseCase = ref.watch(getMyProductsUseCaseProvider);
+  final getMyFavoriteProductsUseCase =
+      ref.watch(getMyFavoriteProductsUseCaseProvider);
+  return ProductNotifier(
+    ref,
+    getPaginatedProductsUseCase,
+    getProductDetailUseCase,
+    getMyProductsUseCase: getMyProductsUseCase,
+    getMyFavoriteProductsUseCase: getMyFavoriteProductsUseCase,
   );
 });

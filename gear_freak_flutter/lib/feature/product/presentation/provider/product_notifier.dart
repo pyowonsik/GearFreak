@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_favorite_products_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
@@ -13,11 +15,15 @@ class ProductNotifier extends StateNotifier<ProductState> {
   /// [ref]는 Riverpod의 Ref 인스턴스입니다.
   /// [getPaginatedProductsUseCase]는 페이지네이션된 상품 목록 조회 UseCase 인스턴스입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase 인스턴스입니다.
+  /// [getMyProductsUseCase]는 내 상품 목록 조회 UseCase 인스턴스입니다. (선택적)
+  /// [getMyFavoriteProductsUseCase]는 찜 목록 조회 UseCase 인스턴스입니다. (선택적)
   ProductNotifier(
     this.ref,
     this.getPaginatedProductsUseCase,
-    this.getProductDetailUseCase,
-  ) : super(const ProductInitial()) {
+    this.getProductDetailUseCase, {
+    this.getMyProductsUseCase,
+    this.getMyFavoriteProductsUseCase,
+  }) : super(const ProductInitial()) {
     debugPrint('🔵 [ProductNotifier] 생성됨');
 
     // 삭제 이벤트 감지하여 자동으로 목록에서 제거
@@ -51,10 +57,11 @@ class ProductNotifier extends StateNotifier<ProductState> {
   /// 상품 상세 조회 UseCase 인스턴스
   final GetProductDetailUseCase getProductDetailUseCase;
 
-  /// 랜덤 상품 로드 (5개) - 홈 화면용
-  Future<void> loadRandomProducts() async {
-    await loadPaginatedProducts(limit: 5, random: true);
-  }
+  /// 내 상품 목록 조회 UseCase 인스턴스 (선택적)
+  final GetMyProductsUseCase? getMyProductsUseCase;
+
+  /// 찜 목록 조회 UseCase 인스턴스 (선택적)
+  final GetMyFavoriteProductsUseCase? getMyFavoriteProductsUseCase;
 
   /// 페이지네이션된 상품 로드 (첫 페이지)
   Future<void> loadPaginatedProducts({
@@ -176,6 +183,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
       pagination: currentPagination,
       category: currentState.category, // 카테고리 정보 유지
       sortBy: currentState.sortBy, // 정렬 기준 유지
+      profileType: currentState.profileType, // 프로필 타입 유지
     );
 
     // 저장된 카테고리 및 정렬 정보 사용
@@ -186,7 +194,16 @@ class ProductNotifier extends StateNotifier<ProductState> {
       sortBy: currentState.sortBy, // 저장된 정렬 기준 사용
     );
 
-    final result = await getPaginatedProductsUseCase(pagination);
+    // 프로필 타입에 따라 적절한 UseCase 사용
+    final result = currentState.profileType == 'myProducts'
+        ? (getMyProductsUseCase != null
+            ? await getMyProductsUseCase!(pagination)
+            : await getPaginatedProductsUseCase(pagination))
+        : currentState.profileType == 'myFavorite'
+            ? (getMyFavoriteProductsUseCase != null
+                ? await getMyFavoriteProductsUseCase!(pagination)
+                : await getPaginatedProductsUseCase(pagination))
+            : await getPaginatedProductsUseCase(pagination);
 
     result.fold(
       (failure) {
@@ -212,6 +229,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
           pagination: response.pagination,
           category: currentState.category, // 카테고리 정보 유지
           sortBy: currentState.sortBy, // 정렬 기준 유지
+          profileType: currentState.profileType, // 프로필 타입 유지
         );
       },
     );
@@ -253,6 +271,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
           ),
           category: currentState.category,
           sortBy: currentState.sortBy,
+          profileType: currentState.profileType,
         );
       }
     } else if (currentState is ProductPaginatedLoadingMore) {
@@ -275,6 +294,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
           ),
           category: currentState.category,
           sortBy: currentState.sortBy,
+          profileType: currentState.profileType,
         );
       }
     }
@@ -304,6 +324,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
           pagination: currentState.pagination,
           category: currentState.category,
           sortBy: currentState.sortBy,
+          profileType: currentState.profileType,
         );
       }
     } else if (currentState is ProductPaginatedLoadingMore) {
@@ -325,8 +346,93 @@ class ProductNotifier extends StateNotifier<ProductState> {
           pagination: currentState.pagination,
           category: currentState.category,
           sortBy: currentState.sortBy,
+          profileType: currentState.profileType,
         );
       }
     }
+  }
+
+  /// 내가 등록한 상품 목록 로드 (프로필 화면용)
+  Future<void> loadMyProducts({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    if (getMyProductsUseCase == null) {
+      debugPrint('⚠️ [ProductNotifier] getMyProductsUseCase가 주입되지 않았습니다.');
+      state = const ProductError('내 상품 목록을 불러올 수 없습니다.');
+      return;
+    }
+
+    state = const ProductLoading();
+    debugPrint('🔄 [ProductNotifier] 내 상품 목록 로드: page=$page, limit=$limit');
+
+    final pagination = pod.PaginationDto(
+      page: page,
+      limit: limit,
+    );
+
+    final result = await getMyProductsUseCase!(pagination);
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [ProductNotifier] 내 상품 목록 로드 실패: ${failure.message}');
+        state = ProductError(failure.message);
+      },
+      (response) {
+        debugPrint('✅ [ProductNotifier] 내 상품 목록 로드 성공: '
+            'page=${response.pagination.page}, '
+            'totalCount=${response.pagination.totalCount}, '
+            'hasMore=${response.pagination.hasMore}, '
+            'products=${response.products.length}개');
+        state = ProductPaginatedLoaded(
+          products: response.products,
+          pagination: response.pagination,
+          sortBy: null,
+        );
+      },
+    );
+  }
+
+  /// 내가 관심목록한 상품 목록 로드 (프로필 화면용)
+  Future<void> loadMyFavoriteProducts({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    if (getMyFavoriteProductsUseCase == null) {
+      debugPrint(
+          '⚠️ [ProductNotifier] getMyFavoriteProductsUseCase가 주입되지 않았습니다.');
+      state = const ProductError('찜 목록을 불러올 수 없습니다.');
+      return;
+    }
+
+    state = const ProductLoading();
+    debugPrint('🔄 [ProductNotifier] 찜 목록 로드: page=$page, limit=$limit');
+
+    final pagination = pod.PaginationDto(
+      page: page,
+      limit: limit,
+    );
+
+    final result = await getMyFavoriteProductsUseCase!(pagination);
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [ProductNotifier] 찜 목록 로드 실패: ${failure.message}');
+        state = ProductError(failure.message);
+      },
+      (response) {
+        debugPrint('✅ [ProductNotifier] 찜 목록 로드 성공: '
+            'page=${response.pagination.page}, '
+            'totalCount=${response.pagination.totalCount}, '
+            'hasMore=${response.pagination.hasMore}, '
+            'products=${response.products.length}개');
+        state = ProductPaginatedLoaded(
+          products: response.products,
+          pagination: response.pagination,
+          sortBy: null,
+          profileType: 'myFavorite',
+        );
+      },
+    );
   }
 }

@@ -25,4 +25,14 @@ abstract class ProductRepository {
 
   /// 상품 삭제
   Future<void> deleteProduct(int productId);
+
+  /// 내가 등록한 상품 목록 조회
+  Future<pod.PaginatedProductsResponseDto> getMyProducts(
+    pod.PaginationDto pagination,
+  );
+
+  /// 내가 관심목록한 상품 목록 조회
+  Future<pod.PaginatedProductsResponseDto> getMyFavoriteProducts(
+    pod.PaginationDto pagination,
+  );
 }

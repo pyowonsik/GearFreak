@@ -34,6 +34,8 @@ fields:
   createdAt: DateTime?
   ### 상품 수정일
   updatedAt: DateTime?
+  ### 판매 상태
+  status: ProductStatus?
 
 indexes:
   seller_id_idx:

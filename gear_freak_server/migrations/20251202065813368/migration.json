@@ -1,0 +1,28 @@
+{
+  "actions": [
+    {
+      "type": "alterTable",
+      "alterTable": {
+        "name": "product",
+        "schema": "public",
+        "addColumns": [
+          {
+            "name": "status",
+            "columnType": 6,
+            "isNullable": true,
+            "dartType": "protocol:ProductStatus?"
+          }
+        ],
+        "deleteColumns": [],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [],
+        "warnings": []
+      }
+    }
+  ],
+  "warnings": [],
+  "migrationApiVersion": 1
+}

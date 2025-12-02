@@ -16,6 +16,7 @@ import '../../../feature/user/model/user.dart' as _i2;
 import '../../../feature/product/model/product_category.dart' as _i3;
 import '../../../feature/product/model/product_condition.dart' as _i4;
 import '../../../feature/product/model/trade_method.dart' as _i5;
+import '../../../feature/product/model/product_status.dart' as _i6;
 
 /// 상품 정보
 abstract class Product
@@ -38,6 +39,7 @@ abstract class Product
     this.chatCount,
     this.createdAt,
     this.updatedAt,
+    this.status,
   });
 
   factory Product({
@@ -58,6 +60,7 @@ abstract class Product
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    _i6.ProductStatus? status,
   }) = _ProductImpl;
 
   factory Product.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -91,6 +94,9 @@ abstract class Product
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+      status: jsonSerialization['status'] == null
+          ? null
+          : _i6.ProductStatus.fromJson((jsonSerialization['status'] as int)),
     );
   }
 
@@ -148,6 +154,9 @@ abstract class Product
   /// 상품 수정일
   DateTime? updatedAt;
 
+  /// 판매 상태
+  _i6.ProductStatus? status;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -172,6 +181,7 @@ abstract class Product
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    _i6.ProductStatus? status,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -193,6 +203,7 @@ abstract class Product
       if (chatCount != null) 'chatCount': chatCount,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
+      if (status != null) 'status': status?.toJson(),
     };
   }
 
@@ -216,6 +227,7 @@ abstract class Product
       if (chatCount != null) 'chatCount': chatCount,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
+      if (status != null) 'status': status?.toJson(),
     };
   }
 
@@ -270,6 +282,7 @@ class _ProductImpl extends Product {
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    _i6.ProductStatus? status,
   }) : super._(
           id: id,
           sellerId: sellerId,
@@ -288,6 +301,7 @@ class _ProductImpl extends Product {
           chatCount: chatCount,
           createdAt: createdAt,
           updatedAt: updatedAt,
+          status: status,
         );
 
   /// Returns a shallow copy of this [Product]
@@ -312,6 +326,7 @@ class _ProductImpl extends Product {
     Object? chatCount = _Undefined,
     Object? createdAt = _Undefined,
     Object? updatedAt = _Undefined,
+    Object? status = _Undefined,
   }) {
     return Product(
       id: id is int? ? id : this.id,
@@ -334,6 +349,7 @@ class _ProductImpl extends Product {
       chatCount: chatCount is int? ? chatCount : this.chatCount,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
       updatedAt: updatedAt is DateTime? ? updatedAt : this.updatedAt,
+      status: status is _i6.ProductStatus? ? status : this.status,
     );
   }
 }
@@ -403,6 +419,11 @@ class ProductTable extends _i1.Table<int?> {
       'updatedAt',
       this,
     );
+    status = _i1.ColumnEnum(
+      'status',
+      this,
+      _i1.EnumSerialization.byIndex,
+    );
   }
 
   late final _i1.ColumnInt sellerId;
@@ -452,6 +473,9 @@ class ProductTable extends _i1.Table<int?> {
   /// 상품 수정일
   late final _i1.ColumnDateTime updatedAt;
 
+  /// 판매 상태
+  late final _i1.ColumnEnum<_i6.ProductStatus> status;
+
   _i2.UserTable get seller {
     if (_seller != null) return _seller!;
     _seller = _i1.createRelationTable(
@@ -483,6 +507,7 @@ class ProductTable extends _i1.Table<int?> {
         chatCount,
         createdAt,
         updatedAt,
+        status,
       ];
 
   @override

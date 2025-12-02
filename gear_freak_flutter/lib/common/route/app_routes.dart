@@ -8,6 +8,7 @@ import 'package:gear_freak_flutter/feature/product/presentation/screen/update_pr
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_center_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
 import 'package:go_router/go_router.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -96,6 +97,22 @@ abstract final class AppRoutes {
           path: '/profile/customer-center',
           name: 'customer-center',
           builder: (context, state) => const CustomerCenterScreen(),
+        ),
+
+        // 내 상품 관리 화면
+        GoRoute(
+          path: '/profile/my-products',
+          name: 'my-products',
+          builder: (context, state) =>
+              const ProfileProductsScreen(type: 'myProducts'),
+        ),
+
+        // 관심 목록 화면
+        GoRoute(
+          path: '/profile/my-favorite',
+          name: 'my-favorite',
+          builder: (context, state) =>
+              const ProfileProductsScreen(type: 'myFavorite'),
         ),
       ];
 }

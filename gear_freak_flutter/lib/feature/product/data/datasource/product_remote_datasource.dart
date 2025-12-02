@@ -74,4 +74,26 @@ class ProductRemoteDataSource {
       throw Exception('상품을 삭제하는데 실패했습니다: $e');
     }
   }
+
+  /// 내가 등록한 상품 목록 조회
+  Future<pod.PaginatedProductsResponseDto> getMyProducts(
+    pod.PaginationDto pagination,
+  ) async {
+    try {
+      return await _client.product.getMyProducts(pagination);
+    } catch (e) {
+      throw Exception('내 상품 목록을 불러오는데 실패했습니다: $e');
+    }
+  }
+
+  /// 내가 관심목록한 상품 목록 조회
+  Future<pod.PaginatedProductsResponseDto> getMyFavoriteProducts(
+    pod.PaginationDto pagination,
+  ) async {
+    try {
+      return await _client.product.getMyFavoriteProducts(pagination);
+    } catch (e) {
+      throw Exception('찜 목록을 불러오는데 실패했습니다: $e');
+    }
+  }
 }

@@ -1,0 +1,7 @@
+### 상품 판매 상태
+enum: ProductStatus
+values:
+  - selling # 판매중
+  - reserved # 예약
+  - sold # 판매완료
+

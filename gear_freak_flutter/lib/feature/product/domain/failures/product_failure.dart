@@ -91,3 +91,29 @@ class DeleteProductFailure extends ProductFailure {
   @override
   String toString() => 'DeleteProductFailure: $message';
 }
+
+/// 내 상품 목록 조회 실패
+class GetMyProductsFailure extends ProductFailure {
+  /// GetMyProductsFailure 생성자
+  const GetMyProductsFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'GetMyProductsFailure: $message';
+}
+
+/// 찜 목록 조회 실패
+class GetMyFavoriteProductsFailure extends ProductFailure {
+  /// GetMyFavoriteProductsFailure 생성자
+  const GetMyFavoriteProductsFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'GetMyFavoriteProductsFailure: $message';
+}

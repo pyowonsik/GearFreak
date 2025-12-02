@@ -25,6 +25,7 @@ class ProductService {
       baseAddress: request.baseAddress,
       detailAddress: request.detailAddress,
       imageUrls: request.imageUrls, // 임시로 원본 URL 저장
+      status: ProductStatus.selling, // 기본값: 판매중
       viewCount: 0,
       favoriteCount: 0,
       chatCount: 0,
@@ -455,17 +456,16 @@ class ProductService {
   ) async {
     final offset = (pagination.page - 1) * pagination.limit;
 
-    // sellerId로 필터링
-    WhereExpressionBuilder<ProductTable> where =
-        (p) => p.sellerId.equals(userId);
-
     // 전체 개수 조회
-    final totalCount = await Product.db.count(session, where: where);
+    final totalCount = await Product.db.count(
+      session,
+      where: (p) => p.sellerId.equals(userId),
+    );
 
     // 등록일 기준 최근순 정렬 (createdAt DESC)
     final products = await Product.db.find(
       session,
-      where: where,
+      where: (p) => p.sellerId.equals(userId),
       orderBy: (p) => p.createdAt,
       orderDescending: true,
       limit: pagination.limit,
