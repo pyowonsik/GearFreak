@@ -73,8 +73,8 @@ class ProfileImageUploadError extends ProfileLoaded {
   /// [error]는 에러 메시지입니다.
   const ProfileImageUploadError({
     required super.user,
-    super.uploadedFileKey,
     required this.error,
+    super.uploadedFileKey,
   });
 
   /// 에러 메시지
@@ -112,8 +112,8 @@ class ProfileUpdateError extends ProfileLoaded {
   /// [error]는 에러 메시지입니다.
   const ProfileUpdateError({
     required super.user,
-    super.uploadedFileKey,
     required this.error,
+    super.uploadedFileKey,
   });
 
   /// 에러 메시지

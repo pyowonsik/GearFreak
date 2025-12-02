@@ -65,57 +65,51 @@ class AppInfoScreen extends StatelessWidget {
             const SizedBox(height: 8),
 
             // 앱 정보 메뉴
-             Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  InfoItemWidget(
-                    title: '이용약관',
-                    onTap: () {
-                      // 이용약관 화면으로 이동
-                    },
-                  ),
-                  const GbDivider(),
-                  InfoItemWidget(
-                    title: '개인정보 처리방침',
-                    onTap: () {
-                      // 개인정보 처리방침 화면으로 이동
-                    },
-                  ),
-                  const GbDivider(),
-                  InfoItemWidget(
-                    title: '오픈소스 라이선스',
-                    onTap: () {
-                      // 오픈소스 라이선스 화면으로 이동
-                    },
-                  ),
-                ],
-              ),
+            Column(
+              children: [
+                InfoItemWidget(
+                  title: '이용약관',
+                  onTap: () {
+                    // 이용약관 화면으로 이동
+                  },
+                ),
+                const GbDivider(),
+                InfoItemWidget(
+                  title: '개인정보 처리방침',
+                  onTap: () {
+                    // 개인정보 처리방침 화면으로 이동
+                  },
+                ),
+                const GbDivider(),
+                InfoItemWidget(
+                  title: '오픈소스 라이선스',
+                  onTap: () {
+                    // 오픈소스 라이선스 화면으로 이동
+                  },
+                ),
+              ],
             ),
 
             const SizedBox(height: 8),
 
             // 개발자 정보
-            Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  InfoItemWidget(
-                    title: '개발자 정보',
-                    onTap: () {
-                      // 개발자 정보 다이얼로그 표시
-                      _showDeveloperInfo(context);
-                    },
-                  ),
-                  const GbDivider(),
-                  InfoItemWidget(
-                    title: '문의하기',
-                    onTap: () {
-                      // 문의하기 화면으로 이동
-                    },
-                  ),
-                ],
-              ),
+            Column(
+              children: [
+                InfoItemWidget(
+                  title: '개발자 정보',
+                  onTap: () {
+                    // 개발자 정보 다이얼로그 표시
+                    _showDeveloperInfo(context);
+                  },
+                ),
+                const GbDivider(),
+                InfoItemWidget(
+                  title: '문의하기',
+                  onTap: () {
+                    // 문의하기 화면으로 이동
+                  },
+                ),
+              ],
             ),
 
             const SizedBox(height: 24),

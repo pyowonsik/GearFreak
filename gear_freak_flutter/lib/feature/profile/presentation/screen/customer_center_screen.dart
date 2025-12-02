@@ -58,44 +58,41 @@ class CustomerCenterScreen extends StatelessWidget {
             const SizedBox(height: 8),
 
             // 문의하기 섹션
-            Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  InfoItemWidget(
-                    title: '1:1 문의하기',
-                    icon: Icons.chat_bubble_outline,
-                    onTap: () {
-                      // 1:1 문의하기 화면으로 이동
-                      GbSnackBar.showInfo(
-                        context,
-                        '1:1 문의하기 기능은 준비 중입니다.',
-                      );
-                    },
-                  ),
-                  const GbDivider(),
-                  InfoItemWidget(
-                    title: '공지사항',
-                    icon: Icons.notifications_outlined,
-                    onTap: () {
-                      // 공지사항 화면으로 이동
-                      GbSnackBar.showInfo(
-                        context,
-                        '공지사항 기능은 준비 중입니다.',
-                      );
-                    },
-                  ),
-                  const GbDivider(),
-                  InfoItemWidget(
-                    title: '이메일 문의',
-                    icon: Icons.email_outlined,
-                    onTap: () {
-                      // 이메일 문의
-                      _showEmailContact(context);
-                    },
-                  ),
-                ],
-              ),
+            Column(
+              children: [
+                InfoItemWidget(
+                  title: '1:1 문의하기',
+                  icon: Icons.chat_bubble_outline,
+                  onTap: () {
+                    // 1:1 문의하기 화면으로 이동
+                    GbSnackBar.showInfo(
+                      context,
+                      '1:1 문의하기 기능은 준비 중입니다.',
+                    );
+                  },
+                ),
+                const GbDivider(),
+                InfoItemWidget(
+                  title: '공지사항',
+                  icon: Icons.notifications_outlined,
+                  onTap: () {
+                    // 공지사항 화면으로 이동
+                    GbSnackBar.showInfo(
+                      context,
+                      '공지사항 기능은 준비 중입니다.',
+                    );
+                  },
+                ),
+                const GbDivider(),
+                InfoItemWidget(
+                  title: '이메일 문의',
+                  icon: Icons.email_outlined,
+                  onTap: () {
+                    // 이메일 문의
+                    _showEmailContact(context);
+                  },
+                ),
+              ],
             ),
 
             const SizedBox(height: 8),
