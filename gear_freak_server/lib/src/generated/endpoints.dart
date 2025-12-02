@@ -271,6 +271,43 @@ class Endpoints extends _i1.EndpointDispatch {
             params['productId'],
           ),
         ),
+        'getMyProducts': _i1.MethodConnector(
+          name: 'getMyProducts',
+          params: {
+            'pagination': _i1.ParameterDescription(
+              name: 'pagination',
+              type: _i1.getType<_i9.PaginationDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i4.ProductEndpoint).getMyProducts(
+            session,
+            params['pagination'],
+          ),
+        ),
+        'getMyFavoriteProducts': _i1.MethodConnector(
+          name: 'getMyFavoriteProducts',
+          params: {
+            'pagination': _i1.ParameterDescription(
+              name: 'pagination',
+              type: _i1.getType<_i9.PaginationDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i4.ProductEndpoint)
+                  .getMyFavoriteProducts(
+            session,
+            params['pagination'],
+          ),
+        ),
       },
     );
     connectors['user'] = _i1.EndpointConnector(

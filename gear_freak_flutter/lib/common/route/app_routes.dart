@@ -5,6 +5,8 @@ import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_scree
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_center_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -80,6 +82,20 @@ abstract final class AppRoutes {
           path: '/profile/edit',
           name: 'edit-profile',
           builder: (context, state) => const EditProfileScreen(),
+        ),
+
+        // 앱 정보 화면
+        GoRoute(
+          path: '/profile/app-info',
+          name: 'app-info',
+          builder: (context, state) => const AppInfoScreen(),
+        ),
+
+        // 고객센터 화면
+        GoRoute(
+          path: '/profile/customer-center',
+          name: 'customer-center',
+          builder: (context, state) => const CustomerCenterScreen(),
         ),
       ];
 }

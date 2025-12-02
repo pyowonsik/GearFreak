@@ -445,4 +445,105 @@ class ProductService {
       );
     }
   }
+
+  /// 내가 등록한 상품 목록 조회 (페이지네이션)
+  /// 등록일 기준 최근순으로 정렬됩니다.
+  Future<PaginatedProductsResponseDto> getMyProducts(
+    Session session,
+    int userId,
+    PaginationDto pagination,
+  ) async {
+    final offset = (pagination.page - 1) * pagination.limit;
+
+    // sellerId로 필터링
+    WhereExpressionBuilder<ProductTable> where =
+        (p) => p.sellerId.equals(userId);
+
+    // 전체 개수 조회
+    final totalCount = await Product.db.count(session, where: where);
+
+    // 등록일 기준 최근순 정렬 (createdAt DESC)
+    final products = await Product.db.find(
+      session,
+      where: where,
+      orderBy: (p) => p.createdAt,
+      orderDescending: true,
+      limit: pagination.limit,
+      offset: offset,
+    );
+
+    // hasMore 계산
+    final hasMore = offset + products.length < totalCount;
+
+    return PaginatedProductsResponseDto(
+      pagination: PaginationDto(
+        page: pagination.page,
+        limit: pagination.limit,
+        totalCount: totalCount,
+        hasMore: hasMore,
+      ),
+      products: products,
+    );
+  }
+
+  /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
+  /// 찜한 날 기준 최근순으로 정렬됩니다.
+  Future<PaginatedProductsResponseDto> getMyFavoriteProducts(
+    Session session,
+    int userId,
+    PaginationDto pagination,
+  ) async {
+    final offset = (pagination.page - 1) * pagination.limit;
+
+    // Favorite 테이블에서 userId로 필터링하여 productId 목록 가져오기
+    // 찜한 날 기준 최근순 정렬 (Favorite.createdAt DESC)
+    final favorites = await Favorite.db.find(
+      session,
+      where: (f) => f.userId.equals(userId),
+      orderBy: (f) => f.createdAt,
+      orderDescending: true,
+    );
+
+    if (favorites.isEmpty) {
+      // 찜한 상품이 없으면 빈 목록 반환
+      return PaginatedProductsResponseDto(
+        pagination: PaginationDto(
+          page: pagination.page,
+          limit: pagination.limit,
+          totalCount: 0,
+          hasMore: false,
+        ),
+        products: [],
+      );
+    }
+
+    final totalCount = favorites.length;
+
+    // 페이지네이션 적용 (Favorite 레벨에서)
+    final startIndex = offset.clamp(0, favorites.length);
+    final endIndex = (offset + pagination.limit).clamp(0, favorites.length);
+    final paginatedFavorites = favorites.sublist(startIndex, endIndex);
+
+    // productId 목록으로 상품 조회 (찜한 순서 유지)
+    final products = <Product>[];
+    for (final favorite in paginatedFavorites) {
+      final product = await Product.db.findById(session, favorite.productId);
+      if (product != null) {
+        products.add(product);
+      }
+    }
+
+    // hasMore 계산
+    final hasMore = offset + products.length < totalCount;
+
+    return PaginatedProductsResponseDto(
+      pagination: PaginationDto(
+        page: pagination.page,
+        limit: pagination.limit,
+        totalCount: totalCount,
+        hasMore: hasMore,
+      ),
+      products: products,
+    );
+  }
 }

@@ -11,6 +11,8 @@ product:
   - toggleFavorite:
   - isFavorite:
   - deleteProduct:
+  - getMyProducts:
+  - getMyFavoriteProducts:
 user:
   - getMe:
   - getUserById:

@@ -61,4 +61,26 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
     final user = await UserService.getMe(session);
     await productService.deleteProduct(session, productId, user.id!);
   }
+
+  /// 내가 등록한 상품 목록 조회 (페이지네이션)
+  Future<PaginatedProductsResponseDto> getMyProducts(
+    Session session,
+    PaginationDto pagination,
+  ) async {
+    final user = await UserService.getMe(session);
+    return await productService.getMyProducts(session, user.id!, pagination);
+  }
+
+  /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
+  Future<PaginatedProductsResponseDto> getMyFavoriteProducts(
+    Session session,
+    PaginationDto pagination,
+  ) async {
+    final user = await UserService.getMe(session);
+    return await productService.getMyFavoriteProducts(
+      session,
+      user.id!,
+      pagination,
+    );
+  }
 }

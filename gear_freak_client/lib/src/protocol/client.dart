@@ -162,6 +162,24 @@ class EndpointProduct extends _i1.EndpointRef {
         'deleteProduct',
         {'productId': productId},
       );
+
+  /// 내가 등록한 상품 목록 조회 (페이지네이션)
+  _i2.Future<_i9.PaginatedProductsResponseDto> getMyProducts(
+          _i10.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i9.PaginatedProductsResponseDto>(
+        'product',
+        'getMyProducts',
+        {'pagination': pagination},
+      );
+
+  /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
+  _i2.Future<_i9.PaginatedProductsResponseDto> getMyFavoriteProducts(
+          _i10.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i9.PaginatedProductsResponseDto>(
+        'product',
+        'getMyFavoriteProducts',
+        {'pagination': pagination},
+      );
 }
 
 /// 사용자 엔드포인트
