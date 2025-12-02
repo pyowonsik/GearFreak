@@ -22,9 +22,11 @@ import 'package:gear_freak_server/src/generated/feature/product/model/dto/update
     as _i8;
 import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
     as _i9;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
     as _i10;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i11;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i11;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i12;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -308,6 +310,24 @@ class Endpoints extends _i1.EndpointDispatch {
             params['pagination'],
           ),
         ),
+        'updateProductStatus': _i1.MethodConnector(
+          name: 'updateProductStatus',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i10.UpdateProductStatusRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i4.ProductEndpoint).updateProductStatus(
+            session,
+            params['request'],
+          ),
+        ),
       },
     );
     connectors['user'] = _i1.EndpointConnector(
@@ -355,7 +375,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i10.UpdateUserProfileRequestDto>(),
+              type: _i1.getType<_i11.UpdateUserProfileRequestDto>(),
               nullable: false,
             )
           },
@@ -370,6 +390,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth'] = _i11.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i12.Endpoints()..initializeEndpoints(server);
   }
 }

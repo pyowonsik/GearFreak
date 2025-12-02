@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 
@@ -18,6 +20,7 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
   /// [isFavoriteUseCase]는 찜 상태 조회 UseCase 인스턴스입니다.
   /// [getUserByIdUseCase]는 사용자 ID로 사용자 정보 조회 UseCase 인스턴스입니다.
   /// [deleteProductUseCase]는 상품 삭제 UseCase 인스턴스입니다.
+  /// [updateProductStatusUseCase]는 상품 상태 변경 UseCase 인스턴스입니다.
   ProductDetailNotifier(
     this.ref,
     this.getProductDetailUseCase,
@@ -25,6 +28,7 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
     this.isFavoriteUseCase,
     this.getUserByIdUseCase,
     this.deleteProductUseCase,
+    this.updateProductStatusUseCase,
   ) : super(const ProductDetailInitial());
 
   /// Riverpod Ref 인스턴스
@@ -44,6 +48,9 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
 
   /// 상품 삭제 UseCase 인스턴스
   final DeleteProductUseCase deleteProductUseCase;
+
+  /// 상품 상태 변경 UseCase 인스턴스
+  final UpdateProductStatusUseCase updateProductStatusUseCase;
 
   /// 상품 상세 조회
   Future<void> loadProductDetail(int id) async {
@@ -150,6 +157,60 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
         Future.microtask(() {
           ref.read(deletedProductIdProvider.notifier).state = null;
         });
+        return true;
+      },
+    );
+  }
+
+  /// 상품 상태 변경
+  Future<bool> updateProductStatus(
+    int productId,
+    pod.ProductStatus status,
+  ) async {
+    final currentState = state;
+    if (currentState is! ProductDetailLoaded) return false;
+
+    // 낙관적 업데이트
+    final updatedProduct = pod.Product(
+      id: currentState.product.id,
+      sellerId: currentState.product.sellerId,
+      title: currentState.product.title,
+      category: currentState.product.category,
+      price: currentState.product.price,
+      condition: currentState.product.condition,
+      description: currentState.product.description,
+      tradeMethod: currentState.product.tradeMethod,
+      baseAddress: currentState.product.baseAddress,
+      detailAddress: currentState.product.detailAddress,
+      imageUrls: currentState.product.imageUrls,
+      status: status,
+      viewCount: currentState.product.viewCount,
+      favoriteCount: currentState.product.favoriteCount,
+      chatCount: currentState.product.chatCount,
+      createdAt: currentState.product.createdAt,
+      updatedAt: currentState.product.updatedAt,
+      seller: currentState.product.seller,
+    );
+    state = currentState.copyWith(product: updatedProduct);
+
+    final request = pod.UpdateProductStatusRequestDto(
+      productId: productId,
+      status: status,
+    );
+
+    final result = await updateProductStatusUseCase(request);
+
+    return result.fold(
+      (failure) {
+        // 실패 시 이전 상태로 복원
+        state = currentState;
+        debugPrint('상품 상태 변경 실패: ${failure.message}');
+        return false;
+      },
+      (updatedProduct) {
+        // 성공 시 상품 정보 업데이트
+        state = currentState.copyWith(product: updatedProduct);
+        debugPrint('상품 상태 변경 성공: $productId -> ${status.name}');
         return true;
       },
     );

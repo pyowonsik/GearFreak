@@ -1,0 +1,9 @@
+### 상품 상태 변경 요청 DTO
+class: UpdateProductStatusRequestDto
+
+fields:
+  ### 상품 ID
+  productId: int
+  ### 판매 상태
+  status: ProductStatus
+

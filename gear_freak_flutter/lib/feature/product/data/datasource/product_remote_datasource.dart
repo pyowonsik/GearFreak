@@ -96,4 +96,15 @@ class ProductRemoteDataSource {
       throw Exception('찜 목록을 불러오는데 실패했습니다: $e');
     }
   }
+
+  /// 상품 상태 변경
+  Future<pod.Product> updateProductStatus(
+    pod.UpdateProductStatusRequestDto request,
+  ) async {
+    try {
+      return await _client.product.updateProductStatus(request);
+    } catch (e) {
+      throw Exception('상품 상태를 변경하는데 실패했습니다: $e');
+    }
+  }
 }

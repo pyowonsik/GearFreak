@@ -349,39 +349,62 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   const SizedBox(height: 20),
                   const Divider(color: Color(0xFFE5E7EB)),
                   const SizedBox(height: 20),
-                  // 상품명
-                  Text(
-                    productData.title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // 카테고리 및 시간
+                  // 상품명과 상태 (본인 상품인 경우)
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        getProductCategoryLabel(productData.category),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7280),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              productData.title,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1F2937),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // 카테고리 및 시간
+                            Row(
+                              children: [
+                                Text(
+                                  getProductCategoryLabel(productData.category),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  '·',
+                                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  formatRelativeTime(productData.createdAt),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '·',
-                        style: TextStyle(color: Color(0xFF9CA3AF)),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        formatRelativeTime(productData.createdAt),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7280),
+                      if (_isMyProduct(productData))
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: ProductStatusDropdownWidget(
+                            currentStatus:
+                                productData.status ?? pod.ProductStatus.selling,
+                            onStatusChanged: (newStatus) {
+                              _handleStatusChange(productData, newStatus);
+                            },
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -394,7 +417,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       color: Color(0xFF2563EB),
                     ),
                   ),
-                  const SizedBox(height: 20),
                   // 상품 상태 및 거래 방법
                   Row(
                     children: [
@@ -569,5 +591,38 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ),
       ),
     );
+  }
+
+  /// 상태 변경 처리
+  Future<void> _handleStatusChange(
+    pod.Product productData,
+    pod.ProductStatus newStatus,
+  ) async {
+    if (productData.id == null) {
+      return;
+    }
+
+    // 현재 상태와 동일하면 변경하지 않음
+    final currentStatus = productData.status ?? pod.ProductStatus.selling;
+    if (currentStatus == newStatus) {
+      return;
+    }
+
+    // 확인 다이얼로그 표시
+    final statusLabel = getProductStatusLabel(newStatus);
+    final shouldChange = await GbDialog.show(
+      context: context,
+      title: '상태 변경',
+      content: '정말 $statusLabel 상태로 변경하시겠습니까?',
+      confirmText: '변경',
+    );
+
+    if (shouldChange != true || !mounted) {
+      return;
+    }
+
+    await ref
+        .read(productDetailNotifierProvider.notifier)
+        .updateProductStatus(productData.id!, newStatus);
   }
 }

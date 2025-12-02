@@ -62,4 +62,11 @@ class ProductRepositoryImpl implements ProductRepository {
   ) async {
     return remoteDataSource.getMyFavoriteProducts(pagination);
   }
+
+  @override
+  Future<pod.Product> updateProductStatus(
+    pod.UpdateProductStatusRequestDto request,
+  ) async {
+    return remoteDataSource.updateProductStatus(request);
+  }
 }

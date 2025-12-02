@@ -117,3 +117,16 @@ class GetMyFavoriteProductsFailure extends ProductFailure {
   @override
   String toString() => 'GetMyFavoriteProductsFailure: $message';
 }
+
+/// 상품 상태 변경 실패
+class UpdateProductStatusFailure extends ProductFailure {
+  /// UpdateProductStatusFailure 생성자
+  const UpdateProductStatusFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'UpdateProductStatusFailure: $message';
+}

@@ -6,4 +6,5 @@ export 'get_paginated_products_usecase.dart';
 export 'get_product_detail_usecase.dart';
 export 'is_favorite_usecase.dart';
 export 'toggle_favorite_usecase.dart';
+export 'update_product_status_usecase.dart';
 export 'update_product_usecase.dart';

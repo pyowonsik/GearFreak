@@ -214,6 +214,45 @@ class ProductService {
     return product;
   }
 
+  /// 상품 상태 변경
+  Future<Product> updateProductStatus(
+    Session session,
+    int productId,
+    int userId,
+    ProductStatus status,
+  ) async {
+    // 1. 기존 상품 조회
+    final product = await Product.db.findById(session, productId);
+    if (product == null) {
+      throw Exception('Product not found');
+    }
+
+    // 2. 권한 확인 (판매자만 상태 변경 가능)
+    if (product.sellerId != userId) {
+      throw Exception(
+        'Unauthorized: Only the seller can update product status',
+      );
+    }
+
+    // 3. 상태 업데이트
+    final now = DateTime.now().toUtc();
+    final updatedProduct = product.copyWith(
+      status: status,
+      updatedAt: now,
+    );
+
+    final result = await Product.db.updateRow(
+      session,
+      updatedProduct,
+      columns: (t) => [
+        t.status,
+        t.updatedAt,
+      ],
+    );
+
+    return result;
+  }
+
   /// 찜 추가/제거 (토글)
   /// 반환값: true = 찜 추가됨, false = 찜 제거됨
   Future<bool> toggleFavorite(

@@ -94,3 +94,16 @@ pod.TradeMethod? parseTradeMethod(String label) {
 bool isDirectTrade(pod.TradeMethod method) {
   return method == pod.TradeMethod.direct || method == pod.TradeMethod.both;
 }
+
+/// ProductStatus enum을 한국어로 변환
+String getProductStatusLabel(pod.ProductStatus? status) {
+  if (status == null) return '판매중';
+  switch (status) {
+    case pod.ProductStatus.selling:
+      return '판매중';
+    case pod.ProductStatus.reserved:
+      return '예약';
+    case pod.ProductStatus.sold:
+      return '판매완료';
+  }
+}

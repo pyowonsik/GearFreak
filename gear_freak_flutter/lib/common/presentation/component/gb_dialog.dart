@@ -51,11 +51,6 @@ class GbDialog extends StatelessWidget {
       title: Text(title),
       content: Text(content),
       actions: [
-        if (cancelText != null)
-          TextButton(
-            onPressed: onCancel ?? () => context.pop(false),
-            child: Text(cancelText!),
-          ),
         TextButton(
           onPressed: onConfirm ?? () => context.pop(true),
           style: TextButton.styleFrom(
@@ -63,6 +58,11 @@ class GbDialog extends StatelessWidget {
           ),
           child: Text(confirmText),
         ),
+        if (cancelText != null)
+          TextButton(
+            onPressed: onCancel ?? () => context.pop(false),
+            child: Text(cancelText!),
+          ),
       ],
     );
   }

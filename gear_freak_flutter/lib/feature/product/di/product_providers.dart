@@ -13,6 +13,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_de
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_notifier.dart';
@@ -92,6 +93,13 @@ final getMyFavoriteProductsUseCaseProvider =
   return GetMyFavoriteProductsUseCase(repository);
 });
 
+/// Update Product Status UseCase Provider
+final updateProductStatusUseCaseProvider =
+    Provider<UpdateProductStatusUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return UpdateProductStatusUseCase(repository);
+});
+
 /// 삭제된 상품 ID 이벤트 Provider (단일 소스)
 /// 상품 삭제 시 이 Provider에 productId를 설정하면
 /// 모든 목록 Provider가 자동으로 해당 상품을 제거합니다.
@@ -124,6 +132,8 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
   final isFavoriteUseCase = ref.watch(isFavoriteUseCaseProvider);
   final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
   final deleteProductUseCase = ref.watch(deleteProductUseCaseProvider);
+  final updateProductStatusUseCase =
+      ref.watch(updateProductStatusUseCaseProvider);
   return ProductDetailNotifier(
     ref,
     getProductDetailUseCase,
@@ -131,6 +141,7 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
     isFavoriteUseCase,
     getUserByIdUseCase,
     deleteProductUseCase,
+    updateProductStatusUseCase,
   );
 });
 

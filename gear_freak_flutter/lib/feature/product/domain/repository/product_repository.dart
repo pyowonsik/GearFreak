@@ -35,4 +35,9 @@ abstract class ProductRepository {
   Future<pod.PaginatedProductsResponseDto> getMyFavoriteProducts(
     pod.PaginationDto pagination,
   );
+
+  /// 상품 상태 변경
+  Future<pod.Product> updateProductStatus(
+    pod.UpdateProductStatusRequestDto request,
+  );
 }

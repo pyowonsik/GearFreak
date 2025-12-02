@@ -27,10 +27,12 @@ import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginat
     as _i9;
 import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
     as _i10;
-import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_status_request.dto.dart'
     as _i11;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i12;
-import 'protocol.dart' as _i13;
+import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i12;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i13;
+import 'protocol.dart' as _i14;
 
 /// S3 엔드포인트 (공통 사용)
 /// {@category Endpoint}
@@ -180,6 +182,15 @@ class EndpointProduct extends _i1.EndpointRef {
         'getMyFavoriteProducts',
         {'pagination': pagination},
       );
+
+  /// 상품 상태 변경
+  _i2.Future<_i6.Product> updateProductStatus(
+          _i11.UpdateProductStatusRequestDto request) =>
+      caller.callServerEndpoint<_i6.Product>(
+        'product',
+        'updateProductStatus',
+        {'request': request},
+      );
 }
 
 /// 사용자 엔드포인트
@@ -215,7 +226,7 @@ class EndpointUser extends _i1.EndpointRef {
 
   /// 사용자 프로필 수정
   _i2.Future<_i5.User> updateUserProfile(
-          _i11.UpdateUserProfileRequestDto request) =>
+          _i12.UpdateUserProfileRequestDto request) =>
       caller.callServerEndpoint<_i5.User>(
         'user',
         'updateUserProfile',
@@ -225,10 +236,10 @@ class EndpointUser extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i12.Caller(client);
+    auth = _i13.Caller(client);
   }
 
-  late final _i12.Caller auth;
+  late final _i13.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -247,7 +258,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i13.Protocol(),
+          _i14.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
