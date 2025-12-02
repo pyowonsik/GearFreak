@@ -4,7 +4,7 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/view/view.dart';
 
 /// 페이지네이션된 상품 목록 위젯
 class PaginatedProductsListWidget extends ConsumerStatefulWidget {
@@ -166,49 +166,14 @@ class _PaginatedProductsListWidgetState
               message: message,
               onRetry: widget.onRetry,
             ),
-          ProductPaginatedLoaded(:final products, :final pagination) => products
-                  .isEmpty
-              ? const GbEmptyView(
-                  message: '등록된 상품이 없습니다',
-                )
-              : ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(16),
-                  itemCount:
-                      products.length + ((pagination.hasMore ?? false) ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == products.length) {
-                      // 마지막에 로딩 인디케이터 표시
-                      return const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-                    return ProductCardWidget(
-                      product: products[index],
-                    );
-                  },
-                ),
-          ProductPaginatedLoadingMore(:final products) => ListView.builder(
-              controller: scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: products.length + 1,
-              itemBuilder: (context, index) {
-                if (index == products.length) {
-                  // 로딩 중 인디케이터 표시
-                  return const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-                return ProductCardWidget(
-                  product: products[index],
-                );
-              },
+          ProductPaginatedLoaded(:final products, :final pagination) ||
+          ProductPaginatedLoadingMore(:final products, :final pagination) =>
+            PaginatedProductListView(
+              key: const ValueKey('paginated_product_list'),
+              products: products,
+              pagination: pagination,
+              scrollController: scrollController!,
+              isLoadingMore: productState is ProductPaginatedLoadingMore,
             ),
           ProductInitial() => const GbLoadingView(),
         },

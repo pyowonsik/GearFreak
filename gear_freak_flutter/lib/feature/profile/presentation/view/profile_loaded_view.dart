@@ -9,10 +9,14 @@ class ProfileLoadedView extends StatelessWidget {
   /// [user]는 사용자 정보입니다.
   /// [onEditProfile]는 프로필 편집 버튼 클릭 콜백입니다.
   /// [onLogout]는 로그아웃 메뉴 클릭 콜백입니다.
+  /// [onAppInfo]는 앱 정보 메뉴 클릭 콜백입니다.
+  /// [onCustomerCenter]는 고객 센터 메뉴 클릭 콜백입니다.
   const ProfileLoadedView({
     required this.user,
     required this.onLogout,
     this.onEditProfile,
+    this.onAppInfo,
+    this.onCustomerCenter,
     super.key,
   });
 
@@ -24,6 +28,12 @@ class ProfileLoadedView extends StatelessWidget {
 
   /// 로그아웃 메뉴 클릭 콜백
   final VoidCallback onLogout;
+
+  /// 앱 정보 메뉴 클릭 콜백
+  final VoidCallback? onAppInfo;
+
+  /// 고객 센터 메뉴 클릭 콜백
+  final VoidCallback? onCustomerCenter;
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +72,15 @@ class ProfileLoadedView extends StatelessWidget {
                 icon: Icons.star_outline,
                 title: '후기 관리',
               ),
-              const ProfileMenuItemWidget(
+              ProfileMenuItemWidget(
                 icon: Icons.help_outline,
                 title: '고객 센터',
+                onTap: onCustomerCenter,
               ),
-              const ProfileMenuItemWidget(
+              ProfileMenuItemWidget(
                 icon: Icons.info_outline,
                 title: '앱 정보',
+                onTap: onAppInfo,
               ),
               ProfileMenuItemWidget(
                 icon: Icons.logout_outlined,

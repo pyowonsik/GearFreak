@@ -1,0 +1,8 @@
+### 사용자 프로필 수정 요청 DTO
+class: UpdateUserProfileRequestDto
+
+fields:
+  ### 닉네임
+  nickname: String?
+  ### 프로필 이미지 URL (temp/profile/{userId}/{file} 또는 profile/{userId}/{file})
+  profileImageUrl: String?

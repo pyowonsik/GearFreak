@@ -1,11 +1,10 @@
-import 'package:serverpod/serverpod.dart';
+import 'package:gear_freak_server/src/common/authenticated_mixin.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
+import 'package:serverpod/serverpod.dart';
 import '../service/user_service.dart';
 
 /// 사용자 엔드포인트
-class UserEndpoint extends Endpoint
-// with AuthenticatedMixin
-{
+class UserEndpoint extends Endpoint with AuthenticatedMixin {
   /// 현재 로그인한 사용자 정보를 가져옵니다
   Future<User> getMe(Session session) async {
     return await UserService.getMe(session);
@@ -21,8 +20,15 @@ class UserEndpoint extends Endpoint
     return await UserService.getUserScopes(session);
   }
 
-  // // 사용자 프로필 수정
-  // Future<User> updateUserProfile(Session session, UpdateUserProfileRequestDto request) async {
-  //   return await UserService.updateUserProfile(session, request);
-  // }
+  /// 사용자 프로필 수정
+  Future<User> updateUserProfile(
+    Session session,
+    UpdateUserProfileRequestDto request,
+  ) async {
+    // 사용자 인증 확인 (AuthenticatedMixin으로 자동 처리)
+    await UserService.getMe(session);
+
+    // Service에서 전체 로직 처리
+    return await UserService.updateUserProfile(session, request);
+  }
 }

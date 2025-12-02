@@ -360,6 +360,142 @@ Center(child: CircularProgressIndicator())
 
 - `message` (선택): 로딩 메시지 (없으면 CircularProgressIndicator만 표시)
 
+## State 분기 처리 및 Build 헬퍼 메서드 규칙
+
+### 불필요한 State 분기 처리 금지
+
+같은 View를 사용하는 여러 상태는 `||` 패턴으로 통합해야 합니다. 부모 클래스를 상속받는 하위 상태들은 부모 클래스만 매칭하면 자동으로 모든 하위 상태가 포함됩니다.
+
+```dart
+// ✅ 올바른 사용 - || 패턴으로 통합
+switch (state) {
+  ProductPaginatedLoaded(:final products, :final pagination, :final sortBy) ||
+  ProductPaginatedLoadingMore(:final products, :final pagination, :final sortBy) =>
+    HomeLoadedView(
+      products: products,
+      pagination: pagination,
+      sortBy: sortBy,
+      isLoadingMore: state is ProductPaginatedLoadingMore,
+    ),
+}
+
+// ✅ 올바른 사용 - 부모 클래스만 매칭 (하위 상태 자동 포함)
+switch (state) {
+  ProfileLoaded(:final user) =>  // ProfileImageUploading, ProfileUpdating 등 모든 하위 상태 포함
+    ProfileLoadedView(user: user),
+  UpdateProductLoaded() =>  // UpdateProductUploading, UpdateProductUpdating 등 모든 하위 상태 포함
+    ProductEditorForm(...),
+}
+
+// ❌ 잘못된 사용 - 중복된 분기 처리
+switch (state) {
+  ProductPaginatedLoaded(...) => HomeLoadedView(...),
+  ProductPaginatedLoadingMore(...) => HomeLoadedView(...),  // 중복!
+}
+
+// ❌ 잘못된 사용 - 불필요하게 모든 하위 상태 나열
+switch (state) {
+  ProfileLoaded(:final user) ||
+  ProfileImageUploading(:final user) ||
+  ProfileImageUploadSuccess(:final user) ||  // 불필요! 부모 클래스만으로 충분
+  ProfileUpdating(:final user) =>
+    ProfileLoadedView(user: user),
+}
+```
+
+### Build 헬퍼 메서드 사용 금지
+
+`_build` 헬퍼 메서드를 사용하지 말고, 위젯 클래스를 직접 사용해야 합니다.
+
+**핵심 차이점:**
+- **`_build` 헬퍼 메서드**: 매번 호출될 때마다 새로운 위젯 인스턴스를 생성하고, `const` 생성자를 사용할 수 없어 Flutter의 위젯 트리 최적화(Element 재사용)를 제대로 활용할 수 없음
+- **위젯 클래스 직접 사용**: `const` 생성자와 `key`를 사용한 최적화가 가능하고, Flutter가 Element를 재사용할 수 있음
+
+**StatelessWidget도 `_build` 헬퍼로 호출하면 같은 문제 발생:**
+- StatelessWidget 자체는 문제가 없지만, `_build` 헬퍼 메서드로 StatelessWidget을 반환하면 여전히 매번 새로운 인스턴스가 생성됨
+- 따라서 StatelessWidget도 직접 사용해야 함
+
+```dart
+// ✅ 올바른 사용 - 위젯 클래스 직접 사용 (const 가능, key로 최적화 가능)
+switch (state) {
+  ProfileLoaded(:final user) =>
+    ProfileLoadedView(  // StatelessWidget 직접 사용
+      key: const ValueKey('profile_loaded'),  // key로 최적화
+      user: user,
+      onLogout: _handleLogout,
+      onEditProfile: _handleEditProfile,
+    ),
+}
+
+// ❌ 잘못된 사용 - _build 헬퍼 메서드 사용 (StatelessWidget이어도 문제)
+switch (state) {
+  ProfileLoaded(:final user) => _buildProfileLoadedView(user),
+}
+
+Widget _buildProfileLoadedView(pod.User user) {  // ❌ 매번 새로운 인스턴스 생성
+  return ProfileLoadedView(  // StatelessWidget이어도 _build로 호출하면 최적화 불가
+    user: user,
+    onLogout: _handleLogout,
+    onEditProfile: _handleEditProfile,
+  );
+}
+```
+
+### 예외 사항
+
+다음과 같은 경우는 허용됩니다:
+
+1. **Switch 문을 포함하는 헬퍼 메서드**: `_buildBody`처럼 switch 문 자체를 포함하는 경우
+   ```dart
+   Widget _buildBody(SearchState state) {
+     return switch (state) {  // switch 문을 포함하므로 허용
+       SearchInitial() => const SearchInitialView(),
+       SearchLoaded(...) => SearchLoadedView(...),
+     };
+   }
+   ```
+
+2. **작은 UI 조각 헬퍼**: `_buildFAQItem`, `_buildInfoItem`, `_buildDivider` 등 작은 UI 조각을 반환하는 경우
+   - 단, 가능하면 StatelessWidget으로 분리하는 것을 권장 (더 나은 최적화)
+   ```dart
+   // ✅ 권장 - StatelessWidget으로 분리 (const 가능, 최적화 가능)
+   class InfoItemWidget extends StatelessWidget {
+     final IconData icon;
+     final String label;
+     
+     const InfoItemWidget({
+       required this.icon,
+       required this.label,
+       super.key,
+     });
+     
+     @override
+     Widget build(BuildContext context) {
+       return ListTile(
+         leading: Icon(icon),
+         title: Text(label),
+       );
+     }
+   }
+   
+   // ⚠️ 허용되지만 권장하지 않음 - 작은 UI 조각 헬퍼
+   Widget _buildInfoItem(IconData icon, String label) {
+     return ListTile(
+       leading: Icon(icon),
+       title: Text(label),
+     );
+   }
+   ```
+
+### 요약
+
+- ✅ 같은 View를 사용하는 상태는 `||` 패턴으로 통합
+- ✅ 부모 클래스를 상속받는 하위 상태는 부모 클래스만 매칭
+- ✅ 위젯 클래스를 직접 사용 (const 생성자, key로 최적화 가능)
+- ❌ `_build` 헬퍼 메서드 사용 금지 (StatelessWidget이어도 `_build`로 호출하면 최적화 불가)
+- ❌ 불필요하게 모든 하위 상태 나열 금지
+- 💡 작은 UI 조각도 가능하면 StatelessWidget으로 분리 권장
+
 ## Clean Architecture 패턴
 
 프로젝트는 **Clean Architecture**를 엄격하게 따릅니다. 모든 API 호출은 다음 레이어 구조를 따라야 합니다:

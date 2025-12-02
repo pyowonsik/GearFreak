@@ -19,6 +19,7 @@ abstract class User implements _i1.SerializableModel {
     required this.userInfoId,
     this.userInfo,
     this.nickname,
+    this.profileImageUrl,
     this.bio,
     this.withdrawalDate,
     this.blockedReason,
@@ -32,6 +33,7 @@ abstract class User implements _i1.SerializableModel {
     required int userInfoId,
     _i2.UserInfo? userInfo,
     String? nickname,
+    String? profileImageUrl,
     String? bio,
     DateTime? withdrawalDate,
     String? blockedReason,
@@ -49,6 +51,7 @@ abstract class User implements _i1.SerializableModel {
           : _i2.UserInfo.fromJson(
               (jsonSerialization['userInfo'] as Map<String, dynamic>)),
       nickname: jsonSerialization['nickname'] as String?,
+      profileImageUrl: jsonSerialization['profileImageUrl'] as String?,
       bio: jsonSerialization['bio'] as String?,
       withdrawalDate: jsonSerialization['withdrawalDate'] == null
           ? null
@@ -81,6 +84,9 @@ abstract class User implements _i1.SerializableModel {
   /// 닉네임
   String? nickname;
 
+  /// 프로필 이미지 URL
+  String? profileImageUrl;
+
   /// 자기 소개 (biography)
   String? bio;
 
@@ -107,6 +113,7 @@ abstract class User implements _i1.SerializableModel {
     int? userInfoId,
     _i2.UserInfo? userInfo,
     String? nickname,
+    String? profileImageUrl,
     String? bio,
     DateTime? withdrawalDate,
     String? blockedReason,
@@ -121,6 +128,7 @@ abstract class User implements _i1.SerializableModel {
       'userInfoId': userInfoId,
       if (userInfo != null) 'userInfo': userInfo?.toJson(),
       if (nickname != null) 'nickname': nickname,
+      if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       if (bio != null) 'bio': bio,
       if (withdrawalDate != null) 'withdrawalDate': withdrawalDate?.toJson(),
       if (blockedReason != null) 'blockedReason': blockedReason,
@@ -144,6 +152,7 @@ class _UserImpl extends User {
     required int userInfoId,
     _i2.UserInfo? userInfo,
     String? nickname,
+    String? profileImageUrl,
     String? bio,
     DateTime? withdrawalDate,
     String? blockedReason,
@@ -155,6 +164,7 @@ class _UserImpl extends User {
           userInfoId: userInfoId,
           userInfo: userInfo,
           nickname: nickname,
+          profileImageUrl: profileImageUrl,
           bio: bio,
           withdrawalDate: withdrawalDate,
           blockedReason: blockedReason,
@@ -172,6 +182,7 @@ class _UserImpl extends User {
     int? userInfoId,
     Object? userInfo = _Undefined,
     Object? nickname = _Undefined,
+    Object? profileImageUrl = _Undefined,
     Object? bio = _Undefined,
     Object? withdrawalDate = _Undefined,
     Object? blockedReason = _Undefined,
@@ -185,6 +196,8 @@ class _UserImpl extends User {
       userInfo:
           userInfo is _i2.UserInfo? ? userInfo : this.userInfo?.copyWith(),
       nickname: nickname is String? ? nickname : this.nickname,
+      profileImageUrl:
+          profileImageUrl is String? ? profileImageUrl : this.profileImageUrl,
       bio: bio is String? ? bio : this.bio,
       withdrawalDate:
           withdrawalDate is DateTime? ? withdrawalDate : this.withdrawalDate,

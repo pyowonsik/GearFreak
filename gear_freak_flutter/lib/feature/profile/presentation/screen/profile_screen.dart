@@ -4,6 +4,7 @@ import 'package:gear_freak_flutter/common/presentation/component/component.dart'
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
 import 'package:go_router/go_router.dart';
@@ -34,17 +35,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       appBar: const ProfileAppBarWidget(),
-      body: profileState.isLoading
-          ? const GbLoadingView()
-          : profileState.user == null
-              ? const GbEmptyView(
-                  message: '프로필을 불러올 수 없습니다',
-                )
-              : ProfileLoadedView(
-                  user: profileState.user!,
-                  onLogout: _handleLogout,
-                  onEditProfile: _handleEditProfile,
-                ),
+      body: switch (profileState) {
+        ProfileInitial() => const GbLoadingView(),
+        ProfileLoading() => const GbLoadingView(),
+        ProfileError(:final message) => GbErrorView(
+            message: message,
+            onRetry: () {
+              ref.read(profileNotifierProvider.notifier).loadProfile();
+            },
+          ),
+        ProfileLoaded(:final user) => ProfileLoadedView(
+            user: user,
+            onLogout: _handleLogout,
+            onEditProfile: _handleEditProfile,
+            onAppInfo: _handleAppInfo,
+            onCustomerCenter: _handleCustomerCenter,
+          ),
+      },
     );
   }
 
@@ -86,5 +93,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// 프로필 편집 처리
   void _handleEditProfile() {
     context.push('/profile/edit');
+  }
+
+  /// 앱 정보 화면 이동
+  void _handleAppInfo() {
+    context.push('/profile/app-info');
+  }
+
+  /// 고객센터 화면 이동
+  void _handleCustomerCenter() {
+    context.push('/profile/customer-center');
   }
 }

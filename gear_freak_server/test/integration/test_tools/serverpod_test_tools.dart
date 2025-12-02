@@ -30,6 +30,8 @@ import 'package:gear_freak_server/src/generated/feature/product/model/dto/pagina
     as _i10;
 import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
     as _i11;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i12;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -570,6 +572,35 @@ class _UserEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i6.User> updateUserProfile(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i12.UpdateUserProfileRequestDto request,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'user',
+        method: 'updateUserProfile',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'user',
+          methodName: 'updateUserProfile',
+          parameters: _i1.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i6.User>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

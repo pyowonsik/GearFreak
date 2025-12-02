@@ -97,27 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           :final products,
           :final pagination,
           :final sortBy
-        ) =>
-          HomeLoadedView(
-            key: const ValueKey('home_loaded'),
-            products: products,
-            pagination: pagination,
-            sortBy: sortBy,
-            selectedCategory: _selectedCategory,
-            scrollController: scrollController!,
-            onCategoryChanged: (category) {
-              setState(() {
-                _selectedCategory = category;
-              });
-              _loadProducts(sortBy: sortBy);
-            },
-            onSortChanged: (newSortBy) async {
-              await _loadProducts(sortBy: newSortBy);
-            },
-            onRefresh: () async {
-              await _loadProducts(sortBy: sortBy);
-            },
-          ),
+        ) ||
         ProductPaginatedLoadingMore(
           :final products,
           :final pagination,
@@ -130,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             sortBy: sortBy,
             selectedCategory: _selectedCategory,
             scrollController: scrollController!,
-            isLoadingMore: true,
+            isLoadingMore: productState is ProductPaginatedLoadingMore,
             onCategoryChanged: (category) {
               setState(() {
                 _selectedCategory = category;

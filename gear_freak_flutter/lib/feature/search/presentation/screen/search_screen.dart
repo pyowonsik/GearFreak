@@ -145,25 +145,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             }
           },
         ),
-      SearchLoaded(:final result, :final query, :final sortBy) =>
-        SearchLoadedView(
-          key: const ValueKey('search_loaded'),
-          products: result.products,
-          pagination: result.pagination,
-          query: query,
-          sortBy: sortBy,
-          scrollController: scrollController!,
-          onSortChanged: (pod.ProductSortBy? newSortBy) async {
-            await ref
-                .read(searchNotifierProvider.notifier)
-                .searchProducts(query, sortBy: newSortBy);
-          },
-          onRefresh: () async {
-            await ref
-                .read(searchNotifierProvider.notifier)
-                .searchProducts(query, sortBy: sortBy);
-          },
-        ),
+      SearchLoaded(:final result, :final query, :final sortBy) ||
       SearchLoadingMore(:final result, :final query, :final sortBy) =>
         SearchLoadedView(
           key: const ValueKey('search_loaded'),
@@ -172,7 +154,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           query: query,
           sortBy: sortBy,
           scrollController: scrollController!,
-          isLoadingMore: true,
+          isLoadingMore: state is SearchLoadingMore,
           onSortChanged: (pod.ProductSortBy? newSortBy) async {
             await ref
                 .read(searchNotifierProvider.notifier)

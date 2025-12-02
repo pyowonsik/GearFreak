@@ -26,4 +26,15 @@ class ProfileRemoteDataSource {
   Future<pod.User> getUserById(int id) async {
     return _client.user.getUserById(id);
   }
+
+  /// 사용자 프로필 수정
+  Future<pod.User> updateUserProfile(
+    pod.UpdateUserProfileRequestDto request,
+  ) async {
+    try {
+      return await _client.user.updateUserProfile(request);
+    } catch (e) {
+      throw Exception('프로필을 수정하는데 실패했습니다: $e');
+    }
+  }
 }

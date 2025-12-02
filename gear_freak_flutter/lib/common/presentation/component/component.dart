@@ -4,5 +4,6 @@
 library;
 
 export 'gb_dialog.dart';
+export 'gb_divider.dart';
 export 'gb_snackbar.dart';
 export 'gb_text_form_field.dart';

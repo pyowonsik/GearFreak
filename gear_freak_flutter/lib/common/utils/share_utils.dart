@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// 공유 유틸리티
@@ -22,7 +23,8 @@ class ShareUtils {
     try {
       // 딥링크 URL 생성
       // Universal Links 사용 (프로덕션)
-      final deepLinkUrl = 'https://gear-freaks.com/product/$productId';
+      final deepLinkBaseUrl = dotenv.env['DEEP_LINK_BASE_URL']!;
+      final deepLinkUrl = '$deepLinkBaseUrl/product/$productId';
 
       // 공유 텍스트 생성
       final shareText =

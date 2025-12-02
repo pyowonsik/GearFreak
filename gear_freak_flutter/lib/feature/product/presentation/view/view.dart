@@ -4,3 +4,4 @@
 library;
 
 export 'home_loaded_view.dart';
+export 'paginated_product_list_view.dart';

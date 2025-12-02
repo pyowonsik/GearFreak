@@ -30,3 +30,16 @@ class GetUserByIdFailure extends ProfileFailure {
   @override
   String toString() => 'GetUserByIdFailure: $message';
 }
+
+/// 사용자 프로필 수정 실패
+class UpdateUserProfileFailure extends ProfileFailure {
+  /// UpdateUserProfileFailure 생성자
+  const UpdateUserProfileFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'UpdateUserProfileFailure: $message';
+}

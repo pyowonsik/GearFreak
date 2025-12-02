@@ -22,7 +22,9 @@ import 'package:gear_freak_server/src/generated/feature/product/model/dto/update
     as _i8;
 import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
     as _i9;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i10;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i10;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i11;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -311,8 +313,26 @@ class Endpoints extends _i1.EndpointDispatch {
           ) async =>
               (endpoints['user'] as _i5.UserEndpoint).getUserScopes(session),
         ),
+        'updateUserProfile': _i1.MethodConnector(
+          name: 'updateUserProfile',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i10.UpdateUserProfileRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['user'] as _i5.UserEndpoint).updateUserProfile(
+            session,
+            params['request'],
+          ),
+        ),
       },
     );
-    modules['serverpod_auth'] = _i10.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i11.Endpoints()..initializeEndpoints(server);
   }
 }

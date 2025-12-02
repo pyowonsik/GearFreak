@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/data/datasource/profile_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/profile/data/repository/profile_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/repository/profile_repository.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/profile/domain/usecase/update_user_profile_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_notifier.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 
@@ -25,11 +27,27 @@ final getUserByIdUseCaseProvider = Provider<GetUserByIdUseCase>((ref) {
   return GetUserByIdUseCase(repository);
 });
 
+/// Update User Profile UseCase Provider
+final updateUserProfileUseCaseProvider =
+    Provider<UpdateUserProfileUseCase>((ref) {
+  final repository = ref.watch(profileRepositoryProvider);
+  return UpdateUserProfileUseCase(repository);
+});
+
 /// Profile Notifier Provider
 final profileNotifierProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
   /// usecase 주입
   final getMeUseCase = ref.watch(getMeUseCaseProvider);
   final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
-  return ProfileNotifier(getMeUseCase, getUserByIdUseCase);
+  final uploadImageUseCase = ref.watch(uploadImageUseCaseProvider);
+  final deleteImageUseCase = ref.watch(deleteImageUseCaseProvider);
+  final updateUserProfileUseCase = ref.watch(updateUserProfileUseCaseProvider);
+  return ProfileNotifier(
+    getMeUseCase,
+    getUserByIdUseCase,
+    uploadImageUseCase,
+    deleteImageUseCase,
+    updateUserProfileUseCase,
+  );
 });

@@ -10,4 +10,5 @@ export 'product_basic_info_section_widget.dart';
 export 'product_card_widget.dart';
 export 'product_editor_form.dart';
 export 'product_image_section_widget.dart';
+export 'product_info_item_widget.dart';
 export 'product_trade_info_section_widget.dart';

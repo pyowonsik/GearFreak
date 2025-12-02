@@ -166,13 +166,8 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
           ],
         ),
         body: switch (state) {
-          UpdateProductInitial() => const Center(
-              child: CircularProgressIndicator(),
-            ),
-          UpdateProductLoading() => const Center(
-              child: CircularProgressIndicator(),
-            ),
-          UpdateProductLoaded() => _buildForm(),
+          UpdateProductInitial() => const GbLoadingView(),
+          UpdateProductLoading() => const GbLoadingView(),
           UpdateProductLoadError(:final error) => GbErrorView(
               title: '오류가 발생했습니다',
               message: error,
@@ -187,54 +182,51 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
               showBackButton: true,
               onBack: () => context.pop(),
             ),
+          UpdateProductLoaded() => ProductEditorForm(
+              formKey: _formKey,
+              titleController: _titleController,
+              priceController: _priceController,
+              descriptionController: _descriptionController,
+              detailAddressController: _detailAddressController,
+              selectedCategory: _selectedCategory,
+              selectedCondition: _selectedCondition,
+              selectedTradeMethod: _selectedTradeMethod,
+              existingImageUrls: _existingImageUrls,
+              newImageFiles: _newImageFiles,
+              baseAddress: _baseAddress,
+              onCategoryChanged: (category) {
+                setState(() {
+                  _selectedCategory = category;
+                });
+              },
+              onConditionChanged: (condition) {
+                setState(() {
+                  _selectedCondition = condition;
+                });
+              },
+              onTradeMethodChanged: (method) {
+                setState(() {
+                  _selectedTradeMethod = method;
+                });
+              },
+              onBaseAddressChanged: (address) {
+                setState(() {
+                  _baseAddress = address;
+                });
+              },
+              onAddImage: _addImage,
+              onRemoveExistingImage: _removeExistingImage,
+              onRemoveNewImage: _removeNewImage,
+              getUploadedFileKeys: () {
+                final currentState = ref.read(updateProductNotifierProvider);
+                if (currentState is UpdateProductLoaded) {
+                  return currentState.uploadedFileKeys;
+                }
+                return [];
+              },
+            ),
         },
       ),
-    );
-  }
-
-  Widget _buildForm() {
-    return ProductEditorForm(
-      formKey: _formKey,
-      titleController: _titleController,
-      priceController: _priceController,
-      descriptionController: _descriptionController,
-      detailAddressController: _detailAddressController,
-      selectedCategory: _selectedCategory,
-      selectedCondition: _selectedCondition,
-      selectedTradeMethod: _selectedTradeMethod,
-      existingImageUrls: _existingImageUrls,
-      newImageFiles: _newImageFiles,
-      baseAddress: _baseAddress,
-      onCategoryChanged: (category) {
-        setState(() {
-          _selectedCategory = category;
-        });
-      },
-      onConditionChanged: (condition) {
-        setState(() {
-          _selectedCondition = condition;
-        });
-      },
-      onTradeMethodChanged: (method) {
-        setState(() {
-          _selectedTradeMethod = method;
-        });
-      },
-      onBaseAddressChanged: (address) {
-        setState(() {
-          _baseAddress = address;
-        });
-      },
-      onAddImage: _addImage,
-      onRemoveExistingImage: _removeExistingImage,
-      onRemoveNewImage: _removeNewImage,
-      getUploadedFileKeys: () {
-        final currentState = ref.read(updateProductNotifierProvider);
-        if (currentState is UpdateProductLoaded) {
-          return currentState.uploadedFileKeys;
-        }
-        return [];
-      },
     );
   }
 

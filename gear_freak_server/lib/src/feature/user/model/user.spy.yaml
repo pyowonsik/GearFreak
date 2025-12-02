@@ -8,6 +8,8 @@ fields:
   userInfo: module:auth:UserInfo?, relation
   ### 닉네임
   nickname: String?
+  ### 프로필 이미지 URL
+  profileImageUrl: String?
   ### 자기 소개 (biography)
   bio: String?
   ### 사용자 탈퇴 요청 날짜 (3개월 후 사용자 정보 삭제)
@@ -25,5 +27,3 @@ indexes:
   user_info_id_unique_idx:
     fields: userInfoId
     unique: true
-
-

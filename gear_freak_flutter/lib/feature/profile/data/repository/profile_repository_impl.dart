@@ -30,4 +30,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<pod.User> getUserById(int id) async {
     return remoteDataSource.getUserById(id);
   }
+
+  @override
+  Future<pod.User> updateUserProfile(
+    pod.UpdateUserProfileRequestDto request,
+  ) async {
+    return remoteDataSource.updateUserProfile(request);
+  }
 }

@@ -9,4 +9,7 @@ abstract class ProfileRepository {
 
   /// 사용자 Id로 사용자 정보를 가져옵니다
   Future<pod.User> getUserById(int id);
+
+  /// 사용자 프로필 수정
+  Future<pod.User> updateUserProfile(pod.UpdateUserProfileRequestDto request);
 }

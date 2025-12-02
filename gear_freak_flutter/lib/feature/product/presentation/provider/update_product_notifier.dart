@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/s3/domain/usecase/delete_image_usecase.dart';
@@ -238,11 +239,9 @@ class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
 
     try {
       // 업로드된 이미지 URL 목록 생성
+      final s3BaseUrl = dotenv.env['S3_PUBLIC_BASE_URL']!;
       final uploadedImageUrls = currentState.uploadedFileKeys
-          .map(
-            (key) =>
-                'https://gear-freak-public-storage-3059875.s3.ap-northeast-2.amazonaws.com/$key',
-          )
+          .map((key) => '$s3BaseUrl/$key')
           .toList();
 
       // 최종 이미지 URL 목록 (기존 이미지 + 새로 업로드한 이미지)

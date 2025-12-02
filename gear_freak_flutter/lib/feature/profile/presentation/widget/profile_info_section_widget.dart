@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 
@@ -26,13 +27,37 @@ class ProfileInfoSectionWidget extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: const Color(0xFFF3F4F6),
-            child: Icon(
-              Icons.person,
-              size: 48,
-              color: Colors.grey.shade500,
+          ClipOval(
+            child: Container(
+              width: 80,
+              height: 80,
+              color: const Color(0xFFF3F4F6),
+              child: user.profileImageUrl != null &&
+                      user.profileImageUrl!.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: user.profileImageUrl!,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF9CA3AF),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.person,
+                        size: 48,
+                        color: Colors.grey.shade500,
+                      ),
+                    )
+                  : Icon(
+                      Icons.person,
+                      size: 48,
+                      color: Colors.grey.shade500,
+                    ),
             ),
           ),
           const SizedBox(width: 16),

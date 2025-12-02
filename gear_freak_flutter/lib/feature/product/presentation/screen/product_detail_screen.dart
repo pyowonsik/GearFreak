@@ -12,6 +12,7 @@ import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 상품 상세 화면
@@ -486,17 +487,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildInfoItem(
-                        Icons.remove_red_eye_outlined,
-                        '조회 ${productData.viewCount ?? 0}',
+                      ProductInfoItemWidget(
+                        icon: Icons.remove_red_eye_outlined,
+                        label: '조회 ${productData.viewCount ?? 0}',
                       ),
-                      _buildInfoItem(
-                        Icons.favorite_border,
-                        '찜 ${productData.favoriteCount ?? 0}',
+                      ProductInfoItemWidget(
+                        icon: Icons.favorite_border,
+                        label: '찜 ${productData.favoriteCount ?? 0}',
                       ),
-                      _buildInfoItem(
-                        Icons.chat_bubble_outline,
-                        '채팅 ${productData.chatCount ?? 0}',
+                      ProductInfoItemWidget(
+                        icon: Icons.chat_bubble_outline,
+                        label: '채팅 ${productData.chatCount ?? 0}',
                       ),
                     ],
                   ),
@@ -567,26 +568,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoItem(IconData icon, String label) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 20,
-          color: const Color(0xFF6B7280),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(0xFF6B7280),
-          ),
-        ),
-      ],
     );
   }
 }

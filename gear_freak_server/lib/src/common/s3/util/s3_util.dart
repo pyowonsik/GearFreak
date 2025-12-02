@@ -65,5 +65,24 @@ class S3Util {
     }
     throw Exception('Invalid temp key format: $tempKey');
   }
-}
 
+  /// 파일 키에서 temp 경로를 프로필 경로로 변환
+  ///
+  /// 예: temp/profile/1/xxx.png, userId=1
+  /// -> profile/1/xxx.png
+  static String convertTempKeyToProfileKey(
+    String tempKey,
+    int userId,
+  ) {
+    // temp/profile/1/xxx.png -> profile/1/xxx.png
+    if (tempKey.startsWith('temp/profile/')) {
+      final parts = tempKey.split('/');
+      if (parts.length >= 4) {
+        // temp, profile, userId, filename
+        final filename = parts.sublist(3).join('/');
+        return 'profile/$userId/$filename';
+      }
+    }
+    throw Exception('Invalid temp key format: $tempKey');
+  }
+}
