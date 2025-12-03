@@ -17,24 +17,50 @@ import 'package:gear_freak_client/src/protocol/common/s3/model/dto/generate_pres
     as _i4;
 import 'package:gear_freak_client/src/protocol/feature/user/model/user.dart'
     as _i5;
-import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/create_chat_room_response.dto.dart'
     as _i6;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/create_product_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/create_chat_room_request.dto.dart'
     as _i7;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/chat_room.dart'
     as _i8;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/join_chat_room_response.dto.dart'
     as _i9;
-import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/join_chat_room_request.dto.dart'
     as _i10;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_status_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/leave_chat_room_response.dto.dart'
     as _i11;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/product_stats.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/leave_chat_room_request.dto.dart'
     as _i12;
-import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/chat_participant_info.dto.dart'
     as _i13;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i14;
-import 'protocol.dart' as _i15;
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/chat_message_response.dto.dart'
+    as _i14;
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/send_message_request.dto.dart'
+    as _i15;
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/paginated_chat_messages_response.dto.dart'
+    as _i16;
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/get_chat_messages_request.dto.dart'
+    as _i17;
+import 'package:gear_freak_client/src/protocol/feature/chat/model/chat_message.dart'
+    as _i18;
+import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
+    as _i19;
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/create_product_request.dto.dart'
+    as _i20;
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_request.dto.dart'
+    as _i21;
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
+    as _i22;
+import 'package:gear_freak_client/src/protocol/common/model/pagination_dto.dart'
+    as _i23;
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_status_request.dto.dart'
+    as _i24;
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/product_stats.dto.dart'
+    as _i25;
+import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i26;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i27;
+import 'protocol.dart' as _i28;
 
 /// S3 엔드포인트 (공통 사용)
 /// {@category Endpoint}
@@ -103,6 +129,122 @@ class EndpointAuth extends _i1.EndpointRef {
       );
 }
 
+/// 채팅 엔드포인트
+/// {@category Endpoint}
+class EndpointChat extends _i1.EndpointRef {
+  EndpointChat(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'chat';
+
+  /// 채팅방 생성 또는 조회
+  /// 상품 ID와 상대방 사용자 ID로 기존 채팅방을 찾거나 새로 생성합니다.
+  _i2.Future<_i6.CreateChatRoomResponseDto> createOrGetChatRoom(
+          _i7.CreateChatRoomRequestDto request) =>
+      caller.callServerEndpoint<_i6.CreateChatRoomResponseDto>(
+        'chat',
+        'createOrGetChatRoom',
+        {'request': request},
+      );
+
+  /// 채팅방 정보 조회
+  _i2.Future<_i8.ChatRoom?> getChatRoomById(int chatRoomId) =>
+      caller.callServerEndpoint<_i8.ChatRoom?>(
+        'chat',
+        'getChatRoomById',
+        {'chatRoomId': chatRoomId},
+      );
+
+  /// 상품 ID로 채팅방 목록 조회
+  _i2.Future<List<_i8.ChatRoom>?> getChatRoomsByProductId(int productId) =>
+      caller.callServerEndpoint<List<_i8.ChatRoom>?>(
+        'chat',
+        'getChatRoomsByProductId',
+        {'productId': productId},
+      );
+
+  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
+  _i2.Future<List<_i8.ChatRoom>?> getUserChatRoomsByProductId(int productId) =>
+      caller.callServerEndpoint<List<_i8.ChatRoom>?>(
+        'chat',
+        'getUserChatRoomsByProductId',
+        {'productId': productId},
+      );
+
+  /// 채팅방 참여
+  _i2.Future<_i9.JoinChatRoomResponseDto> joinChatRoom(
+          _i10.JoinChatRoomRequestDto request) =>
+      caller.callServerEndpoint<_i9.JoinChatRoomResponseDto>(
+        'chat',
+        'joinChatRoom',
+        {'request': request},
+      );
+
+  /// 채팅방 나가기
+  _i2.Future<_i11.LeaveChatRoomResponseDto> leaveChatRoom(
+          _i12.LeaveChatRoomRequestDto request) =>
+      caller.callServerEndpoint<_i11.LeaveChatRoomResponseDto>(
+        'chat',
+        'leaveChatRoom',
+        {'request': request},
+      );
+
+  /// 채팅방 참여자 목록 조회
+  _i2.Future<List<_i13.ChatParticipantInfoDto>> getChatParticipants(
+          int chatRoomId) =>
+      caller.callServerEndpoint<List<_i13.ChatParticipantInfoDto>>(
+        'chat',
+        'getChatParticipants',
+        {'chatRoomId': chatRoomId},
+      );
+
+  /// 메시지 전송
+  _i2.Future<_i14.ChatMessageResponseDto> sendMessage(
+          _i15.SendMessageRequestDto request) =>
+      caller.callServerEndpoint<_i14.ChatMessageResponseDto>(
+        'chat',
+        'sendMessage',
+        {'request': request},
+      );
+
+  /// 페이지네이션된 메시지 조회
+  _i2.Future<_i16.PaginatedChatMessagesResponseDto> getChatMessagesPaginated(
+          _i17.GetChatMessagesRequestDto request) =>
+      caller.callServerEndpoint<_i16.PaginatedChatMessagesResponseDto>(
+        'chat',
+        'getChatMessagesPaginated',
+        {'request': request},
+      );
+
+  /// 채팅방의 마지막 메시지 조회
+  _i2.Future<_i18.ChatMessage?> getLastMessageByChatRoomId(int chatRoomId) =>
+      caller.callServerEndpoint<_i18.ChatMessage?>(
+        'chat',
+        'getLastMessageByChatRoomId',
+        {'chatRoomId': chatRoomId},
+      );
+}
+
+/// Redis 기반 실시간 채팅 스트림 관리 엔드포인트
+/// {@category Endpoint}
+class EndpointChatStream extends _i1.EndpointRef {
+  EndpointChatStream(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'chatStream';
+
+  /// 채팅방 메시지 스트림 구독 (Redis 기반)
+  /// 특정 채팅방의 실시간 메시지를 받기 위한 스트림
+  _i2.Stream<_i14.ChatMessageResponseDto> chatMessageStream(int chatRoomId) =>
+      caller.callStreamingServerEndpoint<
+          _i2.Stream<_i14.ChatMessageResponseDto>, _i14.ChatMessageResponseDto>(
+        'chatStream',
+        'chatMessageStream',
+        {'chatRoomId': chatRoomId},
+        {},
+      );
+}
+
 /// 상품 엔드포인트
 /// {@category Endpoint}
 class EndpointProduct extends _i1.EndpointRef {
@@ -112,32 +254,34 @@ class EndpointProduct extends _i1.EndpointRef {
   String get name => 'product';
 
   /// 상품 생성
-  _i2.Future<_i6.Product> createProduct(_i7.CreateProductRequestDto request) =>
-      caller.callServerEndpoint<_i6.Product>(
+  _i2.Future<_i19.Product> createProduct(
+          _i20.CreateProductRequestDto request) =>
+      caller.callServerEndpoint<_i19.Product>(
         'product',
         'createProduct',
         {'request': request},
       );
 
   /// 상품 수정
-  _i2.Future<_i6.Product> updateProduct(_i8.UpdateProductRequestDto request) =>
-      caller.callServerEndpoint<_i6.Product>(
+  _i2.Future<_i19.Product> updateProduct(
+          _i21.UpdateProductRequestDto request) =>
+      caller.callServerEndpoint<_i19.Product>(
         'product',
         'updateProduct',
         {'request': request},
       );
 
-  _i2.Future<_i6.Product> getProduct(int id) =>
-      caller.callServerEndpoint<_i6.Product>(
+  _i2.Future<_i19.Product> getProduct(int id) =>
+      caller.callServerEndpoint<_i19.Product>(
         'product',
         'getProduct',
         {'id': id},
       );
 
   /// 페이지네이션된 상품 목록 조회
-  _i2.Future<_i9.PaginatedProductsResponseDto> getPaginatedProducts(
-          _i10.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i9.PaginatedProductsResponseDto>(
+  _i2.Future<_i22.PaginatedProductsResponseDto> getPaginatedProducts(
+          _i23.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i22.PaginatedProductsResponseDto>(
         'product',
         'getPaginatedProducts',
         {'pagination': pagination},
@@ -168,35 +312,35 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 내가 등록한 상품 목록 조회 (페이지네이션)
-  _i2.Future<_i9.PaginatedProductsResponseDto> getMyProducts(
-          _i10.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i9.PaginatedProductsResponseDto>(
+  _i2.Future<_i22.PaginatedProductsResponseDto> getMyProducts(
+          _i23.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i22.PaginatedProductsResponseDto>(
         'product',
         'getMyProducts',
         {'pagination': pagination},
       );
 
   /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
-  _i2.Future<_i9.PaginatedProductsResponseDto> getMyFavoriteProducts(
-          _i10.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i9.PaginatedProductsResponseDto>(
+  _i2.Future<_i22.PaginatedProductsResponseDto> getMyFavoriteProducts(
+          _i23.PaginationDto pagination) =>
+      caller.callServerEndpoint<_i22.PaginatedProductsResponseDto>(
         'product',
         'getMyFavoriteProducts',
         {'pagination': pagination},
       );
 
   /// 상품 상태 변경
-  _i2.Future<_i6.Product> updateProductStatus(
-          _i11.UpdateProductStatusRequestDto request) =>
-      caller.callServerEndpoint<_i6.Product>(
+  _i2.Future<_i19.Product> updateProductStatus(
+          _i24.UpdateProductStatusRequestDto request) =>
+      caller.callServerEndpoint<_i19.Product>(
         'product',
         'updateProductStatus',
         {'request': request},
       );
 
   /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
-  _i2.Future<_i12.ProductStatsDto> getProductStats() =>
-      caller.callServerEndpoint<_i12.ProductStatsDto>(
+  _i2.Future<_i25.ProductStatsDto> getProductStats() =>
+      caller.callServerEndpoint<_i25.ProductStatsDto>(
         'product',
         'getProductStats',
         {},
@@ -236,7 +380,7 @@ class EndpointUser extends _i1.EndpointRef {
 
   /// 사용자 프로필 수정
   _i2.Future<_i5.User> updateUserProfile(
-          _i13.UpdateUserProfileRequestDto request) =>
+          _i26.UpdateUserProfileRequestDto request) =>
       caller.callServerEndpoint<_i5.User>(
         'user',
         'updateUserProfile',
@@ -246,10 +390,10 @@ class EndpointUser extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i14.Caller(client);
+    auth = _i27.Caller(client);
   }
 
-  late final _i14.Caller auth;
+  late final _i27.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -268,7 +412,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i15.Protocol(),
+          _i28.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -280,6 +424,8 @@ class Client extends _i1.ServerpodClientShared {
         ) {
     s3 = EndpointS3(this);
     auth = EndpointAuth(this);
+    chat = EndpointChat(this);
+    chatStream = EndpointChatStream(this);
     product = EndpointProduct(this);
     user = EndpointUser(this);
     modules = Modules(this);
@@ -288,6 +434,10 @@ class Client extends _i1.ServerpodClientShared {
   late final EndpointS3 s3;
 
   late final EndpointAuth auth;
+
+  late final EndpointChat chat;
+
+  late final EndpointChatStream chatStream;
 
   late final EndpointProduct product;
 
@@ -299,6 +449,8 @@ class Client extends _i1.ServerpodClientShared {
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
         's3': s3,
         'auth': auth,
+        'chat': chat,
+        'chatStream': chatStream,
         'product': product,
         'user': user,
       };

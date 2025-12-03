@@ -12,21 +12,33 @@
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../common/s3/endpoint/s3_endpoint.dart' as _i2;
 import '../feature/auth/endpoint/auth_endpoint.dart' as _i3;
-import '../feature/product/endpoint/product_endpoint.dart' as _i4;
-import '../feature/user/endpoint/user_endpoint.dart' as _i5;
+import '../feature/chat/endpoint/chat_endpoint.dart' as _i4;
+import '../feature/chat/endpoint/chat_stream_endpoint.dart' as _i5;
+import '../feature/product/endpoint/product_endpoint.dart' as _i6;
+import '../feature/user/endpoint/user_endpoint.dart' as _i7;
 import 'package:gear_freak_server/src/generated/common/s3/model/dto/generate_presigned_upload_url_request.dto.dart'
-    as _i6;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
-    as _i7;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
     as _i8;
-import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/create_chat_room_request.dto.dart'
     as _i9;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/join_chat_room_request.dto.dart'
     as _i10;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/leave_chat_room_request.dto.dart'
     as _i11;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i12;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/send_message_request.dto.dart'
+    as _i12;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/get_chat_messages_request.dto.dart'
+    as _i13;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
+    as _i14;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
+    as _i15;
+import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+    as _i16;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
+    as _i17;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i18;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i19;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -44,13 +56,25 @@ class Endpoints extends _i1.EndpointDispatch {
           'auth',
           null,
         ),
-      'product': _i4.ProductEndpoint()
+      'chat': _i4.ChatEndpoint()
+        ..initialize(
+          server,
+          'chat',
+          null,
+        ),
+      'chatStream': _i5.ChatStreamEndpoint()
+        ..initialize(
+          server,
+          'chatStream',
+          null,
+        ),
+      'product': _i6.ProductEndpoint()
         ..initialize(
           server,
           'product',
           null,
         ),
-      'user': _i5.UserEndpoint()
+      'user': _i7.UserEndpoint()
         ..initialize(
           server,
           'user',
@@ -66,7 +90,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i6.GeneratePresignedUploadUrlRequestDto>(),
+              type: _i1.getType<_i8.GeneratePresignedUploadUrlRequestDto>(),
               nullable: false,
             )
           },
@@ -142,6 +166,222 @@ class Endpoints extends _i1.EndpointDispatch {
         )
       },
     );
+    connectors['chat'] = _i1.EndpointConnector(
+      name: 'chat',
+      endpoint: endpoints['chat']!,
+      methodConnectors: {
+        'createOrGetChatRoom': _i1.MethodConnector(
+          name: 'createOrGetChatRoom',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i9.CreateChatRoomRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).createOrGetChatRoom(
+            session,
+            params['request'],
+          ),
+        ),
+        'getChatRoomById': _i1.MethodConnector(
+          name: 'getChatRoomById',
+          params: {
+            'chatRoomId': _i1.ParameterDescription(
+              name: 'chatRoomId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).getChatRoomById(
+            session,
+            params['chatRoomId'],
+          ),
+        ),
+        'getChatRoomsByProductId': _i1.MethodConnector(
+          name: 'getChatRoomsByProductId',
+          params: {
+            'productId': _i1.ParameterDescription(
+              name: 'productId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).getChatRoomsByProductId(
+            session,
+            params['productId'],
+          ),
+        ),
+        'getUserChatRoomsByProductId': _i1.MethodConnector(
+          name: 'getUserChatRoomsByProductId',
+          params: {
+            'productId': _i1.ParameterDescription(
+              name: 'productId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint)
+                  .getUserChatRoomsByProductId(
+            session,
+            params['productId'],
+          ),
+        ),
+        'joinChatRoom': _i1.MethodConnector(
+          name: 'joinChatRoom',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i10.JoinChatRoomRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).joinChatRoom(
+            session,
+            params['request'],
+          ),
+        ),
+        'leaveChatRoom': _i1.MethodConnector(
+          name: 'leaveChatRoom',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i11.LeaveChatRoomRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).leaveChatRoom(
+            session,
+            params['request'],
+          ),
+        ),
+        'getChatParticipants': _i1.MethodConnector(
+          name: 'getChatParticipants',
+          params: {
+            'chatRoomId': _i1.ParameterDescription(
+              name: 'chatRoomId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).getChatParticipants(
+            session,
+            params['chatRoomId'],
+          ),
+        ),
+        'sendMessage': _i1.MethodConnector(
+          name: 'sendMessage',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i12.SendMessageRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).sendMessage(
+            session,
+            params['request'],
+          ),
+        ),
+        'getChatMessagesPaginated': _i1.MethodConnector(
+          name: 'getChatMessagesPaginated',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i13.GetChatMessagesRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).getChatMessagesPaginated(
+            session,
+            params['request'],
+          ),
+        ),
+        'getLastMessageByChatRoomId': _i1.MethodConnector(
+          name: 'getLastMessageByChatRoomId',
+          params: {
+            'chatRoomId': _i1.ParameterDescription(
+              name: 'chatRoomId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint)
+                  .getLastMessageByChatRoomId(
+            session,
+            params['chatRoomId'],
+          ),
+        ),
+      },
+    );
+    connectors['chatStream'] = _i1.EndpointConnector(
+      name: 'chatStream',
+      endpoint: endpoints['chatStream']!,
+      methodConnectors: {
+        'chatMessageStream': _i1.MethodStreamConnector(
+          name: 'chatMessageStream',
+          params: {
+            'chatRoomId': _i1.ParameterDescription(
+              name: 'chatRoomId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          streamParams: {},
+          returnType: _i1.MethodStreamReturnType.streamType,
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+            Map<String, Stream> streamParams,
+          ) =>
+              (endpoints['chatStream'] as _i5.ChatStreamEndpoint)
+                  .chatMessageStream(
+            session,
+            params['chatRoomId'],
+          ),
+        )
+      },
+    );
     connectors['product'] = _i1.EndpointConnector(
       name: 'product',
       endpoint: endpoints['product']!,
@@ -151,7 +391,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i7.CreateProductRequestDto>(),
+              type: _i1.getType<_i14.CreateProductRequestDto>(),
               nullable: false,
             )
           },
@@ -159,7 +399,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).createProduct(
+              (endpoints['product'] as _i6.ProductEndpoint).createProduct(
             session,
             params['request'],
           ),
@@ -169,7 +409,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i8.UpdateProductRequestDto>(),
+              type: _i1.getType<_i15.UpdateProductRequestDto>(),
               nullable: false,
             )
           },
@@ -177,7 +417,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).updateProduct(
+              (endpoints['product'] as _i6.ProductEndpoint).updateProduct(
             session,
             params['request'],
           ),
@@ -195,7 +435,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).getProduct(
+              (endpoints['product'] as _i6.ProductEndpoint).getProduct(
             session,
             params['id'],
           ),
@@ -205,7 +445,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i9.PaginationDto>(),
+              type: _i1.getType<_i16.PaginationDto>(),
               nullable: false,
             )
           },
@@ -213,7 +453,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint)
+              (endpoints['product'] as _i6.ProductEndpoint)
                   .getPaginatedProducts(
             session,
             params['pagination'],
@@ -232,7 +472,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).toggleFavorite(
+              (endpoints['product'] as _i6.ProductEndpoint).toggleFavorite(
             session,
             params['productId'],
           ),
@@ -250,7 +490,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).isFavorite(
+              (endpoints['product'] as _i6.ProductEndpoint).isFavorite(
             session,
             params['productId'],
           ),
@@ -268,7 +508,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).deleteProduct(
+              (endpoints['product'] as _i6.ProductEndpoint).deleteProduct(
             session,
             params['productId'],
           ),
@@ -278,7 +518,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i9.PaginationDto>(),
+              type: _i1.getType<_i16.PaginationDto>(),
               nullable: false,
             )
           },
@@ -286,7 +526,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).getMyProducts(
+              (endpoints['product'] as _i6.ProductEndpoint).getMyProducts(
             session,
             params['pagination'],
           ),
@@ -296,7 +536,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i9.PaginationDto>(),
+              type: _i1.getType<_i16.PaginationDto>(),
               nullable: false,
             )
           },
@@ -304,7 +544,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint)
+              (endpoints['product'] as _i6.ProductEndpoint)
                   .getMyFavoriteProducts(
             session,
             params['pagination'],
@@ -315,7 +555,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i10.UpdateProductStatusRequestDto>(),
+              type: _i1.getType<_i17.UpdateProductStatusRequestDto>(),
               nullable: false,
             )
           },
@@ -323,7 +563,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint).updateProductStatus(
+              (endpoints['product'] as _i6.ProductEndpoint).updateProductStatus(
             session,
             params['request'],
           ),
@@ -335,7 +575,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['product'] as _i4.ProductEndpoint)
+              (endpoints['product'] as _i6.ProductEndpoint)
                   .getProductStats(session),
         ),
       },
@@ -351,7 +591,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i5.UserEndpoint).getMe(session),
+              (endpoints['user'] as _i7.UserEndpoint).getMe(session),
         ),
         'getUserById': _i1.MethodConnector(
           name: 'getUserById',
@@ -366,7 +606,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i5.UserEndpoint).getUserById(
+              (endpoints['user'] as _i7.UserEndpoint).getUserById(
             session,
             params['id'],
           ),
@@ -378,14 +618,14 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i5.UserEndpoint).getUserScopes(session),
+              (endpoints['user'] as _i7.UserEndpoint).getUserScopes(session),
         ),
         'updateUserProfile': _i1.MethodConnector(
           name: 'updateUserProfile',
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i11.UpdateUserProfileRequestDto>(),
+              type: _i1.getType<_i18.UpdateUserProfileRequestDto>(),
               nullable: false,
             )
           },
@@ -393,13 +633,13 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['user'] as _i5.UserEndpoint).updateUserProfile(
+              (endpoints['user'] as _i7.UserEndpoint).updateUserProfile(
             session,
             params['request'],
           ),
         ),
       },
     );
-    modules['serverpod_auth'] = _i12.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i19.Endpoints()..initializeEndpoints(server);
   }
 }

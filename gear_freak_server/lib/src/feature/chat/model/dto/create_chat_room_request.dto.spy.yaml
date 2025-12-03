@@ -1,0 +1,9 @@
+### 채팅방 생성 요청
+class: CreateChatRoomRequestDto
+
+fields:
+  ### 연결된 상품 ID
+  productId: int
+  ### 상대방 사용자 ID (1:1 채팅의 경우)
+  targetUserId: int?
+

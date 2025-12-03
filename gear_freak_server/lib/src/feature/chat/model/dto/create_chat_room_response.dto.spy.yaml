@@ -1,0 +1,13 @@
+### 채팅방 생성 응답
+class: CreateChatRoomResponseDto
+
+fields:
+  ### 생성 성공 여부
+  success: bool
+  ### 채팅방 ID
+  chatRoomId: int?
+  ### 채팅방 정보
+  chatRoom: ChatRoom?
+  ### 메시지 (성공/실패 메시지)
+  message: String?
+

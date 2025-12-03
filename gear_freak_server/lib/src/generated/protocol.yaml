@@ -3,6 +3,19 @@ s3:
   - deleteS3File:
 auth:
   - signupWithoutEmailVerification:
+chat:
+  - createOrGetChatRoom:
+  - getChatRoomById:
+  - getChatRoomsByProductId:
+  - getUserChatRoomsByProductId:
+  - joinChatRoom:
+  - leaveChatRoom:
+  - getChatParticipants:
+  - sendMessage:
+  - getChatMessagesPaginated:
+  - getLastMessageByChatRoomId:
+chatStream:
+  - chatMessageStream:
 product:
   - createProduct:
   - updateProduct:

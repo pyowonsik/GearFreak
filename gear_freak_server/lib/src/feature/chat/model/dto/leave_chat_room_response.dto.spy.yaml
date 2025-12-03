@@ -1,0 +1,11 @@
+### 채팅방 나가기 응답
+class: LeaveChatRoomResponseDto
+
+fields:
+  ### 나가기 성공 여부
+  success: bool
+  ### 채팅방 ID
+  chatRoomId: int
+  ### 메시지 (성공/실패 메시지)
+  message: String?
+

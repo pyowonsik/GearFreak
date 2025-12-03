@@ -1,0 +1,17 @@
+### 채팅 메시지 전송 요청
+class: SendMessageRequestDto
+
+fields:
+  ### 채팅방 ID
+  chatRoomId: int
+  ### 메시지 내용
+  content: String
+  ### 메시지 타입 (text, image, file, system)
+  messageType: MessageType
+  ### 첨부파일 URL (선택적)
+  attachmentUrl: String?
+  ### 첨부파일 이름 (선택적)
+  attachmentName: String?
+  ### 첨부파일 크기 (bytes, 선택적)
+  attachmentSize: int?
+
