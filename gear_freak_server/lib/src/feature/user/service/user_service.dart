@@ -7,6 +7,8 @@ import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 /// 사용자 서비스
 /// 사용자 정보 조회 등 사용자 관련 비즈니스 로직을 처리합니다.
 class UserService {
+  // ==================== Public Methods (Endpoint에서 직접 호출) ====================
+
   /// 현재 로그인한 사용자 정보를 가져옵니다
   static Future<User> getMe(Session session) async {
     final authenticationInfo = await session.authenticated;

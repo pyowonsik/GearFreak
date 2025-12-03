@@ -7,6 +7,8 @@ import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 
 /// S3 서비스 (Presigned URL 생성)
 class S3Service {
+  // ==================== Public Methods (Endpoint에서 직접 호출) ====================
+
   /// Presigned URL 생성 (업로드용) - 전체 프로세스 처리
   ///
   /// [session] - Serverpod 세션

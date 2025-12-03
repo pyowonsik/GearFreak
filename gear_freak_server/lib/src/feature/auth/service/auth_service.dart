@@ -5,6 +5,8 @@ import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 /// 인증 서비스
 /// 회원가입, 로그인 등 인증 관련 비즈니스 로직을 처리합니다.
 class AuthService {
+  // ==================== Public Methods (Endpoint에서 직접 호출) ====================
+
   /// 개발용: 이메일 인증 없이 바로 회원가입
   static Future<User> signupWithoutEmailVerification(
     Session session, {

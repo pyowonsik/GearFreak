@@ -5,6 +5,8 @@ import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 
 class ProductService {
+  // ==================== Public Methods (Endpoint에서 직접 호출) ====================
+
   /// 상품 생성
   Future<Product> createProduct(
     Session session,
@@ -203,7 +205,7 @@ class ProductService {
     return result;
   }
 
-  // 상품 조회
+  /// 상품 조회
   Future<Product> getProductById(Session session, int id) async {
     final product = await Product.db.findById(session, id);
 
@@ -251,6 +253,57 @@ class ProductService {
     );
 
     return result;
+  }
+
+  /// 상품 삭제
+  Future<void> deleteProduct(
+    Session session,
+    int productId,
+    int userId,
+  ) async {
+    // 1. 기존 상품 조회
+    final product = await Product.db.findById(session, productId);
+    if (product == null) {
+      throw Exception('Product not found');
+    }
+
+    // 2. 권한 확인 (판매자만 삭제 가능)
+    if (product.sellerId != userId) {
+      throw Exception('Unauthorized: Only the seller can delete this product');
+    }
+
+    // 3. 상품 이미지들을 S3에서 삭제
+    if (product.imageUrls != null && product.imageUrls!.isNotEmpty) {
+      for (final imageUrl in product.imageUrls!) {
+        try {
+          final fileKey = S3Util.extractKeyFromUrl(imageUrl);
+          // product 경로의 이미지만 삭제
+          if (fileKey.startsWith('product/')) {
+            await S3Service.deleteS3Object(session, fileKey, 'public');
+            session.log('Deleted image: $fileKey', level: LogLevel.info);
+          }
+        } catch (e) {
+          session.log(
+            'Failed to delete image: $imageUrl - $e',
+            level: LogLevel.warning,
+          );
+          // 삭제 실패해도 계속 진행
+        }
+      }
+    }
+
+    // 4. 관련된 찜 데이터 삭제
+    final favorites = await Favorite.db.find(
+      session,
+      where: (f) => f.productId.equals(productId),
+    );
+
+    for (final favorite in favorites) {
+      await Favorite.db.deleteRow(session, favorite);
+    }
+
+    // 5. 상품 삭제
+    await Product.db.deleteRow(session, product);
   }
 
   /// 찜 추가/제거 (토글)
@@ -313,57 +366,6 @@ class ProductService {
     return favorite != null;
   }
 
-  /// 상품 삭제
-  Future<void> deleteProduct(
-    Session session,
-    int productId,
-    int userId,
-  ) async {
-    // 1. 기존 상품 조회
-    final product = await Product.db.findById(session, productId);
-    if (product == null) {
-      throw Exception('Product not found');
-    }
-
-    // 2. 권한 확인 (판매자만 삭제 가능)
-    if (product.sellerId != userId) {
-      throw Exception('Unauthorized: Only the seller can delete this product');
-    }
-
-    // 3. 상품 이미지들을 S3에서 삭제
-    if (product.imageUrls != null && product.imageUrls!.isNotEmpty) {
-      for (final imageUrl in product.imageUrls!) {
-        try {
-          final fileKey = S3Util.extractKeyFromUrl(imageUrl);
-          // product 경로의 이미지만 삭제
-          if (fileKey.startsWith('product/')) {
-            await S3Service.deleteS3Object(session, fileKey, 'public');
-            session.log('Deleted image: $fileKey', level: LogLevel.info);
-          }
-        } catch (e) {
-          session.log(
-            'Failed to delete image: $imageUrl - $e',
-            level: LogLevel.warning,
-          );
-          // 삭제 실패해도 계속 진행
-        }
-      }
-    }
-
-    // 4. 관련된 찜 데이터 삭제
-    final favorites = await Favorite.db.find(
-      session,
-      where: (f) => f.productId.equals(productId),
-    );
-
-    for (final favorite in favorites) {
-      await Favorite.db.deleteRow(session, favorite);
-    }
-
-    // 5. 상품 삭제
-    await Product.db.deleteRow(session, product);
-  }
-
   /// 페이지네이션된 상품 목록 조회
   Future<PaginatedProductsResponseDto> getPaginatedProducts(
     Session session,
@@ -371,89 +373,182 @@ class ProductService {
   ) async {
     final offset = (pagination.page - 1) * pagination.limit;
     final sortBy = pagination.sortBy ?? ProductSortBy.latest;
-
-    // 필터링 조건 준비
     final filterParams = ProductFilterParams.fromPaginationDto(pagination);
 
     // 판매완료 제외가 필요한 경우
     if (filterParams.excludeSold) {
-      // 전체 상품을 가져온 후 메모리에서 필터링
-      // (Serverpod의 enum null 체크 제약으로 인해 메모리 필터링 사용)
       final allProducts = await _findProductsWithFilter(session, filterParams);
+      final filteredProducts = _filterSoldProducts(allProducts);
+      final sortedProducts = _sortProducts(filteredProducts, sortBy);
+      final paginatedProducts =
+          _applyPagination(sortedProducts, offset, pagination.limit);
 
-      // 판매완료 제외 (status가 null, selling, reserved인 상품만)
-      final filteredProducts = allProducts
-          .where((p) =>
-              p.status == null ||
-              p.status == ProductStatus.selling ||
-              p.status == ProductStatus.reserved)
-          .toList();
-
-      // 정렬 적용
-      switch (sortBy) {
-        case ProductSortBy.latest:
-          filteredProducts.sort((a, b) {
-            final aDate = a.createdAt ?? DateTime(1970);
-            final bDate = b.createdAt ?? DateTime(1970);
-            return bDate.compareTo(aDate); // 최신순 (내림차순)
-          });
-          break;
-        case ProductSortBy.priceAsc:
-          filteredProducts.sort((a, b) => a.price.compareTo(b.price));
-          break;
-        case ProductSortBy.priceDesc:
-          filteredProducts.sort((a, b) => b.price.compareTo(a.price));
-          break;
-        case ProductSortBy.popular:
-          filteredProducts.sort((a, b) {
-            final aCount = a.favoriteCount ?? 0;
-            final bCount = b.favoriteCount ?? 0;
-            return bCount.compareTo(aCount); // 인기순 (내림차순)
-          });
-          break;
-      }
-
-      // 페이지네이션 적용
-      final startIndex = offset.clamp(0, filteredProducts.length);
-      final endIndex =
-          (offset + pagination.limit).clamp(0, filteredProducts.length);
-      final paginatedProducts = filteredProducts.sublist(startIndex, endIndex);
-
-      final totalCount = filteredProducts.length;
-      final hasMore = offset + paginatedProducts.length < totalCount;
-
-      return PaginatedProductsResponseDto(
-        pagination: PaginationDto(
-          page: pagination.page,
-          limit: pagination.limit,
-          totalCount: totalCount,
-          hasMore: hasMore,
-        ),
-        products: paginatedProducts,
+      return _buildPaginationResponse(
+        paginatedProducts,
+        sortedProducts.length,
+        pagination,
       );
     }
 
     // 일반적인 경우 (판매완료 제외 불필요)
-    // 전체 개수 조회
     final totalCount = await _getTotalCount(session, filterParams);
-
-    // 상품 목록 조회
     final products = await _getSortedProducts(
         session, filterParams, sortBy, pagination.limit, offset);
 
-    // hasMore 계산
-    final hasMore = offset + products.length < totalCount;
+    return _buildPaginationResponse(products, totalCount, pagination);
+  }
 
-    return PaginatedProductsResponseDto(
-      pagination: PaginationDto(
-        page: pagination.page,
-        limit: pagination.limit,
-        totalCount: totalCount,
-        hasMore: hasMore,
-      ),
-      products: products,
+  /// 내가 등록한 상품 목록 조회 (페이지네이션)
+  /// 등록일 기준 최근순으로 정렬됩니다.
+  /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
+  /// [pagination.status]가 null이 아니면 해당 상태의 상품만 반환합니다.
+  Future<PaginatedProductsResponseDto> getMyProducts(
+    Session session,
+    int userId,
+    PaginationDto pagination,
+  ) async {
+    final offset = (pagination.page - 1) * pagination.limit;
+
+    if (pagination.status != null) {
+      if (pagination.status == ProductStatus.selling) {
+        // 판매중인 경우: status가 null, selling, reserved인 상품 포함
+        final allProducts = await Product.db.find(
+          session,
+          where: (p) => p.sellerId.equals(userId),
+          orderBy: (p) => p.createdAt,
+          orderDescending: true,
+        );
+
+        final sellingProducts = _filterSellingProducts(allProducts);
+        final paginatedProducts =
+            _applyPagination(sellingProducts, offset, pagination.limit);
+
+        return _buildPaginationResponse(
+          paginatedProducts,
+          sellingProducts.length,
+          pagination,
+        );
+      } else {
+        // 다른 상태인 경우: 해당 상태만
+        final totalCount = await Product.db.count(
+          session,
+          where: (p) =>
+              p.sellerId.equals(userId) & p.status.equals(pagination.status!),
+        );
+
+        final products = await Product.db.find(
+          session,
+          where: (p) =>
+              p.sellerId.equals(userId) & p.status.equals(pagination.status!),
+          orderBy: (p) => p.createdAt,
+          orderDescending: true,
+          limit: pagination.limit,
+          offset: offset,
+        );
+
+        return _buildPaginationResponse(products, totalCount, pagination);
+      }
+    }
+
+    // status 필터링이 없는 경우 (모든 상태)
+    final totalCount = await Product.db.count(
+      session,
+      where: (p) => p.sellerId.equals(userId),
+    );
+
+    final products = await Product.db.find(
+      session,
+      where: (p) => p.sellerId.equals(userId),
+      orderBy: (p) => p.createdAt,
+      orderDescending: true,
+      limit: pagination.limit,
+      offset: offset,
+    );
+
+    return _buildPaginationResponse(products, totalCount, pagination);
+  }
+
+  /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
+  /// 찜한 날 기준 최근순으로 정렬됩니다.
+  Future<PaginatedProductsResponseDto> getMyFavoriteProducts(
+    Session session,
+    int userId,
+    PaginationDto pagination,
+  ) async {
+    final offset = (pagination.page - 1) * pagination.limit;
+
+    // Favorite 테이블에서 userId로 필터링하여 productId 목록 가져오기
+    // 찜한 날 기준 최근순 정렬 (Favorite.createdAt DESC)
+    final favorites = await Favorite.db.find(
+      session,
+      where: (f) => f.userId.equals(userId),
+      orderBy: (f) => f.createdAt,
+      orderDescending: true,
+    );
+
+    if (favorites.isEmpty) {
+      return _buildPaginationResponse([], 0, pagination);
+    }
+
+    final totalCount = favorites.length;
+    final paginatedFavorites =
+        _applyPagination(favorites, offset, pagination.limit);
+
+    // productId 목록으로 상품 조회 (찜한 순서 유지)
+    final products = <Product>[];
+    for (final favorite in paginatedFavorites) {
+      final product = await Product.db.findById(session, favorite.productId);
+      if (product != null) {
+        products.add(product);
+      }
+    }
+
+    return _buildPaginationResponse(products, totalCount, pagination);
+  }
+
+  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
+  Future<ProductStatsDto> getProductStats(
+    Session session,
+    int userId,
+  ) async {
+    // 전체 상품 개수
+    final totalCount = await Product.db.count(
+      session,
+      where: (p) => p.sellerId.equals(userId),
+    );
+
+    // 거래완료 상품 개수 (status = sold)
+    final soldCount = await Product.db.count(
+      session,
+      where: (p) =>
+          p.sellerId.equals(userId) & p.status.equals(ProductStatus.sold),
+    );
+
+    // 예약 상품 개수 (status = reserved)
+    final reservedCount = await Product.db.count(
+      session,
+      where: (p) =>
+          p.sellerId.equals(userId) & p.status.equals(ProductStatus.reserved),
+    );
+
+    // 판매중 상품 개수 = 전체 - 거래완료 - 예약
+    // (status가 null이거나 selling인 경우 모두 판매중으로 간주)
+    final sellingCount = totalCount - soldCount - reservedCount;
+
+    // 관심목록 상품 개수 (Favorite 테이블에서 userId로 카운트)
+    final favoriteCount = await Favorite.db.count(
+      session,
+      where: (f) => f.userId.equals(userId),
+    );
+
+    return ProductStatsDto(
+      sellingCount: sellingCount,
+      soldCount: soldCount,
+      favoriteCount: favoriteCount,
     );
   }
+
+  // ==================== Private Helper Methods ====================
 
   /// 전체 개수 조회
   Future<int> _getTotalCount(
@@ -522,83 +617,13 @@ class ProductService {
     }
   }
 
-  /// 내가 등록한 상품 목록 조회 (페이지네이션)
-  /// 등록일 기준 최근순으로 정렬됩니다.
-  /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
-  /// [pagination.status]가 null이 아니면 해당 상태의 상품만 반환합니다.
-  Future<PaginatedProductsResponseDto> getMyProducts(
-    Session session,
-    int userId,
+  /// 페이지네이션 응답 생성
+  PaginatedProductsResponseDto _buildPaginationResponse(
+    List<Product> products,
+    int totalCount,
     PaginationDto pagination,
-  ) async {
+  ) {
     final offset = (pagination.page - 1) * pagination.limit;
-
-    // where 절 생성 (sellerId + status 필터)
-    List<Product> products;
-    int totalCount;
-
-    if (pagination.status != null) {
-      if (pagination.status == ProductStatus.selling) {
-        // 판매중인 경우: status가 selling이거나 null인 상품 포함 (기존 상품 호환)
-        // 전체 상품을 가져온 후 메모리에서 필터링
-        final allProducts = await Product.db.find(
-          session,
-          where: (p) => p.sellerId.equals(userId),
-          orderBy: (p) => p.createdAt,
-          orderDescending: true,
-        );
-
-        // status가 null, selling, reserved인 상품만 필터링
-        final sellingProducts = allProducts
-            .where((p) =>
-                p.status == null ||
-                p.status == ProductStatus.selling ||
-                p.status == ProductStatus.reserved)
-            .toList();
-
-        totalCount = sellingProducts.length;
-
-        // 페이지네이션 적용
-        final startIndex = offset.clamp(0, sellingProducts.length);
-        final endIndex =
-            (offset + pagination.limit).clamp(0, sellingProducts.length);
-        products = sellingProducts.sublist(startIndex, endIndex);
-      } else {
-        // 다른 상태인 경우: 해당 상태만
-        totalCount = await Product.db.count(
-          session,
-          where: (p) =>
-              p.sellerId.equals(userId) & p.status.equals(pagination.status!),
-        );
-
-        products = await Product.db.find(
-          session,
-          where: (p) =>
-              p.sellerId.equals(userId) & p.status.equals(pagination.status!),
-          orderBy: (p) => p.createdAt,
-          orderDescending: true,
-          limit: pagination.limit,
-          offset: offset,
-        );
-      }
-    } else {
-      // status 필터링이 없는 경우 (모든 상태)
-      totalCount = await Product.db.count(
-        session,
-        where: (p) => p.sellerId.equals(userId),
-      );
-
-      products = await Product.db.find(
-        session,
-        where: (p) => p.sellerId.equals(userId),
-        orderBy: (p) => p.createdAt,
-        orderDescending: true,
-        limit: pagination.limit,
-        offset: offset,
-      );
-    }
-
-    // hasMore 계산
     final hasMore = offset + products.length < totalCount;
 
     return PaginatedProductsResponseDto(
@@ -612,106 +637,58 @@ class ProductService {
     );
   }
 
-  /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
-  /// 찜한 날 기준 최근순으로 정렬됩니다.
-  Future<PaginatedProductsResponseDto> getMyFavoriteProducts(
-    Session session,
-    int userId,
-    PaginationDto pagination,
-  ) async {
-    final offset = (pagination.page - 1) * pagination.limit;
-
-    // Favorite 테이블에서 userId로 필터링하여 productId 목록 가져오기
-    // 찜한 날 기준 최근순 정렬 (Favorite.createdAt DESC)
-    final favorites = await Favorite.db.find(
-      session,
-      where: (f) => f.userId.equals(userId),
-      orderBy: (f) => f.createdAt,
-      orderDescending: true,
-    );
-
-    if (favorites.isEmpty) {
-      // 찜한 상품이 없으면 빈 목록 반환
-      return PaginatedProductsResponseDto(
-        pagination: PaginationDto(
-          page: pagination.page,
-          limit: pagination.limit,
-          totalCount: 0,
-          hasMore: false,
-        ),
-        products: [],
-      );
-    }
-
-    final totalCount = favorites.length;
-
-    // 페이지네이션 적용 (Favorite 레벨에서)
-    final startIndex = offset.clamp(0, favorites.length);
-    final endIndex = (offset + pagination.limit).clamp(0, favorites.length);
-    final paginatedFavorites = favorites.sublist(startIndex, endIndex);
-
-    // productId 목록으로 상품 조회 (찜한 순서 유지)
-    final products = <Product>[];
-    for (final favorite in paginatedFavorites) {
-      final product = await Product.db.findById(session, favorite.productId);
-      if (product != null) {
-        products.add(product);
-      }
-    }
-
-    // hasMore 계산
-    final hasMore = offset + products.length < totalCount;
-
-    return PaginatedProductsResponseDto(
-      pagination: PaginationDto(
-        page: pagination.page,
-        limit: pagination.limit,
-        totalCount: totalCount,
-        hasMore: hasMore,
-      ),
-      products: products,
-    );
+  /// 판매완료 제외 필터링 (status가 null, selling, reserved인 상품만)
+  List<Product> _filterSoldProducts(List<Product> products) {
+    return products
+        .where((p) =>
+            p.status == null ||
+            p.status == ProductStatus.selling ||
+            p.status == ProductStatus.reserved)
+        .toList();
   }
 
-  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
-  Future<ProductStatsDto> getProductStats(
-    Session session,
-    int userId,
-  ) async {
-    // 전체 상품 개수
-    final totalCount = await Product.db.count(
-      session,
-      where: (p) => p.sellerId.equals(userId),
-    );
+  /// 판매중 필터링 (status가 null, selling, reserved인 상품만)
+  List<Product> _filterSellingProducts(List<Product> products) {
+    return _filterSoldProducts(products);
+  }
 
-    // 거래완료 상품 개수 (status = sold)
-    final soldCount = await Product.db.count(
-      session,
-      where: (p) =>
-          p.sellerId.equals(userId) & p.status.equals(ProductStatus.sold),
-    );
+  /// 상품 목록 정렬
+  List<Product> _sortProducts(
+    List<Product> products,
+    ProductSortBy sortBy,
+  ) {
+    final sorted = List<Product>.from(products);
 
-    // 예약 상품 개수 (status = reserved)
-    final reservedCount = await Product.db.count(
-      session,
-      where: (p) =>
-          p.sellerId.equals(userId) & p.status.equals(ProductStatus.reserved),
-    );
+    switch (sortBy) {
+      case ProductSortBy.latest:
+        sorted.sort((a, b) {
+          final aDate = a.createdAt ?? DateTime(1970);
+          final bDate = b.createdAt ?? DateTime(1970);
+          return bDate.compareTo(aDate); // 최신순 (내림차순)
+        });
+        break;
+      case ProductSortBy.priceAsc:
+        sorted.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case ProductSortBy.priceDesc:
+        sorted.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case ProductSortBy.popular:
+        sorted.sort((a, b) {
+          final aCount = a.favoriteCount ?? 0;
+          final bCount = b.favoriteCount ?? 0;
+          return bCount.compareTo(aCount); // 인기순 (내림차순)
+        });
+        break;
+    }
 
-    // 판매중 상품 개수 = 전체 - 거래완료 - 예약
-    // (status가 null이거나 selling인 경우 모두 판매중으로 간주)
-    final sellingCount = totalCount - soldCount - reservedCount;
+    return sorted;
+  }
 
-    // 관심목록 상품 개수 (Favorite 테이블에서 userId로 카운트)
-    final favoriteCount = await Favorite.db.count(
-      session,
-      where: (f) => f.userId.equals(userId),
-    );
-
-    return ProductStatsDto(
-      sellingCount: sellingCount,
-      soldCount: soldCount,
-      favoriteCount: favoriteCount,
-    );
+  /// 페이지네이션 적용
+  List<T> _applyPagination<T>(List<T> items, int offset, int limit) {
+    final startIndex = offset.clamp(0, items.length);
+    final endIndex = (offset + limit).clamp(0, items.length);
+    return items.sublist(startIndex, endIndex);
   }
 }
