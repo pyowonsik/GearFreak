@@ -107,6 +107,14 @@ abstract final class AppRoutes {
               const ProfileProductsScreen(type: 'myProducts'),
         ),
 
+        // 거래완료 상품 화면
+        GoRoute(
+          path: '/profile/sold-products',
+          name: 'sold-products',
+          builder: (context, state) =>
+              const ProfileProductsScreen(type: 'mySoldProducts'),
+        ),
+
         // 관심 목록 화면
         GoRoute(
           path: '/profile/my-favorite',

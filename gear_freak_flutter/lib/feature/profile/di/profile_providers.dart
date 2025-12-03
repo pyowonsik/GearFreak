@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/data/datasource/profile_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/profile/data/repository/profile_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/repository/profile_repository.dart';
@@ -43,11 +44,14 @@ final profileNotifierProvider =
   final uploadImageUseCase = ref.watch(uploadImageUseCaseProvider);
   final deleteImageUseCase = ref.watch(deleteImageUseCaseProvider);
   final updateUserProfileUseCase = ref.watch(updateUserProfileUseCaseProvider);
+  final getProductStatsUseCase = ref.watch(getProductStatsUseCaseProvider);
   return ProfileNotifier(
+    ref,
     getMeUseCase,
     getUserByIdUseCase,
     uploadImageUseCase,
     deleteImageUseCase,
     updateUserProfileUseCase,
+    getProductStatsUseCase,
   );
 });

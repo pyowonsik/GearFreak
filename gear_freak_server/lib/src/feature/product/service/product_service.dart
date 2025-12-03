@@ -488,6 +488,8 @@ class ProductService {
 
   /// 내가 등록한 상품 목록 조회 (페이지네이션)
   /// 등록일 기준 최근순으로 정렬됩니다.
+  /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
+  /// [pagination.status]가 null이 아니면 해당 상태의 상품만 반환합니다.
   Future<PaginatedProductsResponseDto> getMyProducts(
     Session session,
     int userId,
@@ -495,21 +497,70 @@ class ProductService {
   ) async {
     final offset = (pagination.page - 1) * pagination.limit;
 
-    // 전체 개수 조회
-    final totalCount = await Product.db.count(
-      session,
-      where: (p) => p.sellerId.equals(userId),
-    );
+    // where 절 생성 (sellerId + status 필터)
+    List<Product> products;
+    int totalCount;
 
-    // 등록일 기준 최근순 정렬 (createdAt DESC)
-    final products = await Product.db.find(
-      session,
-      where: (p) => p.sellerId.equals(userId),
-      orderBy: (p) => p.createdAt,
-      orderDescending: true,
-      limit: pagination.limit,
-      offset: offset,
-    );
+    if (pagination.status != null) {
+      if (pagination.status == ProductStatus.selling) {
+        // 판매중인 경우: status가 selling이거나 null인 상품 포함 (기존 상품 호환)
+        // 전체 상품을 가져온 후 메모리에서 필터링
+        final allProducts = await Product.db.find(
+          session,
+          where: (p) => p.sellerId.equals(userId),
+          orderBy: (p) => p.createdAt,
+          orderDescending: true,
+        );
+
+        // status가 null, selling, reserved인 상품만 필터링
+        final sellingProducts = allProducts
+            .where((p) =>
+                p.status == null ||
+                p.status == ProductStatus.selling ||
+                p.status == ProductStatus.reserved)
+            .toList();
+
+        totalCount = sellingProducts.length;
+
+        // 페이지네이션 적용
+        final startIndex = offset.clamp(0, sellingProducts.length);
+        final endIndex =
+            (offset + pagination.limit).clamp(0, sellingProducts.length);
+        products = sellingProducts.sublist(startIndex, endIndex);
+      } else {
+        // 다른 상태인 경우: 해당 상태만
+        totalCount = await Product.db.count(
+          session,
+          where: (p) =>
+              p.sellerId.equals(userId) & p.status.equals(pagination.status!),
+        );
+
+        products = await Product.db.find(
+          session,
+          where: (p) =>
+              p.sellerId.equals(userId) & p.status.equals(pagination.status!),
+          orderBy: (p) => p.createdAt,
+          orderDescending: true,
+          limit: pagination.limit,
+          offset: offset,
+        );
+      }
+    } else {
+      // status 필터링이 없는 경우 (모든 상태)
+      totalCount = await Product.db.count(
+        session,
+        where: (p) => p.sellerId.equals(userId),
+      );
+
+      products = await Product.db.find(
+        session,
+        where: (p) => p.sellerId.equals(userId),
+        orderBy: (p) => p.createdAt,
+        orderDescending: true,
+        limit: pagination.limit,
+        offset: offset,
+      );
+    }
 
     // hasMore 계산
     final hasMore = offset + products.length < totalCount;
@@ -583,6 +634,48 @@ class ProductService {
         hasMore: hasMore,
       ),
       products: products,
+    );
+  }
+
+  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
+  Future<ProductStatsDto> getProductStats(
+    Session session,
+    int userId,
+  ) async {
+    // 전체 상품 개수
+    final totalCount = await Product.db.count(
+      session,
+      where: (p) => p.sellerId.equals(userId),
+    );
+
+    // 거래완료 상품 개수 (status = sold)
+    final soldCount = await Product.db.count(
+      session,
+      where: (p) =>
+          p.sellerId.equals(userId) & p.status.equals(ProductStatus.sold),
+    );
+
+    // 예약 상품 개수 (status = reserved)
+    final reservedCount = await Product.db.count(
+      session,
+      where: (p) =>
+          p.sellerId.equals(userId) & p.status.equals(ProductStatus.reserved),
+    );
+
+    // 판매중 상품 개수 = 전체 - 거래완료 - 예약
+    // (status가 null이거나 selling인 경우 모두 판매중으로 간주)
+    final sellingCount = totalCount - soldCount - reservedCount;
+
+    // 관심목록 상품 개수 (Favorite 테이블에서 userId로 카운트)
+    final favoriteCount = await Favorite.db.count(
+      session,
+      where: (f) => f.userId.equals(userId),
+    );
+
+    return ProductStatsDto(
+      sellingCount: sellingCount,
+      soldCount: soldCount,
+      favoriteCount: favoriteCount,
     );
   }
 }

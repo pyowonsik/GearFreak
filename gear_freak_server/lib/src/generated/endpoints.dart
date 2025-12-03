@@ -328,6 +328,16 @@ class Endpoints extends _i1.EndpointDispatch {
             params['request'],
           ),
         ),
+        'getProductStats': _i1.MethodConnector(
+          name: 'getProductStats',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i4.ProductEndpoint)
+                  .getProductStats(session),
+        ),
       },
     );
     connectors['user'] = _i1.EndpointConnector(

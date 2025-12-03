@@ -7,6 +7,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_product
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 
 /// 상품 Notifier
 class ProductNotifier extends StateNotifier<ProductState> {
@@ -192,10 +193,14 @@ class ProductNotifier extends StateNotifier<ProductState> {
       limit: currentPagination.limit,
       category: currentState.category, // 저장된 카테고리 정보 사용
       sortBy: currentState.sortBy, // 저장된 정렬 기준 사용
+      status: currentState.profileType == 'mySoldProducts'
+          ? pod.ProductStatus.sold
+          : null, // 거래완료인 경우 status 추가
     );
 
     // 프로필 타입에 따라 적절한 UseCase 사용
-    final result = currentState.profileType == 'myProducts'
+    final result = currentState.profileType == 'myProducts' ||
+            currentState.profileType == 'mySoldProducts'
         ? (getMyProductsUseCase != null
             ? await getMyProductsUseCase!(pagination)
             : await getPaginatedProductsUseCase(pagination))
@@ -305,6 +310,41 @@ class ProductNotifier extends StateNotifier<ProductState> {
     final currentState = state;
 
     if (currentState is ProductPaginatedLoaded) {
+      // 현재 화면의 필터 조건 확인
+      final expectedStatus =
+          getExpectedStatusForProfileType(currentState.profileType);
+
+      // 상태가 변경되어 필터 조건에 맞지 않으면 목록에서 제거
+      if (expectedStatus != null &&
+          !isStatusMatching(expectedStatus, updatedProduct.status)) {
+        final updatedProducts = currentState.products
+            .where((product) => product.id != updatedProduct.id)
+            .toList();
+
+        if (updatedProducts.length < currentState.products.length) {
+          debugPrint(
+            '✏️ [ProductNotifier] 상품 제거 (상태 변경): productId=${updatedProduct.id} '
+            '(${currentState.products.length}개 → ${updatedProducts.length}개)',
+          );
+
+          final updatedTotalCount =
+              (currentState.pagination.totalCount ?? 0) - 1;
+
+          state = ProductPaginatedLoaded(
+            products: updatedProducts,
+            pagination: currentState.pagination.copyWith(
+              totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+              hasMore: updatedProducts.length < updatedTotalCount,
+            ),
+            category: currentState.category,
+            sortBy: currentState.sortBy,
+            profileType: currentState.profileType,
+          );
+        }
+        return;
+      }
+
+      // 필터 조건에 맞으면 상품 정보 업데이트
       final updatedProducts = currentState.products.map((product) {
         // 같은 ID면 새 데이터로 교체
         return product.id == updatedProduct.id ? updatedProduct : product;
@@ -328,7 +368,39 @@ class ProductNotifier extends StateNotifier<ProductState> {
         );
       }
     } else if (currentState is ProductPaginatedLoadingMore) {
-      // 로딩 중 상태에서도 수정 처리
+      // 로딩 중 상태에서도 동일한 로직 적용
+      final expectedStatus =
+          getExpectedStatusForProfileType(currentState.profileType);
+
+      if (expectedStatus != null &&
+          !isStatusMatching(expectedStatus, updatedProduct.status)) {
+        final updatedProducts = currentState.products
+            .where((product) => product.id != updatedProduct.id)
+            .toList();
+
+        if (updatedProducts.length < currentState.products.length) {
+          debugPrint(
+            '✏️ [ProductNotifier] 상품 제거 (상태 변경, 로딩 중): productId=${updatedProduct.id} '
+            '(${currentState.products.length}개 → ${updatedProducts.length}개)',
+          );
+
+          final updatedTotalCount =
+              (currentState.pagination.totalCount ?? 0) - 1;
+
+          state = ProductPaginatedLoadingMore(
+            products: updatedProducts,
+            pagination: currentState.pagination.copyWith(
+              totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+              hasMore: updatedProducts.length < updatedTotalCount,
+            ),
+            category: currentState.category,
+            sortBy: currentState.sortBy,
+            profileType: currentState.profileType,
+          );
+        }
+        return;
+      }
+
       final updatedProducts = currentState.products.map((product) {
         return product.id == updatedProduct.id ? updatedProduct : product;
       }).toList();
@@ -356,6 +428,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
   Future<void> loadMyProducts({
     int page = 1,
     int limit = 20,
+    pod.ProductStatus? status,
   }) async {
     if (getMyProductsUseCase == null) {
       debugPrint('⚠️ [ProductNotifier] getMyProductsUseCase가 주입되지 않았습니다.');
@@ -364,11 +437,13 @@ class ProductNotifier extends StateNotifier<ProductState> {
     }
 
     state = const ProductLoading();
-    debugPrint('🔄 [ProductNotifier] 내 상품 목록 로드: page=$page, limit=$limit');
+    debugPrint(
+        '🔄 [ProductNotifier] 내 상품 목록 로드: page=$page, limit=$limit, status=$status');
 
     final pagination = pod.PaginationDto(
       page: page,
       limit: limit,
+      status: status,
     );
 
     final result = await getMyProductsUseCase!(pagination);
@@ -388,6 +463,11 @@ class ProductNotifier extends StateNotifier<ProductState> {
           products: response.products,
           pagination: response.pagination,
           sortBy: null,
+          profileType: status == pod.ProductStatus.sold
+              ? 'mySoldProducts'
+              : status == pod.ProductStatus.selling
+                  ? 'myProducts'
+                  : 'myProducts',
         );
       },
     );

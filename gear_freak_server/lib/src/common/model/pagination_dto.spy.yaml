@@ -19,3 +19,5 @@ fields:
   category: ProductCategory?
   ### 정렬 기준 (선택적, 기본값: latest)
   sortBy: ProductSortBy?
+  ### 상품 상태 필터링 (선택적, getMyProducts에서 사용)
+  status: ProductStatus?

@@ -12,6 +12,7 @@
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import '../../feature/product/model/product_category.dart' as _i2;
 import '../../feature/product/model/product_sort_by.dart' as _i3;
+import '../../feature/product/model/product_status.dart' as _i4;
 
 /// 페이지네이션 DTO
 /// 요청 및 응답에서 공통으로 사용
@@ -25,6 +26,7 @@ abstract class PaginationDto implements _i1.SerializableModel {
     this.random,
     this.category,
     this.sortBy,
+    this.status,
   });
 
   factory PaginationDto({
@@ -36,6 +38,7 @@ abstract class PaginationDto implements _i1.SerializableModel {
     bool? random,
     _i2.ProductCategory? category,
     _i3.ProductSortBy? sortBy,
+    _i4.ProductStatus? status,
   }) = _PaginationDtoImpl;
 
   factory PaginationDto.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -53,6 +56,9 @@ abstract class PaginationDto implements _i1.SerializableModel {
       sortBy: jsonSerialization['sortBy'] == null
           ? null
           : _i3.ProductSortBy.fromJson((jsonSerialization['sortBy'] as int)),
+      status: jsonSerialization['status'] == null
+          ? null
+          : _i4.ProductStatus.fromJson((jsonSerialization['status'] as int)),
     );
   }
 
@@ -80,6 +86,9 @@ abstract class PaginationDto implements _i1.SerializableModel {
   /// 정렬 기준 (선택적, 기본값: latest)
   _i3.ProductSortBy? sortBy;
 
+  /// 상품 상태 필터링 (선택적, getMyProducts에서 사용)
+  _i4.ProductStatus? status;
+
   /// Returns a shallow copy of this [PaginationDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -92,6 +101,7 @@ abstract class PaginationDto implements _i1.SerializableModel {
     bool? random,
     _i2.ProductCategory? category,
     _i3.ProductSortBy? sortBy,
+    _i4.ProductStatus? status,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -104,6 +114,7 @@ abstract class PaginationDto implements _i1.SerializableModel {
       if (random != null) 'random': random,
       if (category != null) 'category': category?.toJson(),
       if (sortBy != null) 'sortBy': sortBy?.toJson(),
+      if (status != null) 'status': status?.toJson(),
     };
   }
 
@@ -125,6 +136,7 @@ class _PaginationDtoImpl extends PaginationDto {
     bool? random,
     _i2.ProductCategory? category,
     _i3.ProductSortBy? sortBy,
+    _i4.ProductStatus? status,
   }) : super._(
           page: page,
           limit: limit,
@@ -134,6 +146,7 @@ class _PaginationDtoImpl extends PaginationDto {
           random: random,
           category: category,
           sortBy: sortBy,
+          status: status,
         );
 
   /// Returns a shallow copy of this [PaginationDto]
@@ -149,6 +162,7 @@ class _PaginationDtoImpl extends PaginationDto {
     Object? random = _Undefined,
     Object? category = _Undefined,
     Object? sortBy = _Undefined,
+    Object? status = _Undefined,
   }) {
     return PaginationDto(
       page: page ?? this.page,
@@ -159,6 +173,7 @@ class _PaginationDtoImpl extends PaginationDto {
       random: random is bool? ? random : this.random,
       category: category is _i2.ProductCategory? ? category : this.category,
       sortBy: sortBy is _i3.ProductSortBy? ? sortBy : this.sortBy,
+      status: status is _i4.ProductStatus? ? status : this.status,
     );
   }
 }

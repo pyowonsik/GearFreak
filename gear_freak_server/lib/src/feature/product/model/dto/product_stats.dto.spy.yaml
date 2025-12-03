@@ -1,0 +1,10 @@
+### 상품 통계 DTO
+class: ProductStatsDto
+
+fields:
+  ### 판매중 상품 개수
+  sellingCount: int
+  ### 거래완료 상품 개수
+  soldCount: int
+  ### 관심목록 상품 개수
+  favoriteCount: int

@@ -107,3 +107,38 @@ String getProductStatusLabel(pod.ProductStatus? status) {
       return '판매완료';
   }
 }
+
+/// profileType에 따른 기대되는 상품 상태 반환
+pod.ProductStatus? getExpectedStatusForProfileType(String? profileType) {
+  switch (profileType) {
+    case 'myProducts':
+      return pod.ProductStatus.selling;
+    case 'mySoldProducts':
+      return pod.ProductStatus.sold;
+    case 'myFavorite':
+      return null; // 관심목록은 상태 필터 없음
+    default:
+      return null; // 일반 목록은 상태 필터 없음
+  }
+}
+
+/// 상태가 필터 조건에 맞는지 확인
+/// 판매중 화면의 경우: selling, reserved, null 모두 허용
+bool isStatusMatching(
+  pod.ProductStatus? expectedStatus,
+  pod.ProductStatus? actualStatus,
+) {
+  if (expectedStatus == null) {
+    return true; // 필터가 없으면 모든 상태 허용
+  }
+
+  if (expectedStatus == pod.ProductStatus.selling) {
+    // 판매중 화면: selling, reserved, null 모두 허용
+    return actualStatus == null ||
+        actualStatus == pod.ProductStatus.selling ||
+        actualStatus == pod.ProductStatus.reserved;
+  }
+
+  // 다른 상태는 정확히 일치해야 함
+  return actualStatus == expectedStatus;
+}

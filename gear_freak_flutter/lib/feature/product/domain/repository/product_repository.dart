@@ -40,4 +40,7 @@ abstract class ProductRepository {
   Future<pod.Product> updateProductStatus(
     pod.UpdateProductStatusRequestDto request,
   );
+
+  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
+  Future<pod.ProductStatsDto> getProductStats();
 }

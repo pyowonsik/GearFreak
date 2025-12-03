@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/view/profile_product_list_view.dart';
 
-/// 프로필 상품 목록 화면 (내 상품 / 찜 목록)
+/// 프로필 상품 목록 화면 (내 상품 / 찜 목록 / 거래완료)
 class ProfileProductsScreen extends ConsumerStatefulWidget {
   /// ProfileProductsScreen 생성자
   ///
-  /// [type]는 "myProducts" (내 상품) 또는 "myFavorite" (찜 목록)입니다.
+  /// [type]는 "myProducts" (내 상품), "mySoldProducts" (거래완료), 또는 "myFavorite" (찜 목록)입니다.
   const ProfileProductsScreen({
     required this.type,
     super.key,
@@ -72,7 +73,11 @@ class _ProfileProductsScreenState extends ConsumerState<ProfileProductsScreen>
     );
 
     if (widget.type == 'myProducts') {
-      notifier.loadMyProducts();
+      // 판매중 상품만 조회
+      notifier.loadMyProducts(status: pod.ProductStatus.selling);
+    } else if (widget.type == 'mySoldProducts') {
+      // 거래완료 상품만 조회
+      notifier.loadMyProducts(status: pod.ProductStatus.sold);
     } else if (widget.type == 'myFavorite') {
       notifier.loadMyFavoriteProducts();
     }
@@ -87,7 +92,12 @@ class _ProfileProductsScreenState extends ConsumerState<ProfileProductsScreen>
   Widget build(BuildContext context) {
     final productState = ref.watch(profileProductNotifierProvider(widget.type));
 
-    final title = widget.type == 'myProducts' ? '내 상품 관리' : '관심 목록';
+    final title = switch (widget.type) {
+      'myProducts' => '내 상품 관리',
+      'mySoldProducts' => '거래완료',
+      'myFavorite' => '관심 목록',
+      _ => '상품 목록',
+    };
 
     return Scaffold(
       appBar: AppBar(

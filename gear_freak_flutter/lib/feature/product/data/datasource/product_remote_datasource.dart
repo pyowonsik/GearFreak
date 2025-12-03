@@ -107,4 +107,13 @@ class ProductRemoteDataSource {
       throw Exception('상품 상태를 변경하는데 실패했습니다: $e');
     }
   }
+
+  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
+  Future<pod.ProductStatsDto> getProductStats() async {
+    try {
+      return await _client.product.getProductStats();
+    } catch (e) {
+      throw Exception('상품 통계를 불러오는데 실패했습니다: $e');
+    }
+  }
 }

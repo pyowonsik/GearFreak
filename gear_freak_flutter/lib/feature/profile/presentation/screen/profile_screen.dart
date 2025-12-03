@@ -44,14 +44,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ref.read(profileNotifierProvider.notifier).loadProfile();
             },
           ),
-        ProfileLoaded(:final user) => ProfileLoadedView(
+        ProfileLoaded(:final user, :final stats) => ProfileLoadedView(
             user: user,
+            stats: stats,
             onLogout: _handleLogout,
             onEditProfile: _handleEditProfile,
             onAppInfo: _handleAppInfo,
             onCustomerCenter: _handleCustomerCenter,
-            onMyProducts: _handleMyProducts,
-            onMyFavorite: _handleMyFavorite,
+            onSellingTap: _handleMyProducts,
+            onSoldTap: _handleSoldProducts,
+            onFavoriteTap: _handleMyFavorite,
           ),
       },
     );
@@ -107,9 +109,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     context.push('/profile/customer-center');
   }
 
-  /// 내 상품 관리 화면 이동
+  /// 내 상품 관리 화면 이동 (판매중)
   void _handleMyProducts() {
     context.push('/profile/my-products');
+  }
+
+  /// 거래완료 상품 화면 이동
+  void _handleSoldProducts() {
+    context.push('/profile/sold-products');
   }
 
   /// 관심 목록 화면 이동

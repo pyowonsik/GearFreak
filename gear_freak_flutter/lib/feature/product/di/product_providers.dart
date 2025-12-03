@@ -10,10 +10,11 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_favorit
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
-import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_notifier.dart';
@@ -98,6 +99,12 @@ final updateProductStatusUseCaseProvider =
     Provider<UpdateProductStatusUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
   return UpdateProductStatusUseCase(repository);
+});
+
+/// Get Product Stats UseCase Provider
+final getProductStatsUseCaseProvider = Provider<GetProductStatsUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return GetProductStatsUseCase(repository);
 });
 
 /// 삭제된 상품 ID 이벤트 Provider (단일 소스)

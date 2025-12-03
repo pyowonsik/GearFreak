@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/widget/profile_stat_item_widget.dart';
 
 /// 프로필 활동 통계 섹션 위젯
 class ProfileStatsSectionWidget extends StatelessWidget {
@@ -7,10 +8,16 @@ class ProfileStatsSectionWidget extends StatelessWidget {
   /// [sellingCount]는 판매중 상품 개수입니다.
   /// [soldCount]는 거래완료 상품 개수입니다.
   /// [favoriteCount]는 관심목록 상품 개수입니다.
+  /// [onSellingTap]는 판매중 통계 클릭 콜백입니다.
+  /// [onSoldTap]는 거래완료 통계 클릭 콜백입니다.
+  /// [onFavoriteTap]는 관심목록 통계 클릭 콜백입니다.
   const ProfileStatsSectionWidget({
     required this.sellingCount,
     required this.soldCount,
     required this.favoriteCount,
+    this.onSellingTap,
+    this.onSoldTap,
+    this.onFavoriteTap,
     super.key,
   });
 
@@ -23,6 +30,15 @@ class ProfileStatsSectionWidget extends StatelessWidget {
   /// 관심목록 상품 개수
   final int favoriteCount;
 
+  /// 판매중 통계 클릭 콜백
+  final VoidCallback? onSellingTap;
+
+  /// 거래완료 통계 클릭 콜백
+  final VoidCallback? onSoldTap;
+
+  /// 관심목록 통계 클릭 콜백
+  final VoidCallback? onFavoriteTap;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,34 +47,23 @@ class ProfileStatsSectionWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem('판매중', '$sellingCount'),
-          _buildStatItem('거래완료', '$soldCount'),
-          _buildStatItem('관심목록', '$favoriteCount'),
+          ProfileStatItemWidget(
+            label: '판매중',
+            value: '$sellingCount',
+            onTap: onSellingTap,
+          ),
+          ProfileStatItemWidget(
+            label: '거래완료',
+            value: '$soldCount',
+            onTap: onSoldTap,
+          ),
+          ProfileStatItemWidget(
+            label: '관심목록',
+            value: '$favoriteCount',
+            onTap: onFavoriteTap,
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2563EB),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF6B7280),
-          ),
-        ),
-      ],
     );
   }
 }

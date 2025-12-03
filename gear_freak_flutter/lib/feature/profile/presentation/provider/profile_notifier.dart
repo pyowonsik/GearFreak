@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/s3/domain/usecase/delete_image_usecase.dart';
 import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/update_user_profile_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
@@ -14,18 +17,38 @@ import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile
 class ProfileNotifier extends StateNotifier<ProfileState> {
   /// ProfileNotifier 생성자
   ///
+  /// [ref]는 Riverpod의 Ref 인스턴스입니다.
   /// [getMeUseCase]는 현재 사용자 정보 조회 UseCase 인스턴스입니다.
   /// [getUserByIdUseCase]는 사용자 ID로 사용자 정보 조회 UseCase 인스턴스입니다.
   /// [uploadImageUseCase]는 이미지 업로드 UseCase 인스턴스입니다.
   /// [deleteImageUseCase]는 이미지 삭제 UseCase 인스턴스입니다.
   /// [updateUserProfileUseCase]는 사용자 프로필 수정 UseCase 인스턴스입니다.
+  /// [getProductStatsUseCase]는 상품 통계 조회 UseCase 인스턴스입니다.
   ProfileNotifier(
+    this.ref,
     this.getMeUseCase,
     this.getUserByIdUseCase,
     this.uploadImageUseCase,
     this.deleteImageUseCase,
     this.updateUserProfileUseCase,
-  ) : super(const ProfileInitial());
+    this.getProductStatsUseCase,
+  ) : super(const ProfileInitial()) {
+    // 상품 삭제/수정 이벤트 감지하여 stats 자동 갱신
+    ref
+      ..listen<int?>(deletedProductIdProvider, (previous, next) {
+        if (next != null) {
+          _refreshStats();
+        }
+      })
+      ..listen<pod.Product?>(updatedProductProvider, (previous, next) {
+        if (next != null) {
+          _refreshStats();
+        }
+      });
+  }
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 현재 사용자 정보 조회 UseCase 인스턴스
   final GetMeUseCase getMeUseCase;
@@ -42,19 +65,53 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   /// 사용자 프로필 수정 UseCase
   final UpdateUserProfileUseCase updateUserProfileUseCase;
 
+  /// 상품 통계 조회 UseCase
+  final GetProductStatsUseCase getProductStatsUseCase;
+
+  /// Stats만 새로고침 (상품 삭제/수정 시 호출)
+  Future<void> _refreshStats() async {
+    final currentState = state;
+    if (currentState is! ProfileLoaded) {
+      return;
+    }
+
+    // Stats만 다시 로드
+    final statsResult = await getProductStatsUseCase(null);
+    final stats = statsResult.fold(
+      (failure) {
+        debugPrint('Stats 갱신 실패: ${failure.message}');
+        return currentState.stats; // 실패 시 기존 stats 유지
+      },
+      (newStats) => newStats,
+    );
+
+    // Stats만 업데이트
+    state = currentState.copyWith(stats: stats);
+  }
+
   /// 프로필 로드
   Future<void> loadProfile() async {
     state = const ProfileLoading();
 
     final result = await getMeUseCase(null);
 
-    result.fold(
+    await result.fold(
       (failure) {
         state = ProfileError(failure.message);
       },
-      (user) {
+      (user) async {
         if (user != null) {
-          state = ProfileLoaded(user: user);
+          // 사용자 정보와 통계를 동시에 로드
+          final statsResult = await getProductStatsUseCase(null);
+          final stats = statsResult.fold(
+            (failure) => null,
+            (stats) => stats,
+          );
+
+          state = ProfileLoaded(
+            user: user,
+            stats: stats,
+          );
         } else {
           state = const ProfileError(
             '사용자 정보를 불러올 수 없습니다. 로그인 상태를 확인해주세요.',
@@ -102,6 +159,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       state = ProfileImageUploading(
         user: currentState.user,
         uploadedFileKey: currentState.uploadedFileKey,
+        stats: currentState.stats,
         currentFileName: fileName,
       );
 
@@ -118,6 +176,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           state = ProfileImageUploadError(
             user: currentState.user,
             uploadedFileKey: currentState.uploadedFileKey,
+            stats: currentState.stats,
             error: failure.message,
           );
         },
@@ -125,6 +184,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           state = ProfileImageUploadSuccess(
             user: currentState.user,
             uploadedFileKey: response.fileKey,
+            stats: currentState.stats,
           );
         },
       );
@@ -132,6 +192,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       state = ProfileImageUploadError(
         user: currentState.user,
         uploadedFileKey: currentState.uploadedFileKey,
+        stats: currentState.stats,
         error: '이미지 업로드 중 오류가 발생했습니다: $e',
       );
     }
@@ -162,6 +223,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           state = ProfileImageUploadError(
             user: currentState.user,
             uploadedFileKey: updatedKeys,
+            stats: currentState.stats,
             error: '이미지 삭제 중 오류가 발생했습니다: ${failure.message}',
           );
         },
@@ -173,6 +235,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           state = ProfileLoaded(
             user: currentState.user,
             uploadedFileKey: updatedKeys,
+            stats: currentState.stats,
           );
         },
       );
@@ -184,6 +247,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       state = ProfileImageUploadError(
         user: currentState.user,
         uploadedFileKey: updatedKeys,
+        stats: currentState.stats,
         error: '이미지 삭제 중 오류가 발생했습니다: $e',
       );
     }
@@ -225,6 +289,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       state = ProfileUpdating(
         user: currentState.user,
         uploadedFileKey: currentState.uploadedFileKey,
+        stats: currentState.stats,
       );
 
       // UseCase 호출
@@ -235,12 +300,14 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           state = ProfileUpdateError(
             user: currentState.user,
             uploadedFileKey: currentState.uploadedFileKey,
+            stats: currentState.stats,
             error: failure.message,
           );
         },
         (updatedUser) {
           state = ProfileUpdated(
             user: updatedUser,
+            stats: currentState.stats,
           );
         },
       );
@@ -248,6 +315,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       state = ProfileUpdateError(
         user: currentState.user,
         uploadedFileKey: currentState.uploadedFileKey,
+        stats: currentState.stats,
         error: '프로필 업데이트 중 오류가 발생했습니다: $e',
       );
     }

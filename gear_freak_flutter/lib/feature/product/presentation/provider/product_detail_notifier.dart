@@ -133,6 +133,12 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
               product: updatedProduct,
               isFavorite: isFavorite,
             );
+            // 찜 토글 성공 시 이벤트 발행 (ProfileNotifier가 stats 갱신)
+            ref.read(updatedProductProvider.notifier).state = updatedProduct;
+            // 이벤트 처리 후 초기화 (다음 업데이트를 위해)
+            Future.microtask(() {
+              ref.read(updatedProductProvider.notifier).state = null;
+            });
           },
         );
       },
@@ -211,6 +217,12 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
         // 성공 시 상품 정보 업데이트
         state = currentState.copyWith(product: updatedProduct);
         debugPrint('상품 상태 변경 성공: $productId -> ${status.name}');
+        // 상태 변경 이벤트 발행 (모든 목록 Provider와 ProfileNotifier가 자동으로 반응)
+        ref.read(updatedProductProvider.notifier).state = updatedProduct;
+        // 이벤트 처리 후 초기화 (다음 업데이트를 위해)
+        Future.microtask(() {
+          ref.read(updatedProductProvider.notifier).state = null;
+        });
         return true;
       },
     );

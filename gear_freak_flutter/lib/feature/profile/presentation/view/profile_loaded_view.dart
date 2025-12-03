@@ -7,6 +7,7 @@ class ProfileLoadedView extends StatelessWidget {
   /// ProfileLoadedView 생성자
   ///
   /// [user]는 사용자 정보입니다.
+  /// [stats]는 상품 통계 정보입니다.
   /// [onEditProfile]는 프로필 편집 버튼 클릭 콜백입니다.
   /// [onLogout]는 로그아웃 메뉴 클릭 콜백입니다.
   /// [onAppInfo]는 앱 정보 메뉴 클릭 콜백입니다.
@@ -14,16 +15,21 @@ class ProfileLoadedView extends StatelessWidget {
   const ProfileLoadedView({
     required this.user,
     required this.onLogout,
+    this.stats,
     this.onEditProfile,
     this.onAppInfo,
     this.onCustomerCenter,
-    this.onMyProducts,
-    this.onMyFavorite,
+    this.onSellingTap,
+    this.onSoldTap,
+    this.onFavoriteTap,
     super.key,
   });
 
   /// 사용자 정보
   final pod.User user;
+
+  /// 상품 통계 정보
+  final pod.ProductStatsDto? stats;
 
   /// 프로필 편집 버튼 클릭 콜백
   final VoidCallback? onEditProfile;
@@ -37,11 +43,14 @@ class ProfileLoadedView extends StatelessWidget {
   /// 고객 센터 메뉴 클릭 콜백
   final VoidCallback? onCustomerCenter;
 
-  /// 내 상품 관리 메뉴 클릭 콜백
-  final VoidCallback? onMyProducts;
+  /// 판매중 통계 클릭 콜백
+  final VoidCallback? onSellingTap;
 
-  /// 관심 목록 메뉴 클릭 콜백
-  final VoidCallback? onMyFavorite;
+  /// 거래완료 통계 클릭 콜백
+  final VoidCallback? onSoldTap;
+
+  /// 관심목록 통계 클릭 콜백
+  final VoidCallback? onFavoriteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -55,29 +64,18 @@ class ProfileLoadedView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           // 활동 통계
-          const ProfileStatsSectionWidget(
-            sellingCount: 0, // TODO: 실제 데이터로 교체
-            soldCount: 0, // TODO: 실제 데이터로 교체
-            favoriteCount: 0, // TODO: 실제 데이터로 교체
+          ProfileStatsSectionWidget(
+            sellingCount: stats?.sellingCount ?? 0,
+            soldCount: stats?.soldCount ?? 0,
+            favoriteCount: stats?.favoriteCount ?? 0,
+            onSellingTap: onSellingTap,
+            onSoldTap: onSoldTap,
+            onFavoriteTap: onFavoriteTap,
           ),
           const SizedBox(height: 8),
           // 메뉴 리스트
           Column(
             children: [
-              ProfileMenuItemWidget(
-                icon: Icons.shopping_bag_outlined,
-                title: '내 상품 관리',
-                onTap: onMyProducts,
-              ),
-              const ProfileMenuItemWidget(
-                icon: Icons.receipt_long_outlined,
-                title: '거래 내역',
-              ),
-              ProfileMenuItemWidget(
-                icon: Icons.favorite_outline,
-                title: '관심 목록',
-                onTap: onMyFavorite,
-              ),
               const ProfileMenuItemWidget(
                 icon: Icons.star_outline,
                 title: '후기 관리',

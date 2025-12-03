@@ -23,9 +23,11 @@ class ProfileLoaded extends ProfileState {
   ///
   /// [user]는 사용자 정보입니다.
   /// [uploadedFileKey]는 업로드된 프로필 이미지 파일 키입니다.
+  /// [stats]는 상품 통계 정보입니다. (판매중, 거래완료, 관심목록 개수)
   const ProfileLoaded({
     required this.user,
     this.uploadedFileKey,
+    this.stats,
   });
 
   /// 사용자 정보
@@ -33,6 +35,22 @@ class ProfileLoaded extends ProfileState {
 
   /// 업로드된 프로필 이미지 파일 키 (temp/profile에 업로드된 새 이미지)
   final String? uploadedFileKey;
+
+  /// 상품 통계 정보 (판매중, 거래완료, 관심목록 개수)
+  final pod.ProductStatsDto? stats;
+
+  /// ProfileLoaded 복사
+  ProfileLoaded copyWith({
+    pod.User? user,
+    String? uploadedFileKey,
+    pod.ProductStatsDto? stats,
+  }) {
+    return ProfileLoaded(
+      user: user ?? this.user,
+      uploadedFileKey: uploadedFileKey ?? this.uploadedFileKey,
+      stats: stats ?? this.stats,
+    );
+  }
 }
 
 /// 프로필 이미지 업로드 중 상태
@@ -41,11 +59,13 @@ class ProfileImageUploading extends ProfileLoaded {
   ///
   /// [user]는 사용자 정보입니다.
   /// [uploadedFileKey]는 기존에 업로드된 프로필 이미지 파일 키입니다.
+  /// [stats]는 상품 통계 정보입니다.
   /// [currentFileName]은 현재 업로드 중인 파일 이름입니다.
   const ProfileImageUploading({
     required super.user,
     required this.currentFileName,
     super.uploadedFileKey,
+    super.stats,
   });
 
   /// 현재 업로드 중인 파일 이름
@@ -58,9 +78,11 @@ class ProfileImageUploadSuccess extends ProfileLoaded {
   ///
   /// [user]는 사용자 정보입니다.
   /// [uploadedFileKey]는 업로드된 프로필 이미지 파일 키입니다.
+  /// [stats]는 상품 통계 정보입니다.
   const ProfileImageUploadSuccess({
     required super.user,
     required super.uploadedFileKey,
+    super.stats,
   });
 }
 
@@ -70,11 +92,13 @@ class ProfileImageUploadError extends ProfileLoaded {
   ///
   /// [user]는 사용자 정보입니다.
   /// [uploadedFileKey]는 기존에 업로드된 프로필 이미지 파일 키입니다.
+  /// [stats]는 상품 통계 정보입니다.
   /// [error]는 에러 메시지입니다.
   const ProfileImageUploadError({
     required super.user,
     required this.error,
     super.uploadedFileKey,
+    super.stats,
   });
 
   /// 에러 메시지
@@ -87,9 +111,11 @@ class ProfileUpdating extends ProfileLoaded {
   ///
   /// [user]는 사용자 정보입니다.
   /// [uploadedFileKey]는 업로드된 프로필 이미지 파일 키입니다.
+  /// [stats]는 상품 통계 정보입니다.
   const ProfileUpdating({
     required super.user,
     super.uploadedFileKey,
+    super.stats,
   });
 }
 
@@ -98,8 +124,10 @@ class ProfileUpdated extends ProfileLoaded {
   /// ProfileUpdated 생성자
   ///
   /// [user]는 업데이트된 사용자 정보입니다.
+  /// [stats]는 상품 통계 정보입니다.
   const ProfileUpdated({
     required super.user,
+    super.stats,
   });
 }
 
@@ -109,11 +137,13 @@ class ProfileUpdateError extends ProfileLoaded {
   ///
   /// [user]는 사용자 정보입니다.
   /// [uploadedFileKey]는 업로드된 프로필 이미지 파일 키입니다.
+  /// [stats]는 상품 통계 정보입니다.
   /// [error]는 에러 메시지입니다.
   const ProfileUpdateError({
     required super.user,
     required this.error,
     super.uploadedFileKey,
+    super.stats,
   });
 
   /// 에러 메시지
