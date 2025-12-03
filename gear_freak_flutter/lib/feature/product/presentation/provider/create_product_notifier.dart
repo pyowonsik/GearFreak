@@ -30,6 +30,8 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
   /// 상품 생성 UseCase
   final CreateProductUseCase createProductUseCase;
 
+  // ==================== Public Methods (UseCase 호출) ====================
+
   /// 이미지 업로드
   Future<void> uploadImage({
     required File imageFile,
@@ -227,4 +229,8 @@ class CreateProductNotifier extends StateNotifier<CreateProductState> {
   void reset() {
     state = const CreateProductInitial();
   }
+
+  // ==================== Public Methods (Service 호출) ====================
+
+  // ==================== Private Helper Methods ====================
 }

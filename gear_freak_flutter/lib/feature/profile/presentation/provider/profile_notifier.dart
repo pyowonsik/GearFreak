@@ -68,26 +68,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   /// 상품 통계 조회 UseCase
   final GetProductStatsUseCase getProductStatsUseCase;
 
-  /// Stats만 새로고침 (상품 삭제/수정 시 호출)
-  Future<void> _refreshStats() async {
-    final currentState = state;
-    if (currentState is! ProfileLoaded) {
-      return;
-    }
-
-    // Stats만 다시 로드
-    final statsResult = await getProductStatsUseCase(null);
-    final stats = statsResult.fold(
-      (failure) {
-        debugPrint('Stats 갱신 실패: ${failure.message}');
-        return currentState.stats; // 실패 시 기존 stats 유지
-      },
-      (newStats) => newStats,
-    );
-
-    // Stats만 업데이트
-    state = currentState.copyWith(stats: stats);
-  }
+  // ==================== Public Methods (UseCase 호출) ====================
 
   /// 프로필 로드
   Future<void> loadProfile() async {
@@ -331,5 +312,30 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       },
       (user) => user,
     );
+  }
+
+  // ==================== Public Methods (Service 호출) ====================
+
+  // ==================== Private Helper Methods ====================
+
+  /// Stats만 새로고침 (상품 삭제/수정 시 호출)
+  Future<void> _refreshStats() async {
+    final currentState = state;
+    if (currentState is! ProfileLoaded) {
+      return;
+    }
+
+    // Stats만 다시 로드
+    final statsResult = await getProductStatsUseCase(null);
+    final stats = statsResult.fold(
+      (failure) {
+        debugPrint('Stats 갱신 실패: ${failure.message}');
+        return currentState.stats; // 실패 시 기존 stats 유지
+      },
+      (newStats) => newStats,
+    );
+
+    // Stats만 업데이트
+    state = currentState.copyWith(stats: stats);
   }
 }

@@ -64,6 +64,8 @@ class ProductNotifier extends StateNotifier<ProductState> {
   /// 찜 목록 조회 UseCase 인스턴스 (선택적)
   final GetMyFavoriteProductsUseCase? getMyFavoriteProductsUseCase;
 
+  // ==================== Public Methods (UseCase 호출) ====================
+
   /// 페이지네이션된 상품 로드 (첫 페이지)
   Future<void> loadPaginatedProducts({
     int page = 1,
@@ -250,6 +252,102 @@ class ProductNotifier extends StateNotifier<ProductState> {
     );
   }
 
+  /// 내가 등록한 상품 목록 로드 (프로필 화면용)
+  Future<void> loadMyProducts({
+    int page = 1,
+    int limit = 20,
+    pod.ProductStatus? status,
+  }) async {
+    if (getMyProductsUseCase == null) {
+      debugPrint('⚠️ [ProductNotifier] getMyProductsUseCase가 주입되지 않았습니다.');
+      state = const ProductError('내 상품 목록을 불러올 수 없습니다.');
+      return;
+    }
+
+    state = const ProductLoading();
+    debugPrint(
+        '🔄 [ProductNotifier] 내 상품 목록 로드: page=$page, limit=$limit, status=$status');
+
+    final pagination = pod.PaginationDto(
+      page: page,
+      limit: limit,
+      status: status,
+    );
+
+    final result = await getMyProductsUseCase!(pagination);
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [ProductNotifier] 내 상품 목록 로드 실패: ${failure.message}');
+        state = ProductError(failure.message);
+      },
+      (response) {
+        debugPrint('✅ [ProductNotifier] 내 상품 목록 로드 성공: '
+            'page=${response.pagination.page}, '
+            'totalCount=${response.pagination.totalCount}, '
+            'hasMore=${response.pagination.hasMore}, '
+            'products=${response.products.length}개');
+        state = ProductPaginatedLoaded(
+          products: response.products,
+          pagination: response.pagination,
+          sortBy: null,
+          profileType: status == pod.ProductStatus.sold
+              ? 'mySoldProducts'
+              : status == pod.ProductStatus.selling
+                  ? 'myProducts'
+                  : 'myProducts',
+        );
+      },
+    );
+  }
+
+  /// 내가 관심목록한 상품 목록 로드 (프로필 화면용)
+  Future<void> loadMyFavoriteProducts({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    if (getMyFavoriteProductsUseCase == null) {
+      debugPrint(
+          '⚠️ [ProductNotifier] getMyFavoriteProductsUseCase가 주입되지 않았습니다.');
+      state = const ProductError('찜 목록을 불러올 수 없습니다.');
+      return;
+    }
+
+    state = const ProductLoading();
+    debugPrint('🔄 [ProductNotifier] 찜 목록 로드: page=$page, limit=$limit');
+
+    final pagination = pod.PaginationDto(
+      page: page,
+      limit: limit,
+    );
+
+    final result = await getMyFavoriteProductsUseCase!(pagination);
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [ProductNotifier] 찜 목록 로드 실패: ${failure.message}');
+        state = ProductError(failure.message);
+      },
+      (response) {
+        debugPrint('✅ [ProductNotifier] 찜 목록 로드 성공: '
+            'page=${response.pagination.page}, '
+            'totalCount=${response.pagination.totalCount}, '
+            'hasMore=${response.pagination.hasMore}, '
+            'products=${response.products.length}개');
+        state = ProductPaginatedLoaded(
+          products: response.products,
+          pagination: response.pagination,
+          sortBy: null,
+          profileType: 'myFavorite',
+        );
+      },
+    );
+  }
+
+  // ==================== Public Methods (Service 호출) ====================
+
+  // ==================== Private Helper Methods ====================
+
   /// 목록에서 상품 제거 (삭제 이벤트에 의해 자동 호출)
   void _removeProduct(int productId) {
     final currentState = state;
@@ -420,97 +518,5 @@ class ProductNotifier extends StateNotifier<ProductState> {
         profileType: currentState.profileType,
       );
     }
-  }
-
-  /// 내가 등록한 상품 목록 로드 (프로필 화면용)
-  Future<void> loadMyProducts({
-    int page = 1,
-    int limit = 20,
-    pod.ProductStatus? status,
-  }) async {
-    if (getMyProductsUseCase == null) {
-      debugPrint('⚠️ [ProductNotifier] getMyProductsUseCase가 주입되지 않았습니다.');
-      state = const ProductError('내 상품 목록을 불러올 수 없습니다.');
-      return;
-    }
-
-    state = const ProductLoading();
-    debugPrint(
-        '🔄 [ProductNotifier] 내 상품 목록 로드: page=$page, limit=$limit, status=$status');
-
-    final pagination = pod.PaginationDto(
-      page: page,
-      limit: limit,
-      status: status,
-    );
-
-    final result = await getMyProductsUseCase!(pagination);
-
-    result.fold(
-      (failure) {
-        debugPrint('❌ [ProductNotifier] 내 상품 목록 로드 실패: ${failure.message}');
-        state = ProductError(failure.message);
-      },
-      (response) {
-        debugPrint('✅ [ProductNotifier] 내 상품 목록 로드 성공: '
-            'page=${response.pagination.page}, '
-            'totalCount=${response.pagination.totalCount}, '
-            'hasMore=${response.pagination.hasMore}, '
-            'products=${response.products.length}개');
-        state = ProductPaginatedLoaded(
-          products: response.products,
-          pagination: response.pagination,
-          sortBy: null,
-          profileType: status == pod.ProductStatus.sold
-              ? 'mySoldProducts'
-              : status == pod.ProductStatus.selling
-                  ? 'myProducts'
-                  : 'myProducts',
-        );
-      },
-    );
-  }
-
-  /// 내가 관심목록한 상품 목록 로드 (프로필 화면용)
-  Future<void> loadMyFavoriteProducts({
-    int page = 1,
-    int limit = 20,
-  }) async {
-    if (getMyFavoriteProductsUseCase == null) {
-      debugPrint(
-          '⚠️ [ProductNotifier] getMyFavoriteProductsUseCase가 주입되지 않았습니다.');
-      state = const ProductError('찜 목록을 불러올 수 없습니다.');
-      return;
-    }
-
-    state = const ProductLoading();
-    debugPrint('🔄 [ProductNotifier] 찜 목록 로드: page=$page, limit=$limit');
-
-    final pagination = pod.PaginationDto(
-      page: page,
-      limit: limit,
-    );
-
-    final result = await getMyFavoriteProductsUseCase!(pagination);
-
-    result.fold(
-      (failure) {
-        debugPrint('❌ [ProductNotifier] 찜 목록 로드 실패: ${failure.message}');
-        state = ProductError(failure.message);
-      },
-      (response) {
-        debugPrint('✅ [ProductNotifier] 찜 목록 로드 성공: '
-            'page=${response.pagination.page}, '
-            'totalCount=${response.pagination.totalCount}, '
-            'hasMore=${response.pagination.hasMore}, '
-            'products=${response.products.length}개');
-        state = ProductPaginatedLoaded(
-          products: response.products,
-          pagination: response.pagination,
-          sortBy: null,
-          profileType: 'myFavorite',
-        );
-      },
-    );
   }
 }

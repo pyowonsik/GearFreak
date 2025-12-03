@@ -29,26 +29,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 회원가입 UseCase 인스턴스
   final SignupUseCase signupUseCase;
 
-  /// 앱 시작 시 세션 확인
-  Future<void> _checkSession() async {
-    state = const AuthLoading();
-
-    final result = await getMeUseCase(null);
-
-    result.fold(
-      (failure) {
-        // 세션이 없거나 만료된 경우
-        state = const AuthUnauthenticated();
-      },
-      (user) {
-        if (user != null) {
-          state = AuthAuthenticated(user);
-        } else {
-          state = const AuthUnauthenticated();
-        }
-      },
-    );
-  }
+  // ==================== Public Methods (UseCase 호출) ====================
 
   /// 회원가입
   Future<void> signup({
@@ -109,5 +90,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = const AuthError('로그아웃에 실패했습니다.');
     }
+  }
+
+  // ==================== Public Methods (Service 호출) ====================
+
+  // ==================== Private Helper Methods ====================
+
+  /// 앱 시작 시 세션 확인
+  Future<void> _checkSession() async {
+    state = const AuthLoading();
+
+    final result = await getMeUseCase(null);
+
+    result.fold(
+      (failure) {
+        // 세션이 없거나 만료된 경우
+        state = const AuthUnauthenticated();
+      },
+      (user) {
+        if (user != null) {
+          state = AuthAuthenticated(user);
+        } else {
+          state = const AuthUnauthenticated();
+        }
+      },
+    );
   }
 }

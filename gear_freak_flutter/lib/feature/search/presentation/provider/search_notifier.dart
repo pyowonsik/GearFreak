@@ -44,18 +44,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// 최근 검색어 서비스
   final RecentSearchService _recentSearchService = RecentSearchService();
 
-  /// 최근 검색어 로드
-  Future<void> _loadRecentSearches() async {
-    final recentSearches = await _recentSearchService.getRecentSearches();
-    if (state is SearchInitial) {
-      state = SearchInitial(recentSearches: recentSearches);
-    }
-  }
-
-  /// 최근 검색어 가져오기 (public)
-  Future<List<String>> getRecentSearches() async {
-    return _recentSearchService.getRecentSearches();
-  }
+  // ==================== Public Methods (UseCase 호출) ====================
 
   /// 상품 검색 (첫 페이지)
   Future<void> searchProducts(String query, {pod.ProductSortBy? sortBy}) async {
@@ -177,6 +166,13 @@ class SearchNotifier extends StateNotifier<SearchState> {
     );
   }
 
+  // ==================== Public Methods (Service 호출) ====================
+
+  /// 최근 검색어 가져오기
+  Future<List<String>> getRecentSearches() async {
+    return _recentSearchService.getRecentSearches();
+  }
+
   /// 검색 초기화
   Future<void> clearSearch() async {
     await _loadRecentSearches();
@@ -192,6 +188,16 @@ class SearchNotifier extends StateNotifier<SearchState> {
   Future<void> clearAllRecentSearches() async {
     await _recentSearchService.clearAll();
     state = const SearchInitial();
+  }
+
+  // ==================== Private Helper Methods ====================
+
+  /// 최근 검색어 로드
+  Future<void> _loadRecentSearches() async {
+    final recentSearches = await _recentSearchService.getRecentSearches();
+    if (state is SearchInitial) {
+      state = SearchInitial(recentSearches: recentSearches);
+    }
   }
 
   /// 목록에서 상품 제거 (삭제 이벤트에 의해 자동 호출)

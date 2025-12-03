@@ -43,6 +43,8 @@ class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
   /// 상품 수정 UseCase
   final UpdateProductUseCase updateProductUseCase;
 
+  // ==================== Public Methods (UseCase 호출) ====================
+
   /// 상품 데이터 로딩
   Future<void> loadProduct(int productId) async {
     try {
@@ -311,4 +313,8 @@ class UpdateProductNotifier extends StateNotifier<UpdateProductState> {
       );
     }
   }
+
+  // ==================== Public Methods (Service 호출) ====================
+
+  // ==================== Private Helper Methods ====================
 }

@@ -755,3 +755,80 @@ class ProductService {
 - ✅ 섹션 구분 주석 사용 (`// ==================== ... ====================`)
 - ✅ 한 클래스에서만 사용되는 헬퍼는 같은 클래스에 유지
 - ✅ 여러 클래스에서 재사용되는 헬퍼는 별도 유틸 파일로 분리
+
+## Presentation Layer (Notifier) 구조 규칙
+
+### Notifier 클래스 함수 순서
+
+Riverpod의 Notifier 클래스는 다음과 같은 순서로 함수를 배치합니다:
+
+1. **Public Methods (UseCase 호출)**
+   - UseCase를 호출하는 public 메서드들을 먼저 배치
+   - 예: `loadProductDetail`, `searchProducts`, `loadMoreProducts`, `createProduct` 등
+
+2. **Public Methods (Service 호출)**
+   - Service를 호출하는 public 메서드들을 두 번째로 배치
+   - 예: `getRecentSearches`, `clearSearch`, `deleteRecentSearch` 등
+
+3. **Private Helper Methods (`_`로 시작하는 헬퍼 함수들)**
+   - 내부 로직을 처리하는 private 헬퍼 메서드들을 마지막에 배치
+   - 예: `_loadRecentSearches`, `_removeProduct`, `_updateProduct`, `_refreshStats` 등
+
+### 구조 예시
+
+```dart
+class SearchNotifier extends StateNotifier<SearchState> {
+  // 생성자, 필드 선언...
+
+  // ==================== Public Methods (UseCase 호출) ====================
+  
+  /// 상품 검색 (첫 페이지)
+  Future<void> searchProducts(String query, {pod.ProductSortBy? sortBy}) async {
+    final result = await searchProductsUseCase(...);
+    // ...
+  }
+  
+  /// 검색 결과 더 불러오기
+  Future<void> loadMoreProducts() async {
+    final result = await searchProductsUseCase(...);
+    // ...
+  }
+  
+  // ==================== Public Methods (Service 호출) ====================
+  
+  /// 최근 검색어 가져오기
+  Future<List<String>> getRecentSearches() async {
+    return _recentSearchService.getRecentSearches();
+  }
+  
+  /// 검색 초기화
+  Future<void> clearSearch() async {
+    await _loadRecentSearches();
+  }
+  
+  // ==================== Private Helper Methods ====================
+  
+  /// 최근 검색어 로드
+  Future<void> _loadRecentSearches() async {
+    // ...
+  }
+  
+  /// 목록에서 상품 제거
+  void _removeProduct(int productId) {
+    // ...
+  }
+}
+```
+
+### 구분 기준
+
+- **UseCase 호출**: Domain 레이어의 UseCase를 호출하여 비즈니스 로직을 수행하는 메서드
+- **Service 호출**: 공통 Service (예: `RecentSearchService`, `LocalStorageService` 등)를 호출하는 메서드
+- **Private Helper**: 내부 상태 관리나 로직 처리를 위한 private 메서드
+
+### 요약
+
+- ✅ UseCase 호출 메서드를 먼저 배치
+- ✅ Service 호출 메서드를 두 번째로 배치
+- ✅ Private 헬퍼 메서드를 마지막에 배치
+- ✅ 섹션 구분 주석 사용 (`// ==================== ... ====================`)

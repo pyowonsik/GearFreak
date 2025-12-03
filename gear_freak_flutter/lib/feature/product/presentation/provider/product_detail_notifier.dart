@@ -52,6 +52,8 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
   /// 상품 상태 변경 UseCase 인스턴스
   final UpdateProductStatusUseCase updateProductStatusUseCase;
 
+  // ==================== Public Methods (UseCase 호출) ====================
+
   /// 상품 상세 조회
   Future<void> loadProductDetail(int id) async {
     state = const ProductDetailLoading();
@@ -227,4 +229,8 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
       },
     );
   }
+
+  // ==================== Public Methods (Service 호출) ====================
+
+  // ==================== Private Helper Methods ====================
 }

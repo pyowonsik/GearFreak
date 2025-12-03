@@ -13,6 +13,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// 채팅 목록 조회 UseCase 인스턴스
   final GetChatListUseCase getChatListUseCase;
 
+  // ==================== Public Methods (UseCase 호출) ====================
+
   /// 채팅 목록 조회
   Future<void> loadChatList() async {
     state = state.copyWith(isLoading: true);
@@ -34,4 +36,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
       },
     );
   }
+
+  // ==================== Public Methods (Service 호출) ====================
+
+  // ==================== Private Helper Methods ====================
 }
