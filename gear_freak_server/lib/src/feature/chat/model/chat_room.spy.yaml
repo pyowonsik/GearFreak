@@ -1,0 +1,27 @@
+### 채팅방 정보
+class: ChatRoom
+table: chat_room
+
+fields:
+  ### 연결된 상품 ID
+  productId: int, relation(parent=product, onDelete=Cascade)
+  ### 채팅방 제목
+  title: String?
+  ### 채팅방 타입 (1:1, 그룹)
+  chatRoomType: ChatRoomType
+  ### 참여자 수 (캐시된 값)
+  participantCount: int
+  ### 최근 활동 일시
+  lastActivityAt: DateTime?
+  ### 채팅방 생성일
+  createdAt: DateTime?
+  ### 수정일
+  updatedAt: DateTime?
+
+indexes:
+  product_id_idx:
+    fields: productId
+  last_activity_idx:
+    fields: lastActivityAt
+  chat_room_type_idx:
+    fields: chatRoomType

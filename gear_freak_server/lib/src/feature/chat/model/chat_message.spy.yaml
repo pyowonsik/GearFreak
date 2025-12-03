@@ -1,0 +1,31 @@
+### 채팅 메시지
+class: ChatMessage
+table: chat_message
+
+fields:
+  ### 채팅방 ID
+  chatRoomId: int, relation(parent=chat_room, onDelete=Cascade)
+  ### 발신자 사용자 ID
+  senderId: int
+  ### 메시지 내용
+  content: String
+  ### 메시지 타입 (text, image, file, system)
+  messageType: MessageType
+  ### 첨부파일 URL (선택적)
+  attachmentUrl: String?
+  ### 첨부파일 이름 (선택적)
+  attachmentName: String?
+  ### 첨부파일 크기 (bytes, 선택적)
+  attachmentSize: int?
+  ### 메시지 전송 일시
+  createdAt: DateTime?
+  ### 수정일 (메시지 수정 시)
+  updatedAt: DateTime?
+
+indexes:
+  chat_room_messages_idx:
+    fields: chatRoomId, createdAt
+  sender_messages_idx:
+    fields: senderId, createdAt
+  message_type_idx:
+    fields: messageType
