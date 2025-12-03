@@ -1,8 +1,8 @@
-import 'dart:io';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/add_image_button_widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/existing_image_preview_widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/widget/new_image_preview_widget.dart';
 
 /// 상품 이미지 섹션 위젯
 ///
@@ -71,169 +71,27 @@ class ProductImageSectionWidget extends StatelessWidget {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
-                if (totalImageCount < 10) _buildAddImageButton(),
+                if (totalImageCount < 10)
+                  AddImageButtonWidget(
+                    onTap: onAddImage,
+                  ),
                 ...existingImageUrls.asMap().entries.map((entry) {
-                  return _buildExistingImagePreview(
-                    entry.value,
-                    entry.key,
+                  return ExistingImagePreviewWidget(
+                    imageUrl: entry.value,
+                    index: entry.key,
+                    onRemove: onRemoveExistingImage,
                   );
                 }),
                 ...newImageFiles.asMap().entries.map((entry) {
-                  return _buildNewImagePreview(
-                    entry.value,
-                    entry.key,
+                  return NewImagePreviewWidget(
+                    imageFile: entry.value,
+                    index: entry.key,
+                    onRemove: onRemoveNewImage,
                   );
                 }),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddImageButton() {
-    return GestureDetector(
-      onTap: onAddImage,
-      child: Container(
-        width: 100,
-        height: 100,
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-        ),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.camera_alt,
-              size: 32,
-              color: Color(0xFF9CA3AF),
-            ),
-            SizedBox(height: 4),
-            Text(
-              '사진 추가',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF6B7280),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExistingImagePreview(String imageUrl, int index) {
-    return Container(
-      width: 100,
-      height: 100,
-      margin: const EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: CachedNetworkImage(
-              imageUrl: imageUrl,
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9CA3AF)),
-                ),
-              ),
-              errorWidget: (context, url, error) => const Center(
-                child: Icon(
-                  Icons.image,
-                  size: 48,
-                  color: Color(0xFF9CA3AF),
-                ),
-              ),
-            ),
-          ),
-          if (onRemoveExistingImage != null)
-            Positioned(
-              top: 4,
-              right: 4,
-              child: GestureDetector(
-                onTap: () => onRemoveExistingImage!(index),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    size: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNewImagePreview(XFile imageFile, int index) {
-    return Container(
-      width: 100,
-      height: 100,
-      margin: const EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.file(
-              File(imageFile.path),
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(
-                    Icons.image,
-                    size: 48,
-                    color: Color(0xFF9CA3AF),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (onRemoveNewImage != null)
-            Positioned(
-              top: 4,
-              right: 4,
-              child: GestureDetector(
-                onTap: () => onRemoveNewImage!(index),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    size: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
