@@ -261,6 +261,39 @@ class SearchNotifier extends StateNotifier<SearchState> {
     final currentState = state;
 
     if (currentState is SearchLoaded) {
+      // 판매완료로 변경된 경우: 검색 결과에서 제거
+      if (updatedProduct.status == pod.ProductStatus.sold) {
+        final updatedProducts = currentState.result.products
+            .where((product) => product.id != updatedProduct.id)
+            .toList();
+
+        if (updatedProducts.length < currentState.result.products.length) {
+          debugPrint(
+            '✏️ [SearchNotifier] 상품 제거 (판매완료): productId=${updatedProduct.id} '
+            '(${currentState.result.products.length}개 → ${updatedProducts.length}개)',
+          );
+
+          final updatedTotalCount =
+              (currentState.result.pagination.totalCount ?? 0) - 1;
+
+          final updatedResult = pod.PaginatedProductsResponseDto(
+            pagination: currentState.result.pagination.copyWith(
+              totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+              hasMore: updatedProducts.length < updatedTotalCount,
+            ),
+            products: updatedProducts,
+          );
+
+          state = SearchLoaded(
+            result: updatedResult,
+            query: currentState.query,
+            sortBy: currentState.sortBy,
+          );
+        }
+        return;
+      }
+
+      // 필터 조건에 맞으면 상품 정보 업데이트
       final updatedProducts = currentState.result.products.map((product) {
         // 같은 ID면 새 데이터로 교체
         return product.id == updatedProduct.id ? updatedProduct : product;
@@ -285,7 +318,40 @@ class SearchNotifier extends StateNotifier<SearchState> {
         );
       }
     } else if (currentState is SearchLoadingMore) {
-      // 로딩 중 상태에서도 수정 처리
+      // 로딩 중 상태에서도 동일한 로직 적용
+      // 판매완료로 변경된 경우: 검색 결과에서 제거
+      if (updatedProduct.status == pod.ProductStatus.sold) {
+        final updatedProducts = currentState.result.products
+            .where((product) => product.id != updatedProduct.id)
+            .toList();
+
+        if (updatedProducts.length < currentState.result.products.length) {
+          debugPrint(
+            '✏️ [SearchNotifier] 상품 제거 (판매완료, 로딩 중): productId=${updatedProduct.id} '
+            '(${currentState.result.products.length}개 → ${updatedProducts.length}개)',
+          );
+
+          final updatedTotalCount =
+              (currentState.result.pagination.totalCount ?? 0) - 1;
+
+          final updatedResult = pod.PaginatedProductsResponseDto(
+            pagination: currentState.result.pagination.copyWith(
+              totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+              hasMore: updatedProducts.length < updatedTotalCount,
+            ),
+            products: updatedProducts,
+          );
+
+          state = SearchLoadingMore(
+            result: updatedResult,
+            query: currentState.query,
+            sortBy: currentState.sortBy,
+          );
+        }
+        return;
+      }
+
+      // 필터 조건에 맞으면 상품 정보 업데이트
       final updatedProducts = currentState.result.products.map((product) {
         return product.id == updatedProduct.id ? updatedProduct : product;
       }).toList();

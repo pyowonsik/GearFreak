@@ -7,12 +7,14 @@ class ProductFilterParams {
   final String? titleQuery;
   final bool hasCategoryFilter;
   final ProductCategory? category;
+  final bool excludeSold; // 판매완료 상품 제외 여부
 
   ProductFilterParams({
     required this.hasTitleFilter,
     required this.titleQuery,
     required this.hasCategoryFilter,
     required this.category,
+    this.excludeSold = false,
   });
 
   /// PaginationDto로부터 필터링 파라미터 생성
@@ -22,12 +24,15 @@ class ProductFilterParams {
     final titleQuery = hasTitleFilter ? '%${pagination.title!.trim()}%' : null;
     final hasCategoryFilter = pagination.category != null;
     final category = pagination.category;
+    // status가 null이거나 sold가 아니면 판매완료 제외
+    final excludeSold = pagination.status == null;
 
     return ProductFilterParams(
       hasTitleFilter: hasTitleFilter,
       titleQuery: titleQuery,
       hasCategoryFilter: hasCategoryFilter,
       category: category,
+      excludeSold: excludeSold,
     );
   }
 }
@@ -37,17 +42,25 @@ class ProductFilterUtil {
   /// 필터링 조건에 따른 where 절 생성
   static WhereExpressionBuilder<ProductTable>? buildWhereClause(
       ProductFilterParams params) {
+    WhereExpressionBuilder<ProductTable>? baseWhere;
+
+    // 제목 필터
     if (params.hasTitleFilter && params.hasCategoryFilter) {
-      return (p) =>
+      baseWhere = (p) =>
           p.title.like(params.titleQuery!) &
           p.category.equals(params.category!);
     } else if (params.hasTitleFilter) {
-      return (p) => p.title.like(params.titleQuery!);
+      baseWhere = (p) => p.title.like(params.titleQuery!);
     } else if (params.hasCategoryFilter) {
-      return (p) => p.category.equals(params.category!);
-    } else {
-      return null;
+      baseWhere = (p) => p.category.equals(params.category!);
     }
+
+    // 판매완료 제외 필터
+    // Serverpod의 enum 컬럼 null 체크는 복잡하므로, 메모리에서 필터링하는 방식 사용
+    // 여기서는 where 절에 판매완료 제외 조건을 추가하지 않고,
+    // getPaginatedProducts에서 메모리 필터링으로 처리
+
+    return baseWhere;
   }
 }
 

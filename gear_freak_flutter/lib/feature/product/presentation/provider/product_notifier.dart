@@ -68,7 +68,6 @@ class ProductNotifier extends StateNotifier<ProductState> {
   Future<void> loadPaginatedProducts({
     int page = 1,
     int limit = 10,
-    bool random = false,
     pod.ProductSortBy? sortBy,
   }) async {
     state = const ProductLoading();
@@ -76,12 +75,11 @@ class ProductNotifier extends StateNotifier<ProductState> {
     final pagination = pod.PaginationDto(
       page: page,
       limit: limit,
-      random: random,
       sortBy: sortBy,
     );
     debugPrint('🔄 [ProductNotifier] 페이지네이션 요청: '
         'page=$page, limit=$limit, '
-        'random=$random, sortBy=${sortBy?.name ?? "없음"}');
+        'sortBy=${sortBy?.name ?? "없음"}');
     final result = await getPaginatedProductsUseCase(pagination);
 
     result.fold(
@@ -256,52 +254,71 @@ class ProductNotifier extends StateNotifier<ProductState> {
   void _removeProduct(int productId) {
     final currentState = state;
     if (currentState is ProductPaginatedLoaded) {
-      final updatedProducts = currentState.products
-          .where((product) => product.id != productId)
-          .toList();
-
-      // 상품이 실제로 제거되었는지 확인
-      if (updatedProducts.length < currentState.products.length) {
-        debugPrint('🗑️ [ProductNotifier] 상품 제거: productId=$productId '
-            '(${currentState.products.length}개 → ${updatedProducts.length}개)');
-
-        // totalCount도 감소
-        final updatedTotalCount = (currentState.pagination.totalCount ?? 0) - 1;
-
-        state = ProductPaginatedLoaded(
-          products: updatedProducts,
-          pagination: currentState.pagination.copyWith(
-            totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
-            hasMore: updatedProducts.length < updatedTotalCount,
-          ),
-          category: currentState.category,
-          sortBy: currentState.sortBy,
-          profileType: currentState.profileType,
-        );
-      }
+      _removeProductFromLoaded(productId, currentState);
     } else if (currentState is ProductPaginatedLoadingMore) {
-      // 로딩 중 상태에서도 제거 처리
-      final updatedProducts = currentState.products
-          .where((product) => product.id != productId)
-          .toList();
+      _removeProductFromLoadingMore(productId, currentState);
+    }
+  }
 
-      if (updatedProducts.length < currentState.products.length) {
-        debugPrint('🗑️ [ProductNotifier] 상품 제거 (로딩 중): productId=$productId '
-            '(${currentState.products.length}개 → ${updatedProducts.length}개)');
+  /// ProductPaginatedLoaded 상태에서 상품 제거
+  void _removeProductFromLoaded(
+    int productId,
+    ProductPaginatedLoaded currentState,
+  ) {
+    final updatedProducts = currentState.products
+        .where((product) => product.id != productId)
+        .toList();
 
-        final updatedTotalCount = (currentState.pagination.totalCount ?? 0) - 1;
+    if (updatedProducts.length < currentState.products.length) {
+      debugPrint(
+        '🗑️ [ProductNotifier] 상품 제거: productId=$productId '
+        '(${currentState.products.length}개 → ${updatedProducts.length}개)',
+      );
 
-        state = ProductPaginatedLoadingMore(
-          products: updatedProducts,
-          pagination: currentState.pagination.copyWith(
-            totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
-            hasMore: updatedProducts.length < updatedTotalCount,
-          ),
-          category: currentState.category,
-          sortBy: currentState.sortBy,
-          profileType: currentState.profileType,
-        );
-      }
+      final updatedTotalCount = (currentState.pagination.totalCount ?? 0) - 1;
+      final updatedPagination = currentState.pagination.copyWith(
+        totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+        hasMore: updatedProducts.length < updatedTotalCount,
+      );
+
+      state = ProductPaginatedLoaded(
+        products: updatedProducts,
+        pagination: updatedPagination,
+        category: currentState.category,
+        sortBy: currentState.sortBy,
+        profileType: currentState.profileType,
+      );
+    }
+  }
+
+  /// ProductPaginatedLoadingMore 상태에서 상품 제거
+  void _removeProductFromLoadingMore(
+    int productId,
+    ProductPaginatedLoadingMore currentState,
+  ) {
+    final updatedProducts = currentState.products
+        .where((product) => product.id != productId)
+        .toList();
+
+    if (updatedProducts.length < currentState.products.length) {
+      debugPrint(
+        '🗑️ [ProductNotifier] 상품 제거 (로딩 중): productId=$productId '
+        '(${currentState.products.length}개 → ${updatedProducts.length}개)',
+      );
+
+      final updatedTotalCount = (currentState.pagination.totalCount ?? 0) - 1;
+      final updatedPagination = currentState.pagination.copyWith(
+        totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
+        hasMore: updatedProducts.length < updatedTotalCount,
+      );
+
+      state = ProductPaginatedLoadingMore(
+        products: updatedProducts,
+        pagination: updatedPagination,
+        category: currentState.category,
+        sortBy: currentState.sortBy,
+        profileType: currentState.profileType,
+      );
     }
   }
 
@@ -310,117 +327,98 @@ class ProductNotifier extends StateNotifier<ProductState> {
     final currentState = state;
 
     if (currentState is ProductPaginatedLoaded) {
-      // 현재 화면의 필터 조건 확인
-      final expectedStatus =
-          getExpectedStatusForProfileType(currentState.profileType);
-
-      // 상태가 변경되어 필터 조건에 맞지 않으면 목록에서 제거
-      if (expectedStatus != null &&
-          !isStatusMatching(expectedStatus, updatedProduct.status)) {
-        final updatedProducts = currentState.products
-            .where((product) => product.id != updatedProduct.id)
-            .toList();
-
-        if (updatedProducts.length < currentState.products.length) {
-          debugPrint(
-            '✏️ [ProductNotifier] 상품 제거 (상태 변경): productId=${updatedProduct.id} '
-            '(${currentState.products.length}개 → ${updatedProducts.length}개)',
-          );
-
-          final updatedTotalCount =
-              (currentState.pagination.totalCount ?? 0) - 1;
-
-          state = ProductPaginatedLoaded(
-            products: updatedProducts,
-            pagination: currentState.pagination.copyWith(
-              totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
-              hasMore: updatedProducts.length < updatedTotalCount,
-            ),
-            category: currentState.category,
-            sortBy: currentState.sortBy,
-            profileType: currentState.profileType,
-          );
-        }
-        return;
-      }
-
-      // 필터 조건에 맞으면 상품 정보 업데이트
-      final updatedProducts = currentState.products.map((product) {
-        // 같은 ID면 새 데이터로 교체
-        return product.id == updatedProduct.id ? updatedProduct : product;
-      }).toList();
-
-      // 실제로 변경이 있었는지 확인
-      final hasChanges =
-          currentState.products.any((p) => p.id == updatedProduct.id);
-
-      if (hasChanges) {
-        debugPrint(
-          '✏️ [ProductNotifier] 상품 수정: productId=${updatedProduct.id}',
-        );
-
-        state = ProductPaginatedLoaded(
-          products: updatedProducts,
-          pagination: currentState.pagination,
-          category: currentState.category,
-          sortBy: currentState.sortBy,
-          profileType: currentState.profileType,
-        );
-      }
+      _updateProductInLoaded(updatedProduct, currentState);
     } else if (currentState is ProductPaginatedLoadingMore) {
-      // 로딩 중 상태에서도 동일한 로직 적용
-      final expectedStatus =
-          getExpectedStatusForProfileType(currentState.profileType);
+      _updateProductInLoadingMore(updatedProduct, currentState);
+    }
+  }
 
-      if (expectedStatus != null &&
-          !isStatusMatching(expectedStatus, updatedProduct.status)) {
-        final updatedProducts = currentState.products
-            .where((product) => product.id != updatedProduct.id)
-            .toList();
+  /// 상품이 목록에서 제거되어야 하는지 확인
+  bool _shouldRemoveProduct(
+    pod.Product updatedProduct,
+    String? profileType,
+  ) {
+    // 판매완료로 변경된 경우: 거래완료 목록이 아니면 무조건 제거
+    if (updatedProduct.status == pod.ProductStatus.sold &&
+        profileType != 'mySoldProducts') {
+      return true;
+    }
 
-        if (updatedProducts.length < currentState.products.length) {
-          debugPrint(
-            '✏️ [ProductNotifier] 상품 제거 (상태 변경, 로딩 중): productId=${updatedProduct.id} '
-            '(${currentState.products.length}개 → ${updatedProducts.length}개)',
-          );
+    // 판매중/예약중으로 변경된 경우: 판매중 목록이 아니면 제거
+    final expectedStatus = getExpectedStatusForProfileType(profileType);
+    if (expectedStatus != null &&
+        !isStatusMatching(expectedStatus, updatedProduct.status)) {
+      return true;
+    }
 
-          final updatedTotalCount =
-              (currentState.pagination.totalCount ?? 0) - 1;
+    return false;
+  }
 
-          state = ProductPaginatedLoadingMore(
-            products: updatedProducts,
-            pagination: currentState.pagination.copyWith(
-              totalCount: updatedTotalCount.clamp(0, double.infinity).toInt(),
-              hasMore: updatedProducts.length < updatedTotalCount,
-            ),
-            category: currentState.category,
-            sortBy: currentState.sortBy,
-            profileType: currentState.profileType,
-          );
-        }
-        return;
-      }
+  /// ProductPaginatedLoaded 상태에서 상품 수정
+  void _updateProductInLoaded(
+    pod.Product updatedProduct,
+    ProductPaginatedLoaded currentState,
+  ) {
+    // 제거 조건 확인
+    if (_shouldRemoveProduct(updatedProduct, currentState.profileType)) {
+      _removeProductFromLoaded(updatedProduct.id!, currentState);
+      return;
+    }
 
-      final updatedProducts = currentState.products.map((product) {
-        return product.id == updatedProduct.id ? updatedProduct : product;
-      }).toList();
+    // 필터 조건에 맞으면 상품 정보 업데이트
+    final updatedProducts = currentState.products.map((product) {
+      return product.id == updatedProduct.id ? updatedProduct : product;
+    }).toList();
 
-      final hasChanges =
-          currentState.products.any((p) => p.id == updatedProduct.id);
+    final hasChanges =
+        currentState.products.any((p) => p.id == updatedProduct.id);
 
-      if (hasChanges) {
-        debugPrint(
-          '✏️ [ProductNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}',
-        );
+    if (hasChanges) {
+      debugPrint(
+        '✏️ [ProductNotifier] 상품 수정: productId=${updatedProduct.id}',
+      );
 
-        state = ProductPaginatedLoadingMore(
-          products: updatedProducts,
-          pagination: currentState.pagination,
-          category: currentState.category,
-          sortBy: currentState.sortBy,
-          profileType: currentState.profileType,
-        );
-      }
+      state = ProductPaginatedLoaded(
+        products: updatedProducts,
+        pagination: currentState.pagination,
+        category: currentState.category,
+        sortBy: currentState.sortBy,
+        profileType: currentState.profileType,
+      );
+    }
+  }
+
+  /// ProductPaginatedLoadingMore 상태에서 상품 수정
+  void _updateProductInLoadingMore(
+    pod.Product updatedProduct,
+    ProductPaginatedLoadingMore currentState,
+  ) {
+    // 제거 조건 확인
+    if (_shouldRemoveProduct(updatedProduct, currentState.profileType)) {
+      _removeProductFromLoadingMore(updatedProduct.id!, currentState);
+      return;
+    }
+
+    // 필터 조건에 맞으면 상품 정보 업데이트
+    final updatedProducts = currentState.products.map((product) {
+      return product.id == updatedProduct.id ? updatedProduct : product;
+    }).toList();
+
+    final hasChanges =
+        currentState.products.any((p) => p.id == updatedProduct.id);
+
+    if (hasChanges) {
+      debugPrint(
+        '✏️ [ProductNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}',
+      );
+
+      state = ProductPaginatedLoadingMore(
+        products: updatedProducts,
+        pagination: currentState.pagination,
+        category: currentState.category,
+        sortBy: currentState.sortBy,
+        profileType: currentState.profileType,
+      );
     }
   }
 

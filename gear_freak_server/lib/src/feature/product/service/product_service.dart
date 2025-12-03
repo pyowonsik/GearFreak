@@ -371,20 +371,75 @@ class ProductService {
   ) async {
     final offset = (pagination.page - 1) * pagination.limit;
     final sortBy = pagination.sortBy ?? ProductSortBy.latest;
-    final isRandom = pagination.random == true;
 
     // 필터링 조건 준비
     final filterParams = ProductFilterParams.fromPaginationDto(pagination);
 
+    // 판매완료 제외가 필요한 경우
+    if (filterParams.excludeSold) {
+      // 전체 상품을 가져온 후 메모리에서 필터링
+      // (Serverpod의 enum null 체크 제약으로 인해 메모리 필터링 사용)
+      final allProducts = await _findProductsWithFilter(session, filterParams);
+
+      // 판매완료 제외 (status가 null, selling, reserved인 상품만)
+      final filteredProducts = allProducts
+          .where((p) =>
+              p.status == null ||
+              p.status == ProductStatus.selling ||
+              p.status == ProductStatus.reserved)
+          .toList();
+
+      // 정렬 적용
+      switch (sortBy) {
+        case ProductSortBy.latest:
+          filteredProducts.sort((a, b) {
+            final aDate = a.createdAt ?? DateTime(1970);
+            final bDate = b.createdAt ?? DateTime(1970);
+            return bDate.compareTo(aDate); // 최신순 (내림차순)
+          });
+          break;
+        case ProductSortBy.priceAsc:
+          filteredProducts.sort((a, b) => a.price.compareTo(b.price));
+          break;
+        case ProductSortBy.priceDesc:
+          filteredProducts.sort((a, b) => b.price.compareTo(a.price));
+          break;
+        case ProductSortBy.popular:
+          filteredProducts.sort((a, b) {
+            final aCount = a.favoriteCount ?? 0;
+            final bCount = b.favoriteCount ?? 0;
+            return bCount.compareTo(aCount); // 인기순 (내림차순)
+          });
+          break;
+      }
+
+      // 페이지네이션 적용
+      final startIndex = offset.clamp(0, filteredProducts.length);
+      final endIndex =
+          (offset + pagination.limit).clamp(0, filteredProducts.length);
+      final paginatedProducts = filteredProducts.sublist(startIndex, endIndex);
+
+      final totalCount = filteredProducts.length;
+      final hasMore = offset + paginatedProducts.length < totalCount;
+
+      return PaginatedProductsResponseDto(
+        pagination: PaginationDto(
+          page: pagination.page,
+          limit: pagination.limit,
+          totalCount: totalCount,
+          hasMore: hasMore,
+        ),
+        products: paginatedProducts,
+      );
+    }
+
+    // 일반적인 경우 (판매완료 제외 불필요)
     // 전체 개수 조회
     final totalCount = await _getTotalCount(session, filterParams);
 
     // 상품 목록 조회
-    final products = isRandom
-        ? await _getRandomProducts(
-            session, filterParams, pagination.limit, offset)
-        : await _getSortedProducts(
-            session, filterParams, sortBy, pagination.limit, offset);
+    final products = await _getSortedProducts(
+        session, filterParams, sortBy, pagination.limit, offset);
 
     // hasMore 계산
     final hasMore = offset + products.length < totalCount;
@@ -409,25 +464,6 @@ class ProductService {
     } else {
       return await Product.db.count(session);
     }
-  }
-
-  /// 랜덤 정렬된 상품 조회
-  Future<List<Product>> _getRandomProducts(
-    Session session,
-    ProductFilterParams params,
-    int limit,
-    int offset,
-  ) async {
-    // 필터링된 모든 상품 조회
-    final allProducts = await _findProductsWithFilter(session, params);
-
-    // 랜덤으로 섞기
-    allProducts.shuffle();
-
-    // 페이지네이션 적용
-    final startIndex = offset.clamp(0, allProducts.length);
-    final endIndex = (offset + limit).clamp(0, allProducts.length);
-    return allProducts.sublist(startIndex, endIndex);
   }
 
   /// 정렬된 상품 조회

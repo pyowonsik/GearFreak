@@ -23,7 +23,6 @@ abstract class PaginationDto implements _i1.SerializableModel {
     this.totalCount,
     this.hasMore,
     this.title,
-    this.random,
     this.category,
     this.sortBy,
     this.status,
@@ -35,7 +34,6 @@ abstract class PaginationDto implements _i1.SerializableModel {
     int? totalCount,
     bool? hasMore,
     String? title,
-    bool? random,
     _i2.ProductCategory? category,
     _i3.ProductSortBy? sortBy,
     _i4.ProductStatus? status,
@@ -48,7 +46,6 @@ abstract class PaginationDto implements _i1.SerializableModel {
       totalCount: jsonSerialization['totalCount'] as int?,
       hasMore: jsonSerialization['hasMore'] as bool?,
       title: jsonSerialization['title'] as String?,
-      random: jsonSerialization['random'] as bool?,
       category: jsonSerialization['category'] == null
           ? null
           : _i2.ProductCategory.fromJson(
@@ -77,9 +74,6 @@ abstract class PaginationDto implements _i1.SerializableModel {
   /// 검색어 (제목 필터링용, 선택적)
   String? title;
 
-  /// 랜덤 정렬 여부 (선택적)
-  bool? random;
-
   /// 카테고리 필터링 (선택적)
   _i2.ProductCategory? category;
 
@@ -98,7 +92,6 @@ abstract class PaginationDto implements _i1.SerializableModel {
     int? totalCount,
     bool? hasMore,
     String? title,
-    bool? random,
     _i2.ProductCategory? category,
     _i3.ProductSortBy? sortBy,
     _i4.ProductStatus? status,
@@ -111,7 +104,6 @@ abstract class PaginationDto implements _i1.SerializableModel {
       if (totalCount != null) 'totalCount': totalCount,
       if (hasMore != null) 'hasMore': hasMore,
       if (title != null) 'title': title,
-      if (random != null) 'random': random,
       if (category != null) 'category': category?.toJson(),
       if (sortBy != null) 'sortBy': sortBy?.toJson(),
       if (status != null) 'status': status?.toJson(),
@@ -133,7 +125,6 @@ class _PaginationDtoImpl extends PaginationDto {
     int? totalCount,
     bool? hasMore,
     String? title,
-    bool? random,
     _i2.ProductCategory? category,
     _i3.ProductSortBy? sortBy,
     _i4.ProductStatus? status,
@@ -143,7 +134,6 @@ class _PaginationDtoImpl extends PaginationDto {
           totalCount: totalCount,
           hasMore: hasMore,
           title: title,
-          random: random,
           category: category,
           sortBy: sortBy,
           status: status,
@@ -159,7 +149,6 @@ class _PaginationDtoImpl extends PaginationDto {
     Object? totalCount = _Undefined,
     Object? hasMore = _Undefined,
     Object? title = _Undefined,
-    Object? random = _Undefined,
     Object? category = _Undefined,
     Object? sortBy = _Undefined,
     Object? status = _Undefined,
@@ -170,7 +159,6 @@ class _PaginationDtoImpl extends PaginationDto {
       totalCount: totalCount is int? ? totalCount : this.totalCount,
       hasMore: hasMore is bool? ? hasMore : this.hasMore,
       title: title is String? ? title : this.title,
-      random: random is bool? ? random : this.random,
       category: category is _i2.ProductCategory? ? category : this.category,
       sortBy: sortBy is _i3.ProductSortBy? ? sortBy : this.sortBy,
       status: status is _i4.ProductStatus? ? status : this.status,
