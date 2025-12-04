@@ -243,6 +243,15 @@ class Endpoints extends _i1.EndpointDispatch {
             params['productId'],
           ),
         ),
+        'getMyChatRooms': _i1.MethodConnector(
+          name: 'getMyChatRooms',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint).getMyChatRooms(session),
+        ),
         'joinChatRoom': _i1.MethodConnector(
           name: 'joinChatRoom',
           params: {

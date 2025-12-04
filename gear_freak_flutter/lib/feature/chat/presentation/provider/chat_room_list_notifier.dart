@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_my_chat_rooms_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 
 /// 채팅방 목록 Notifier
@@ -7,21 +7,21 @@ import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_
 class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   /// ChatRoomListNotifier 생성자
   ///
-  /// [getUserChatRoomsByProductIdUseCase]는 사용자 채팅방 목록 조회 UseCase입니다.
+  /// [getMyChatRoomsUseCase]는 내 채팅방 목록 조회 UseCase입니다.
   ChatRoomListNotifier(
-    this.getUserChatRoomsByProductIdUseCase,
+    this.getMyChatRoomsUseCase,
   ) : super(const ChatRoomListInitial());
 
-  final GetUserChatRoomsByProductIdUseCase getUserChatRoomsByProductIdUseCase;
+  final GetMyChatRoomsUseCase getMyChatRoomsUseCase;
 
   // ==================== Public Methods (UseCase 호출) ====================
 
   /// 채팅방 목록 로드
-  Future<void> loadChatRooms(int productId) async {
+  Future<void> loadChatRooms() async {
     state = const ChatRoomListLoading();
 
-    final result = await getUserChatRoomsByProductIdUseCase(
-      GetUserChatRoomsByProductIdParams(productId: productId),
+    final result = await getMyChatRoomsUseCase(
+      const GetMyChatRoomsParams(),
     );
 
     result.fold(

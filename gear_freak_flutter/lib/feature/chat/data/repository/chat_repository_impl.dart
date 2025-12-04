@@ -38,6 +38,11 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<List<pod.ChatRoom>?> getMyChatRooms() async {
+    return remoteDataSource.getMyChatRooms();
+  }
+
+  @override
   Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId) async {
     return remoteDataSource.joinChatRoom(chatRoomId);
   }

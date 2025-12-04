@@ -8,6 +8,7 @@ chat:
   - getChatRoomById:
   - getChatRoomsByProductId:
   - getUserChatRoomsByProductId:
+  - getMyChatRooms:
   - joinChatRoom:
   - leaveChatRoom:
   - getChatParticipants:

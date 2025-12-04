@@ -171,6 +171,14 @@ class EndpointChat extends _i1.EndpointRef {
         {'productId': productId},
       );
 
+  /// 사용자가 참여한 모든 채팅방 목록 조회
+  _i2.Future<List<_i8.ChatRoom>?> getMyChatRooms() =>
+      caller.callServerEndpoint<List<_i8.ChatRoom>?>(
+        'chat',
+        'getMyChatRooms',
+        {},
+      );
+
   /// 채팅방 참여
   _i2.Future<_i9.JoinChatRoomResponseDto> joinChatRoom(
           _i10.JoinChatRoomRequestDto request) =>

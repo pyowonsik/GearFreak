@@ -95,3 +95,13 @@ class GetUserChatRoomsByProductIdFailure extends ChatFailure {
   @override
   String toString() => 'GetUserChatRoomsByProductIdFailure: $message';
 }
+
+/// 내 채팅방 목록 조회 실패
+class GetMyChatRoomsFailure extends ChatFailure {
+  /// GetMyChatRoomsFailure 생성자
+  const GetMyChatRoomsFailure(super.message,
+      {super.exception, super.stackTrace});
+
+  @override
+  String toString() => 'GetMyChatRoomsFailure: $message';
+}

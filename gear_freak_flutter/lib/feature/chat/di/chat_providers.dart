@@ -39,6 +39,12 @@ final getUserChatRoomsByProductIdUseCaseProvider =
   return GetUserChatRoomsByProductIdUseCase(repository);
 });
 
+/// Get My Chat Rooms UseCase Provider
+final getMyChatRoomsUseCaseProvider = Provider<GetMyChatRoomsUseCase>((ref) {
+  final repository = ref.watch(chatRepositoryProvider);
+  return GetMyChatRoomsUseCase(repository);
+});
+
 /// Join Chat Room UseCase Provider
 final joinChatRoomUseCaseProvider = Provider<JoinChatRoomUseCase>((ref) {
   final repository = ref.watch(chatRepositoryProvider);
@@ -75,9 +81,8 @@ final subscribeChatMessageStreamUseCaseProvider =
 final chatRoomListNotifierProvider =
     StateNotifierProvider.autoDispose<ChatRoomListNotifier, ChatRoomListState>(
   (ref) {
-    final getUserChatRoomsByProductIdUseCase =
-        ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
-    return ChatRoomListNotifier(getUserChatRoomsByProductIdUseCase);
+    final getMyChatRoomsUseCase = ref.watch(getMyChatRoomsUseCaseProvider);
+    return ChatRoomListNotifier(getMyChatRoomsUseCase);
   },
 );
 

@@ -20,7 +20,9 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: 채팅방 목록 조회 로직 추가 (getUserChatRoomsByProductId 사용)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
+    });
   }
 
   @override
@@ -41,7 +43,7 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
       ChatRoomListError(:final message) => GbErrorView(
           message: '에러: $message',
           onRetry: () {
-            // TODO: 채팅방 목록 재조회 로직 추가
+            ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
           },
         ),
       ChatRoomListLoaded(:final chatRooms) => chatRooms.isEmpty

@@ -2,6 +2,7 @@ export 'create_or_get_chat_room_usecase.dart';
 export 'get_chat_messages_usecase.dart';
 export 'get_chat_participants_usecase.dart';
 export 'get_chat_room_by_id_usecase.dart';
+export 'get_my_chat_rooms_usecase.dart';
 export 'get_user_chat_rooms_by_product_id_usecase.dart';
 export 'join_chat_room_usecase.dart';
 export 'send_message_usecase.dart';

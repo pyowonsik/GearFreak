@@ -53,6 +53,17 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     );
   }
 
+  /// 사용자가 참여한 모든 채팅방 목록 조회
+  Future<List<ChatRoom>?> getMyChatRooms(
+    Session session,
+  ) async {
+    final user = await UserService.getMe(session);
+    return await chatService.getMyChatRooms(
+      session,
+      user.id!,
+    );
+  }
+
   /// 채팅방 참여
   Future<JoinChatRoomResponseDto> joinChatRoom(
     Session session,

@@ -251,6 +251,49 @@ class ChatService {
     }
   }
 
+  /// 사용자가 참여한 모든 채팅방 목록 조회
+  Future<List<ChatRoom>?> getMyChatRooms(
+    Session session,
+    int userId,
+  ) async {
+    try {
+      // 사용자가 참여 중인 채팅방만 조회
+      final participantChatRooms = await ChatParticipant.db.find(
+        session,
+        where: (participant) =>
+            participant.userId.equals(userId) &
+            participant.isActive.equals(true),
+      );
+
+      // 참여 중인 채팅방 ID 목록 추출
+      final chatRoomIds = participantChatRooms
+          .map((participant) => participant.chatRoomId)
+          .toSet();
+
+      if (chatRoomIds.isEmpty) {
+        return [];
+      }
+
+      // 참여 중인 모든 채팅방 조회
+      final chatRooms = await ChatRoom.db.find(
+        session,
+        where: (chatRoom) => chatRoom.id.inSet(chatRoomIds),
+        orderBy: (chatRoom) => chatRoom.lastActivityAt,
+        orderDescending: true,
+      );
+
+      return chatRooms;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 내 채팅방 목록 조회 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   /// 채팅방 참여
   Future<JoinChatRoomResponseDto> joinChatRoom(
     Session session,

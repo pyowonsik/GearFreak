@@ -34,6 +34,11 @@ class ChatRemoteDataSource {
     return _client.chat.getUserChatRoomsByProductId(productId);
   }
 
+  /// 사용자가 참여한 모든 채팅방 목록 조회
+  Future<List<pod.ChatRoom>?> getMyChatRooms() async {
+    return _client.chat.getMyChatRooms();
+  }
+
   /// 채팅방 참여
   Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId) async {
     final request = pod.JoinChatRoomRequestDto(chatRoomId: chatRoomId);

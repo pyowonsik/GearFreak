@@ -15,6 +15,9 @@ abstract class ChatRepository {
   /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
   Future<List<pod.ChatRoom>?> getUserChatRoomsByProductId(int productId);
 
+  /// 사용자가 참여한 모든 채팅방 목록 조회
+  Future<List<pod.ChatRoom>?> getMyChatRooms();
+
   /// 채팅방 참여
   Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId);
 
