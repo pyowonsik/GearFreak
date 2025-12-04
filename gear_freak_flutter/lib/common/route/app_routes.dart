@@ -2,7 +2,7 @@ import 'package:gear_freak_flutter/common/route/app_route.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/login_screen.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/signup_screen.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_screen.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_screen.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_screen.dart';
@@ -73,8 +73,8 @@ abstract final class AppRoutes {
           path: '/chat/:id',
           name: 'chat-room',
           builder: (context, state) {
-            final chatId = state.pathParameters['id'] ?? '';
-            return ChatRoomScreen(chatId: chatId);
+            final productId = state.pathParameters['id'] ?? '';
+            return ChatScreen(productId: productId);
           },
         ),
 

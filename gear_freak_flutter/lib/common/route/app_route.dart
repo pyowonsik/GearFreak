@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_flutter/common/route/app_router_page.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_list_screen.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_list_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/create_product_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/home_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_screen.dart';
@@ -103,7 +103,7 @@ abstract class AppRoute {
           GoRoute(
             path: '/main/chat',
             name: 'chat-list',
-            builder: (context, state) => const ChatListScreen(),
+            builder: (context, state) => const ChatRoomListScreen(),
           ),
         ],
       ),

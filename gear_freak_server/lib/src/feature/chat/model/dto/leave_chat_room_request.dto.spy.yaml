@@ -1,7 +1,0 @@
-### 채팅방 나가기 요청
-class: LeaveChatRoomRequestDto
-
-fields:
-  ### 나갈 채팅방 ID
-  chatRoomId: int
-

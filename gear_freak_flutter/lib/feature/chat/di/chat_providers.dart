@@ -4,6 +4,8 @@ import 'package:gear_freak_flutter/feature/chat/data/repository/chat_repository_
 import 'package:gear_freak_flutter/feature/chat/domain/repository/chat_repository.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/usecases.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_notifier.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_notifier.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 
 /// Chat Remote DataSource Provider
@@ -69,8 +71,36 @@ final subscribeChatMessageStreamUseCaseProvider =
   return SubscribeChatMessageStreamUseCase(repository);
 });
 
-/// Chat Notifier Provider
+/// Chat Room List Notifier Provider (채팅방 목록 화면용)
+final chatRoomListNotifierProvider =
+    StateNotifierProvider.autoDispose<ChatRoomListNotifier, ChatRoomListState>(
+  (ref) {
+    final getUserChatRoomsByProductIdUseCase =
+        ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
+    return ChatRoomListNotifier(getUserChatRoomsByProductIdUseCase);
+  },
+);
+
+/// Chat Notifier Provider (채팅 화면용)
 final chatNotifierProvider =
-    StateNotifierProvider<ChatNotifier, ChatState>((ref) {
-  return ChatNotifier();
+    StateNotifierProvider.autoDispose<ChatNotifier, ChatState>((ref) {
+  final createOrGetChatRoomUseCase =
+      ref.watch(createOrGetChatRoomUseCaseProvider);
+  final getChatRoomByIdUseCase = ref.watch(getChatRoomByIdUseCaseProvider);
+  final joinChatRoomUseCase = ref.watch(joinChatRoomUseCaseProvider);
+  final getChatParticipantsUseCase =
+      ref.watch(getChatParticipantsUseCaseProvider);
+  final getChatMessagesUseCase = ref.watch(getChatMessagesUseCaseProvider);
+  final sendMessageUseCase = ref.watch(sendMessageUseCaseProvider);
+  final subscribeChatMessageStreamUseCase =
+      ref.watch(subscribeChatMessageStreamUseCaseProvider);
+  return ChatNotifier(
+    createOrGetChatRoomUseCase,
+    getChatRoomByIdUseCase,
+    joinChatRoomUseCase,
+    getChatParticipantsUseCase,
+    getChatMessagesUseCase,
+    sendMessageUseCase,
+    subscribeChatMessageStreamUseCase,
+  );
 });

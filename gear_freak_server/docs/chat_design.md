@@ -802,14 +802,92 @@ void dispose() {
 - ✅ 같은 사용자 조합 + 같은 상품 = 기존 채팅방 재사용
 - ✅ 다른 상품 = 별도 채팅방 생성
 
+## 프론트엔드 구현
+
+### 1. Clean Architecture 구조
+
+#### Domain Layer
+- ✅ `ChatRepository` 인터페이스 정의
+- ✅ UseCase 구현
+  - `CreateOrGetChatRoomUseCase`
+  - `GetChatRoomByIdUseCase`
+  - `JoinChatRoomUseCase`
+  - `GetChatParticipantsUseCase`
+  - `GetChatMessagesUseCase`
+  - `SendMessageUseCase`
+  - `SubscribeChatMessageStreamUseCase` (StreamUseCase)
+  - `GetUserChatRoomsByProductIdUseCase`
+
+#### Data Layer
+- ✅ `ChatRemoteDataSource` 구현 (Serverpod Client 호출)
+- ✅ `ChatRepositoryImpl` 구현
+
+#### Presentation Layer
+- ✅ `ChatRoomState` 생성 (Sealed Class)
+  - `ChatRoomInitial`
+  - `ChatRoomLoading`
+  - `ChatRoomLoaded`
+  - `ChatRoomLoadingMore`
+  - `ChatRoomError`
+- ✅ `ChatRoomNotifier` 구현
+  - `createOrGetChatRoomAndEnter()`: 채팅방 생성/조회 및 진입
+  - `sendMessage()`: 메시지 전송
+  - `loadMoreMessages()`: 이전 메시지 로드 (페이지네이션)
+  - `_connectMessageStream()`: 실시간 메시지 스트림 연결
+- ✅ `ChatNotifier` (채팅방 목록용, 추후 구현)
+
+#### DI (Dependency Injection)
+- ✅ `chat_providers.dart`에 모든 Provider 정의
+- ✅ `chatRoomNotifierProvider` (autoDispose)
+
+### 2. 상품 상세 화면 연동
+
+#### `product_detail_screen.dart`
+- ✅ "1:1 채팅하기" 버튼 클릭 시 `ChatRoomNotifier` 사용
+- ✅ `_handleChatButton()` 메서드 구현
+  - 본인 상품 체크
+  - `createOrGetChatRoomAndEnter()` 호출
+  - 성공 시 채팅방 화면으로 이동
+  - 실패 시 에러 스낵바 표시
+
+### 3. 채팅방 진입 플로우 (프론트엔드)
+
+```
+1. 상품 상세 화면: "1:1 채팅하기" 버튼 클릭
+   ↓
+2. ChatRoomNotifier.createOrGetChatRoomAndEnter() 호출
+   ↓
+3. UseCase 체인 실행:
+   - CreateOrGetChatRoomUseCase → 채팅방 생성/조회
+   - GetChatRoomByIdUseCase → 채팅방 정보 조회
+   - JoinChatRoomUseCase → 채팅방 참여
+   - GetChatParticipantsUseCase → 참여자 목록 조회
+   - GetChatMessagesUseCase → 이전 메시지 로드 (page: 1, limit: 50)
+   - SubscribeChatMessageStreamUseCase → 실시간 스트림 연결
+   ↓
+4. ChatRoomLoaded 상태로 전환
+   ↓
+5. 채팅방 화면으로 이동 (/chat/{chatRoomId})
+```
+
+### 4. 제거된 기능
+
+- ❌ `GetChatListUseCase` 제거 (역할 불명확)
+- ❌ `ChatState.chatList` 필드 (추후 채팅방 목록으로 변경 예정)
+
 ## 향후 구현 필요 사항
 
 ### 프론트엔드
 
-- ⏳ 채팅방 화면 구현
+- ⏳ 채팅방 화면 (`chat_room_screen.dart`) 구현
+  - 메시지 목록 표시
+  - 메시지 입력 및 전송
+  - 실시간 메시지 수신 처리
 - ⏳ 메시지 무한 스크롤 구현 (`PaginationScrollMixin` 적용)
-- ⏳ 실시간 메시지 수신 처리
+  - 위로 스크롤 시 이전 메시지 로드
 - ⏳ 채팅방 목록 화면 구현
+  - `GetUserChatRoomsByProductIdUseCase` 사용
+  - 최근 메시지 표시
 
 ### 백엔드 (선택사항)
 

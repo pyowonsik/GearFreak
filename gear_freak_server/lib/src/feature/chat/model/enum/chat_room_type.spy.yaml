@@ -1,8 +1,0 @@
-### 채팅방 타입
-enum: ChatRoomType
-
-values:
-  ### 1:1 채팅방 (개인 간 대화)
-  - direct
-  ### 그룹 채팅방 (다중 참여자)
-  - group
