@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
@@ -66,8 +67,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     final searchState = ref.watch(searchNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('검색'),
+      appBar: const GbAppBar(
+        title: Text('검색'),
       ),
       body: GestureDetector(
         onTap: () {

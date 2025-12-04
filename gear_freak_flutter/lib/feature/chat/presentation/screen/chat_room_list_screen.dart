@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
@@ -27,8 +28,8 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
     final chatRoomListState = ref.watch(chatRoomListNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('채팅'),
+      appBar: const GbAppBar(
+        title: Text('채팅'),
       ),
       body: _buildBody(chatRoomListState),
     );

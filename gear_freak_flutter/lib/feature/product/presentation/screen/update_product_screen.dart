@@ -132,7 +132,7 @@ class _UpdateProductScreenState extends ConsumerState<UpdateProductScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: GbAppBar(
           title: const Text('상품 수정'),
           actions: [
             Consumer(

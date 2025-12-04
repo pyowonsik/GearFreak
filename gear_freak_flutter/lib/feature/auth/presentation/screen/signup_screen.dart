@@ -87,13 +87,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
-            onPressed: () => context.pop(),
-          ),
+        appBar: GbAppBar(
           title: const Text(
             '회원가입',
             style: TextStyle(
@@ -102,6 +96,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
+            onPressed: () => context.pop(),
+          ),
+          automaticallyImplyLeading: false,
         ),
         body: SafeArea(
           child: SingleChildScrollView(

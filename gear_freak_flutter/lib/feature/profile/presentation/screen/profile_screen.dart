@@ -6,7 +6,6 @@ import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/view/view.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 프로필 화면
@@ -34,7 +33,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileState = ref.watch(profileNotifierProvider);
 
     return Scaffold(
-      appBar: const ProfileAppBarWidget(),
+      appBar: GbAppBar(
+        title: const Text('내 정보'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              context.push('/profile/settings');
+            },
+          ),
+        ],
+      ),
       body: switch (profileState) {
         ProfileInitial() => const GbLoadingView(),
         ProfileLoading() => const GbLoadingView(),

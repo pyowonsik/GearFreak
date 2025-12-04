@@ -10,8 +10,8 @@ class AppInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('앱 정보'),
+      appBar: const GbAppBar(
+        title: Text('앱 정보'),
       ),
       body: SingleChildScrollView(
         child: Column(

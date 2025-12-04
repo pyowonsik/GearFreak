@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/view/view.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
 
 /// 홈 화면
 class HomeScreen extends ConsumerStatefulWidget {
@@ -82,7 +82,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final productState = ref.watch(productNotifierProvider);
 
     return Scaffold(
-      appBar: const HomeAppBarWidget(),
+      appBar: GbAppBar(
+        title: const Text('운동은 장비충'),
+        prefix: Icon(
+          Icons.shopping_bag,
+          color: Theme.of(context).colorScheme.primary,
+          size: 28,
+        ),
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  // TODO: 알림 화면으로 이동
+                },
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: switch (productState) {
         ProductLoading() => const GbLoadingView(),
         ProductError(:final message) => GbErrorView(

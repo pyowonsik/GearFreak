@@ -79,7 +79,7 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: GbAppBar(
           title: const Text('상품 등록'),
           actions: [
             Consumer(

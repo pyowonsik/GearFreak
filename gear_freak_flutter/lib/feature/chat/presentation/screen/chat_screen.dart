@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/view/view.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
 
 /// 채팅 화면을 표시하는 위젯입니다.
 ///
@@ -49,9 +49,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     // 상품 정보에서 sellerId 가져오기 (추후 구현)
     // 일단 null로 전달 (백엔드에서 처리)
-    await ref
-        .read(chatNotifierProvider.notifier)
-        .createOrGetChatRoomAndEnter(
+    await ref.read(chatNotifierProvider.notifier).createOrGetChatRoomAndEnter(
           productId: productId,
           targetUserId: null,
         );
@@ -145,19 +143,38 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return switch (state) {
       ChatLoaded(:final participants) ||
       ChatLoadingMore(:final participants) =>
-        ChatAppBarWidget(
-          nickname: participants.isNotEmpty
-              ? participants
-                      .firstWhere(
-                        (p) => p.userId != currentUserId,
-                        orElse: () => participants.first,
-                      )
-                      .nickname ??
-                  '사용자'
-              : '사용자',
+        GbAppBar(
+          title: Text(
+            participants.isNotEmpty
+                ? participants
+                        .firstWhere(
+                          (p) => p.userId != currentUserId,
+                          orElse: () => participants.first,
+                        )
+                        .nickname ??
+                    '사용자'
+                : '사용자',
+          ),
+          prefix: CircleAvatar(
+            radius: 18,
+            backgroundColor: const Color(0xFFF3F4F6),
+            child: Icon(
+              Icons.person,
+              color: Colors.grey.shade500,
+              size: 20,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: () {
+                // TODO: 더보기 메뉴
+              },
+            ),
+          ],
         ),
-      _ => AppBar(
-          title: const Text('채팅'),
+      _ => const GbAppBar(
+          title: Text('채팅'),
         ),
     };
   }
@@ -207,4 +224,3 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     };
   }
 }
-

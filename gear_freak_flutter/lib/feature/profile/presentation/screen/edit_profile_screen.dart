@@ -188,7 +188,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: GbAppBar(
         title: const Text('프로필 편집'),
         actions: [
           TextButton(

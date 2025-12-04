@@ -129,11 +129,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     return switch (productDetailState) {
       ProductDetailLoading() => Scaffold(
-          appBar: AppBar(),
+          appBar: const GbAppBar(title: Text('')),
           body: const GbLoadingView(),
         ),
       ProductDetailError(:final message) => Scaffold(
-          appBar: AppBar(),
+          appBar: const GbAppBar(title: Text('')),
           body: GbErrorView(
             message: message,
             onRetry: () {
@@ -152,7 +152,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           isFavorite,
         ),
       ProductDetailInitial() => Scaffold(
-          appBar: AppBar(),
+          appBar: const GbAppBar(title: Text('')),
           body: const GbLoadingView(),
         ),
     };
@@ -165,7 +165,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     bool isFavorite,
   ) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: GbAppBar(
+        title: const Text(''),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -177,6 +178,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             }
           },
         ),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),

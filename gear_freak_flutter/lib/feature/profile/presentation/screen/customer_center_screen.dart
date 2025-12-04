@@ -10,8 +10,8 @@ class CustomerCenterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('고객 센터'),
+      appBar: const GbAppBar(
+        title: Text('고객 센터'),
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
@@ -106,7 +107,7 @@ class _PaginatedProductsListWidgetState
     final productState = ref.watch(widget.productStateProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: GbAppBar(
         title: Text(widget.title),
         actions: [
           PopupMenuButton<String>(

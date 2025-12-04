@@ -6,7 +6,6 @@ library;
 export 'add_image_button_widget.dart';
 export 'category_item_widget.dart';
 export 'existing_image_preview_widget.dart';
-export 'home_app_bar_widget.dart';
 export 'new_image_preview_widget.dart';
 export 'paginated_products_list_widget.dart';
 export 'product_basic_info_section_widget.dart';
