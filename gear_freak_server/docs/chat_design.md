@@ -7,7 +7,13 @@
 3. [데이터 모델](#데이터-모델)
 4. [주요 기능](#주요-기능)
 5. [API 설계](#api-설계)
-6. [실시간 메시징](#실시간-메시징)
+6. [DTO 구조](#dto-구조)
+7. [실시간 메시징](#실시간-메시징)
+8. [채팅방 진입 플로우](#6-채팅방-진입-플로우)
+9. [성능 최적화](#성능-최적화)
+10. [보안 고려사항](#보안-고려사항)
+11. [구현 완료 사항](#구현-완료-사항-)
+12. [향후 구현 필요 사항](#향후-구현-필요-사항)
 
 ---
 
@@ -106,8 +112,7 @@ Product (1) ──< (N) ChatRoom
 
 - `chat_room_messages_idx`: (chatRoomId, createdAt)
 - `sender_messages_idx`: (senderId, createdAt)
-- `message_type_idx`: (messageType, isDeleted)
-- `active_messages_idx`: (chatRoomId, isDeleted, createdAt)
+- `message_type_idx`: (messageType)
 
 ### 3. ChatParticipant (참여자)
 
@@ -151,10 +156,13 @@ Product (1) ──< (N) ChatRoom
 ### 1. 채팅방 생성
 
 - 상품 상세 페이지에서 "채팅하기" 버튼 클릭
-- 기존 채팅방이 있으면 기존 채팅방 반환
+- `createOrGetChatRoom` 호출
+- **상품별 채팅방 분리**: 같은 사용자 조합이라도 상품마다 별도 채팅방 생성
+  - 예: 사용자 A-B가 상품 1에 대해 채팅방 1개, 상품 2에 대해 채팅방 1개 (별도)
+- 같은 상품 + 같은 사용자 조합이면 기존 채팅방 반환
 - 없으면 새 채팅방 생성
 - 1:1 채팅방은 자동으로 `direct` 타입
-- 3명 이상이 되면 자동으로 `group` 타입으로 변경
+- 참여자 추가 시 자동으로 참여자 수 업데이트
 
 ### 2. 메시지 전송
 
@@ -166,15 +174,20 @@ Product (1) ──< (N) ChatRoom
 
 ### 3. 메시지 조회
 
-- 페이지네이션 지원 (최신 메시지부터)
-- 삭제되지 않은 메시지만 조회 (`isDeleted = false`)
+- 페이지네이션 지원 (최신 메시지부터, `orderDescending: true`)
+- 무한 스크롤 지원 (프론트엔드 구현 필요)
+- 메시지 타입별 필터링 가능 (text, image, file, system)
 - 채팅방 참여자만 조회 가능
+- 기본 페이지 크기: 50개 (변경 가능)
+- 최대 페이지 크기: 100개
 
 ### 4. 채팅방 참여/나가기
 
-- 채팅방 참여 시 `ChatParticipant` 생성
-- 나가기 시 `isActive = false`, `leftAt` 설정
-- 참여자 수 자동 업데이트
+- 채팅방 참여 시 `ChatParticipant` 생성 또는 활성화
+- 이미 참여 중이면 기존 참여 정보 반환
+- 나가기 시 `isActive = false`, `leftAt` 설정 (채팅방 삭제 아님)
+- 참여자 수 자동 업데이트 (`participantCount`)
+- 나간 사용자도 메시지는 받을 수 있음 (당근마켓 방식)
 
 ### 5. 실시간 메시징
 
@@ -186,63 +199,304 @@ Product (1) ──< (N) ChatRoom
 
 ## API 설계
 
+### 엔드포인트 구조
+
+채팅 기능은 두 개의 엔드포인트로 분리되어 있습니다:
+
+- **`ChatEndpoint`**: 일반 REST API (채팅방 관리, 메시지 전송/조회)
+- **`ChatStreamEndpoint`**: 실시간 스트림 API (WebSocket 기반 메시지 수신)
+
 ### 1. 채팅방 관련
 
 #### 채팅방 생성/조회
 
+**엔드포인트**: `POST /chat/createOrGetChatRoom`
+
+```dart
+// Request
+CreateChatRoomRequestDto {
+  productId: int,           // 상품 ID
+  targetUserId: int?,       // 상대방 사용자 ID (1:1 채팅의 경우)
+}
+
+// Response
+CreateChatRoomResponseDto {
+  success: bool,
+  chatRoomId: int?,
+  chatRoom: ChatRoom?,
+  message: String?,
+}
 ```
-POST /chat/room
-- 상품 ID로 채팅방 생성 또는 기존 채팅방 조회
 
-GET /chat/room/:chatRoomId
-- 채팅방 정보 조회
+**동작 방식:**
 
-GET /chat/room/product/:productId
-- 상품 ID로 채팅방 목록 조회
-```
+- 같은 상품 + 같은 두 사용자 조합이면 기존 채팅방 반환
+- 없으면 새 채팅방 생성
+- **상품별로 채팅방이 분리됨**: 사용자 A-B가 상품 1에 대해 채팅방 1개, 상품 2에 대해 채팅방 1개 (별도)
 
-#### 채팅방 참여/나가기
+**예시:**
 
 ```
-POST /chat/room/:chatRoomId/join
-- 채팅방 참여
+상품 1: 사용자 A ↔ 사용자 B → 채팅방 1
+상품 2: 사용자 A ↔ 사용자 B → 채팅방 2 (다른 채팅방)
+```
 
-POST /chat/room/:chatRoomId/leave
-- 채팅방 나가기
+#### 채팅방 정보 조회
 
-GET /chat/room/:chatRoomId/participants
-- 채팅방 참여자 목록 조회
+**엔드포인트**: `GET /chat/getChatRoomById`
+
+```dart
+// Request
+chatRoomId: int
+
+// Response
+ChatRoom?
+```
+
+#### 상품 ID로 채팅방 목록 조회
+
+**엔드포인트**: `GET /chat/getChatRoomsByProductId`
+
+```dart
+// Request
+productId: int
+
+// Response
+List<ChatRoom>?
+```
+
+#### 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
+
+**엔드포인트**: `GET /chat/getUserChatRoomsByProductId`
+
+```dart
+// Request
+productId: int
+
+// Response
+List<ChatRoom>?
+```
+
+#### 채팅방 참여
+
+**엔드포인트**: `POST /chat/joinChatRoom`
+
+```dart
+// Request
+JoinChatRoomRequestDto {
+  chatRoomId: int,
+}
+
+// Response
+JoinChatRoomResponseDto {
+  success: bool,
+  chatRoomId: int,
+  joinedAt: DateTime,
+  message: String?,
+  participantCount: int?,
+}
+```
+
+#### 채팅방 나가기
+
+**엔드포인트**: `POST /chat/leaveChatRoom`
+
+```dart
+// Request
+LeaveChatRoomRequestDto {
+  chatRoomId: int,
+}
+
+// Response
+LeaveChatRoomResponseDto {
+  success: bool,
+  chatRoomId: int,
+  message: String?,
+}
+```
+
+**동작 방식:**
+
+- `isActive = false`로 설정 (채팅방 삭제 아님)
+- 참여자 수 자동 업데이트
+- 나간 사용자도 메시지는 받을 수 있음 (당근마켓 방식)
+
+#### 채팅방 참여자 목록 조회
+
+**엔드포인트**: `GET /chat/getChatParticipants`
+
+```dart
+// Request
+chatRoomId: int
+
+// Response
+List<ChatParticipantInfoDto> {
+  userId: int,
+  nickname: String?,
+  profileImageUrl: String?,
+  joinedAt: DateTime?,
+  isActive: bool,
+}
 ```
 
 ### 2. 메시지 관련
 
 #### 메시지 전송
 
-```
-POST /chat/message
-- 메시지 전송
-- Request: { chatRoomId, content, messageType, attachmentUrl?, ... }
-- Response: ChatMessageResult
+**엔드포인트**: `POST /chat/sendMessage`
+
+```dart
+// Request
+SendMessageRequestDto {
+  chatRoomId: int,
+  content: String,
+  messageType: MessageType,      // text, image, file, system
+  attachmentUrl: String?,
+  attachmentName: String?,
+  attachmentSize: int?,
+}
+
+// Response
+ChatMessageResponseDto {
+  id: int,
+  chatRoomId: int,
+  senderId: int,
+  senderNickname: String?,
+  content: String,
+  messageType: MessageType,
+  attachmentUrl: String?,
+  attachmentName: String?,
+  attachmentSize: int?,
+  createdAt: DateTime,
+  updatedAt: DateTime?,
+}
 ```
 
-#### 메시지 조회
+**동작 방식:**
 
+1. DB에 메시지 저장
+2. Redis를 통한 실시간 브로드캐스팅 (`postMessage` with `global: true`)
+3. 채팅방 `lastActivityAt` 업데이트
+
+#### 페이지네이션된 메시지 조회
+
+**엔드포인트**: `POST /chat/getChatMessagesPaginated`
+
+```dart
+// Request
+GetChatMessagesRequestDto {
+  chatRoomId: int,
+  page: int,                      // 1부터 시작
+  limit: int,                     // 1~100 사이
+  messageType: MessageType?,      // 선택적 필터
+}
+
+// Response
+PaginatedChatMessagesResponseDto {
+  messages: List<ChatMessageResponseDto>,
+  totalCount: int,
+  mediaTotalCount: int,           // 이미지/동영상 총 개수
+  fileTotalCount: int,            // 파일 총 개수
+  currentPage: int,
+  pageSize: int,
+  hasNextPage: bool,
+  hasPreviousPage: bool,
+}
 ```
-GET /chat/message/:chatRoomId
-- 채팅방 메시지 목록 조회 (페이지네이션)
-- Query: page, limit
-- Response: PaginatedChatMessagesResult
+
+**동작 방식:**
+
+- 최신 메시지부터 조회 (`orderDescending: true`)
+- 페이지네이션 지원 (무한 스크롤용)
+- 메시지 타입별 필터링 가능
+
+#### 채팅방의 마지막 메시지 조회
+
+**엔드포인트**: `GET /chat/getLastMessageByChatRoomId`
+
+```dart
+// Request
+chatRoomId: int
+
+// Response
+ChatMessage?
 ```
 
 ### 3. 실시간 스트림
 
 #### 메시지 스트림 구독
 
+**엔드포인트**: `Stream /chatStream/chatMessageStream`
+
+```dart
+// Request
+chatRoomId: int
+
+// Response
+Stream<ChatMessageResponseDto>
 ```
-Stream /chat/stream/:chatRoomId
-- 실시간 메시지 수신
-- Redis 기반 Server Events
+
+**동작 방식:**
+
+- Redis 기반 Server Events 사용
+- 채널 이름: `'chat_room_{chatRoomId}'`
+- 채팅방 화면 진입 시 구독 시작
+- 화면 종료 시 구독 해제
+
+### 6. 채팅방 진입 플로우
+
 ```
+1. createOrGetChatRoom()     → chatRoomId 획득
+2. getChatRoomById()         → 채팅방 정보
+3. joinChatRoom()            → 채팅방 참여
+4. getChatParticipants()     → 참여자 목록
+5. getChatMessagesPaginated() → 이전 메시지 (DB, 최신 50개)
+6. chatMessageStream()       → 실시간 메시지 (스트림)
+```
+
+**상세 플로우:**
+
+1. **상품 상세 화면**: "채팅하기" 버튼 클릭
+
+   - `createOrGetChatRoom(productId, targetUserId)` 호출
+   - 채팅방 생성 또는 기존 채팅방 조회
+   - `chatRoomId` 획득
+
+2. **채팅방 화면 진입** (`initState`)
+
+   - 병렬 호출: `getChatRoomById()`, `joinChatRoom()`, `getChatParticipants()`
+   - 이전 메시지 로드: `getChatMessagesPaginated(page: 1, limit: 50)`
+   - 실시간 스트림 연결: `chatMessageStream(chatRoomId)`
+
+3. **메시지 전송**
+
+   - `sendMessage()` 호출
+   - DB 저장 + Redis 브로드캐스팅
+   - 구독 중인 모든 클라이언트에게 실시간 전달
+
+4. **화면 종료** (`dispose`)
+   - 스트림 구독 해제: `subscription.cancel()`
+
+---
+
+## DTO 구조
+
+### Request DTOs
+
+- `CreateChatRoomRequestDto`: 채팅방 생성 요청
+- `JoinChatRoomRequestDto`: 채팅방 참여 요청
+- `LeaveChatRoomRequestDto`: 채팅방 나가기 요청
+- `SendMessageRequestDto`: 메시지 전송 요청
+- `GetChatMessagesRequestDto`: 메시지 조회 요청 (페이지네이션)
+
+### Response DTOs
+
+- `CreateChatRoomResponseDto`: 채팅방 생성 응답
+- `JoinChatRoomResponseDto`: 채팅방 참여 응답
+- `LeaveChatRoomResponseDto`: 채팅방 나가기 응답
+- `ChatMessageResponseDto`: 메시지 응답
+- `PaginatedChatMessagesResponseDto`: 페이지네이션된 메시지 응답
+- `ChatParticipantInfoDto`: 참여자 정보
 
 ---
 
@@ -314,26 +568,32 @@ await session.messages.postMessage(
 
 #### 2. 스트림 구독 (실시간 메시지 수신)
 
+**엔드포인트**: `ChatStreamEndpoint.chatMessageStream()`
+
 ```dart
 // 엔드포인트에서 스트림 생성
-Stream<ChatMessageResult> chatMessageStream(
+Stream<ChatMessageResponseDto> chatMessageStream(
   Session session,
   int chatRoomId,
 ) async* {
   // 인증 확인
   final isUserSignedIn = await session.isUserSignedIn;
   if (!isUserSignedIn) {
-    throw Exception('인증이 필요합니다.');
+    throw Exception('인증이 필요합니다. 로그인 후 다시 시도해주세요.');
+  }
+
+  final userInfo = await session.authenticated;
+  if (userInfo == null) {
+    throw Exception('사용자 정보를 찾을 수 없습니다.');
   }
 
   // 채팅방 참여 여부 확인
-  final userInfo = await session.authenticated;
   final participation = await ChatParticipant.db.findFirstRow(
     session,
-    where: (p) =>
-      p.userId.equals(userInfo!.userId) &
-      p.chatRoomId.equals(chatRoomId) &
-      p.isActive.equals(true),
+    where: (participant) =>
+      participant.userId.equals(userInfo.userId) &
+      participant.chatRoomId.equals(chatRoomId) &
+      participant.isActive.equals(true),
   );
 
   if (participation == null) {
@@ -341,7 +601,7 @@ Stream<ChatMessageResult> chatMessageStream(
   }
 
   // 🚀 Server Events를 통한 Redis 기반 스트림 생성
-  final messageStream = session.messages.createStream<ChatMessageResult>(
+  final messageStream = session.messages.createStream<ChatMessageResponseDto>(
     'chat_room_$chatRoomId',  // 채널 이름 (브로드캐스팅과 동일)
   );
 
@@ -364,10 +624,12 @@ Stream<ChatMessageResult> chatMessageStream(
 // Flutter 클라이언트에서
 final stream = client.chatStream.chatMessageStream(chatRoomId);
 
-stream.listen(
+final subscription = stream.listen(
   (message) {
     // 실시간 메시지 수신 처리
-    print('새 메시지: ${message.content}');
+    setState(() {
+      messages.add(message);
+    });
   },
   onError: (error) {
     // 에러 처리
@@ -378,7 +640,20 @@ stream.listen(
     print('스트림 종료');
   },
 );
+
+// 화면 종료 시 구독 해제
+@override
+void dispose() {
+  subscription.cancel();
+  super.dispose();
+}
 ```
+
+**호출 시점:**
+
+- 채팅방 화면 진입 시 (`initState`)
+- 이전 메시지 로드 후 스트림 연결
+- 화면 종료 시 구독 해제 (`dispose`)
 
 ### 멀티 인스턴스 지원
 
@@ -451,8 +726,11 @@ stream.listen(
 ### 3. 페이지네이션
 
 - 메시지 조회 시 페이지네이션 적용
-- 기본 페이지 크기: 20개
+- 기본 페이지 크기: 50개 (초기 로드)
 - 최대 페이지 크기: 100개
+- 무한 스크롤 지원 (프론트엔드 구현 필요)
+- 최신 메시지부터 조회 (`orderDescending: true`)
+- `hasNextPage`, `hasPreviousPage` 필드로 다음/이전 페이지 존재 여부 확인
 
 ---
 
@@ -476,37 +754,69 @@ stream.listen(
 
 ---
 
-## 향후 확장 계획
+## 구현 완료 사항 ✅
 
-### 1. 읽음 상태 관리
+### 1. 데이터 모델
 
-- 메시지 읽음/안 읽음 상태 추적
-- 읽지 않은 메시지 수 표시
+- ✅ ChatRoom, ChatMessage, ChatParticipant 모델 생성
+- ✅ ChatRoomType, MessageType Enum 생성
+- ✅ 인덱스 생성 (성능 최적화)
+- ✅ 마이그레이션 완료
 
-### 2. 알림 기능
+### 2. DTO 구조
 
-- 새 메시지 알림
-- 채팅방 초대 알림
+- ✅ Request DTOs 생성 (모든 엔드포인트용)
+- ✅ Response DTOs 생성 (result → response로 명명)
+- ✅ 페이지네이션 DTO 생성
 
-### 3. 파일 업로드
+### 3. 서비스 레이어
 
-- 이미지/파일 업로드 기능
-- S3 연동
+- ✅ ChatService 구현
+  - 채팅방 생성/조회 로직
+  - 메시지 전송/조회 로직
+  - 참여자 관리 로직
+  - 페이지네이션 처리
+- ✅ 함수 그룹화 및 주석 추가 (Public Methods, Private Helper Methods)
 
-### 4. 검색 기능
+### 4. 엔드포인트 레이어
 
-- 채팅방 내 메시지 검색
-- 키워드 검색
+- ✅ ChatEndpoint 구현 (일반 REST API)
+  - 채팅방 관리 (생성, 조회, 참여, 나가기)
+  - 메시지 전송/조회
+  - 참여자 목록 조회
+- ✅ ChatStreamEndpoint 구현 (실시간 스트림)
+  - 메시지 스트림 구독
+- ✅ 엔드포인트 분리 (ChatEndpoint / ChatStreamEndpoint)
 
----
+### 5. 실시간 메시징
 
-## 마이그레이션 계획
+- ✅ Redis 설정 완료 (development.yaml)
+- ✅ Server Events 구현
+  - `postMessage` (메시지 브로드캐스팅)
+  - `createStream` (스트림 구독)
+- ✅ 채널 이름: `'chat_room_{chatRoomId}'`
 
-1. **1단계**: 기본 모델 생성 (ChatRoom, ChatMessage, ChatParticipant)
-2. **2단계**: Enum 타입 생성 (ChatRoomType, MessageType)
-3. **3단계**: 인덱스 생성
-4. **4단계**: 기본 API 구현
-5. **5단계**: 실시간 메시징 구현
+### 6. 채팅방 생성 로직
+
+- ✅ 상품별 채팅방 분리 구현
+- ✅ 같은 사용자 조합 + 같은 상품 = 기존 채팅방 재사용
+- ✅ 다른 상품 = 별도 채팅방 생성
+
+## 향후 구현 필요 사항
+
+### 프론트엔드
+
+- ⏳ 채팅방 화면 구현
+- ⏳ 메시지 무한 스크롤 구현 (`PaginationScrollMixin` 적용)
+- ⏳ 실시간 메시지 수신 처리
+- ⏳ 채팅방 목록 화면 구현
+
+### 백엔드 (선택사항)
+
+- ⏳ 읽음 상태 관리
+- ⏳ 알림 기능
+- ⏳ 파일 업로드 (이미지/파일)
+- ⏳ 메시지 검색 기능
 
 ---
 

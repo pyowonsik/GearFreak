@@ -1,0 +1,854 @@
+import 'package:gear_freak_server/src/generated/protocol.dart';
+import 'package:serverpod/serverpod.dart';
+
+/// 채팅 서비스
+/// 채팅방 및 메시지 관련 비즈니스 로직을 처리합니다.
+class ChatService {
+  // ==================== Public Methods (Endpoint에서 직접 호출) ====================
+
+  /// 채팅방 생성 또는 조회
+  /// 상품 ID와 상대방 사용자 ID로 기존 채팅방을 찾거나 새로 생성합니다.
+  Future<CreateChatRoomResponseDto> createOrGetChatRoom(
+    Session session,
+    int userId,
+    CreateChatRoomRequestDto request,
+  ) async {
+    try {
+      session.log(
+        '💬 채팅방 생성/조회 시작 - '
+        'userId: $userId, '
+        'productId: ${request.productId}, '
+        'targetUserId: ${request.targetUserId}',
+        level: LogLevel.info,
+      );
+
+      // 1. 상품 존재 확인
+      final product = await Product.db.findById(session, request.productId);
+      if (product == null) {
+        return CreateChatRoomResponseDto(
+          success: false,
+          chatRoomId: null,
+          chatRoom: null,
+          message: '상품을 찾을 수 없습니다.',
+        );
+      }
+
+      // 2. 사용자 ID 확인
+      if (userId <= 0) {
+        return CreateChatRoomResponseDto(
+          success: false,
+          chatRoomId: null,
+          chatRoom: null,
+          message: '유효하지 않은 사용자 ID입니다.',
+        );
+      }
+
+      // 3. 상대방 사용자 확인 (1:1 채팅의 경우)
+      if (request.targetUserId != null) {
+        final targetUserId = request.targetUserId!;
+        final targetUser = await User.db.findById(session, targetUserId);
+        if (targetUser == null) {
+          return CreateChatRoomResponseDto(
+            success: false,
+            chatRoomId: null,
+            chatRoom: null,
+            message: '상대방 사용자를 찾을 수 없습니다.',
+          );
+        }
+      }
+
+      // 4. 기존 채팅방 찾기 (1:1 채팅의 경우)
+      if (request.targetUserId != null) {
+        // 현재 사용자와 상대방이 모두 참여한 채팅방 찾기
+        final existingChatRoom = await _findExistingDirectChatRoom(
+          session,
+          request.productId,
+          userId,
+          request.targetUserId!,
+        );
+
+        if (existingChatRoom != null) {
+          session.log(
+            '✅ 기존 채팅방 발견 - chatRoomId: ${existingChatRoom.id}',
+            level: LogLevel.info,
+          );
+          return CreateChatRoomResponseDto(
+            success: true,
+            chatRoomId: existingChatRoom.id,
+            chatRoom: existingChatRoom,
+            message: '기존 채팅방을 찾았습니다.',
+          );
+        }
+      }
+
+      // 5. 새 채팅방 생성
+      final now = DateTime.now().toUtc();
+      final chatRoom = ChatRoom(
+        productId: request.productId,
+        title: null, // 1:1 채팅방은 제목 없음
+        chatRoomType: ChatRoomType.direct, // 기본값: 1:1 채팅
+        participantCount: 0,
+        lastActivityAt: now,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final createdChatRoom = await ChatRoom.db.insertRow(session, chatRoom);
+      session.log(
+        '✅ 채팅방 생성 완료 - chatRoomId: ${createdChatRoom.id}',
+        level: LogLevel.info,
+      );
+
+      // 6. 참여자 추가 (현재 사용자)
+      final chatRoomId = createdChatRoom.id;
+      if (chatRoomId == null) {
+        return CreateChatRoomResponseDto(
+          success: false,
+          chatRoomId: null,
+          chatRoom: null,
+          message: '채팅방 생성에 실패했습니다.',
+        );
+      }
+
+      await _addParticipant(
+        session,
+        chatRoomId,
+        userId,
+      );
+
+      // 7. 참여자 추가 (상대방 사용자, 1:1 채팅의 경우)
+      if (request.targetUserId != null) {
+        await _addParticipant(
+          session,
+          chatRoomId,
+          request.targetUserId!,
+        );
+      }
+
+      // 8. 참여자 수 업데이트
+      await _updateParticipantCount(session, chatRoomId);
+
+      // 9. 업데이트된 채팅방 정보 조회
+      final updatedChatRoom = await ChatRoom.db.findById(
+        session,
+        createdChatRoom.id!,
+      );
+
+      return CreateChatRoomResponseDto(
+        success: true,
+        chatRoomId: updatedChatRoom?.id,
+        chatRoom: updatedChatRoom,
+        message: '채팅방이 성공적으로 생성되었습니다.',
+      );
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 채팅방 생성/조회 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      return CreateChatRoomResponseDto(
+        success: false,
+        chatRoomId: null,
+        chatRoom: null,
+        message: '채팅방 생성 중 오류가 발생했습니다: $e',
+      );
+    }
+  }
+
+  /// 채팅방 정보 조회
+  Future<ChatRoom?> getChatRoomById(
+    Session session,
+    int chatRoomId,
+  ) async {
+    try {
+      final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+      return chatRoom;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 채팅방 조회 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 상품 ID로 채팅방 목록 조회
+  Future<List<ChatRoom>?> getChatRoomsByProductId(
+    Session session,
+    int productId,
+  ) async {
+    try {
+      final chatRooms = await ChatRoom.db.find(
+        session,
+        where: (chatRoom) => chatRoom.productId.equals(productId),
+      );
+      return chatRooms;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 채팅방 목록 조회 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
+  Future<List<ChatRoom>?> getUserChatRoomsByProductId(
+    Session session,
+    int userId,
+    int productId,
+  ) async {
+    try {
+      // 사용자가 참여 중인 채팅방만 조회
+      final participantChatRooms = await ChatParticipant.db.find(
+        session,
+        where: (participant) =>
+            participant.userId.equals(userId) &
+            participant.isActive.equals(true),
+      );
+
+      // 참여 중인 채팅방 ID 목록 추출
+      final chatRoomIds = participantChatRooms
+          .map((participant) => participant.chatRoomId)
+          .toSet();
+
+      if (chatRoomIds.isEmpty) {
+        return [];
+      }
+
+      // 해당 productId이면서 참여 중인 채팅방들만 조회
+      final chatRooms = await ChatRoom.db.find(
+        session,
+        where: (chatRoom) =>
+            chatRoom.productId.equals(productId) &
+            chatRoom.id.inSet(chatRoomIds),
+      );
+
+      return chatRooms;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 사용자 채팅방 목록 조회 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 채팅방 참여
+  Future<JoinChatRoomResponseDto> joinChatRoom(
+    Session session,
+    int userId,
+    JoinChatRoomRequestDto request,
+  ) async {
+    try {
+      // 1. 채팅방 존재 여부 확인
+      var chatRoom = await ChatRoom.db.findById(
+        session,
+        request.chatRoomId,
+      );
+      if (chatRoom == null) {
+        return JoinChatRoomResponseDto(
+          success: false,
+          chatRoomId: request.chatRoomId,
+          joinedAt: DateTime.now().toUtc(),
+          message: '채팅방을 찾을 수 없습니다.',
+          participantCount: null,
+        );
+      }
+
+      // 2. 이미 참여 중인지 확인
+      final existingParticipant = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (participant) =>
+            participant.chatRoomId.equals(request.chatRoomId) &
+            participant.userId.equals(userId) &
+            participant.isActive.equals(true),
+      );
+
+      if (existingParticipant != null) {
+        // 이미 참여 중인 경우
+        session.log(
+          '이미 참여 중인 사용자: '
+          'chatRoomId=${request.chatRoomId}, '
+          'userId=$userId',
+          level: LogLevel.info,
+        );
+
+        return JoinChatRoomResponseDto(
+          success: true,
+          chatRoomId: request.chatRoomId,
+          joinedAt: existingParticipant.joinedAt ?? DateTime.now().toUtc(),
+          message: '이미 참여 중인 채팅방입니다.',
+          participantCount: chatRoom.participantCount,
+        );
+      }
+
+      // 3. 새로운 참여자 추가
+      final now = DateTime.now().toUtc();
+      await _addParticipant(
+        session,
+        request.chatRoomId,
+        userId,
+      );
+
+      // 4. 참여자 수 업데이트
+      await _updateParticipantCount(session, request.chatRoomId);
+
+      // 5. 채팅방 최근 활동 시간 업데이트
+      await ChatRoom.db.updateRow(
+        session,
+        chatRoom.copyWith(
+          lastActivityAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      // 6. 업데이트된 채팅방 정보 조회
+      chatRoom = await ChatRoom.db.findById(
+        session,
+        request.chatRoomId,
+      );
+
+      session.log(
+        '채팅방 참여 성공: '
+        'chatRoomId=${request.chatRoomId}, '
+        'userId=$userId',
+        level: LogLevel.info,
+      );
+
+      return JoinChatRoomResponseDto(
+        success: true,
+        chatRoomId: request.chatRoomId,
+        joinedAt: now,
+        message: '채팅방에 성공적으로 참여했습니다.',
+        participantCount: chatRoom?.participantCount,
+      );
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '채팅방 참여 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      return JoinChatRoomResponseDto(
+        success: false,
+        chatRoomId: request.chatRoomId,
+        joinedAt: DateTime.now().toUtc(),
+        message: '채팅방 참여 중 오류가 발생했습니다: $e',
+        participantCount: null,
+      );
+    }
+  }
+
+  /// 채팅방 나가기
+  Future<LeaveChatRoomResponseDto> leaveChatRoom(
+    Session session,
+    int userId,
+    LeaveChatRoomRequestDto request,
+  ) async {
+    try {
+      // 1. 채팅방 존재 여부 확인
+      final chatRoom = await ChatRoom.db.findById(
+        session,
+        request.chatRoomId,
+      );
+      if (chatRoom == null) {
+        return LeaveChatRoomResponseDto(
+          success: false,
+          chatRoomId: request.chatRoomId,
+          message: '채팅방을 찾을 수 없습니다.',
+        );
+      }
+
+      // 2. 참여자 찾기
+      final participant = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (p) =>
+            p.chatRoomId.equals(request.chatRoomId) &
+            p.userId.equals(userId) &
+            p.isActive.equals(true),
+      );
+
+      if (participant == null) {
+        return LeaveChatRoomResponseDto(
+          success: false,
+          chatRoomId: request.chatRoomId,
+          message: '참여 중인 채팅방이 아닙니다.',
+        );
+      }
+
+      // 3. 나가기 처리 (isActive = false)
+      final now = DateTime.now().toUtc();
+      await ChatParticipant.db.updateRow(
+        session,
+        participant.copyWith(
+          isActive: false,
+          leftAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      // 4. 참여자 수 업데이트
+      await _updateParticipantCount(session, request.chatRoomId);
+
+      session.log(
+        '채팅방 나가기 성공: '
+        'chatRoomId=${request.chatRoomId}, '
+        'userId=$userId',
+        level: LogLevel.info,
+      );
+
+      return LeaveChatRoomResponseDto(
+        success: true,
+        chatRoomId: request.chatRoomId,
+        message: '채팅방에서 나갔습니다.',
+      );
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '채팅방 나가기 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      return LeaveChatRoomResponseDto(
+        success: false,
+        chatRoomId: request.chatRoomId,
+        message: '채팅방 나가기 중 오류가 발생했습니다: $e',
+      );
+    }
+  }
+
+  /// 채팅방 참여자 목록 조회
+  Future<List<ChatParticipantInfoDto>> getChatParticipants(
+    Session session,
+    int chatRoomId,
+  ) async {
+    try {
+      // 채팅방 존재 여부 확인
+      final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+      if (chatRoom == null) {
+        throw Exception('채팅방을 찾을 수 없습니다.');
+      }
+
+      // 활성 참여자 조회
+      final participants = await ChatParticipant.db.find(
+        session,
+        where: (participant) =>
+            participant.chatRoomId.equals(chatRoomId) &
+            participant.isActive.equals(true),
+      );
+
+      // 참여자 정보 수집
+      final participantInfos = <ChatParticipantInfoDto>[];
+
+      for (final participant in participants) {
+        // User 정보 조회
+        final user = await User.db.findById(session, participant.userId);
+
+        final participantInfo = ChatParticipantInfoDto(
+          userId: participant.userId,
+          nickname: user?.nickname,
+          profileImageUrl: user?.profileImageUrl,
+          joinedAt: participant.joinedAt,
+          isActive: participant.isActive,
+        );
+
+        participantInfos.add(participantInfo);
+      }
+
+      return participantInfos;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '참여자 목록 조회 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 메시지 전송
+  Future<ChatMessageResponseDto> sendMessage(
+    Session session,
+    int userId,
+    SendMessageRequestDto request,
+  ) async {
+    try {
+      // 1. 채팅방 참여 확인
+      final participation = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (participant) =>
+            participant.userId.equals(userId) &
+            participant.chatRoomId.equals(request.chatRoomId) &
+            participant.isActive.equals(true),
+      );
+
+      if (participation == null) {
+        throw Exception('채팅방에 참여하지 않은 사용자입니다.');
+      }
+
+      // 2. 메시지 내용 검증
+      if (request.content.trim().isEmpty) {
+        throw Exception('메시지 내용이 비어있습니다.');
+      }
+
+      // 3. DB에 메시지 저장
+      final now = DateTime.now().toUtc();
+      final message = ChatMessage(
+        chatRoomId: request.chatRoomId,
+        senderId: userId,
+        content: request.content,
+        messageType: request.messageType,
+        attachmentUrl: request.attachmentUrl,
+        attachmentName: request.attachmentName,
+        attachmentSize: request.attachmentSize,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final savedMessage = await ChatMessage.db.insertRow(session, message);
+
+      // 4. 채팅방 최근 활동 시간 업데이트
+      final chatRoom = await ChatRoom.db.findById(
+        session,
+        request.chatRoomId,
+      );
+      if (chatRoom != null) {
+        await ChatRoom.db.updateRow(
+          session,
+          chatRoom.copyWith(
+            lastActivityAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+
+      // 5. 발신자 정보 조회
+      final user = await User.db.findById(session, userId);
+
+      // 6. 응답 DTO 생성
+      final response = ChatMessageResponseDto(
+        id: savedMessage.id!,
+        chatRoomId: savedMessage.chatRoomId,
+        senderId: savedMessage.senderId,
+        senderNickname: user?.nickname,
+        content: savedMessage.content,
+        messageType: savedMessage.messageType,
+        attachmentUrl: savedMessage.attachmentUrl,
+        attachmentName: savedMessage.attachmentName,
+        attachmentSize: savedMessage.attachmentSize,
+        createdAt: savedMessage.createdAt ?? now,
+        updatedAt: savedMessage.updatedAt,
+      );
+
+      // 7. 🚀 Redis 기반 글로벌 브로드캐스팅
+      await session.messages.postMessage(
+        'chat_room_${request.chatRoomId}',
+        response,
+        global: true, // 🔥 Redis를 통한 글로벌 브로드캐스팅
+      );
+
+      session.log(
+        '메시지 전송 완료: '
+        'chatRoomId=${request.chatRoomId}, '
+        'senderId=$userId, '
+        'messageId=${savedMessage.id}',
+        level: LogLevel.info,
+      );
+
+      return response;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '메시지 전송 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 페이지네이션된 메시지 조회
+  Future<PaginatedChatMessagesResponseDto> getChatMessagesPaginated(
+    Session session,
+    GetChatMessagesRequestDto request,
+  ) async {
+    try {
+      // 입력 검증
+      if (request.page < 1) {
+        throw Exception('페이지 번호는 1 이상이어야 합니다.');
+      }
+      if (request.limit < 1 || request.limit > 100) {
+        throw Exception('페이지 크기는 1~100 사이여야 합니다.');
+      }
+
+      // 채팅방 존재 여부 확인
+      final chatRoom = await ChatRoom.db.findById(
+        session,
+        request.chatRoomId,
+      );
+      if (chatRoom == null) {
+        throw Exception('채팅방을 찾을 수 없습니다.');
+      }
+
+      // 오프셋 계산
+      final offset = (request.page - 1) * request.limit;
+
+      // 전체 메시지/타입별 집계 조회
+      Expression<Object?> baseWhere(ChatMessageTable message) =>
+          message.chatRoomId.equals(request.chatRoomId);
+
+      final totalCount = await ChatMessage.db.count(session, where: baseWhere);
+      final mediaTotalCount = await ChatMessage.db.count(
+        session,
+        where: (message) =>
+            baseWhere(message) & message.messageType.equals(MessageType.image),
+      );
+      final fileTotalCount = await ChatMessage.db.count(
+        session,
+        where: (message) =>
+            baseWhere(message) & message.messageType.equals(MessageType.file),
+      );
+
+      // 메시지 조회 (최신 순으로 정렬)
+      final messages = await ChatMessage.db.find(
+        session,
+        limit: request.limit,
+        offset: offset,
+        orderBy: (message) => message.createdAt,
+        orderDescending: true,
+        where: (message) {
+          var condition = message.chatRoomId.equals(request.chatRoomId);
+          // 선택적 타입 필터 적용
+          if (request.messageType != null) {
+            condition =
+                condition & message.messageType.equals(request.messageType);
+          }
+          return condition;
+        },
+      );
+
+      // 필터가 적용된 경우, 페이지네이션 기준 카운트도 필터 기준으로 계산
+      var effectiveTotalCount = totalCount;
+      if (request.messageType != null) {
+        effectiveTotalCount = await ChatMessage.db.count(
+          session,
+          where: (message) =>
+              message.chatRoomId.equals(request.chatRoomId) &
+              message.messageType.equals(request.messageType),
+        );
+      }
+
+      // ChatMessageResponseDto 리스트 생성
+      final messageResponses = <ChatMessageResponseDto>[];
+      for (final message in messages) {
+        // 발신자 정보 조회
+        final user = await User.db.findById(session, message.senderId);
+
+        final response = ChatMessageResponseDto(
+          id: message.id!,
+          chatRoomId: message.chatRoomId,
+          senderId: message.senderId,
+          senderNickname: user?.nickname,
+          content: message.content,
+          messageType: message.messageType,
+          attachmentUrl: message.attachmentUrl,
+          attachmentName: message.attachmentName,
+          attachmentSize: message.attachmentSize,
+          createdAt: message.createdAt ?? DateTime.now().toUtc(),
+          updatedAt: message.updatedAt,
+        );
+        messageResponses.add(response);
+      }
+
+      // 페이지네이션 결과 생성
+      final hasNextPage = offset + request.limit < effectiveTotalCount;
+      final hasPreviousPage = request.page > 1;
+
+      return PaginatedChatMessagesResponseDto(
+        messages: messageResponses,
+        totalCount: effectiveTotalCount,
+        mediaTotalCount: mediaTotalCount,
+        fileTotalCount: fileTotalCount,
+        currentPage: request.page,
+        pageSize: request.limit,
+        hasNextPage: hasNextPage,
+        hasPreviousPage: hasPreviousPage,
+      );
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '메시지 조회 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 채팅방의 마지막 메시지 조회
+  Future<ChatMessage?> getLastMessageByChatRoomId(
+    Session session,
+    int chatRoomId,
+  ) async {
+    try {
+      // 채팅방 존재 여부 확인
+      final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+      if (chatRoom == null) {
+        session.log(
+          '채팅방을 찾을 수 없음: chatRoomId=$chatRoomId',
+          level: LogLevel.warning,
+        );
+        return null;
+      }
+
+      // 해당 채팅방의 마지막 메시지 조회 (최신)
+      final lastMessage = await ChatMessage.db.findFirstRow(
+        session,
+        orderBy: (message) => message.createdAt,
+        orderDescending: true,
+        where: (message) => message.chatRoomId.equals(chatRoomId),
+      );
+
+      if (lastMessage == null) {
+        session.log(
+          '채팅방에 메시지가 없음: chatRoomId=$chatRoomId',
+          level: LogLevel.info,
+        );
+        return null;
+      }
+
+      return lastMessage;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '마지막 메시지 조회 실패: chatRoomId=$chatRoomId, error=$e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  // ==================== Private Helper Methods ====================
+
+  /// 기존 1:1 채팅방 찾기
+  Future<ChatRoom?> _findExistingDirectChatRoom(
+    Session session,
+    int productId,
+    int userId1,
+    int userId2,
+  ) async {
+    // userId1이 참여한 채팅방 찾기
+    final participant1Rooms = await ChatParticipant.db.find(
+      session,
+      where: (p) => p.userId.equals(userId1) & p.isActive.equals(true),
+    );
+
+    final chatRoomIds1 = participant1Rooms.map((p) => p.chatRoomId).toSet();
+
+    if (chatRoomIds1.isEmpty) {
+      return null;
+    }
+
+    // 해당 상품의 채팅방만 필터링
+    final productChatRooms = await ChatRoom.db.find(
+      session,
+      where: (room) =>
+          room.productId.equals(productId) &
+          room.id.inSet(chatRoomIds1) &
+          room.chatRoomType.equals(ChatRoomType.direct),
+    );
+
+    // userId2도 참여한 채팅방 찾기
+    for (final chatRoom in productChatRooms) {
+      final participant2 = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (p) =>
+            p.chatRoomId.equals(chatRoom.id) &
+            p.userId.equals(userId2) &
+            p.isActive.equals(true),
+      );
+
+      if (participant2 != null) {
+        return chatRoom;
+      }
+    }
+
+    return null;
+  }
+
+  /// 참여자 추가
+  Future<void> _addParticipant(
+    Session session,
+    int chatRoomId,
+    int userId,
+  ) async {
+    // 이미 참여 중인지 확인
+    final existing = await ChatParticipant.db.findFirstRow(
+      session,
+      where: (p) => p.chatRoomId.equals(chatRoomId) & p.userId.equals(userId),
+    );
+
+    if (existing != null) {
+      // 이미 존재하면 활성화
+      if (!existing.isActive) {
+        final now = DateTime.now().toUtc();
+        await ChatParticipant.db.updateRow(
+          session,
+          existing.copyWith(
+            isActive: true,
+            joinedAt: now,
+            leftAt: null,
+            updatedAt: now,
+          ),
+        );
+      }
+      return;
+    }
+
+    // 새 참여자 추가
+    final now = DateTime.now().toUtc();
+    final participant = ChatParticipant(
+      chatRoomId: chatRoomId,
+      userId: userId,
+      joinedAt: now,
+      isActive: true,
+      leftAt: null,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await ChatParticipant.db.insertRow(session, participant);
+  }
+
+  /// 참여자 수 업데이트
+  Future<void> _updateParticipantCount(
+    Session session,
+    int chatRoomId,
+  ) async {
+    final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+    if (chatRoom != null) {
+      final count = await ChatParticipant.db.count(
+        session,
+        where: (participant) =>
+            participant.chatRoomId.equals(chatRoomId) &
+            participant.isActive.equals(true),
+      );
+
+      final updatedChatRoom = chatRoom.copyWith(
+        participantCount: count,
+        updatedAt: DateTime.now().toUtc(),
+      );
+      await ChatRoom.db.updateRow(session, updatedChatRoom);
+    }
+  }
+}
