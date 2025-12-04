@@ -74,7 +74,11 @@ abstract final class AppRoutes {
           name: 'chat-room',
           builder: (context, state) {
             final productId = state.pathParameters['id'] ?? '';
-            return ChatScreen(productId: productId);
+            final sellerId = state.uri.queryParameters['sellerId'];
+            return ChatScreen(
+              productId: productId,
+              sellerId: sellerId != null ? int.tryParse(sellerId) : null,
+            );
           },
         ),
 

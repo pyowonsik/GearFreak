@@ -17,13 +17,18 @@ class ChatScreen extends ConsumerStatefulWidget {
   /// 채팅 화면을 생성합니다.
   ///
   /// [productId]는 상품 ID입니다. (채팅방 생성/조회에 사용)
+  /// [sellerId]는 판매자 ID입니다. (기존 채팅방 찾기에 사용)
   const ChatScreen({
     required this.productId,
+    this.sellerId,
     super.key,
   });
 
   /// 상품 ID
   final String productId;
+
+  /// 판매자 ID (기존 채팅방 찾기에 사용)
+  final int? sellerId;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -47,11 +52,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
-    // 상품 정보에서 sellerId 가져오기 (추후 구현)
-    // 일단 null로 전달 (백엔드에서 처리)
+    // sellerId가 제공되지 않으면 현재 사용자가 판매자가 아닌 경우이므로
+    // 상품 정보를 가져와서 sellerId를 확인해야 함
+    int? targetUserId = widget.sellerId;
+
+    // sellerId가 없으면 현재 사용자와 다른 사용자를 찾아야 함
+    // 일단 sellerId를 전달 (null이면 백엔드에서 처리)
     await ref.read(chatNotifierProvider.notifier).createOrGetChatRoomAndEnter(
           productId: productId,
-          targetUserId: null,
+          targetUserId: targetUserId,
         );
   }
 

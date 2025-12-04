@@ -43,45 +43,57 @@ class ChatService {
         );
       }
 
-      // 3. 상대방 사용자 확인 (1:1 채팅의 경우)
-      if (request.targetUserId != null) {
-        final targetUserId = request.targetUserId!;
-        final targetUser = await User.db.findById(session, targetUserId);
-        if (targetUser == null) {
+      // 3. targetUserId가 없으면 상품의 sellerId를 사용
+      int? targetUserId = request.targetUserId;
+      if (targetUserId == null) {
+        // 상품의 판매자 ID를 targetUserId로 사용
+        targetUserId = product.sellerId;
+
+        // 현재 사용자가 판매자인 경우 채팅방 생성 불가
+        if (targetUserId == userId) {
           return CreateChatRoomResponseDto(
             success: false,
             chatRoomId: null,
             chatRoom: null,
-            message: '상대방 사용자를 찾을 수 없습니다.',
+            message: '본인이 등록한 상품에는 채팅할 수 없습니다.',
           );
         }
       }
 
-      // 4. 기존 채팅방 찾기 (1:1 채팅의 경우)
-      if (request.targetUserId != null) {
-        // 현재 사용자와 상대방이 모두 참여한 채팅방 찾기
-        final existingChatRoom = await _findExistingDirectChatRoom(
-          session,
-          request.productId,
-          userId,
-          request.targetUserId!,
+      // 4. 상대방 사용자 확인
+      final targetUser = await User.db.findById(session, targetUserId);
+      if (targetUser == null) {
+        return CreateChatRoomResponseDto(
+          success: false,
+          chatRoomId: null,
+          chatRoom: null,
+          message: '상대방 사용자를 찾을 수 없습니다.',
         );
-
-        if (existingChatRoom != null) {
-          session.log(
-            '✅ 기존 채팅방 발견 - chatRoomId: ${existingChatRoom.id}',
-            level: LogLevel.info,
-          );
-          return CreateChatRoomResponseDto(
-            success: true,
-            chatRoomId: existingChatRoom.id,
-            chatRoom: existingChatRoom,
-            message: '기존 채팅방을 찾았습니다.',
-          );
-        }
       }
 
-      // 5. 새 채팅방 생성
+      // 5. 기존 채팅방 찾기 (1:1 채팅의 경우)
+      // 현재 사용자와 상대방이 모두 참여한 채팅방 찾기
+      final existingChatRoom = await _findExistingDirectChatRoom(
+        session,
+        request.productId,
+        userId,
+        targetUserId,
+      );
+
+      if (existingChatRoom != null) {
+        session.log(
+          '✅ 기존 채팅방 발견 - chatRoomId: ${existingChatRoom.id}',
+          level: LogLevel.info,
+        );
+        return CreateChatRoomResponseDto(
+          success: true,
+          chatRoomId: existingChatRoom.id,
+          chatRoom: existingChatRoom,
+          message: '기존 채팅방을 찾았습니다.',
+        );
+      }
+
+      // 6. 새 채팅방 생성
       final now = DateTime.now().toUtc();
       final chatRoom = ChatRoom(
         productId: request.productId,
@@ -99,7 +111,7 @@ class ChatService {
         level: LogLevel.info,
       );
 
-      // 6. 참여자 추가 (현재 사용자)
+      // 7. 참여자 추가 (현재 사용자)
       final chatRoomId = createdChatRoom.id;
       if (chatRoomId == null) {
         return CreateChatRoomResponseDto(
@@ -116,19 +128,17 @@ class ChatService {
         userId,
       );
 
-      // 7. 참여자 추가 (상대방 사용자, 1:1 채팅의 경우)
-      if (request.targetUserId != null) {
-        await _addParticipant(
-          session,
-          chatRoomId,
-          request.targetUserId!,
-        );
-      }
+      // 8. 참여자 추가 (상대방 사용자, 1:1 채팅의 경우)
+      await _addParticipant(
+        session,
+        chatRoomId,
+        targetUserId,
+      );
 
-      // 8. 참여자 수 업데이트
+      // 9. 참여자 수 업데이트
       await _updateParticipantCount(session, chatRoomId);
 
-      // 9. 업데이트된 채팅방 정보 조회
+      // 10. 업데이트된 채팅방 정보 조회
       final updatedChatRoom = await ChatRoom.db.findById(
         session,
         createdChatRoom.id!,
