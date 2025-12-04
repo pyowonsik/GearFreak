@@ -19,10 +19,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   @override
   void initState() {
     super.initState();
-    // 화면 진입 시 채팅 목록 로드
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(chatNotifierProvider.notifier).loadChatList();
-    });
+    // TODO: 채팅방 목록 조회 로직 추가 (getUserChatRoomsByProductId 사용)
   }
 
   @override
@@ -46,7 +43,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       return GbErrorView(
         message: '에러: ${state.error}',
         onRetry: () {
-          ref.read(chatNotifierProvider.notifier).loadChatList();
+          // TODO: 채팅방 목록 재조회 로직 추가
         },
       );
     }

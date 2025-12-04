@@ -10,39 +10,86 @@ class ChatRemoteDataSource {
   /// Serverpod Client
   pod.Client get _client => PodService.instance.client;
 
-  /// 채팅 목록 조회
-  Future<List<Map<String, dynamic>>> getChatList() async {
-    // TODO: Serverpod 엔드포인트 호출
-    // 예시: return await client.chat.getChatList();
+  // ==================== Public Methods (Repository에서 호출) ====================
 
-    // 임시 더미 데이터
-    return [
-      {
-        'id': '1',
-        'senderId': 'user1',
-        'senderName': '사용자 1',
-        'content': '안녕하세요!',
-        'timestamp': DateTime.now().toIso8601String(),
-        'isRead': false,
-      },
-    ];
+  /// 채팅방 생성 또는 조회
+  Future<pod.CreateChatRoomResponseDto> createOrGetChatRoom({
+    required int productId,
+    int? targetUserId,
+  }) async {
+    final request = pod.CreateChatRoomRequestDto(
+      productId: productId,
+      targetUserId: targetUserId,
+    );
+    return _client.chat.createOrGetChatRoom(request);
+  }
+
+  /// 채팅방 정보 조회
+  Future<pod.ChatRoom?> getChatRoomById(int chatRoomId) async {
+    return _client.chat.getChatRoomById(chatRoomId);
+  }
+
+  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
+  Future<List<pod.ChatRoom>?> getUserChatRoomsByProductId(int productId) async {
+    return _client.chat.getUserChatRoomsByProductId(productId);
+  }
+
+  /// 채팅방 참여
+  Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId) async {
+    final request = pod.JoinChatRoomRequestDto(chatRoomId: chatRoomId);
+    return _client.chat.joinChatRoom(request);
+  }
+
+  /// 채팅방 참여자 목록 조회
+  Future<List<pod.ChatParticipantInfoDto>> getChatParticipants(
+    int chatRoomId,
+  ) async {
+    return _client.chat.getChatParticipants(chatRoomId);
+  }
+
+  /// 채팅 메시지 조회 (페이지네이션)
+  Future<pod.PaginatedChatMessagesResponseDto> getChatMessages({
+    required int chatRoomId,
+    int page = 1,
+    int limit = 50,
+    pod.MessageType? messageType,
+  }) async {
+    final request = pod.GetChatMessagesRequestDto(
+      chatRoomId: chatRoomId,
+      page: page,
+      limit: limit,
+      messageType: messageType,
+    );
+    return _client.chat.getChatMessagesPaginated(request);
   }
 
   /// 메시지 전송
-  Future<Map<String, dynamic>> sendMessage({
-    required String chatRoomId,
+  Future<pod.ChatMessageResponseDto> sendMessage({
+    required int chatRoomId,
     required String content,
+    required pod.MessageType messageType,
+    String? attachmentUrl,
+    String? attachmentName,
+    int? attachmentSize,
   }) async {
-    // TODO: Serverpod 엔드포인트 호출
-    // 예시: return await client.chat.sendMessage(...);
+    final request = pod.SendMessageRequestDto(
+      chatRoomId: chatRoomId,
+      content: content,
+      messageType: messageType,
+      attachmentUrl: attachmentUrl,
+      attachmentName: attachmentName,
+      attachmentSize: attachmentSize,
+    );
+    return _client.chat.sendMessage(request);
+  }
 
-    return {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'senderId': 'current_user',
-      'senderName': '나',
-      'content': content,
-      'timestamp': DateTime.now().toIso8601String(),
-      'isRead': false,
-    };
+  /// 채팅 메시지 스트림 구독 (실시간 메시지 수신)
+  ///
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// 반환: 실시간 메시지 스트림
+  Stream<pod.ChatMessageResponseDto> subscribeChatMessageStream(
+    int chatRoomId,
+  ) {
+    return _client.chatStream.chatMessageStream(chatRoomId);
   }
 }

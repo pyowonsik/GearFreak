@@ -1,3 +1,4 @@
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/chat/data/datasource/chat_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/entity/chat_message.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/repository/chat_repository.dart';
@@ -13,31 +14,86 @@ class ChatRepositoryImpl implements ChatRepository {
   /// 채팅 원격 데이터 소스
   final ChatRemoteDataSource remoteDataSource;
 
-  @override
-  Future<List<ChatMessage>> getChatList() async {
-    final data = await remoteDataSource.getChatList();
-    return data.map(_toEntity).toList();
-  }
+  // ==================== Public Methods (UseCase에서 호출) ====================
 
   @override
-  Future<List<ChatMessage>> getChatMessages(String chatRoomId) async {
-    return [];
-  }
-
-  @override
-  Future<ChatMessage> sendMessage({
-    required String chatRoomId,
-    required String content,
+  Future<pod.CreateChatRoomResponseDto> createOrGetChatRoom({
+    required int productId,
+    int? targetUserId,
   }) async {
-    final data = await remoteDataSource.sendMessage(
+    return remoteDataSource.createOrGetChatRoom(
+      productId: productId,
+      targetUserId: targetUserId,
+    );
+  }
+
+  @override
+  Future<pod.ChatRoom?> getChatRoomById(int chatRoomId) async {
+    return remoteDataSource.getChatRoomById(chatRoomId);
+  }
+
+  @override
+  Future<List<pod.ChatRoom>?> getUserChatRoomsByProductId(int productId) async {
+    return remoteDataSource.getUserChatRoomsByProductId(productId);
+  }
+
+  @override
+  Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId) async {
+    return remoteDataSource.joinChatRoom(chatRoomId);
+  }
+
+  @override
+  Future<List<pod.ChatParticipantInfoDto>> getChatParticipants(
+    int chatRoomId,
+  ) async {
+    return remoteDataSource.getChatParticipants(chatRoomId);
+  }
+
+  @override
+  Future<pod.PaginatedChatMessagesResponseDto> getChatMessages({
+    required int chatRoomId,
+    int page = 1,
+    int limit = 50,
+    pod.MessageType? messageType,
+  }) async {
+    return remoteDataSource.getChatMessages(
+      chatRoomId: chatRoomId,
+      page: page,
+      limit: limit,
+      messageType: messageType,
+    );
+  }
+
+  @override
+  Future<pod.ChatMessageResponseDto> sendMessage({
+    required int chatRoomId,
+    required String content,
+    required pod.MessageType messageType,
+    String? attachmentUrl,
+    String? attachmentName,
+    int? attachmentSize,
+  }) async {
+    return remoteDataSource.sendMessage(
       chatRoomId: chatRoomId,
       content: content,
+      messageType: messageType,
+      attachmentUrl: attachmentUrl,
+      attachmentName: attachmentName,
+      attachmentSize: attachmentSize,
     );
-    return _toEntity(data);
   }
 
   @override
   Future<void> markAsRead(String messageId) async {}
+
+  @override
+  Stream<pod.ChatMessageResponseDto> subscribeChatMessageStream(
+    int chatRoomId,
+  ) {
+    return remoteDataSource.subscribeChatMessageStream(chatRoomId);
+  }
+
+  // ==================== Private Helper Methods ====================
 
   /// JSON을 Entity로 변환
   ChatMessage _toEntity(Map<String, dynamic> json) {
