@@ -35,7 +35,7 @@ abstract class CreateChatRoomRequestDto
   /// 연결된 상품 ID
   int productId;
 
-  /// 상대방 사용자 ID (1:1 채팅의 경우)
+  /// 상대방 사용자 ID (1:1 채팅의 경우, 선택적)
   int? targetUserId;
 
   /// Returns a shallow copy of this [CreateChatRoomRequestDto]

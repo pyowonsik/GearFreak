@@ -52,7 +52,7 @@ abstract class SendMessageRequestDto
   /// 메시지 내용
   String content;
 
-  /// 메시지 타입 (text, image, file, system)
+  /// 메시지 타입 (text, image, file)
   _i2.MessageType messageType;
 
   /// 첨부파일 URL (선택적)
@@ -61,7 +61,7 @@ abstract class SendMessageRequestDto
   /// 첨부파일 이름 (선택적)
   String? attachmentName;
 
-  /// 첨부파일 크기 (bytes, 선택적)
+  /// 첨부파일 크기 (선택적)
   int? attachmentSize;
 
   /// Returns a shallow copy of this [SendMessageRequestDto]

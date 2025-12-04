@@ -11,7 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 
-/// 채팅방 참여자 정보
+/// 채팅 참여자 정보
 abstract class ChatParticipantInfoDto
     implements _i1.SerializableModel, _i1.ProtocolSerialization {
   ChatParticipantInfoDto._({
@@ -46,7 +46,7 @@ abstract class ChatParticipantInfoDto
   /// 사용자 ID
   int userId;
 
-  /// 닉네임
+  /// 사용자 닉네임
   String? nickname;
 
   /// 프로필 이미지 URL

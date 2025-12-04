@@ -11,7 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 
-/// 메시지 타입
+/// 채팅 메시지 타입
 enum MessageType implements _i1.SerializableModel {
   /// 텍스트 메시지
   text,

@@ -1,0 +1,7 @@
+### 채팅방 참여 요청
+class: JoinChatRoomRequestDto
+
+fields:
+  ### 참여할 채팅방 ID
+  chatRoomId: int
+

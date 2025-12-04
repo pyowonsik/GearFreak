@@ -9,6 +9,7 @@ import 'package:gear_freak_flutter/common/utils/product_utils.dart';
 import 'package:gear_freak_flutter/common/utils/share_utils.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_room_selection_modal.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
@@ -564,11 +565,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              // 1:1 채팅하기 버튼
+              // 1:1 채팅하기 / 대화중인 채팅방 보기 버튼
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    context.push('/chat/${widget.productId}');
+                    if (_isMyProduct(productData)) {
+                      // 본인 상품인 경우: 대화중인 채팅방 보기 모달
+                      ChatRoomSelectionModal.show(context);
+                    } else {
+                      // 다른 사람 상품인 경우: 1:1 채팅하기
+                      final sellerId = productData.sellerId;
+                      context
+                          .push('/chat/${widget.productId}?sellerId=$sellerId');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2563EB),
@@ -579,9 +588,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    '1:1 채팅하기',
-                    style: TextStyle(
+                  child: Text(
+                    _isMyProduct(productData) ? '대화중인 채팅방 보기' : '1:1 채팅하기',
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
