@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
+import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/view/view.dart';
@@ -16,13 +17,37 @@ class ChatRoomListScreen extends ConsumerStatefulWidget {
   ConsumerState<ChatRoomListScreen> createState() => _ChatRoomListScreenState();
 }
 
-class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
+class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
+    with PaginationScrollMixin {
   @override
   void initState() {
     super.initState();
+    initPaginationScroll(
+      onLoadMore: () {
+        ref.read(chatRoomListNotifierProvider.notifier).loadMoreChatRooms();
+      },
+      getPagination: () {
+        final state = ref.read(chatRoomListNotifierProvider);
+        if (state is ChatRoomListLoaded) {
+          return state.pagination;
+        }
+        return null;
+      },
+      isLoading: () {
+        final state = ref.read(chatRoomListNotifierProvider);
+        return state is ChatRoomListLoadingMore;
+      },
+      screenName: 'ChatRoomListScreen',
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
     });
+  }
+
+  @override
+  void dispose() {
+    disposePaginationScroll();
+    super.dispose();
   }
 
   @override
@@ -46,11 +71,18 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
             ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
           },
         ),
-      ChatRoomListLoaded(:final chatRooms) => chatRooms.isEmpty
-          ? const GbEmptyView(
-              message: '채팅 목록이 없습니다',
-            )
-          : ChatRoomListLoadedView(chatRoomList: chatRooms),
+      ChatRoomListLoaded(:final chatRooms, :final pagination) ||
+      ChatRoomListLoadingMore(:final chatRooms, :final pagination) =>
+        chatRooms.isEmpty
+            ? const GbEmptyView(
+                message: '채팅 목록이 없습니다',
+              )
+            : ChatRoomListLoadedView(
+                chatRoomList: chatRooms,
+                pagination: pagination,
+                scrollController: scrollController!,
+                isLoadingMore: state is ChatRoomListLoadingMore,
+              ),
     };
   }
 }

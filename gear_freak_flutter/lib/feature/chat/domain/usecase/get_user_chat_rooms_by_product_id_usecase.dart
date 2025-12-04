@@ -3,10 +3,10 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/domain.dart';
 
-/// 사용자가 참여한 채팅방 목록 조회 UseCase (상품 ID 기준)
+/// 사용자가 참여한 채팅방 목록 조회 UseCase (상품 ID 기준, 페이지네이션)
 class GetUserChatRoomsByProductIdUseCase
     implements
-        UseCase<List<pod.ChatRoom>?, GetUserChatRoomsByProductIdParams,
+        UseCase<pod.PaginatedChatRoomsResponseDto, GetUserChatRoomsByProductIdParams,
             ChatRepository> {
   /// GetUserChatRoomsByProductIdUseCase 생성자
   ///
@@ -20,12 +20,13 @@ class GetUserChatRoomsByProductIdUseCase
   ChatRepository get repo => repository;
 
   @override
-  Future<Either<Failure, List<pod.ChatRoom>?>> call(
+  Future<Either<Failure, pod.PaginatedChatRoomsResponseDto>> call(
     GetUserChatRoomsByProductIdParams param,
   ) async {
     try {
       final result = await repository.getUserChatRoomsByProductId(
-        param.productId,
+        productId: param.productId,
+        pagination: param.pagination,
       );
       return Right(result);
     } on Exception catch (e) {
@@ -44,10 +45,15 @@ class GetUserChatRoomsByProductIdParams {
   /// GetUserChatRoomsByProductIdParams 생성자
   ///
   /// [productId]는 상품 ID입니다.
+  /// [pagination]는 페이지네이션 정보입니다.
   const GetUserChatRoomsByProductIdParams({
     required this.productId,
+    required this.pagination,
   });
 
   /// 상품 ID
   final int productId;
+
+  /// 페이지네이션 정보
+  final pod.PaginationDto pagination;
 }

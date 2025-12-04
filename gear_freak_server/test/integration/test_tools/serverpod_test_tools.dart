@@ -26,42 +26,44 @@ import 'package:gear_freak_server/src/generated/feature/chat/model/dto/create_ch
     as _i8;
 import 'package:gear_freak_server/src/generated/feature/chat/model/chat_room.dart'
     as _i9;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/join_chat_room_response.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/paginated_chat_rooms_response.dto.dart'
     as _i10;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/join_chat_room_request.dto.dart'
-    as _i11;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/leave_chat_room_response.dto.dart'
-    as _i12;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/leave_chat_room_request.dto.dart'
-    as _i13;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/chat_participant_info.dto.dart'
-    as _i14;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/chat_message_response.dto.dart'
-    as _i15;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/send_message_request.dto.dart'
-    as _i16;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/paginated_chat_messages_response.dto.dart'
-    as _i17;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/get_chat_messages_request.dto.dart'
-    as _i18;
-import 'package:gear_freak_server/src/generated/feature/chat/model/chat_message.dart'
-    as _i19;
-import 'package:gear_freak_server/src/generated/feature/product/model/product.dart'
-    as _i20;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
-    as _i21;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
-    as _i22;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/paginated_products_response.dto.dart'
-    as _i23;
 import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+    as _i11;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/join_chat_room_response.dto.dart'
+    as _i12;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/join_chat_room_request.dto.dart'
+    as _i13;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/leave_chat_room_response.dto.dart'
+    as _i14;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/leave_chat_room_request.dto.dart'
+    as _i15;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/chat_participant_info.dto.dart'
+    as _i16;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/chat_message_response.dto.dart'
+    as _i17;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/send_message_request.dto.dart'
+    as _i18;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/paginated_chat_messages_response.dto.dart'
+    as _i19;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/get_chat_messages_request.dto.dart'
+    as _i20;
+import 'package:gear_freak_server/src/generated/feature/chat/model/chat_message.dart'
+    as _i21;
+import 'package:gear_freak_server/src/generated/feature/product/model/product.dart'
+    as _i22;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
+    as _i23;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
     as _i24;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/paginated_products_response.dto.dart'
     as _i25;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/product_stats.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
     as _i26;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/product_stats.dto.dart'
     as _i27;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i28;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -412,9 +414,10 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<List<_i9.ChatRoom>?> getUserChatRoomsByProductId(
+  _i3.Future<_i10.PaginatedChatRoomsResponseDto> getUserChatRoomsByProductId(
     _i1.TestSessionBuilder sessionBuilder,
     int productId,
+    _i11.PaginationDto pagination,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -427,13 +430,16 @@ class _ChatEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'chat',
           methodName: 'getUserChatRoomsByProductId',
-          parameters: _i1.testObjectToJson({'productId': productId}),
+          parameters: _i1.testObjectToJson({
+            'productId': productId,
+            'pagination': pagination,
+          }),
           serializationManager: _serializationManager,
         );
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i9.ChatRoom>?>);
+        ) as _i3.Future<_i10.PaginatedChatRoomsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -441,8 +447,10 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<List<_i9.ChatRoom>?> getMyChatRooms(
-      _i1.TestSessionBuilder sessionBuilder) async {
+  _i3.Future<_i10.PaginatedChatRoomsResponseDto> getMyChatRooms(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i11.PaginationDto pagination,
+  ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
@@ -454,13 +462,13 @@ class _ChatEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'chat',
           methodName: 'getMyChatRooms',
-          parameters: _i1.testObjectToJson({}),
+          parameters: _i1.testObjectToJson({'pagination': pagination}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i9.ChatRoom>?>);
+        ) as _i3.Future<_i10.PaginatedChatRoomsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -468,9 +476,9 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<_i10.JoinChatRoomResponseDto> joinChatRoom(
+  _i3.Future<_i12.JoinChatRoomResponseDto> joinChatRoom(
     _i1.TestSessionBuilder sessionBuilder,
-    _i11.JoinChatRoomRequestDto request,
+    _i13.JoinChatRoomRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -489,7 +497,7 @@ class _ChatEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i10.JoinChatRoomResponseDto>);
+        ) as _i3.Future<_i12.JoinChatRoomResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -497,9 +505,9 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<_i12.LeaveChatRoomResponseDto> leaveChatRoom(
+  _i3.Future<_i14.LeaveChatRoomResponseDto> leaveChatRoom(
     _i1.TestSessionBuilder sessionBuilder,
-    _i13.LeaveChatRoomRequestDto request,
+    _i15.LeaveChatRoomRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -518,7 +526,7 @@ class _ChatEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i12.LeaveChatRoomResponseDto>);
+        ) as _i3.Future<_i14.LeaveChatRoomResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -526,7 +534,7 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<List<_i14.ChatParticipantInfoDto>> getChatParticipants(
+  _i3.Future<List<_i16.ChatParticipantInfoDto>> getChatParticipants(
     _i1.TestSessionBuilder sessionBuilder,
     int chatRoomId,
   ) async {
@@ -547,7 +555,7 @@ class _ChatEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i14.ChatParticipantInfoDto>>);
+        ) as _i3.Future<List<_i16.ChatParticipantInfoDto>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -555,9 +563,9 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<_i15.ChatMessageResponseDto> sendMessage(
+  _i3.Future<_i17.ChatMessageResponseDto> sendMessage(
     _i1.TestSessionBuilder sessionBuilder,
-    _i16.SendMessageRequestDto request,
+    _i18.SendMessageRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -576,7 +584,7 @@ class _ChatEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i15.ChatMessageResponseDto>);
+        ) as _i3.Future<_i17.ChatMessageResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -584,9 +592,9 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<_i17.PaginatedChatMessagesResponseDto> getChatMessagesPaginated(
+  _i3.Future<_i19.PaginatedChatMessagesResponseDto> getChatMessagesPaginated(
     _i1.TestSessionBuilder sessionBuilder,
-    _i18.GetChatMessagesRequestDto request,
+    _i20.GetChatMessagesRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -605,7 +613,7 @@ class _ChatEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i17.PaginatedChatMessagesResponseDto>);
+        ) as _i3.Future<_i19.PaginatedChatMessagesResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -613,7 +621,7 @@ class _ChatEndpoint {
     });
   }
 
-  _i3.Future<_i19.ChatMessage?> getLastMessageByChatRoomId(
+  _i3.Future<_i21.ChatMessage?> getLastMessageByChatRoomId(
     _i1.TestSessionBuilder sessionBuilder,
     int chatRoomId,
   ) async {
@@ -634,7 +642,7 @@ class _ChatEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i19.ChatMessage?>);
+        ) as _i3.Future<_i21.ChatMessage?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -653,12 +661,12 @@ class _ChatStreamEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Stream<_i15.ChatMessageResponseDto> chatMessageStream(
+  _i3.Stream<_i17.ChatMessageResponseDto> chatMessageStream(
     _i1.TestSessionBuilder sessionBuilder,
     int chatRoomId,
   ) {
     var _localTestStreamManager =
-        _i1.TestStreamManager<_i15.ChatMessageResponseDto>();
+        _i1.TestStreamManager<_i17.ChatMessageResponseDto>();
     _i1.callStreamFunctionAndHandleExceptions(
       () async {
         var _localUniqueSession =
@@ -697,9 +705,9 @@ class _ProductEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i20.Product> createProduct(
+  _i3.Future<_i22.Product> createProduct(
     _i1.TestSessionBuilder sessionBuilder,
-    _i21.CreateProductRequestDto request,
+    _i23.CreateProductRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -718,7 +726,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i20.Product>);
+        ) as _i3.Future<_i22.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -726,9 +734,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i20.Product> updateProduct(
+  _i3.Future<_i22.Product> updateProduct(
     _i1.TestSessionBuilder sessionBuilder,
-    _i22.UpdateProductRequestDto request,
+    _i24.UpdateProductRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -747,7 +755,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i20.Product>);
+        ) as _i3.Future<_i22.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -755,7 +763,7 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i20.Product> getProduct(
+  _i3.Future<_i22.Product> getProduct(
     _i1.TestSessionBuilder sessionBuilder,
     int id,
   ) async {
@@ -776,7 +784,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i20.Product>);
+        ) as _i3.Future<_i22.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -784,9 +792,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i23.PaginatedProductsResponseDto> getPaginatedProducts(
+  _i3.Future<_i25.PaginatedProductsResponseDto> getPaginatedProducts(
     _i1.TestSessionBuilder sessionBuilder,
-    _i24.PaginationDto pagination,
+    _i11.PaginationDto pagination,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -805,7 +813,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i23.PaginatedProductsResponseDto>);
+        ) as _i3.Future<_i25.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -900,9 +908,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i23.PaginatedProductsResponseDto> getMyProducts(
+  _i3.Future<_i25.PaginatedProductsResponseDto> getMyProducts(
     _i1.TestSessionBuilder sessionBuilder,
-    _i24.PaginationDto pagination,
+    _i11.PaginationDto pagination,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -921,7 +929,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i23.PaginatedProductsResponseDto>);
+        ) as _i3.Future<_i25.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -929,9 +937,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i23.PaginatedProductsResponseDto> getMyFavoriteProducts(
+  _i3.Future<_i25.PaginatedProductsResponseDto> getMyFavoriteProducts(
     _i1.TestSessionBuilder sessionBuilder,
-    _i24.PaginationDto pagination,
+    _i11.PaginationDto pagination,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -950,7 +958,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i23.PaginatedProductsResponseDto>);
+        ) as _i3.Future<_i25.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -958,9 +966,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i20.Product> updateProductStatus(
+  _i3.Future<_i22.Product> updateProductStatus(
     _i1.TestSessionBuilder sessionBuilder,
-    _i25.UpdateProductStatusRequestDto request,
+    _i26.UpdateProductStatusRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -979,7 +987,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i20.Product>);
+        ) as _i3.Future<_i22.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -987,7 +995,7 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i26.ProductStatsDto> getProductStats(
+  _i3.Future<_i27.ProductStatsDto> getProductStats(
       _i1.TestSessionBuilder sessionBuilder) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1006,7 +1014,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i26.ProductStatsDto>);
+        ) as _i3.Future<_i27.ProductStatsDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1109,7 +1117,7 @@ class _UserEndpoint {
 
   _i3.Future<_i6.User> updateUserProfile(
     _i1.TestSessionBuilder sessionBuilder,
-    _i27.UpdateUserProfileRequestDto request,
+    _i28.UpdateUserProfileRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =

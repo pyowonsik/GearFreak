@@ -129,9 +129,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final productDetailState = ref.watch(productDetailNotifierProvider);
 
     return switch (productDetailState) {
-      ProductDetailLoading() => Scaffold(
-          appBar: const GbAppBar(title: Text('')),
-          body: const GbLoadingView(),
+      ProductDetailLoading() => const Scaffold(
+          appBar: GbAppBar(title: Text('')),
+          body: GbLoadingView(),
         ),
       ProductDetailError(:final message) => Scaffold(
           appBar: const GbAppBar(title: Text('')),
@@ -152,9 +152,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           seller,
           isFavorite,
         ),
-      ProductDetailInitial() => Scaffold(
-          appBar: const GbAppBar(title: Text('')),
-          body: const GbLoadingView(),
+      ProductDetailInitial() => const Scaffold(
+          appBar: GbAppBar(title: Text('')),
+          body: GbLoadingView(),
         ),
     };
   }
@@ -571,7 +571,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   onPressed: () {
                     if (_isMyProduct(productData)) {
                       // 본인 상품인 경우: 대화중인 채팅방 보기 모달
-                      ChatRoomSelectionModal.show(context);
+                      final productId = int.parse(widget.productId);
+                      ChatRoomSelectionModal.show(context, productId);
                     } else {
                       // 다른 사람 상품인 경우: 1:1 채팅하기
                       final sellerId = productData.sellerId;

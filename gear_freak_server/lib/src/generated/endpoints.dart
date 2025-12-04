@@ -20,19 +20,19 @@ import 'package:gear_freak_server/src/generated/common/s3/model/dto/generate_pre
     as _i8;
 import 'package:gear_freak_server/src/generated/feature/chat/model/dto/create_chat_room_request.dto.dart'
     as _i9;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/join_chat_room_request.dto.dart'
-    as _i10;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/leave_chat_room_request.dto.dart'
-    as _i11;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/send_message_request.dto.dart'
-    as _i12;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/get_chat_messages_request.dto.dart'
-    as _i13;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
-    as _i14;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
-    as _i15;
 import 'package:gear_freak_server/src/generated/common/model/pagination_dto.dart'
+    as _i10;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/join_chat_room_request.dto.dart'
+    as _i11;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/leave_chat_room_request.dto.dart'
+    as _i12;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/send_message_request.dto.dart'
+    as _i13;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/get_chat_messages_request.dto.dart'
+    as _i14;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
+    as _i15;
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
     as _i16;
 import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
     as _i17;
@@ -231,7 +231,12 @@ class Endpoints extends _i1.EndpointDispatch {
               name: 'productId',
               type: _i1.getType<int>(),
               nullable: false,
-            )
+            ),
+            'pagination': _i1.ParameterDescription(
+              name: 'pagination',
+              type: _i1.getType<_i10.PaginationDto>(),
+              nullable: false,
+            ),
           },
           call: (
             _i1.Session session,
@@ -241,23 +246,33 @@ class Endpoints extends _i1.EndpointDispatch {
                   .getUserChatRoomsByProductId(
             session,
             params['productId'],
+            params['pagination'],
           ),
         ),
         'getMyChatRooms': _i1.MethodConnector(
           name: 'getMyChatRooms',
-          params: {},
+          params: {
+            'pagination': _i1.ParameterDescription(
+              name: 'pagination',
+              type: _i1.getType<_i10.PaginationDto>(),
+              nullable: false,
+            )
+          },
           call: (
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['chat'] as _i4.ChatEndpoint).getMyChatRooms(session),
+              (endpoints['chat'] as _i4.ChatEndpoint).getMyChatRooms(
+            session,
+            params['pagination'],
+          ),
         ),
         'joinChatRoom': _i1.MethodConnector(
           name: 'joinChatRoom',
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i10.JoinChatRoomRequestDto>(),
+              type: _i1.getType<_i11.JoinChatRoomRequestDto>(),
               nullable: false,
             )
           },
@@ -275,7 +290,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i11.LeaveChatRoomRequestDto>(),
+              type: _i1.getType<_i12.LeaveChatRoomRequestDto>(),
               nullable: false,
             )
           },
@@ -311,7 +326,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i12.SendMessageRequestDto>(),
+              type: _i1.getType<_i13.SendMessageRequestDto>(),
               nullable: false,
             )
           },
@@ -329,7 +344,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i13.GetChatMessagesRequestDto>(),
+              type: _i1.getType<_i14.GetChatMessagesRequestDto>(),
               nullable: false,
             )
           },
@@ -400,7 +415,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i14.CreateProductRequestDto>(),
+              type: _i1.getType<_i15.CreateProductRequestDto>(),
               nullable: false,
             )
           },
@@ -418,7 +433,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i15.UpdateProductRequestDto>(),
+              type: _i1.getType<_i16.UpdateProductRequestDto>(),
               nullable: false,
             )
           },
@@ -454,7 +469,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i16.PaginationDto>(),
+              type: _i1.getType<_i10.PaginationDto>(),
               nullable: false,
             )
           },
@@ -527,7 +542,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i16.PaginationDto>(),
+              type: _i1.getType<_i10.PaginationDto>(),
               nullable: false,
             )
           },
@@ -545,7 +560,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'pagination': _i1.ParameterDescription(
               name: 'pagination',
-              type: _i1.getType<_i16.PaginationDto>(),
+              type: _i1.getType<_i10.PaginationDto>(),
               nullable: false,
             )
           },

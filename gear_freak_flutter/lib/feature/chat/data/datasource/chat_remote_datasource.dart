@@ -29,15 +29,66 @@ class ChatRemoteDataSource {
     return _client.chat.getChatRoomById(chatRoomId);
   }
 
-  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
-  Future<List<pod.ChatRoom>?> getUserChatRoomsByProductId(int productId) async {
-    return _client.chat.getUserChatRoomsByProductId(productId);
+  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준, 페이지네이션)
+  Future<pod.PaginatedChatRoomsResponseDto> getUserChatRoomsByProductId({
+    required int productId,
+    required pod.PaginationDto pagination,
+  }) async {
+    return _client.chat.getUserChatRoomsByProductId(productId, pagination);
+    // return _getHardcodedChatRooms(pagination);
   }
 
-  /// 사용자가 참여한 모든 채팅방 목록 조회
-  Future<List<pod.ChatRoom>?> getMyChatRooms() async {
-    return _client.chat.getMyChatRooms();
+  /// 사용자가 참여한 모든 채팅방 목록 조회 (페이지네이션)
+  Future<pod.PaginatedChatRoomsResponseDto> getMyChatRooms({
+    required pod.PaginationDto pagination,
+  }) async {
+    return _client.chat.getMyChatRooms(pagination);
+    // return _getHardcodedChatRooms(pagination);
   }
+
+  // // ==================== Private Helper Methods ====================
+
+  // /// 테스트용 하드코딩된 채팅방 목록 반환
+  // Future<pod.PaginatedChatRoomsResponseDto> _getHardcodedChatRooms(
+  //   pod.PaginationDto pagination,
+  // ) async {
+  //   // 60개의 하드코딩된 채팅방 생성
+  //   final allChatRooms = List.generate(60, (index) {
+  //     final now = DateTime.now();
+  //     final lastActivityAt = now.subtract(Duration(hours: index));
+  //     return pod.ChatRoom(
+  //       id: index + 1,
+  //       productId: (index % 10) + 1,
+  //       title: '채팅방 ${index + 1}',
+  //       chatRoomType: pod.ChatRoomType.direct,
+  //       participantCount: 2,
+  //       lastActivityAt: lastActivityAt,
+  //       createdAt: now.subtract(Duration(days: index)),
+  //       updatedAt: lastActivityAt,
+  //     );
+  //   });
+
+  //   // 페이지네이션 적용
+  //   final offset = (pagination.page - 1) * pagination.limit;
+  //   final endIndex = (offset + pagination.limit).clamp(0, allChatRooms.length);
+  //   final paginatedChatRooms = allChatRooms.sublist(
+  //     offset.clamp(0, allChatRooms.length),
+  //     endIndex,
+  //   );
+
+  //   final totalCount = allChatRooms.length;
+  //   final hasMore = endIndex < totalCount;
+
+  //   return pod.PaginatedChatRoomsResponseDto(
+  //     pagination: pod.PaginationDto(
+  //       page: pagination.page,
+  //       limit: pagination.limit,
+  //       totalCount: totalCount,
+  //       hasMore: hasMore,
+  //     ),
+  //     chatRooms: paginatedChatRooms,
+  //   );
+  // }
 
   /// 채팅방 참여
   Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId) async {

@@ -82,7 +82,12 @@ final chatRoomListNotifierProvider =
     StateNotifierProvider.autoDispose<ChatRoomListNotifier, ChatRoomListState>(
   (ref) {
     final getMyChatRoomsUseCase = ref.watch(getMyChatRoomsUseCaseProvider);
-    return ChatRoomListNotifier(getMyChatRoomsUseCase);
+    final getUserChatRoomsByProductIdUseCase =
+        ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
+    return ChatRoomListNotifier(
+      getMyChatRoomsUseCase,
+      getUserChatRoomsByProductIdUseCase,
+    );
   },
 );
 

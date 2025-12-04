@@ -1,0 +1,8 @@
+### 페이지네이션된 채팅방 목록 응답 DTO
+class: PaginatedChatRoomsResponseDto
+
+fields:
+  ### 페이지네이션 정보
+  pagination: PaginationDto
+  ### 채팅방 목록
+  chatRooms: List<ChatRoom>

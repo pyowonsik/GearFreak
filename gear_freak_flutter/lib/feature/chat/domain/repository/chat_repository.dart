@@ -12,11 +12,16 @@ abstract class ChatRepository {
   /// 채팅방 정보 조회
   Future<pod.ChatRoom?> getChatRoomById(int chatRoomId);
 
-  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
-  Future<List<pod.ChatRoom>?> getUserChatRoomsByProductId(int productId);
+  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준, 페이지네이션)
+  Future<pod.PaginatedChatRoomsResponseDto> getUserChatRoomsByProductId({
+    required int productId,
+    required pod.PaginationDto pagination,
+  });
 
-  /// 사용자가 참여한 모든 채팅방 목록 조회
-  Future<List<pod.ChatRoom>?> getMyChatRooms();
+  /// 사용자가 참여한 모든 채팅방 목록 조회 (페이지네이션)
+  Future<pod.PaginatedChatRoomsResponseDto> getMyChatRooms({
+    required pod.PaginationDto pagination,
+  });
 
   /// 채팅방 참여
   Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId);

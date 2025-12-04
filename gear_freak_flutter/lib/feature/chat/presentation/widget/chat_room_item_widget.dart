@@ -79,4 +79,3 @@ class ChatRoomItemWidget extends StatelessWidget {
     }
   }
 }
-

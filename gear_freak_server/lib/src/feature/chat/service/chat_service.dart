@@ -207,13 +207,16 @@ class ChatService {
     }
   }
 
-  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준)
-  Future<List<ChatRoom>?> getUserChatRoomsByProductId(
+  /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준, 페이지네이션)
+  Future<PaginatedChatRoomsResponseDto> getUserChatRoomsByProductId(
     Session session,
     int userId,
     int productId,
+    PaginationDto pagination,
   ) async {
     try {
+      final offset = (pagination.page - 1) * pagination.limit;
+
       // 사용자가 참여 중인 채팅방만 조회
       final participantChatRooms = await ChatParticipant.db.find(
         session,
@@ -228,18 +231,31 @@ class ChatService {
           .toSet();
 
       if (chatRoomIds.isEmpty) {
-        return [];
+        return _buildChatRoomsPaginationResponse([], 0, pagination);
       }
 
-      // 해당 productId이면서 참여 중인 채팅방들만 조회
-      final chatRooms = await ChatRoom.db.find(
+      // 전체 개수 조회
+      final totalCount = await ChatRoom.db.count(
         session,
         where: (chatRoom) =>
             chatRoom.productId.equals(productId) &
             chatRoom.id.inSet(chatRoomIds),
       );
 
-      return chatRooms;
+      // 해당 productId이면서 참여 중인 채팅방들만 조회 (페이지네이션 적용)
+      final chatRooms = await ChatRoom.db.find(
+        session,
+        where: (chatRoom) =>
+            chatRoom.productId.equals(productId) &
+            chatRoom.id.inSet(chatRoomIds),
+        orderBy: (chatRoom) => chatRoom.lastActivityAt,
+        orderDescending: true,
+        limit: pagination.limit,
+        offset: offset,
+      );
+
+      return _buildChatRoomsPaginationResponse(
+          chatRooms, totalCount, pagination);
     } on Exception catch (e, stackTrace) {
       session.log(
         '❌ 사용자 채팅방 목록 조회 실패: $e',
@@ -251,12 +267,15 @@ class ChatService {
     }
   }
 
-  /// 사용자가 참여한 모든 채팅방 목록 조회
-  Future<List<ChatRoom>?> getMyChatRooms(
+  /// 사용자가 참여한 모든 채팅방 목록 조회 (페이지네이션)
+  Future<PaginatedChatRoomsResponseDto> getMyChatRooms(
     Session session,
     int userId,
+    PaginationDto pagination,
   ) async {
     try {
+      final offset = (pagination.page - 1) * pagination.limit;
+
       // 사용자가 참여 중인 채팅방만 조회
       final participantChatRooms = await ChatParticipant.db.find(
         session,
@@ -271,18 +290,27 @@ class ChatService {
           .toSet();
 
       if (chatRoomIds.isEmpty) {
-        return [];
+        return _buildChatRoomsPaginationResponse([], 0, pagination);
       }
 
-      // 참여 중인 모든 채팅방 조회
+      // 전체 개수 조회
+      final totalCount = await ChatRoom.db.count(
+        session,
+        where: (chatRoom) => chatRoom.id.inSet(chatRoomIds),
+      );
+
+      // 참여 중인 채팅방 조회 (페이지네이션 적용)
       final chatRooms = await ChatRoom.db.find(
         session,
         where: (chatRoom) => chatRoom.id.inSet(chatRoomIds),
         orderBy: (chatRoom) => chatRoom.lastActivityAt,
         orderDescending: true,
+        limit: pagination.limit,
+        offset: offset,
       );
 
-      return chatRooms;
+      return _buildChatRoomsPaginationResponse(
+          chatRooms, totalCount, pagination);
     } on Exception catch (e, stackTrace) {
       session.log(
         '❌ 내 채팅방 목록 조회 실패: $e',
@@ -792,6 +820,26 @@ class ChatService {
   }
 
   // ==================== Private Helper Methods ====================
+
+  /// 채팅방 페이지네이션 응답 생성
+  PaginatedChatRoomsResponseDto _buildChatRoomsPaginationResponse(
+    List<ChatRoom> chatRooms,
+    int totalCount,
+    PaginationDto pagination,
+  ) {
+    final offset = (pagination.page - 1) * pagination.limit;
+    final hasMore = offset + chatRooms.length < totalCount;
+
+    return PaginatedChatRoomsResponseDto(
+      pagination: PaginationDto(
+        page: pagination.page,
+        limit: pagination.limit,
+        totalCount: totalCount,
+        hasMore: hasMore,
+      ),
+      chatRooms: chatRooms,
+    );
+  }
 
   /// 기존 1:1 채팅방 찾기
   Future<ChatRoom?> _findExistingDirectChatRoom(

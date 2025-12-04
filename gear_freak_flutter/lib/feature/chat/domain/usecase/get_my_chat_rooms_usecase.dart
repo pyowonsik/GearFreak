@@ -3,9 +3,11 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/domain.dart';
 
-/// 사용자가 참여한 모든 채팅방 목록 조회 UseCase
+/// 사용자가 참여한 모든 채팅방 목록 조회 UseCase (페이지네이션)
 class GetMyChatRoomsUseCase
-    implements UseCase<List<pod.ChatRoom>?, GetMyChatRoomsParams, ChatRepository> {
+    implements
+        UseCase<pod.PaginatedChatRoomsResponseDto, GetMyChatRoomsParams,
+            ChatRepository> {
   /// GetMyChatRoomsUseCase 생성자
   ///
   /// [repository]는 채팅 Repository 인스턴스입니다.
@@ -18,11 +20,13 @@ class GetMyChatRoomsUseCase
   ChatRepository get repo => repository;
 
   @override
-  Future<Either<Failure, List<pod.ChatRoom>?>> call(
+  Future<Either<Failure, pod.PaginatedChatRoomsResponseDto>> call(
     GetMyChatRoomsParams param,
   ) async {
     try {
-      final result = await repository.getMyChatRooms();
+      final result = await repository.getMyChatRooms(
+        pagination: param.pagination,
+      );
       return Right(result);
     } on Exception catch (e) {
       return Left(
@@ -38,6 +42,12 @@ class GetMyChatRoomsUseCase
 /// 사용자가 참여한 모든 채팅방 목록 조회 파라미터
 class GetMyChatRoomsParams {
   /// GetMyChatRoomsParams 생성자
-  const GetMyChatRoomsParams();
-}
+  ///
+  /// [pagination]는 페이지네이션 정보입니다.
+  const GetMyChatRoomsParams({
+    required this.pagination,
+  });
 
+  /// 페이지네이션 정보
+  final pod.PaginationDto pagination;
+}

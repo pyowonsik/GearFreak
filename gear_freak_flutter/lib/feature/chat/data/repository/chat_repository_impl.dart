@@ -33,13 +33,21 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<List<pod.ChatRoom>?> getUserChatRoomsByProductId(int productId) async {
-    return remoteDataSource.getUserChatRoomsByProductId(productId);
+  Future<pod.PaginatedChatRoomsResponseDto> getUserChatRoomsByProductId({
+    required int productId,
+    required pod.PaginationDto pagination,
+  }) async {
+    return remoteDataSource.getUserChatRoomsByProductId(
+      productId: productId,
+      pagination: pagination,
+    );
   }
 
   @override
-  Future<List<pod.ChatRoom>?> getMyChatRooms() async {
-    return remoteDataSource.getMyChatRooms();
+  Future<pod.PaginatedChatRoomsResponseDto> getMyChatRooms({
+    required pod.PaginationDto pagination,
+  }) async {
+    return remoteDataSource.getMyChatRooms(pagination: pagination);
   }
 
   @override

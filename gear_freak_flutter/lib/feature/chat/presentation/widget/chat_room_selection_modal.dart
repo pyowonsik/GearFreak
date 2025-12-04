@@ -1,18 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
+import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_room_selection_item_widget.dart';
 
 /// 채팅방 선택 모달
-class ChatRoomSelectionModal extends StatelessWidget {
+class ChatRoomSelectionModal extends ConsumerStatefulWidget {
   /// ChatRoomSelectionModal 생성자
-  const ChatRoomSelectionModal({super.key});
+  const ChatRoomSelectionModal({
+    required this.productId,
+    super.key,
+  });
+
+  /// 상품 ID
+  final int productId;
 
   /// 모달 표시
-  static Future<void> show(BuildContext context) {
+  static Future<void> show(BuildContext context, int productId) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const ChatRoomSelectionModal(),
+      builder: (context) => ChatRoomSelectionModal(productId: productId),
     );
+  }
+
+  @override
+  ConsumerState<ChatRoomSelectionModal> createState() =>
+      _ChatRoomSelectionModalState();
+}
+
+class _ChatRoomSelectionModalState extends ConsumerState<ChatRoomSelectionModal>
+    with PaginationScrollMixin {
+  @override
+  void initState() {
+    super.initState();
+    initPaginationScroll(
+      onLoadMore: () {
+        ref
+            .read(chatRoomListNotifierProvider.notifier)
+            .loadMoreChatRoomsByProductId(widget.productId);
+      },
+      getPagination: () {
+        final state = ref.read(chatRoomListNotifierProvider);
+        if (state is ChatRoomListLoaded) {
+          return state.pagination;
+        }
+        return null;
+      },
+      isLoading: () {
+        final state = ref.read(chatRoomListNotifierProvider);
+        return state is ChatRoomListLoadingMore;
+      },
+      screenName: 'ChatRoomSelectionModal',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(chatRoomListNotifierProvider.notifier)
+          .loadChatRoomsByProductId(widget.productId);
+    });
+  }
+
+  @override
+  void dispose() {
+    disposePaginationScroll();
+    super.dispose();
   }
 
   @override
@@ -60,208 +114,89 @@ class ChatRoomSelectionModal extends StatelessWidget {
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
           // 채팅방 리스트
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              children: [
-                // 기존 채팅방 목록 (하드코딩, 추후 데이터 연결)
-                _buildChatRoomItem(
-                  context,
-                  productName: '리프팅 벨트 (사이즈 M)',
-                  lastMessage: '네 알겠습니다!',
-                  time: '오후 3:20',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '손목 보호대 새상품',
-                  lastMessage: '가격 협의 가능할까요?',
-                  time: '오전 11:15',
-                  unreadCount: 2,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-                _buildChatRoomItem(
-                  context,
-                  productName: '니슬리브 판매합니다',
-                  lastMessage: '직거래 가능하신가요?',
-                  time: '어제',
-                  unreadCount: 0,
-                ),
-              ],
-            ),
+            child: _buildBody(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildChatRoomItem(
-    BuildContext context, {
-    required String productName,
-    required String lastMessage,
-    required String time,
-    required int unreadCount,
-  }) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        // TODO: 채팅방으로 이동 (추후 구현)
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: const BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+  Widget _buildBody() {
+    final chatRoomListState = ref.watch(chatRoomListNotifierProvider);
+
+    return switch (chatRoomListState) {
+      ChatRoomListInitial() || ChatRoomListLoading() => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ChatRoomListError(:final message) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('에러: $message'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref
+                      .read(chatRoomListNotifierProvider.notifier)
+                      .loadChatRoomsByProductId(widget.productId);
+                },
+                child: const Text('다시 시도'),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          children: [
-            // 상품 이미지
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(8),
+      ChatRoomListLoaded(:final chatRooms, :final pagination) ||
+      ChatRoomListLoadingMore(:final chatRooms, :final pagination) =>
+        chatRooms.isEmpty
+            ? const GbEmptyView(
+                message: '채팅방이 없습니다',
+              )
+            : Builder(
+                builder: (context) {
+                  final isLoadingMoreState =
+                      chatRoomListState is ChatRoomListLoadingMore;
+                  // isLoadingMore이면 항상 마지막에 로딩 인디케이터 표시
+                  // 아니면 hasMore일 때만 표시
+                  final itemCount = isLoadingMoreState
+                      ? chatRooms.length + 1
+                      : chatRooms.length +
+                          ((pagination.hasMore ?? false) ? 1 : 0);
+
+                  return ListView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: itemCount,
+                    itemBuilder: (context, index) {
+                      if (index == chatRooms.length) {
+                        // 마지막에 로딩 인디케이터 표시
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: isLoadingMoreState
+                                ? const CircularProgressIndicator()
+                                : const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                          ),
+                        );
+                      }
+                      final chatRoom = chatRooms[index];
+                      return ChatRoomSelectionItemWidget(
+                        chatRoom: chatRoom,
+                        onTap: () {
+                          Navigator.pop(context);
+                          // TODO: 채팅방으로 이동 - productId와 chatRoomId를 전달해야 함
+                          // context.push('/chat/${widget.productId}?chatRoomId=${chatRoom.id}');
+                        },
+                      );
+                    },
+                  );
+                },
               ),
-              child: const Icon(
-                Icons.shopping_bag,
-                size: 24,
-                color: Color(0xFF9CA3AF),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // 채팅 정보
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          productName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        time,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9CA3AF),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          lastMessage,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: unreadCount > 0
-                                ? const Color(0xFF1F2937)
-                                : const Color(0xFF9CA3AF),
-                            fontWeight: unreadCount > 0
-                                ? FontWeight.w500
-                                : FontWeight.normal,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (unreadCount > 0) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            unreadCount.toString(),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    };
   }
 }
