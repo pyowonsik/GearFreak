@@ -8,4 +8,3 @@ export 'chat_message_input_widget.dart';
 export 'chat_product_info_card_widget.dart';
 export 'chat_room_item_widget.dart';
 export 'chat_room_selection_item_widget.dart';
-export 'chat_room_selection_modal.dart';

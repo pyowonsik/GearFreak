@@ -18,9 +18,11 @@ class ChatScreen extends ConsumerStatefulWidget {
   ///
   /// [productId]는 상품 ID입니다. (채팅방 생성/조회에 사용)
   /// [sellerId]는 판매자 ID입니다. (기존 채팅방 찾기에 사용)
+  /// [chatRoomId]는 채팅방 ID입니다. (기존 채팅방 입장 시 사용)
   const ChatScreen({
     required this.productId,
     this.sellerId,
+    this.chatRoomId,
     super.key,
   });
 
@@ -29,6 +31,9 @@ class ChatScreen extends ConsumerStatefulWidget {
 
   /// 판매자 ID (기존 채팅방 찾기에 사용)
   final int? sellerId;
+
+  /// 채팅방 ID (기존 채팅방 입장 시 사용)
+  final int? chatRoomId;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -47,6 +52,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   /// 채팅방 로드
   Future<void> _loadChatRoom() async {
+    // chatRoomId가 있으면 기존 채팅방으로 직접 입장
+    if (widget.chatRoomId != null) {
+      await ref.read(chatNotifierProvider.notifier).enterChatRoomByChatRoomId(
+            chatRoomId: widget.chatRoomId!,
+          );
+      return;
+    }
+
+    // chatRoomId가 없으면 채팅방 생성 또는 조회
     final productId = int.tryParse(widget.productId);
     if (productId == null) {
       return;
@@ -54,7 +68,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     // sellerId가 제공되지 않으면 현재 사용자가 판매자가 아닌 경우이므로
     // 상품 정보를 가져와서 sellerId를 확인해야 함
-    int? targetUserId = widget.sellerId;
+    final targetUserId = widget.sellerId;
 
     // sellerId가 없으면 현재 사용자와 다른 사용자를 찾아야 함
     // 일단 sellerId를 전달 (null이면 백엔드에서 처리)

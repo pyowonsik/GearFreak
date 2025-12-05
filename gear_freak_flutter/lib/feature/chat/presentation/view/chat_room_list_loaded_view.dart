@@ -10,11 +10,15 @@ class ChatRoomListLoadedView extends StatelessWidget {
   /// [pagination]는 페이지네이션 정보입니다.
   /// [scrollController]는 스크롤 컨트롤러입니다.
   /// [isLoadingMore]는 더 불러오는 중인지 여부입니다.
+  /// [onRefresh]는 새로고침 콜백입니다.
+  /// [itemBuilder]는 채팅방 아이템을 빌드하는 콜백입니다. (선택)
   const ChatRoomListLoadedView({
     required this.chatRoomList,
     required this.pagination,
     required this.scrollController,
     required this.isLoadingMore,
+    required this.onRefresh,
+    this.itemBuilder,
     super.key,
   });
 
@@ -30,6 +34,14 @@ class ChatRoomListLoadedView extends StatelessWidget {
   /// 더 불러오는 중인지 여부
   final bool isLoadingMore;
 
+  /// 새로고침 콜백
+  final Future<void> Function() onRefresh;
+
+  /// 채팅방 아이템 빌더 (선택)
+  /// 제공되지 않으면 기본 `ChatRoomItemWidget`을 사용합니다.
+  final Widget Function(BuildContext context, pod.ChatRoom chatRoom)?
+      itemBuilder;
+
   @override
   Widget build(BuildContext context) {
     // isLoadingMore이면 항상 마지막에 로딩 인디케이터 표시
@@ -39,11 +51,10 @@ class ChatRoomListLoadedView extends StatelessWidget {
         : chatRoomList.length + ((pagination.hasMore ?? false) ? 1 : 0);
 
     return RefreshIndicator(
-      onRefresh: () async {
-        // TODO: 채팅방 목록 새로고침 로직 추가
-      },
+      onRefresh: onRefresh,
       child: ListView.builder(
         controller: scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: itemCount,
         itemBuilder: (context, index) {
           if (index == chatRoomList.length) {
@@ -64,7 +75,9 @@ class ChatRoomListLoadedView extends StatelessWidget {
             );
           }
           final chatRoom = chatRoomList[index];
-          return ChatRoomItemWidget(chatRoom: chatRoom);
+          return itemBuilder != null
+              ? itemBuilder!(context, chatRoom)
+              : ChatRoomItemWidget(chatRoom: chatRoom);
         },
       ),
     );

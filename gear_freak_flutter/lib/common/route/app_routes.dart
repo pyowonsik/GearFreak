@@ -2,6 +2,7 @@ import 'package:gear_freak_flutter/common/route/app_route.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/login_screen.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/signup_screen.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_screen.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_selection_screen.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
@@ -75,9 +76,23 @@ abstract final class AppRoutes {
           builder: (context, state) {
             final productId = state.pathParameters['id'] ?? '';
             final sellerId = state.uri.queryParameters['sellerId'];
+            final chatRoomId = state.uri.queryParameters['chatRoomId'];
             return ChatScreen(
               productId: productId,
               sellerId: sellerId != null ? int.tryParse(sellerId) : null,
+              chatRoomId: chatRoomId != null ? int.tryParse(chatRoomId) : null,
+            );
+          },
+        ),
+
+        // 채팅방 선택 화면
+        GoRoute(
+          path: '/chat-room-selection/:id',
+          name: 'chat-room-selection',
+          builder: (context, state) {
+            final productId = state.pathParameters['id'] ?? '';
+            return ChatRoomSelectionScreen(
+              productId: int.parse(productId),
             );
           },
         ),

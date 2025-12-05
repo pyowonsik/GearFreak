@@ -50,6 +50,11 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
     super.dispose();
   }
 
+  /// 채팅방 목록 새로고침
+  Future<void> _onRefresh() async {
+    await ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatRoomListState = ref.watch(chatRoomListNotifierProvider);
@@ -75,13 +80,14 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
       ChatRoomListLoadingMore(:final chatRooms, :final pagination) =>
         chatRooms.isEmpty
             ? const GbEmptyView(
-                message: '채팅 목록이 없습니다',
+                message: '채팅방이 없습니다',
               )
             : ChatRoomListLoadedView(
                 chatRoomList: chatRooms,
                 pagination: pagination,
                 scrollController: scrollController!,
                 isLoadingMore: state is ChatRoomListLoadingMore,
+                onRefresh: _onRefresh,
               ),
     };
   }

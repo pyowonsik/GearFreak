@@ -9,7 +9,6 @@ import 'package:gear_freak_flutter/common/utils/product_utils.dart';
 import 'package:gear_freak_flutter/common/utils/share_utils.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_room_selection_modal.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
@@ -570,9 +569,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_isMyProduct(productData)) {
-                      // 본인 상품인 경우: 대화중인 채팅방 보기 모달
+                      // 본인 상품인 경우: 대화중인 채팅방 보기 화면
                       final productId = int.parse(widget.productId);
-                      ChatRoomSelectionModal.show(context, productId);
+                      context.push('/chat-room-selection/$productId');
                     } else {
                       // 다른 사람 상품인 경우: 1:1 채팅하기
                       final sellerId = productData.sellerId;

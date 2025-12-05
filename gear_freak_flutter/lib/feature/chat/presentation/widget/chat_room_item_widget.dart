@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:go_router/go_router.dart';
 
 /// 채팅방 아이템 위젯
 /// Presentation Layer: 재사용 가능한 위젯
@@ -56,8 +57,9 @@ class ChatRoomItemWidget extends StatelessWidget {
             )
           : null,
       onTap: () {
-        // TODO: 채팅방 ID로 채팅방 화면으로 이동
-        // context.push('/chat-room/${chatRoom.id}');
+        context.push(
+          '/chat/${chatRoom.productId}?chatRoomId=${chatRoom.id}',
+        );
       },
     );
   }
