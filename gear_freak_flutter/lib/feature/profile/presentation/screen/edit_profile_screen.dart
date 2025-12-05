@@ -81,6 +81,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           imageFile: imageFile,
                           prefix: 'profile',
                         );
+                    // 새 이미지 업로드 시 기존 이미지 삭제 플래그 초기화
+                    if (_removedExistingImage) {
+                      setState(() {
+                        _removedExistingImage = false;
+                      });
+                    }
                   }
                 },
               ),
@@ -105,6 +111,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         await notifier.removeUploadedFileKey(
                           currentState.uploadedFileKey!,
                         );
+                        // 새로 업로드한 이미지를 삭제한 경우, 기존 이미지가 있으면 그것도 제거
+                        if (currentState.user.profileImageUrl != null &&
+                            currentState.user.profileImageUrl!.isNotEmpty) {
+                          setState(() {
+                            _removedExistingImage = true;
+                          });
+                        }
                       } else if (currentState.user.profileImageUrl != null &&
                           currentState.user.profileImageUrl!.isNotEmpty) {
                         // 기존 프로필 이미지가 있으면 제거 표시 (로컬 상태만 변경)
@@ -192,8 +205,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         title: const Text('프로필 편집'),
         actions: [
           TextButton(
-            onPressed: (isUpdating || isUploading) ? null : _saveProfile,
-            child: (isUpdating || isUploading)
+            onPressed: isUpdating ? null : _saveProfile,
+            child: isUpdating
                 ? const SizedBox(
                     width: 20,
                     height: 20,

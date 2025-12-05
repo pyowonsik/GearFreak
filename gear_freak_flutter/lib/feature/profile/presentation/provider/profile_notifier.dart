@@ -113,13 +113,32 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       return;
     }
 
+    // 기존에 업로드된 파일 키 저장 (업로드 실패 시 복원용)
+    final previousUploadedFileKey = currentState.uploadedFileKey;
+
     try {
-      // 1. 파일 정보 가져오기
+      // 1. 기존에 업로드된 파일이 있으면 먼저 삭제 (S3 정리)
+      if (previousUploadedFileKey != null) {
+        try {
+          await deleteImageUseCase(
+            DeleteImageParams(
+              fileKey: previousUploadedFileKey,
+              bucketType: bucketType,
+            ),
+          );
+        } catch (e) {
+          // 삭제 실패해도 계속 진행 (로깅만)
+          debugPrint(
+              '⚠️ 기존 업로드 파일 S3 삭제 실패 (계속 진행): $previousUploadedFileKey - $e');
+        }
+      }
+
+      // 2. 파일 정보 가져오기
       final fileName = imageFile.path.split('/').last;
       final fileBytes = await imageFile.readAsBytes();
       final fileSize = fileBytes.length;
 
-      // 2. Content-Type 결정
+      // 3. Content-Type 결정
       var contentType = 'image/jpeg';
       if (fileName.toLowerCase().endsWith('.png')) {
         contentType = 'image/png';
@@ -127,7 +146,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         contentType = 'image/webp';
       }
 
-      // 3. Presigned URL 요청 DTO 생성
+      // 4. Presigned URL 요청 DTO 생성
       final request = pod.GeneratePresignedUploadUrlRequestDto(
         fileName: fileName,
         contentType: contentType,
@@ -136,15 +155,15 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         prefix: prefix,
       );
 
-      // 4. 업로드 시작
+      // 5. 업로드 시작
       state = ProfileImageUploading(
         user: currentState.user,
-        uploadedFileKey: currentState.uploadedFileKey,
+        uploadedFileKey: null, // 새로 업로드하기 전이므로 null
         stats: currentState.stats,
         currentFileName: fileName,
       );
 
-      // 5. UseCase 호출
+      // 6. UseCase 호출
       final result = await uploadImageUseCase(
         UploadImageParams(
           request: request,
@@ -154,9 +173,10 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
       result.fold(
         (failure) {
+          // 업로드 실패 시 이전 상태로 복원 불가 (이미 삭제됨)
           state = ProfileImageUploadError(
             user: currentState.user,
-            uploadedFileKey: currentState.uploadedFileKey,
+            uploadedFileKey: null, // 이전 파일은 이미 삭제됨
             stats: currentState.stats,
             error: failure.message,
           );
@@ -170,9 +190,10 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         },
       );
     } catch (e) {
+      // 예외 발생 시에도 이전 상태로 복원 불가 (이미 삭제됨)
       state = ProfileImageUploadError(
         user: currentState.user,
-        uploadedFileKey: currentState.uploadedFileKey,
+        uploadedFileKey: null, // 이전 파일은 이미 삭제됨
         stats: currentState.stats,
         error: '이미지 업로드 중 오류가 발생했습니다: $e',
       );
@@ -245,6 +266,30 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     }
 
     try {
+      // 기존 이미지 URL에서 파일 키 추출 (S3 삭제용)
+      String? existingImageFileKey;
+      final s3BaseUrl = dotenv.env['S3_PUBLIC_BASE_URL']!;
+
+      // 기존 이미지가 있고, 다음 중 하나의 경우에 삭제:
+      // 1. removedExistingImage = true (사용자가 명시적으로 삭제)
+      // 2. uploadedFileKey가 있고 기존 이미지가 있음 (새 이미지로 교체)
+      if (currentState.user.profileImageUrl != null &&
+          currentState.user.profileImageUrl!.isNotEmpty) {
+        final shouldDeleteExistingImage = removedExistingImage ||
+            (currentState.uploadedFileKey != null); // 새 이미지로 교체되는 경우
+
+        if (shouldDeleteExistingImage) {
+          final existingImageUrl = currentState.user.profileImageUrl!;
+          if (existingImageUrl.startsWith(s3BaseUrl)) {
+            // URL에서 파일 키 추출: https://bucket.s3.region.amazonaws.com/path/to/file.jpg -> path/to/file.jpg
+            existingImageFileKey = existingImageUrl.substring(s3BaseUrl.length);
+            if (existingImageFileKey.startsWith('/')) {
+              existingImageFileKey = existingImageFileKey.substring(1);
+            }
+          }
+        }
+      }
+
       // 업로드된 이미지 URL 생성
       String? profileImageUrl;
       if (removedExistingImage) {
@@ -252,7 +297,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         profileImageUrl = null;
       } else if (currentState.uploadedFileKey != null) {
         // 새로 업로드된 이미지가 있으면 사용
-        final s3BaseUrl = dotenv.env['S3_PUBLIC_BASE_URL']!;
         profileImageUrl = '$s3BaseUrl/${currentState.uploadedFileKey}';
       } else if (currentState.user.profileImageUrl != null &&
           currentState.user.profileImageUrl!.isNotEmpty) {
@@ -276,7 +320,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       // UseCase 호출
       final result = await updateUserProfileUseCase(request);
 
-      result.fold(
+      await result.fold(
         (failure) {
           state = ProfileUpdateError(
             user: currentState.user,
@@ -285,7 +329,24 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
             error: failure.message,
           );
         },
-        (updatedUser) {
+        (updatedUser) async {
+          // 프로필 업데이트 성공 후, 기존 이미지가 제거되거나 교체된 경우 S3에서도 삭제
+          if (existingImageFileKey != null) {
+            try {
+              debugPrint('🗑️ 기존 프로필 이미지 S3 삭제 시작: $existingImageFileKey');
+              await deleteImageUseCase(
+                DeleteImageParams(
+                  fileKey: existingImageFileKey,
+                  bucketType: 'public',
+                ),
+              );
+              debugPrint('✅ 기존 프로필 이미지 S3 삭제 성공: $existingImageFileKey');
+            } catch (e) {
+              // S3 삭제 실패해도 프로필 업데이트는 성공했으므로 계속 진행
+              debugPrint('❌ 기존 프로필 이미지 S3 삭제 실패: $e');
+            }
+          }
+
           state = ProfileUpdated(
             user: updatedUser,
             stats: currentState.stats,
