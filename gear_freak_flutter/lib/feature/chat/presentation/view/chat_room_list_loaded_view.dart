@@ -11,6 +11,7 @@ class ChatRoomListLoadedView extends StatelessWidget {
   /// [scrollController]는 스크롤 컨트롤러입니다.
   /// [isLoadingMore]는 더 불러오는 중인지 여부입니다.
   /// [onRefresh]는 새로고침 콜백입니다.
+  /// [participantsMap]는 채팅방별 참여자 정보입니다.
   /// [itemBuilder]는 채팅방 아이템을 빌드하는 콜백입니다. (선택)
   const ChatRoomListLoadedView({
     required this.chatRoomList,
@@ -18,6 +19,7 @@ class ChatRoomListLoadedView extends StatelessWidget {
     required this.scrollController,
     required this.isLoadingMore,
     required this.onRefresh,
+    this.participantsMap = const {},
     this.itemBuilder,
     super.key,
   });
@@ -36,6 +38,9 @@ class ChatRoomListLoadedView extends StatelessWidget {
 
   /// 새로고침 콜백
   final Future<void> Function() onRefresh;
+
+  /// 채팅방별 참여자 정보 (chatRoomId -> 참여자 목록)
+  final Map<int, List<pod.ChatParticipantInfoDto>> participantsMap;
 
   /// 채팅방 아이템 빌더 (선택)
   /// 제공되지 않으면 기본 `ChatRoomItemWidget`을 사용합니다.
@@ -77,9 +82,21 @@ class ChatRoomListLoadedView extends StatelessWidget {
           final chatRoom = chatRoomList[index];
           return itemBuilder != null
               ? itemBuilder!(context, chatRoom)
-              : ChatRoomItemWidget(chatRoom: chatRoom);
+              : _buildChatRoomItem(chatRoom);
         },
       ),
+    );
+  }
+
+  /// 채팅방 아이템 빌드
+  Widget _buildChatRoomItem(pod.ChatRoom chatRoom) {
+    // Notifier에서 조회한 참여자 정보 사용
+    final participants =
+        chatRoom.id != null ? participantsMap[chatRoom.id!] : null;
+
+    return ChatRoomItemWidget(
+      chatRoom: chatRoom,
+      participants: participants,
     );
   }
 }

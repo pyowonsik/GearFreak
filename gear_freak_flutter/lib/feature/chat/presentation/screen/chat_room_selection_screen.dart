@@ -6,8 +6,7 @@ import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/view/view.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_room_selection_item_widget.dart';
-import 'package:go_router/go_router.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
 
 /// 채팅방 선택 화면
 class ChatRoomSelectionScreen extends ConsumerStatefulWidget {
@@ -33,25 +32,27 @@ class _ChatRoomSelectionScreenState
     initPaginationScroll(
       onLoadMore: () {
         ref
-            .read(chatRoomListNotifierProvider.notifier)
+            .read(chatRoomSelectionNotifierProvider(widget.productId).notifier)
             .loadMoreChatRoomsByProductId(widget.productId);
       },
       getPagination: () {
-        final state = ref.read(chatRoomListNotifierProvider);
+        final state =
+            ref.read(chatRoomSelectionNotifierProvider(widget.productId));
         if (state is ChatRoomListLoaded) {
           return state.pagination;
         }
         return null;
       },
       isLoading: () {
-        final state = ref.read(chatRoomListNotifierProvider);
+        final state =
+            ref.read(chatRoomSelectionNotifierProvider(widget.productId));
         return state is ChatRoomListLoadingMore;
       },
       screenName: 'ChatRoomSelectionScreen',
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref
-          .read(chatRoomListNotifierProvider.notifier)
+          .read(chatRoomSelectionNotifierProvider(widget.productId).notifier)
           .loadChatRoomsByProductId(widget.productId);
     });
   }
@@ -65,13 +66,14 @@ class _ChatRoomSelectionScreenState
   /// 채팅방 목록 새로고침
   Future<void> _onRefresh() async {
     await ref
-        .read(chatRoomListNotifierProvider.notifier)
+        .read(chatRoomSelectionNotifierProvider(widget.productId).notifier)
         .loadChatRoomsByProductId(widget.productId);
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatRoomListState = ref.watch(chatRoomListNotifierProvider);
+    final chatRoomListState =
+        ref.watch(chatRoomSelectionNotifierProvider(widget.productId));
 
     return Scaffold(
       appBar: const GbAppBar(
@@ -83,12 +85,21 @@ class _ChatRoomSelectionScreenState
             message: message,
             onRetry: () {
               ref
-                  .read(chatRoomListNotifierProvider.notifier)
+                  .read(chatRoomSelectionNotifierProvider(widget.productId)
+                      .notifier)
                   .loadChatRoomsByProductId(widget.productId);
             },
           ),
-        ChatRoomListLoaded(:final chatRooms, :final pagination) ||
-        ChatRoomListLoadingMore(:final chatRooms, :final pagination) =>
+        ChatRoomListLoaded(
+          :final chatRooms,
+          :final pagination,
+          :final participantsMap
+        ) ||
+        ChatRoomListLoadingMore(
+          :final chatRooms,
+          :final pagination,
+          :final participantsMap
+        ) =>
           chatRooms.isEmpty
               ? const GbEmptyView(
                   message: '채팅방이 없습니다',
@@ -97,17 +108,18 @@ class _ChatRoomSelectionScreenState
                   chatRoomList: chatRooms,
                   pagination: pagination,
                   scrollController: scrollController!,
+                  participantsMap: participantsMap,
                   isLoadingMore: chatRoomListState is ChatRoomListLoadingMore,
                   onRefresh: _onRefresh,
                   itemBuilder: (context, chatRoom) {
-                    return ChatRoomSelectionItemWidget(
+                    // 참여자 정보 가져오기
+                    final participants = chatRoom.id != null
+                        ? participantsMap[chatRoom.id!]
+                        : null;
+
+                    return ChatRoomItemWidget(
                       chatRoom: chatRoom,
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.push(
-                          '/chat/${widget.productId}?chatRoomId=${chatRoom.id}',
-                        );
-                      },
+                      participants: participants,
                     );
                   },
                 ),

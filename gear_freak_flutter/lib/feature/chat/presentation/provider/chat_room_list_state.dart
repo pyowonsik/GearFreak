@@ -24,9 +24,11 @@ class ChatRoomListLoaded extends ChatRoomListState {
   ///
   /// [chatRooms]는 채팅방 목록입니다.
   /// [pagination]는 페이지네이션 정보입니다.
+  /// [participantsMap]는 채팅방별 참여자 정보입니다. (chatRoomId -> 참여자 목록)
   const ChatRoomListLoaded({
     required this.chatRooms,
     required this.pagination,
+    this.participantsMap = const {},
   });
 
   /// 채팅방 목록
@@ -35,14 +37,19 @@ class ChatRoomListLoaded extends ChatRoomListState {
   /// 페이지네이션 정보
   final pod.PaginationDto pagination;
 
+  /// 채팅방별 참여자 정보 (chatRoomId -> 참여자 목록)
+  final Map<int, List<pod.ChatParticipantInfoDto>> participantsMap;
+
   /// ChatRoomListLoaded 복사
   ChatRoomListLoaded copyWith({
     List<pod.ChatRoom>? chatRooms,
     pod.PaginationDto? pagination,
+    Map<int, List<pod.ChatParticipantInfoDto>>? participantsMap,
   }) {
     return ChatRoomListLoaded(
       chatRooms: chatRooms ?? this.chatRooms,
       pagination: pagination ?? this.pagination,
+      participantsMap: participantsMap ?? this.participantsMap,
     );
   }
 }
@@ -53,6 +60,7 @@ class ChatRoomListLoadingMore extends ChatRoomListLoaded {
   const ChatRoomListLoadingMore({
     required super.chatRooms,
     required super.pagination,
+    super.participantsMap = const {},
   });
 }
 

@@ -76,8 +76,16 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
             ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
           },
         ),
-      ChatRoomListLoaded(:final chatRooms, :final pagination) ||
-      ChatRoomListLoadingMore(:final chatRooms, :final pagination) =>
+      ChatRoomListLoaded(
+        :final chatRooms,
+        :final pagination,
+        :final participantsMap
+      ) ||
+      ChatRoomListLoadingMore(
+        :final chatRooms,
+        :final pagination,
+        :final participantsMap
+      ) =>
         chatRooms.isEmpty
             ? const GbEmptyView(
                 message: '채팅방이 없습니다',
@@ -88,6 +96,7 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
                 scrollController: scrollController!,
                 isLoadingMore: state is ChatRoomListLoadingMore,
                 onRefresh: _onRefresh,
+                participantsMap: participantsMap,
               ),
     };
   }

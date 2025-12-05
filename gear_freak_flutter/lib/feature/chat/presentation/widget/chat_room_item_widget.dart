@@ -1,83 +1,85 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
 import 'package:go_router/go_router.dart';
 
 /// 채팅방 아이템 위젯
 /// Presentation Layer: 재사용 가능한 위젯
-class ChatRoomItemWidget extends StatelessWidget {
+class ChatRoomItemWidget extends ConsumerWidget {
   /// ChatRoomItemWidget 생성자
   ///
   /// [chatRoom]는 채팅방 정보입니다.
+  /// [participants]는 참여자 목록입니다. (선택, 제공되면 그룹 아바타에 사용)
   const ChatRoomItemWidget({
     required this.chatRoom,
+    this.participants,
     super.key,
   });
 
   /// 채팅방 정보
   final pod.ChatRoom chatRoom;
 
+  /// 참여자 목록 (선택)
+  final List<pod.ChatParticipantInfoDto>? participants;
+
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
-      leading: CircleAvatar(
-        radius: 28,
-        backgroundColor: const Color(0xFFF3F4F6),
-        child: Icon(
-          Icons.person,
-          color: Colors.grey.shade500,
-        ),
-      ),
-      title: Text(
-        chatRoom.title ?? '채팅방',
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
-      ),
-      subtitle: Text(
-        '참여자 ${chatRoom.participantCount}명',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 13,
-          color: Color(0xFF6B7280),
-        ),
-      ),
-      trailing: chatRoom.lastActivityAt != null
-          ? Text(
-              _formatTime(chatRoom.lastActivityAt!),
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF9CA3AF),
-              ),
-            )
-          : null,
-      onTap: () {
-        context.push(
-          '/chat/${chatRoom.productId}?chatRoomId=${chatRoom.id}',
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 상대방 닉네임 가져오기
+    final otherParticipantName = ChatUtil.getOtherParticipantName(
+      ref,
+      participants: participants,
+      defaultName: chatRoom.title ?? '채팅방',
     );
-  }
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 7) {
-      return '${dateTime.month}/${dateTime.day}';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}일 전';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}시간 전';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}분 전';
-    } else {
-      return '방금 전';
-    }
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          leading: ChatUtil.buildChatRoomAvatar(
+            participants: participants,
+            useCircleAvatar: true,
+          ),
+          title: Text(
+            otherParticipantName,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          ),
+          subtitle: Text(
+            '참여자 ${chatRoom.participantCount}명',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+          trailing: chatRoom.lastActivityAt != null
+              ? Text(
+                  ChatUtil.formatChatRoomTime(chatRoom.lastActivityAt!),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                )
+              : null,
+          onTap: () {
+            context.push(
+              '/chat/${chatRoom.productId}?chatRoomId=${chatRoom.id}',
+            );
+          },
+        ),
+        const Divider(
+          height: 1,
+          thickness: 1,
+          color: Color(0xFFE5E7EB),
+        ),
+      ],
+    );
   }
 }

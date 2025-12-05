@@ -78,16 +78,37 @@ final subscribeChatMessageStreamUseCaseProvider =
   return SubscribeChatMessageStreamUseCase(repository);
 });
 
-/// Chat Room List Notifier Provider (채팅방 목록 화면용)
+/// Chat Room List Notifier Provider (채팅방 목록 화면용 - 전체 채팅방)
 final chatRoomListNotifierProvider =
     StateNotifierProvider.autoDispose<ChatRoomListNotifier, ChatRoomListState>(
   (ref) {
     final getMyChatRoomsUseCase = ref.watch(getMyChatRoomsUseCaseProvider);
     final getUserChatRoomsByProductIdUseCase =
         ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
+    final getChatParticipantsUseCase =
+        ref.watch(getChatParticipantsUseCaseProvider);
     return ChatRoomListNotifier(
       getMyChatRoomsUseCase,
       getUserChatRoomsByProductIdUseCase,
+      getChatParticipantsUseCase,
+    );
+  },
+);
+
+/// Chat Room Selection Notifier Provider (채팅방 선택 화면용 - 특정 상품의 채팅방)
+/// productId를 파라미터로 받아서 해당 상품의 채팅방만 조회
+final chatRoomSelectionNotifierProvider =
+    StateNotifierProvider.autoDispose.family<ChatRoomListNotifier, ChatRoomListState, int>(
+  (ref, productId) {
+    final getMyChatRoomsUseCase = ref.watch(getMyChatRoomsUseCaseProvider);
+    final getUserChatRoomsByProductIdUseCase =
+        ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
+    final getChatParticipantsUseCase =
+        ref.watch(getChatParticipantsUseCaseProvider);
+    return ChatRoomListNotifier(
+      getMyChatRoomsUseCase,
+      getUserChatRoomsByProductIdUseCase,
+      getChatParticipantsUseCase,
     );
   },
 );
