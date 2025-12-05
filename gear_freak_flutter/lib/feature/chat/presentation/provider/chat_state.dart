@@ -27,12 +27,14 @@ class ChatLoaded extends ChatState {
   /// [messages]는 메시지 목록입니다.
   /// [pagination]는 페이지네이션 정보입니다.
   /// [isStreamConnected]는 스트림 연결 상태입니다.
+  /// [product]는 상품 정보입니다.
   const ChatLoaded({
     required this.chatRoom,
     this.participants = const [],
     this.messages = const [],
     this.pagination,
     this.isStreamConnected = false,
+    this.product,
   });
 
   /// 채팅방 정보
@@ -50,6 +52,9 @@ class ChatLoaded extends ChatState {
   /// 스트림 연결 상태
   final bool isStreamConnected;
 
+  /// 상품 정보
+  final pod.Product? product;
+
   /// ChatLoaded 복사
   ChatLoaded copyWith({
     pod.ChatRoom? chatRoom,
@@ -57,6 +62,7 @@ class ChatLoaded extends ChatState {
     List<pod.ChatMessageResponseDto>? messages,
     pod.PaginatedChatMessagesResponseDto? pagination,
     bool? isStreamConnected,
+    pod.Product? product,
   }) {
     return ChatLoaded(
       chatRoom: chatRoom ?? this.chatRoom,
@@ -64,6 +70,7 @@ class ChatLoaded extends ChatState {
       messages: messages ?? this.messages,
       pagination: pagination ?? this.pagination,
       isStreamConnected: isStreamConnected ?? this.isStreamConnected,
+      product: product ?? this.product,
     );
   }
 }
@@ -77,6 +84,7 @@ class ChatLoadingMore extends ChatLoaded {
     super.messages,
     super.pagination,
     super.isStreamConnected,
+    super.product,
   });
 }
 
@@ -90,4 +98,3 @@ class ChatError extends ChatState {
   /// 에러 메시지
   final String message;
 }
-

@@ -13,6 +13,7 @@ class ChatLoadedView extends ConsumerWidget {
   /// [messages]는 메시지 목록입니다.
   /// [participants]는 참여자 목록입니다.
   /// [pagination]는 페이지네이션 정보입니다.
+  /// [product]는 상품 정보입니다.
   /// [currentUser]는 현재 사용자 정보입니다.
   /// [currentUserId]는 현재 사용자 ID입니다.
   /// [isLoadingMore]는 추가 메시지 로딩 중 여부입니다.
@@ -30,6 +31,7 @@ class ChatLoadedView extends ConsumerWidget {
     required this.onLoadMore,
     required this.onSendPressed,
     required this.convertMessages,
+    this.product,
     super.key,
   });
 
@@ -44,6 +46,9 @@ class ChatLoadedView extends ConsumerWidget {
 
   /// 페이지네이션 정보
   final pod.PaginatedChatMessagesResponseDto? pagination;
+
+  /// 상품 정보
+  final pod.Product? product;
 
   /// 현재 사용자 정보
   final types.User currentUser;
@@ -69,12 +74,22 @@ class ChatLoadedView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 상품 정보 표시
+    final productName = product?.title ?? '상품 정보 없음';
+    final price = product != null
+        ? '${product!.price.toString().replaceAllMapped(
+              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+              (Match m) => '${m[1]},',
+            )}원'
+        : '가격 정보 없음';
+
     return Column(
       children: [
         // 상품 정보 카드
-        const ChatProductInfoCardWidget(
-          productName: '상품 정보', // TODO: 상품 정보를 가져와서 표시 (추후 구현)
-          price: '가격 정보',
+        ChatProductInfoCardWidget(
+          productName: productName,
+          price: price,
+          product: product,
         ),
         // 채팅 UI
         Expanded(
@@ -113,4 +128,3 @@ class ChatLoadedView extends ConsumerWidget {
     );
   }
 }
-

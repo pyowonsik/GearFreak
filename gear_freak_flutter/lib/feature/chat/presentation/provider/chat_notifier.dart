@@ -9,6 +9,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/join_chat_room_us
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/send_message_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/subscribe_chat_message_stream_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 
 /// 채팅 Notifier
 /// Presentation Layer: Riverpod 상태 관리
@@ -22,6 +23,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// [getChatMessagesUseCase]는 메시지 조회 UseCase입니다.
   /// [sendMessageUseCase]는 메시지 전송 UseCase입니다.
   /// [subscribeChatMessageStreamUseCase]는 메시지 스트림 구독 UseCase입니다.
+  /// [getProductDetailUseCase]는 상품 상세 조회 UseCase입니다.
   ChatNotifier(
     this.createOrGetChatRoomUseCase,
     this.getChatRoomByIdUseCase,
@@ -30,6 +32,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     this.getChatMessagesUseCase,
     this.sendMessageUseCase,
     this.subscribeChatMessageStreamUseCase,
+    this.getProductDetailUseCase,
   ) : super(const ChatInitial()) {
     _messageStreamSubscription = null;
   }
@@ -54,6 +57,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// 메시지 스트림 구독 UseCase
   final SubscribeChatMessageStreamUseCase subscribeChatMessageStreamUseCase;
+
+  /// 상품 상세 조회 UseCase
+  final GetProductDetailUseCase getProductDetailUseCase;
 
   /// 메시지 스트림 구독
   StreamSubscription<pod.ChatMessageResponseDto>? _messageStreamSubscription;
@@ -146,7 +152,20 @@ class ChatNotifier extends StateNotifier<ChatState> {
                   ),
                 );
 
-                // 6. 스트림 연결
+                // 6. 상품 정보 조회
+                pod.Product? product;
+                final productResult =
+                    await getProductDetailUseCase(chatRoom.productId);
+                productResult.fold(
+                  (failure) {
+                    // 상품 정보 조회 실패해도 채팅은 계속 진행
+                  },
+                  (productData) {
+                    product = productData;
+                  },
+                );
+
+                // 7. 스트림 연결
                 _connectMessageStream(chatRoomId);
 
                 state = ChatLoaded(
@@ -155,6 +174,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
                   messages: messagesData.messages,
                   pagination: messagesData.pagination,
                   isStreamConnected: true,
+                  product: product,
                 );
               },
             );
@@ -229,7 +249,20 @@ class ChatNotifier extends StateNotifier<ChatState> {
               ),
             );
 
-            // 5. 스트림 연결
+            // 5. 상품 정보 조회
+            pod.Product? product;
+            final productResult =
+                await getProductDetailUseCase(chatRoom.productId);
+            productResult.fold(
+              (failure) {
+                // 상품 정보 조회 실패해도 채팅은 계속 진행
+              },
+              (productData) {
+                product = productData;
+              },
+            );
+
+            // 6. 스트림 연결
             _connectMessageStream(chatRoomId);
 
             state = ChatLoaded(
@@ -238,6 +271,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
               messages: messagesData.messages,
               pagination: messagesData.pagination,
               isStreamConnected: true,
+              product: product,
             );
           },
         );
@@ -295,6 +329,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       messages: currentState.messages,
       pagination: currentState.pagination,
       isStreamConnected: currentState.isStreamConnected,
+      product: currentState.product,
     );
 
     final result = await getChatMessagesUseCase(
@@ -323,6 +358,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
           messages: [...currentState.messages, ...newMessages],
           pagination: newPagination,
           isStreamConnected: currentState.isStreamConnected,
+          product: currentState.product,
         );
       },
     );

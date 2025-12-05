@@ -219,18 +219,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         :final messages,
         :final participants,
         :final pagination,
+        :final product,
       ) ||
       ChatLoadingMore(
         :final chatRoom,
         :final messages,
         :final participants,
         :final pagination,
+        :final product,
       ) =>
         ChatLoadedView(
           chatRoom: chatRoom,
           messages: messages,
           participants: participants,
           pagination: pagination,
+          product: product,
           currentUser: currentUser,
           currentUserId: currentUserId,
           isLoadingMore: state is ChatLoadingMore,

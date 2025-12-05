@@ -7,6 +7,7 @@ import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_notif
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_notifier.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 
 /// Chat Remote DataSource Provider
 final chatRemoteDataSourceProvider = Provider<ChatRemoteDataSource>((ref) {
@@ -104,6 +105,7 @@ final chatNotifierProvider =
   final sendMessageUseCase = ref.watch(sendMessageUseCaseProvider);
   final subscribeChatMessageStreamUseCase =
       ref.watch(subscribeChatMessageStreamUseCaseProvider);
+  final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ChatNotifier(
     createOrGetChatRoomUseCase,
     getChatRoomByIdUseCase,
@@ -112,5 +114,6 @@ final chatNotifierProvider =
     getChatMessagesUseCase,
     sendMessageUseCase,
     subscribeChatMessageStreamUseCase,
+    getProductDetailUseCase,
   );
 });
