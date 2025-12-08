@@ -97,6 +97,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  chat_group_avatar:
+    dependency: "direct main"
+    description:
+      name: chat_group_avatar
+      sha256: "4fdd9e41141226667fd095d8afcd6fde5d42549cf7b5de795855e5d87dd17d9c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   clock:
     dependency: transitive
     description:
@@ -615,14 +623,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
-  kpostal:
+  kpostal_plus:
     dependency: "direct main"
     description:
-      name: kpostal
-      sha256: "5048c4bf5ba1f2a9a698064c525c17d15e8869b6d5240ee94584e55039f063b2"
+      name: kpostal_plus
+      sha256: "682d1b89656088add877bd830113487dccb07123bcb4e7d1b59f04954601f56b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.0.3"
   leak_tracker:
     dependency: transitive
     description:

@@ -24,6 +24,7 @@ environment:
 dependencies:
   app_links: ^6.4.1
   cached_network_image: ^3.3.1
+  chat_group_avatar: ^0.1.0
   cupertino_icons: ^1.0.5
   dartz: ^0.10.1
   file_picker: ^8.0.1
@@ -38,7 +39,7 @@ dependencies:
   go_router: ^15.1.2
   http: ^1.1.0
   image_picker: ^1.1.2
-  kpostal: ^1.1.0
+  kpostal_plus: ^1.0.3
   serverpod_auth_client: 2.9.2
   serverpod_auth_shared_flutter: 2.9.2
   serverpod_flutter: 2.9.2

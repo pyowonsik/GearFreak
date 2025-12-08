@@ -6,6 +6,5 @@ library;
 export 'gb_app_bar.dart';
 export 'gb_dialog.dart';
 export 'gb_divider.dart';
-export 'gb_group_avatar.dart';
 export 'gb_snackbar.dart';
 export 'gb_text_form_field.dart';

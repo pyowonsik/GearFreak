@@ -4,9 +4,8 @@ import 'package:gear_freak_flutter/common/presentation/component/component.dart'
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
 
-
 import 'package:image_picker/image_picker.dart';
-import 'package:kpostal/kpostal.dart';
+import 'package:kpostal_plus/kpostal_plus.dart';
 
 /// 상품 편집 폼 위젯 (생성/수정 공통)
 class ProductEditorForm extends StatefulWidget {
@@ -124,7 +123,7 @@ class _ProductEditorFormState extends State<ProductEditorForm> {
       final result = await Navigator.push<Kpostal?>(
         context,
         MaterialPageRoute(
-          builder: (_) => KpostalView(),
+          builder: (_) => KpostalPlusView(),
         ),
       );
 

@@ -1,7 +1,7 @@
+import 'package:chat_group_avatar/group_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 
@@ -61,7 +61,7 @@ class ChatUtil {
           .toList();
 
       if (imageUrls.isNotEmpty) {
-        return GbGroupAvatar(
+        return GroupAvatar(
           imageUrls: imageUrls,
           size: size,
           borderColor: Colors.white,
