@@ -87,10 +87,12 @@ final chatRoomListNotifierProvider =
         ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
     final getChatParticipantsUseCase =
         ref.watch(getChatParticipantsUseCaseProvider);
+    final getChatMessagesUseCase = ref.watch(getChatMessagesUseCaseProvider);
     return ChatRoomListNotifier(
       getMyChatRoomsUseCase,
       getUserChatRoomsByProductIdUseCase,
       getChatParticipantsUseCase,
+      getChatMessagesUseCase,
     );
   },
 );
@@ -105,10 +107,12 @@ final chatRoomSelectionNotifierProvider =
         ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
     final getChatParticipantsUseCase =
         ref.watch(getChatParticipantsUseCaseProvider);
+    final getChatMessagesUseCase = ref.watch(getChatMessagesUseCaseProvider);
     return ChatRoomListNotifier(
       getMyChatRoomsUseCase,
       getUserChatRoomsByProductIdUseCase,
       getChatParticipantsUseCase,
+      getChatMessagesUseCase,
     );
   },
 );

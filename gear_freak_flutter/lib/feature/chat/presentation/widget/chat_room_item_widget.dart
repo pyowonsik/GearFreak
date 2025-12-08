@@ -11,9 +11,11 @@ class ChatRoomItemWidget extends ConsumerWidget {
   ///
   /// [chatRoom]는 채팅방 정보입니다.
   /// [participants]는 참여자 목록입니다. (선택, 제공되면 그룹 아바타에 사용)
+  /// [lastMessage]는 마지막 메시지입니다. (선택, 제공되면 subtitle에 표시)
   const ChatRoomItemWidget({
     required this.chatRoom,
     this.participants,
+    this.lastMessage,
     super.key,
   });
 
@@ -22,6 +24,9 @@ class ChatRoomItemWidget extends ConsumerWidget {
 
   /// 참여자 목록 (선택)
   final List<pod.ChatParticipantInfoDto>? participants;
+
+  /// 마지막 메시지 (선택)
+  final pod.ChatMessageResponseDto? lastMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,7 +56,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
             ),
           ),
           subtitle: Text(
-            '참여자 ${chatRoom.participantCount}명',
+            lastMessage?.content ?? '채팅내용이 없습니다.',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(

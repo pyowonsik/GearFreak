@@ -79,12 +79,14 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
       ChatRoomListLoaded(
         :final chatRooms,
         :final pagination,
-        :final participantsMap
+        :final participantsMap,
+        :final lastMessagesMap
       ) ||
       ChatRoomListLoadingMore(
         :final chatRooms,
         :final pagination,
-        :final participantsMap
+        :final participantsMap,
+        :final lastMessagesMap
       ) =>
         chatRooms.isEmpty
             ? const GbEmptyView(
@@ -97,6 +99,7 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
                 isLoadingMore: state is ChatRoomListLoadingMore,
                 onRefresh: _onRefresh,
                 participantsMap: participantsMap,
+                lastMessagesMap: lastMessagesMap,
               ),
     };
   }

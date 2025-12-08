@@ -93,12 +93,14 @@ class _ChatRoomSelectionScreenState
         ChatRoomListLoaded(
           :final chatRooms,
           :final pagination,
-          :final participantsMap
+          :final participantsMap,
+          :final lastMessagesMap
         ) ||
         ChatRoomListLoadingMore(
           :final chatRooms,
           :final pagination,
-          :final participantsMap
+          :final participantsMap,
+          :final lastMessagesMap
         ) =>
           chatRooms.isEmpty
               ? const GbEmptyView(
@@ -109,6 +111,7 @@ class _ChatRoomSelectionScreenState
                   pagination: pagination,
                   scrollController: scrollController!,
                   participantsMap: participantsMap,
+                  lastMessagesMap: lastMessagesMap,
                   isLoadingMore: chatRoomListState is ChatRoomListLoadingMore,
                   onRefresh: _onRefresh,
                   itemBuilder: (context, chatRoom) {
@@ -116,10 +119,15 @@ class _ChatRoomSelectionScreenState
                     final participants = chatRoom.id != null
                         ? participantsMap[chatRoom.id!]
                         : null;
+                    // 마지막 메시지 정보 가져오기
+                    final lastMessage = chatRoom.id != null
+                        ? lastMessagesMap[chatRoom.id!]
+                        : null;
 
                     return ChatRoomItemWidget(
                       chatRoom: chatRoom,
                       participants: participants,
+                      lastMessage: lastMessage,
                     );
                   },
                 ),

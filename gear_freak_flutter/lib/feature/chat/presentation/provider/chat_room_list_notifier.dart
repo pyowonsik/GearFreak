@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_messages_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_participants_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_my_chat_rooms_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
@@ -13,10 +14,12 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   /// [getMyChatRoomsUseCase]는 내 채팅방 목록 조회 UseCase입니다.
   /// [getUserChatRoomsByProductIdUseCase]는 특정 상품의 채팅방 목록 조회 UseCase입니다.
   /// [getChatParticipantsUseCase]는 채팅방 참여자 목록 조회 UseCase입니다.
+  /// [getChatMessagesUseCase]는 채팅 메시지 조회 UseCase입니다.
   ChatRoomListNotifier(
     this.getMyChatRoomsUseCase,
     this.getUserChatRoomsByProductIdUseCase,
     this.getChatParticipantsUseCase,
+    this.getChatMessagesUseCase,
   ) : super(const ChatRoomListInitial());
 
   /// 내 채팅방 목록 조회 UseCase
@@ -27,6 +30,9 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
 
   /// 채팅방 참여자 목록 조회 UseCase
   final GetChatParticipantsUseCase getChatParticipantsUseCase;
+
+  /// 채팅 메시지 조회 UseCase
+  final GetChatMessagesUseCase getChatMessagesUseCase;
 
   // ==================== Public Methods (UseCase 호출) ====================
 
@@ -53,10 +59,13 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       (response) async {
         // 참여자 정보 조회
         final participantsMap = await _loadParticipants(response.chatRooms);
+        // 마지막 메시지 조회
+        final lastMessagesMap = await _loadLastMessages(response.chatRooms);
         state = ChatRoomListLoaded(
           chatRooms: response.chatRooms,
           pagination: response.pagination,
           participantsMap: participantsMap,
+          lastMessagesMap: lastMessagesMap,
         );
       },
     );
@@ -78,6 +87,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       chatRooms: currentState.chatRooms,
       pagination: pagination,
       participantsMap: currentState.participantsMap,
+      lastMessagesMap: currentState.lastMessagesMap,
     );
 
     final nextPagination = pod.PaginationDto(
@@ -102,10 +112,18 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
           ...currentState.participantsMap,
           ...newParticipantsMap,
         };
+        // 새로 로드된 채팅방들의 마지막 메시지 조회
+        final newLastMessagesMap = await _loadLastMessages(response.chatRooms);
+        // 기존 마지막 메시지 정보와 병합
+        final mergedLastMessagesMap = {
+          ...currentState.lastMessagesMap,
+          ...newLastMessagesMap,
+        };
         state = ChatRoomListLoaded(
           chatRooms: [...currentState.chatRooms, ...response.chatRooms],
           pagination: response.pagination,
           participantsMap: mergedParticipantsMap,
+          lastMessagesMap: mergedLastMessagesMap,
         );
       },
     );
@@ -138,10 +156,13 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       (response) async {
         // 참여자 정보 조회
         final participantsMap = await _loadParticipants(response.chatRooms);
+        // 마지막 메시지 조회
+        final lastMessagesMap = await _loadLastMessages(response.chatRooms);
         state = ChatRoomListLoaded(
           chatRooms: response.chatRooms,
           pagination: response.pagination,
           participantsMap: participantsMap,
+          lastMessagesMap: lastMessagesMap,
         );
       },
     );
@@ -162,6 +183,8 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
     state = ChatRoomListLoadingMore(
       chatRooms: currentState.chatRooms,
       pagination: pagination,
+      participantsMap: currentState.participantsMap,
+      lastMessagesMap: currentState.lastMessagesMap,
     );
 
     final nextPagination = pod.PaginationDto(
@@ -189,10 +212,18 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
           ...currentState.participantsMap,
           ...newParticipantsMap,
         };
+        // 새로 로드된 채팅방들의 마지막 메시지 조회
+        final newLastMessagesMap = await _loadLastMessages(response.chatRooms);
+        // 기존 마지막 메시지 정보와 병합
+        final mergedLastMessagesMap = {
+          ...currentState.lastMessagesMap,
+          ...newLastMessagesMap,
+        };
         state = ChatRoomListLoaded(
           chatRooms: [...currentState.chatRooms, ...response.chatRooms],
           pagination: response.pagination,
           participantsMap: mergedParticipantsMap,
+          lastMessagesMap: mergedLastMessagesMap,
         );
       },
     );
@@ -232,5 +263,47 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       }
     }
     return participantsMap;
+  }
+
+  /// 채팅방 목록의 마지막 메시지 조회 (병렬 처리)
+  Future<Map<int, pod.ChatMessageResponseDto>> _loadLastMessages(
+    List<pod.ChatRoom> chatRooms,
+  ) async {
+    final lastMessagesMap = <int, pod.ChatMessageResponseDto>{};
+
+    // 모든 채팅방의 마지막 메시지를 병렬로 조회
+    final futures = chatRooms.map((chatRoom) async {
+      if (chatRoom.id == null) {
+        return null;
+      }
+
+      final result = await getChatMessagesUseCase(
+        GetChatMessagesParams(
+          chatRoomId: chatRoom.id!,
+          page: 1,
+          limit: 1, // 마지막 메시지만 가져오기
+        ),
+      );
+
+      return result.fold(
+        (failure) => null,
+        (pagination) {
+          // 메시지가 있으면 첫 번째 메시지(가장 최근) 반환
+          if (pagination.messages.isNotEmpty) {
+            return (chatRoom.id!, pagination.messages.first);
+          }
+          return null;
+        },
+      );
+    });
+
+    final results = await Future.wait(futures);
+
+    for (final result in results) {
+      if (result != null) {
+        lastMessagesMap[result.$1] = result.$2;
+      }
+    }
+    return lastMessagesMap;
   }
 }
