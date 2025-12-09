@@ -129,7 +129,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         } catch (e) {
           // 삭제 실패해도 계속 진행 (로깅만)
           debugPrint(
-              '⚠️ 기존 업로드 파일 S3 삭제 실패 (계속 진행): $previousUploadedFileKey - $e');
+            '⚠️ 기존 업로드 파일 S3 삭제 실패 (계속 진행): $previousUploadedFileKey - $e',
+          );
         }
       }
 
@@ -158,7 +159,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       // 5. 업로드 시작
       state = ProfileImageUploading(
         user: currentState.user,
-        uploadedFileKey: null, // 새로 업로드하기 전이므로 null
         stats: currentState.stats,
         currentFileName: fileName,
       );
@@ -176,7 +176,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           // 업로드 실패 시 이전 상태로 복원 불가 (이미 삭제됨)
           state = ProfileImageUploadError(
             user: currentState.user,
-            uploadedFileKey: null, // 이전 파일은 이미 삭제됨
             stats: currentState.stats,
             error: failure.message,
           );
@@ -193,7 +192,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       // 예외 발생 시에도 이전 상태로 복원 불가 (이미 삭제됨)
       state = ProfileImageUploadError(
         user: currentState.user,
-        uploadedFileKey: null, // 이전 파일은 이미 삭제됨
         stats: currentState.stats,
         error: '이미지 업로드 중 오류가 발생했습니다: $e',
       );
@@ -234,11 +232,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           final updatedKeys = currentState.uploadedFileKey == fileKey
               ? null
               : currentState.uploadedFileKey;
-          state = ProfileLoaded(
-            user: currentState.user,
-            uploadedFileKey: updatedKeys,
-            stats: currentState.stats,
-          );
+          state = currentState.copyWith(uploadedFileKey: updatedKeys);
         },
       );
     } catch (e) {

@@ -12,7 +12,8 @@ import 'package:gear_freak_flutter/feature/product/presentation/view/profile_pro
 class ProfileProductsScreen extends ConsumerStatefulWidget {
   /// ProfileProductsScreen 생성자
   ///
-  /// [type]는 "myProducts" (내 상품), "mySoldProducts" (거래완료), 또는 "myFavorite" (찜 목록)입니다.
+  /// [type]는 "myProducts" (내 상품), "mySoldProducts" (거래완료),
+  /// 또는 "myFavorite" (찜 목록)입니다.
   const ProfileProductsScreen({
     required this.type,
     super.key,

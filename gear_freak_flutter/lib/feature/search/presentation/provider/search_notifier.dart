@@ -134,11 +134,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
       (failure) {
         debugPrint('❌ [SearchNotifier] 다음 페이지 로드 실패: ${failure.message}');
         // 에러 발생 시 이전 상태로 복구
-        state = SearchLoaded(
-          result: currentResult,
-          query: currentState.query,
-          sortBy: currentState.sortBy,
-        );
+        state = currentState.copyWith(result: currentResult);
       },
       (newResult) {
         // 기존 상품 목록에 새 상품 추가
@@ -157,11 +153,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
             '총 상품=${updatedResult.products.length}개, '
             'hasMore=${newResult.pagination.hasMore}');
 
-        state = SearchLoaded(
-          result: updatedResult,
-          query: currentState.query,
-          sortBy: currentState.sortBy,
-        );
+        state = currentState.copyWith(result: updatedResult);
       },
     );
   }
@@ -227,11 +219,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
           products: updatedProducts,
         );
 
-        state = SearchLoaded(
-          result: updatedResult,
-          query: currentState.query,
-          sortBy: currentState.sortBy,
-        );
+        state = currentState.copyWith(result: updatedResult);
       }
     } else if (currentState is SearchLoadingMore) {
       // 로딩 중 상태에서도 제거 처리
@@ -276,7 +264,8 @@ class SearchNotifier extends StateNotifier<SearchState> {
         if (updatedProducts.length < currentState.result.products.length) {
           debugPrint(
             '✏️ [SearchNotifier] 상품 제거 (판매완료): productId=${updatedProduct.id} '
-            '(${currentState.result.products.length}개 → ${updatedProducts.length}개)',
+            '(${currentState.result.products.length}개 → '
+            '${updatedProducts.length}개)',
           );
 
           final updatedTotalCount =
@@ -290,11 +279,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
             products: updatedProducts,
           );
 
-          state = SearchLoaded(
-            result: updatedResult,
-            query: currentState.query,
-            sortBy: currentState.sortBy,
-          );
+          state = currentState.copyWith(result: updatedResult);
         }
         return;
       }
@@ -317,11 +302,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
           products: updatedProducts,
         );
 
-        state = SearchLoaded(
-          result: updatedResult,
-          query: currentState.query,
-          sortBy: currentState.sortBy,
-        );
+        state = currentState.copyWith(result: updatedResult);
       }
     } else if (currentState is SearchLoadingMore) {
       // 로딩 중 상태에서도 동일한 로직 적용
@@ -333,8 +314,10 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
         if (updatedProducts.length < currentState.result.products.length) {
           debugPrint(
-            '✏️ [SearchNotifier] 상품 제거 (판매완료, 로딩 중): productId=${updatedProduct.id} '
-            '(${currentState.result.products.length}개 → ${updatedProducts.length}개)',
+            '✏️ [SearchNotifier] 상품 제거 (판매완료, 로딩 중): '
+            'productId=${updatedProduct.id} '
+            '(${currentState.result.products.length}개 → '
+            '${updatedProducts.length}개)',
           );
 
           final updatedTotalCount =

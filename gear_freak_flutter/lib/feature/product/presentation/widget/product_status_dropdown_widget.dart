@@ -31,8 +31,11 @@ class ProductStatusDropdownWidget extends StatelessWidget {
       child: DropdownButton<pod.ProductStatus>(
         value: currentStatus,
         underline: const SizedBox.shrink(),
-        icon: const Icon(Icons.arrow_drop_down,
-            color: Color(0xFF6B7280), size: 20),
+        icon: const Icon(
+          Icons.arrow_drop_down,
+          color: Color(0xFF6B7280),
+          size: 20,
+        ),
         isDense: true,
         items: const [
           DropdownMenuItem(

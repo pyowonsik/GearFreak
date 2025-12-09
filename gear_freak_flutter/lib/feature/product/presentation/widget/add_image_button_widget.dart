@@ -48,4 +48,3 @@ class AddImageButtonWidget extends StatelessWidget {
     );
   }
 }
-

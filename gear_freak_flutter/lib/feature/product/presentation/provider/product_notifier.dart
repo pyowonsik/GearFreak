@@ -229,12 +229,9 @@ class ProductNotifier extends StateNotifier<ProductState> {
             '총 상품=${updatedProducts.length}개, '
             'hasMore=${response.pagination.hasMore}');
 
-        state = ProductPaginatedLoaded(
+        state = currentState.copyWith(
           products: updatedProducts,
           pagination: response.pagination,
-          category: currentState.category, // 카테고리 정보 유지
-          sortBy: currentState.sortBy, // 정렬 기준 유지
-          profileType: currentState.profileType, // 프로필 타입 유지
         );
       },
     );
@@ -265,8 +262,8 @@ class ProductNotifier extends StateNotifier<ProductState> {
     }
 
     state = const ProductLoading();
-    debugPrint(
-        '🔄 [ProductNotifier] 내 상품 목록 로드: page=$page, limit=$limit, status=$status');
+    debugPrint('🔄 [ProductNotifier] 내 상품 목록 로드: page=$page,'
+        ' limit=$limit, status=$status');
 
     final pagination = pod.PaginationDto(
       page: page,
@@ -290,7 +287,6 @@ class ProductNotifier extends StateNotifier<ProductState> {
         state = ProductPaginatedLoaded(
           products: response.products,
           pagination: response.pagination,
-          sortBy: null,
           profileType: status == pod.ProductStatus.sold
               ? 'mySoldProducts'
               : status == pod.ProductStatus.selling
@@ -308,7 +304,8 @@ class ProductNotifier extends StateNotifier<ProductState> {
   }) async {
     if (getMyFavoriteProductsUseCase == null) {
       debugPrint(
-          '⚠️ [ProductNotifier] getMyFavoriteProductsUseCase가 주입되지 않았습니다.');
+        '⚠️ [ProductNotifier] getMyFavoriteProductsUseCase가 주입되지 않았습니다.',
+      );
       state = const ProductError('찜 목록을 불러올 수 없습니다.');
       return;
     }
@@ -337,7 +334,6 @@ class ProductNotifier extends StateNotifier<ProductState> {
         state = ProductPaginatedLoaded(
           products: response.products,
           pagination: response.pagination,
-          sortBy: null,
           profileType: 'myFavorite',
         );
       },
@@ -379,12 +375,9 @@ class ProductNotifier extends StateNotifier<ProductState> {
         hasMore: updatedProducts.length < updatedTotalCount,
       );
 
-      state = ProductPaginatedLoaded(
+      state = currentState.copyWith(
         products: updatedProducts,
         pagination: updatedPagination,
-        category: currentState.category,
-        sortBy: currentState.sortBy,
-        profileType: currentState.profileType,
       );
     }
   }
@@ -476,13 +469,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
         '✏️ [ProductNotifier] 상품 수정: productId=${updatedProduct.id}',
       );
 
-      state = ProductPaginatedLoaded(
-        products: updatedProducts,
-        pagination: currentState.pagination,
-        category: currentState.category,
-        sortBy: currentState.sortBy,
-        profileType: currentState.profileType,
-      );
+      state = currentState.copyWith(products: updatedProducts);
     }
   }
 

@@ -70,7 +70,10 @@ class ChatRemoteDataSource {
 
   //   // 페이지네이션 적용
   //   final offset = (pagination.page - 1) * pagination.limit;
-  //   final endIndex = (offset + pagination.limit).clamp(0, allChatRooms.length);
+  //   final endIndex = (offset + pagination.limit).clamp(
+  //     0,
+  //     allChatRooms.length,
+  //   );
   //   final paginatedChatRooms = allChatRooms.sublist(
   //     offset.clamp(0, allChatRooms.length),
   //     endIndex,

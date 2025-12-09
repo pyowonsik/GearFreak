@@ -1,6 +1,5 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/chat/data/datasource/chat_remote_datasource.dart';
-import 'package:gear_freak_flutter/feature/chat/domain/entity/chat_message.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/repository/chat_repository.dart';
 
 /// 채팅 Repository 구현
@@ -107,16 +106,4 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   // ==================== Private Helper Methods ====================
-
-  /// JSON을 Entity로 변환
-  ChatMessage _toEntity(Map<String, dynamic> json) {
-    return ChatMessage(
-      id: json['id'] as String,
-      senderId: json['senderId'] as String,
-      senderName: json['senderName'] as String,
-      content: json['content'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-      isRead: json['isRead'] as bool? ?? false,
-    );
-  }
 }

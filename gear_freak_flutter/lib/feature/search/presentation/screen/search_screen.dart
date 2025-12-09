@@ -76,7 +76,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           FocusScope.of(context).unfocus();
         },
         child: Column(
-          children: [
+        children: [
             SearchTextFieldWidget(
               controller: _searchController,
               focusNode: _searchFocusNode,
@@ -95,13 +95,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                 _searchController.clear();
                 ref.read(searchNotifierProvider.notifier).clearSearch();
               },
-            ),
-            Expanded(
+          ),
+          Expanded(
               child: _showRecentSearches
                   ? _buildRecentSearchesScreen()
                   : _buildBody(searchState),
-            ),
-          ],
+          ),
+        ],
         ),
       ),
     );
@@ -141,7 +141,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       SearchError(:final message, :final query) => GbErrorView(
           message: '에러: $message',
           onRetry: () {
-            if (query != null) {
+                  if (query != null) {
               ref.read(searchNotifierProvider.notifier).searchProducts(query);
             }
           },

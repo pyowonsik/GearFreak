@@ -59,6 +59,23 @@ class ProductPaginatedLoaded extends ProductState {
 
   /// 프로필 화면 타입
   final String? profileType; // "myProducts" 또는 "myFavorite"
+
+  /// ProductPaginatedLoaded 복사
+  ProductPaginatedLoaded copyWith({
+    List<pod.Product>? products,
+    pod.PaginationDto? pagination,
+    pod.ProductCategory? category,
+    pod.ProductSortBy? sortBy,
+    String? profileType,
+  }) {
+    return ProductPaginatedLoaded(
+      products: products ?? this.products,
+      pagination: pagination ?? this.pagination,
+      category: category ?? this.category,
+      sortBy: sortBy ?? this.sortBy,
+      profileType: profileType ?? this.profileType,
+    );
+  }
 }
 
 /// 페이지네이션 추가 로딩 중 상태 (기존 데이터 유지)
@@ -92,4 +109,21 @@ class ProductPaginatedLoadingMore extends ProductState {
 
   /// 프로필 화면 타입
   final String? profileType; // "myProducts" 또는 "myFavorite"
+
+  /// ProductPaginatedLoadingMore 복사
+  ProductPaginatedLoadingMore copyWith({
+    List<pod.Product>? products,
+    pod.PaginationDto? pagination,
+    pod.ProductCategory? category,
+    pod.ProductSortBy? sortBy,
+    String? profileType,
+  }) {
+    return ProductPaginatedLoadingMore(
+      products: products ?? this.products,
+      pagination: pagination ?? this.pagination,
+      category: category ?? this.category,
+      sortBy: sortBy ?? this.sortBy,
+      profileType: profileType ?? this.profileType,
+    );
+  }
 }

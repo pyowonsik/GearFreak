@@ -85,8 +85,10 @@ class _ChatRoomSelectionScreenState
             message: message,
             onRetry: () {
               ref
-                  .read(chatRoomSelectionNotifierProvider(widget.productId)
-                      .notifier)
+                  .read(
+                    chatRoomSelectionNotifierProvider(widget.productId)
+                        .notifier,
+                  )
                   .loadChatRoomsByProductId(widget.productId);
             },
           ),

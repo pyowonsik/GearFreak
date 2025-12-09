@@ -14,6 +14,15 @@ class SearchInitial extends SearchState {
 
   /// 최근 검색어 목록
   final List<String> recentSearches;
+
+  /// SearchInitial 복사
+  SearchInitial copyWith({
+    List<String>? recentSearches,
+  }) {
+    return SearchInitial(
+      recentSearches: recentSearches ?? this.recentSearches,
+    );
+  }
 }
 
 /// 검색 중 상태
@@ -48,6 +57,19 @@ class SearchLoaded extends SearchState {
 
   /// 정렬 기준
   final pod.ProductSortBy? sortBy;
+
+  /// SearchLoaded 복사
+  SearchLoaded copyWith({
+    pod.PaginatedProductsResponseDto? result,
+    String? query,
+    pod.ProductSortBy? sortBy,
+  }) {
+    return SearchLoaded(
+      result: result ?? this.result,
+      query: query ?? this.query,
+      sortBy: sortBy ?? this.sortBy,
+    );
+  }
 }
 
 /// 검색 추가 로딩 중 상태 (기존 데이터 유지)
@@ -71,6 +93,19 @@ class SearchLoadingMore extends SearchState {
 
   /// 정렬 기준
   final pod.ProductSortBy? sortBy;
+
+  /// SearchLoadingMore 복사
+  SearchLoadingMore copyWith({
+    pod.PaginatedProductsResponseDto? result,
+    String? query,
+    pod.ProductSortBy? sortBy,
+  }) {
+    return SearchLoadingMore(
+      result: result ?? this.result,
+      query: query ?? this.query,
+      sortBy: sortBy ?? this.sortBy,
+    );
+  }
 }
 
 /// 검색 실패 상태

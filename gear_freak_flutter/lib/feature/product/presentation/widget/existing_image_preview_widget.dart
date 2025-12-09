@@ -83,4 +83,3 @@ class ExistingImagePreviewWidget extends StatelessWidget {
     );
   }
 }
-

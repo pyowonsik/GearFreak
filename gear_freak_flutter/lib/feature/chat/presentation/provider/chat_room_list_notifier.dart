@@ -119,7 +119,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
           ...currentState.lastMessagesMap,
           ...newLastMessagesMap,
         };
-        state = ChatRoomListLoaded(
+        state = currentState.copyWith(
           chatRooms: [...currentState.chatRooms, ...response.chatRooms],
           pagination: response.pagination,
           participantsMap: mergedParticipantsMap,
@@ -219,7 +219,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
           ...currentState.lastMessagesMap,
           ...newLastMessagesMap,
         };
-        state = ChatRoomListLoaded(
+        state = currentState.copyWith(
           chatRooms: [...currentState.chatRooms, ...response.chatRooms],
           pagination: response.pagination,
           participantsMap: mergedParticipantsMap,
@@ -280,7 +280,6 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       final result = await getChatMessagesUseCase(
         GetChatMessagesParams(
           chatRoomId: chatRoom.id!,
-          page: 1,
           limit: 1, // 마지막 메시지만 가져오기
         ),
       );

@@ -130,6 +130,7 @@ class UpdateProductStatusFailure extends ProductFailure {
   @override
   String toString() => 'UpdateProductStatusFailure: $message';
 }
+
 /// 상품 통계 조회 실패
 class GetProductStatsFailure extends ProductFailure {
   /// GetProductStatsFailure 생성자
@@ -142,4 +143,3 @@ class GetProductStatsFailure extends ProductFailure {
   @override
   String toString() => 'GetProductStatsFailure: $message';
 }
-

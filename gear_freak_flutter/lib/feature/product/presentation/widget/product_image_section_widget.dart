@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/add_image_button_widget.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/existing_image_preview_widget.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/new_image_preview_widget.dart';
+import 'package:image_picker/image_picker.dart';
 
 /// 상품 이미지 섹션 위젯
 ///

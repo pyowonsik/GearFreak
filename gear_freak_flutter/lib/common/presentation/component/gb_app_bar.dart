@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// 공통 AppBar 위젯
-/// 
+///
 /// prefix와 suffix를 통해 title 앞뒤에 위젯을 추가할 수 있습니다.
 class GbAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// GbAppBar 생성자
@@ -42,7 +42,7 @@ class GbAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget titleWidget = title;
+    var titleWidget = title;
 
     // prefix나 suffix가 있으면 Row로 감싸기
     if (prefix != null || suffix != null) {
@@ -73,4 +73,3 @@ class GbAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-

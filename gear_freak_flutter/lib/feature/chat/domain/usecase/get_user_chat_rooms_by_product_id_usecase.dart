@@ -6,8 +6,8 @@ import 'package:gear_freak_flutter/feature/chat/domain/domain.dart';
 /// 사용자가 참여한 채팅방 목록 조회 UseCase (상품 ID 기준, 페이지네이션)
 class GetUserChatRoomsByProductIdUseCase
     implements
-        UseCase<pod.PaginatedChatRoomsResponseDto, GetUserChatRoomsByProductIdParams,
-            ChatRepository> {
+        UseCase<pod.PaginatedChatRoomsResponseDto,
+            GetUserChatRoomsByProductIdParams, ChatRepository> {
   /// GetUserChatRoomsByProductIdUseCase 생성자
   ///
   /// [repository]는 채팅 Repository 인스턴스입니다.

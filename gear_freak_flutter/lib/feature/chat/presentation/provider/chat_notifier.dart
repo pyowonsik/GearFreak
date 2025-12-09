@@ -352,13 +352,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
             .where((m) => !existingIds.contains(m.id))
             .toList();
 
-        state = ChatLoaded(
-          chatRoom: currentState.chatRoom,
-          participants: currentState.participants,
+        state = currentState.copyWith(
           messages: [...currentState.messages, ...newMessages],
           pagination: newPagination,
-          isStreamConnected: currentState.isStreamConnected,
-          product: currentState.product,
         );
       },
     );

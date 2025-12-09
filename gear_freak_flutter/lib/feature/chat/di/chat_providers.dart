@@ -99,8 +99,8 @@ final chatRoomListNotifierProvider =
 
 /// Chat Room Selection Notifier Provider (채팅방 선택 화면용 - 특정 상품의 채팅방)
 /// productId를 파라미터로 받아서 해당 상품의 채팅방만 조회
-final chatRoomSelectionNotifierProvider =
-    StateNotifierProvider.autoDispose.family<ChatRoomListNotifier, ChatRoomListState, int>(
+final chatRoomSelectionNotifierProvider = StateNotifierProvider.autoDispose
+    .family<ChatRoomListNotifier, ChatRoomListState, int>(
   (ref, productId) {
     final getMyChatRoomsUseCase = ref.watch(getMyChatRoomsUseCaseProvider);
     final getUserChatRoomsByProductIdUseCase =
