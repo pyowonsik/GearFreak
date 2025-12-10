@@ -48,7 +48,7 @@ class CategoryFilterSectionComponent extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: selectedCategory == null
                             ? const Color(0xFF2563EB)
-                            : const Color(0xFF2563EB).withOpacity(0.1),
+                            : const Color(0xFF2563EB).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
                         border: selectedCategory == null
                             ? Border.all(
@@ -101,7 +101,7 @@ class CategoryFilterSectionComponent extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? categoryColor
-                              : categoryColor.withOpacity(0.1),
+                              : categoryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                           border: isSelected
                               ? Border.all(

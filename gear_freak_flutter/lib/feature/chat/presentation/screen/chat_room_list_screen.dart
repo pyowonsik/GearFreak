@@ -89,8 +89,19 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
         :final lastMessagesMap
       ) =>
         chatRooms.isEmpty
-            ? const GbEmptyView(
-                message: '채팅방이 없습니다',
+            ? RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height -
+                        kToolbarHeight -
+                        MediaQuery.of(context).padding.top,
+                    child: const GbEmptyView(
+                      message: '채팅방이 없습니다',
+                    ),
+                  ),
+                ),
               )
             : ChatRoomListLoadedView(
                 chatRoomList: chatRooms,

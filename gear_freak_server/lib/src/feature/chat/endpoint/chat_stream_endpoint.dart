@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:gear_freak_server/src/common/authenticated_mixin.dart';
+import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -11,14 +12,10 @@ class ChatStreamEndpoint extends Endpoint with AuthenticatedMixin {
     Session session,
     int chatRoomId,
   ) async* {
-    // 인증 확인
-    final isUserSignedIn = await session.isUserSignedIn;
-    if (!isUserSignedIn) {
-      throw Exception('인증이 필요합니다. 로그인 후 다시 시도해주세요.');
-    }
-
-    final userInfo = await session.authenticated;
-    if (userInfo == null) {
+    // 인증 확인 및 User 정보 가져오기
+    // ChatParticipant.userId는 User.id를 저장하므로 UserService.getMe를 사용해야 함
+    final user = await UserService.getMe(session);
+    if (user.id == null) {
       throw Exception('사용자 정보를 찾을 수 없습니다.');
     }
 
@@ -26,7 +23,7 @@ class ChatStreamEndpoint extends Endpoint with AuthenticatedMixin {
     final participation = await ChatParticipant.db.findFirstRow(
       session,
       where: (participant) =>
-          participant.userId.equals(userInfo.userId) &
+          participant.userId.equals(user.id!) &
           participant.chatRoomId.equals(chatRoomId) &
           participant.isActive.equals(true),
     );

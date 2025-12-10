@@ -279,7 +279,23 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
   }
 
-  /// 메시지 전송
+  /// 상품 정보만 로드 (채팅방이 없을 때)
+  Future<void> loadProductInfo({
+    required int productId,
+    int? targetUserId,
+  }) async {
+    final productResult = await getProductDetailUseCase(productId);
+    productResult.fold(
+      (failure) {
+        state = ChatError(failure.message);
+      },
+      (product) {
+        state = ChatInitial(product: product);
+      },
+    );
+  }
+
+  /// 메시지 전송 (채팅방이 있는 경우)
   Future<void> sendMessage({
     required int chatRoomId,
     required String content,
@@ -305,6 +321,50 @@ class ChatNotifier extends StateNotifier<ChatState> {
       },
       (message) {
         // 스트림을 통해 자동으로 수신되므로 별도 처리 불필요
+      },
+    );
+  }
+
+  /// 메시지 전송 (채팅방이 없는 경우, 카카오톡/당근마켓 방식)
+  /// 첫 메시지 전송 시 채팅방 생성 후 메시지 전송
+  Future<void> sendMessageWithoutChatRoom({
+    required int productId,
+    required String content,
+    int? targetUserId,
+    pod.MessageType messageType = pod.MessageType.text,
+    String? attachmentUrl,
+    String? attachmentName,
+    int? attachmentSize,
+  }) async {
+    state = const ChatLoading();
+
+    // 메시지 전송 (서버에서 채팅방이 없으면 생성)
+    final result = await sendMessageUseCase(
+      SendMessageParams(
+        chatRoomId: null, // 채팅방이 없음을 명시
+        productId: productId,
+        targetUserId: targetUserId,
+        content: content,
+        messageType: messageType,
+        attachmentUrl: attachmentUrl,
+        attachmentName: attachmentName,
+        attachmentSize: attachmentSize,
+      ),
+    );
+
+    await result.fold(
+      (failure) async {
+        state = ChatError(failure.message);
+      },
+      (message) async {
+        // 메시지 전송 성공 후 채팅방 정보 로드
+        final chatRoomId = message.chatRoomId;
+
+        // 채팅방 정보 조회 및 진입 (이미 스트림 연결 포함)
+        await enterChatRoomByChatRoomId(chatRoomId: chatRoomId);
+
+        // enterChatRoomByChatRoomId에서 이미 스트림을 연결하므로 추가 연결 불필요
+        // 전송한 메시지는 enterChatRoomByChatRoomId에서 메시지 목록을 로드할 때 포함됨
       },
     );
   }

@@ -51,6 +51,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   /// 채팅방 로드
+  /// 카카오톡/당근마켓 방식: chatRoomId가 있으면 기존 채팅방으로 입장, 없으면 빈 상태로 유지
   Future<void> _loadChatRoom() async {
     // chatRoomId가 있으면 기존 채팅방으로 직접 입장
     if (widget.chatRoomId != null) {
@@ -60,33 +61,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
-    // chatRoomId가 없으면 채팅방 생성 또는 조회
+    // chatRoomId가 없으면 채팅방을 생성하지 않고 빈 상태로 유지
+    // 첫 메시지 전송 시 채팅방이 생성됨 (카카오톡/당근마켓 방식)
+    // 상품 정보만 로드
     final productId = int.tryParse(widget.productId);
     if (productId == null) {
       return;
     }
 
-    // sellerId가 제공되지 않으면 현재 사용자가 판매자가 아닌 경우이므로
-    // 상품 정보를 가져와서 sellerId를 확인해야 함
-    final targetUserId = widget.sellerId;
-
-    // sellerId가 없으면 현재 사용자와 다른 사용자를 찾아야 함
-    // 일단 sellerId를 전달 (null이면 백엔드에서 처리)
-    await ref.read(chatNotifierProvider.notifier).createOrGetChatRoomAndEnter(
+    // 상품 정보만 로드하여 표시
+    await ref.read(chatNotifierProvider.notifier).loadProductInfo(
           productId: productId,
-          targetUserId: targetUserId,
+          targetUserId: widget.sellerId,
         );
   }
 
   /// 메시지 전송
+  /// 카카오톡/당근마켓 방식: 채팅방이 없으면 생성 후 메시지 전송
   void _handleSendPressed(types.PartialText message) {
     final state = ref.read(chatNotifierProvider);
-    if (state is! ChatLoaded) return;
+    final productId = int.tryParse(widget.productId);
+    final targetUserId = widget.sellerId;
 
-    ref.read(chatNotifierProvider.notifier).sendMessage(
-          chatRoomId: state.chatRoom.id!,
-          content: message.text,
-        );
+    if (state is ChatLoaded) {
+      // 기존 채팅방이 있으면 메시지만 전송
+      ref.read(chatNotifierProvider.notifier).sendMessage(
+            chatRoomId: state.chatRoom.id!,
+            content: message.text,
+          );
+    } else if (state is ChatInitial && productId != null) {
+      // 채팅방이 없으면 생성 후 메시지 전송
+      ref.read(chatNotifierProvider.notifier).sendMessageWithoutChatRoom(
+            productId: productId,
+            targetUserId: targetUserId,
+            content: message.text,
+          );
+    }
   }
 
   /// ChatMessageResponseDto를 flutter_chat_types Message로 변환
@@ -209,10 +219,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     int? currentUserId,
   ) {
     return switch (state) {
-      ChatInitial() || ChatLoading() => const GbLoadingView(),
+      ChatLoading() => const GbLoadingView(),
       ChatError(:final message) => GbErrorView(
           message: message,
           onRetry: _loadChatRoom,
+        ),
+      ChatInitial(:final product) =>
+        // 채팅방이 없는 상태에서도 채팅 입력 UI 표시 (카카오톡/당근마켓 방식)
+        ChatLoadedView(
+          chatRoom: _createDummyChatRoom(),
+          messages: const [],
+          participants: const [],
+          pagination: null,
+          product: product,
+          currentUser: currentUser,
+          currentUserId: currentUserId,
+          isLoadingMore: false,
+          onLoadMore: null,
+          onSendPressed: _handleSendPressed,
+          convertMessages: _convertMessages,
         ),
       ChatLoaded(
         :final chatRoom,
@@ -248,5 +273,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           convertMessages: _convertMessages,
         ),
     };
+  }
+
+  /// 더미 채팅방 생성 (채팅방이 없을 때 UI 표시용)
+  pod.ChatRoom _createDummyChatRoom() {
+    final productId = int.tryParse(widget.productId) ?? 0;
+    return pod.ChatRoom(
+      id: null,
+      productId: productId,
+      title: null,
+      chatRoomType: pod.ChatRoomType.direct,
+      participantCount: 0,
+      lastActivityAt: DateTime.now(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
   }
 }

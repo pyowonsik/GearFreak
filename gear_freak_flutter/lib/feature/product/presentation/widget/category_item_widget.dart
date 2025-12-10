@@ -46,7 +46,7 @@ class CategoryItemWidget extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: colors['background']!.withOpacity(0.1),
+                color: colors['background']!.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(

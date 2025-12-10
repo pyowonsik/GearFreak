@@ -2,8 +2,12 @@
 class: SendMessageRequestDto
 
 fields:
-  ### 채팅방 ID
-  chatRoomId: int
+  ### 채팅방 ID (채팅방이 없을 경우 null 또는 0)
+  chatRoomId: int?
+  ### 상품 ID (채팅방이 없을 경우 필수)
+  productId: int?
+  ### 상대방 사용자 ID (채팅방이 없을 경우 필수)
+  targetUserId: int?
   ### 메시지 내용
   content: String
   ### 메시지 타입 (text, image, file)

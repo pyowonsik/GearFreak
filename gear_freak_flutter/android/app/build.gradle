@@ -7,13 +7,13 @@ plugins {
 
 android {
     namespace = "com.pyowonsik.gearFreakFlutter"
-    compileSdk = 35
+    compileSdk = 36
     // NDK 버전 명시적 지정
-    // 플러그인들(connectivity_plus, file_picker, image_cropper 등)이 NDK 26.1.10909125를 요구
+    // 플러그인들(connectivity_plus, file_picker, image_cropper 등)이 NDK 27.0.12077973을 요구
     // flutter.ndkVersion을 사용하면 Flutter 권장 버전(23.1.7779620)을 사용하지만,
     // 플러그인 호환성을 위해 최신 버전 명시
     // NDK는 하위 호환되므로 최신 버전 사용이 안전함
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -29,7 +29,7 @@ android {
         applicationId = "com.pyowonsik.gearFreakFlutter"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 21
+        minSdkVersion = flutter.minSdkVersion
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName

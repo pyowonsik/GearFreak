@@ -16,7 +16,9 @@ import '../../../../feature/chat/model/enum/message_type.dart' as _i2;
 abstract class SendMessageRequestDto
     implements _i1.SerializableModel, _i1.ProtocolSerialization {
   SendMessageRequestDto._({
-    required this.chatRoomId,
+    this.chatRoomId,
+    this.productId,
+    this.targetUserId,
     required this.content,
     required this.messageType,
     this.attachmentUrl,
@@ -25,7 +27,9 @@ abstract class SendMessageRequestDto
   });
 
   factory SendMessageRequestDto({
-    required int chatRoomId,
+    int? chatRoomId,
+    int? productId,
+    int? targetUserId,
     required String content,
     required _i2.MessageType messageType,
     String? attachmentUrl,
@@ -36,7 +40,9 @@ abstract class SendMessageRequestDto
   factory SendMessageRequestDto.fromJson(
       Map<String, dynamic> jsonSerialization) {
     return SendMessageRequestDto(
-      chatRoomId: jsonSerialization['chatRoomId'] as int,
+      chatRoomId: jsonSerialization['chatRoomId'] as int?,
+      productId: jsonSerialization['productId'] as int?,
+      targetUserId: jsonSerialization['targetUserId'] as int?,
       content: jsonSerialization['content'] as String,
       messageType:
           _i2.MessageType.fromJson((jsonSerialization['messageType'] as int)),
@@ -46,8 +52,14 @@ abstract class SendMessageRequestDto
     );
   }
 
-  /// 채팅방 ID
-  int chatRoomId;
+  /// 채팅방 ID (채팅방이 없을 경우 null 또는 0)
+  int? chatRoomId;
+
+  /// 상품 ID (채팅방이 없을 경우 필수)
+  int? productId;
+
+  /// 상대방 사용자 ID (채팅방이 없을 경우 필수)
+  int? targetUserId;
 
   /// 메시지 내용
   String content;
@@ -69,6 +81,8 @@ abstract class SendMessageRequestDto
   @_i1.useResult
   SendMessageRequestDto copyWith({
     int? chatRoomId,
+    int? productId,
+    int? targetUserId,
     String? content,
     _i2.MessageType? messageType,
     String? attachmentUrl,
@@ -78,7 +92,9 @@ abstract class SendMessageRequestDto
   @override
   Map<String, dynamic> toJson() {
     return {
-      'chatRoomId': chatRoomId,
+      if (chatRoomId != null) 'chatRoomId': chatRoomId,
+      if (productId != null) 'productId': productId,
+      if (targetUserId != null) 'targetUserId': targetUserId,
       'content': content,
       'messageType': messageType.toJson(),
       if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
@@ -90,7 +106,9 @@ abstract class SendMessageRequestDto
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
-      'chatRoomId': chatRoomId,
+      if (chatRoomId != null) 'chatRoomId': chatRoomId,
+      if (productId != null) 'productId': productId,
+      if (targetUserId != null) 'targetUserId': targetUserId,
       'content': content,
       'messageType': messageType.toJson(),
       if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
@@ -109,7 +127,9 @@ class _Undefined {}
 
 class _SendMessageRequestDtoImpl extends SendMessageRequestDto {
   _SendMessageRequestDtoImpl({
-    required int chatRoomId,
+    int? chatRoomId,
+    int? productId,
+    int? targetUserId,
     required String content,
     required _i2.MessageType messageType,
     String? attachmentUrl,
@@ -117,6 +137,8 @@ class _SendMessageRequestDtoImpl extends SendMessageRequestDto {
     int? attachmentSize,
   }) : super._(
           chatRoomId: chatRoomId,
+          productId: productId,
+          targetUserId: targetUserId,
           content: content,
           messageType: messageType,
           attachmentUrl: attachmentUrl,
@@ -129,7 +151,9 @@ class _SendMessageRequestDtoImpl extends SendMessageRequestDto {
   @_i1.useResult
   @override
   SendMessageRequestDto copyWith({
-    int? chatRoomId,
+    Object? chatRoomId = _Undefined,
+    Object? productId = _Undefined,
+    Object? targetUserId = _Undefined,
     String? content,
     _i2.MessageType? messageType,
     Object? attachmentUrl = _Undefined,
@@ -137,7 +161,9 @@ class _SendMessageRequestDtoImpl extends SendMessageRequestDto {
     Object? attachmentSize = _Undefined,
   }) {
     return SendMessageRequestDto(
-      chatRoomId: chatRoomId ?? this.chatRoomId,
+      chatRoomId: chatRoomId is int? ? chatRoomId : this.chatRoomId,
+      productId: productId is int? ? productId : this.productId,
+      targetUserId: targetUserId is int? ? targetUserId : this.targetUserId,
       content: content ?? this.content,
       messageType: messageType ?? this.messageType,
       attachmentUrl:

@@ -78,15 +78,19 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<pod.ChatMessageResponseDto> sendMessage({
-    required int chatRoomId,
     required String content,
     required pod.MessageType messageType,
+    int? chatRoomId,
+    int? productId,
+    int? targetUserId,
     String? attachmentUrl,
     String? attachmentName,
     int? attachmentSize,
   }) async {
     return remoteDataSource.sendMessage(
       chatRoomId: chatRoomId,
+      productId: productId,
+      targetUserId: targetUserId,
       content: content,
       messageType: messageType,
       attachmentUrl: attachmentUrl,

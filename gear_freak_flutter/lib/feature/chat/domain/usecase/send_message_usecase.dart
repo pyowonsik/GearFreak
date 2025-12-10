@@ -25,6 +25,8 @@ class SendMessageUseCase
     try {
       final result = await repository.sendMessage(
         chatRoomId: param.chatRoomId,
+        productId: param.productId,
+        targetUserId: param.targetUserId,
         content: param.content,
         messageType: param.messageType,
         attachmentUrl: param.attachmentUrl,
@@ -47,23 +49,33 @@ class SendMessageUseCase
 class SendMessageParams {
   /// SendMessageParams 생성자
   ///
-  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [chatRoomId]는 채팅방 ID입니다. (채팅방이 없을 경우 null)
+  /// [productId]는 상품 ID입니다. (채팅방이 없을 경우 필수)
+  /// [targetUserId]는 상대방 사용자 ID입니다. (채팅방이 없을 경우 필수)
   /// [content]는 메시지 내용입니다.
   /// [messageType]는 메시지 타입입니다.
   /// [attachmentUrl]는 첨부파일 URL입니다 (선택적).
   /// [attachmentName]는 첨부파일 이름입니다 (선택적).
   /// [attachmentSize]는 첨부파일 크기입니다 (선택적).
   const SendMessageParams({
-    required this.chatRoomId,
     required this.content,
     required this.messageType,
+    this.chatRoomId,
+    this.productId,
+    this.targetUserId,
     this.attachmentUrl,
     this.attachmentName,
     this.attachmentSize,
   });
 
-  /// 채팅방 ID
-  final int chatRoomId;
+  /// 채팅방 ID (채팅방이 없을 경우 null)
+  final int? chatRoomId;
+
+  /// 상품 ID (채팅방이 없을 경우 필수)
+  final int? productId;
+
+  /// 상대방 사용자 ID (채팅방이 없을 경우 필수)
+  final int? targetUserId;
 
   /// 메시지 내용
   final String content;

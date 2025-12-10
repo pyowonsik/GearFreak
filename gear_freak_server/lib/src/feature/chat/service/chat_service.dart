@@ -111,7 +111,7 @@ class ChatService {
         level: LogLevel.info,
       );
 
-      // 7. 참여자 추가 (현재 사용자)
+      // 7. 참여자 추가 (현재 사용자만 추가, 상대방은 메시지 전송 시 추가)
       final chatRoomId = createdChatRoom.id;
       if (chatRoomId == null) {
         return CreateChatRoomResponseDto(
@@ -128,14 +128,7 @@ class ChatService {
         userId,
       );
 
-      // 8. 참여자 추가 (상대방 사용자, 1:1 채팅의 경우)
-      await _addParticipant(
-        session,
-        chatRoomId,
-        targetUserId,
-      );
-
-      // 9. 참여자 수 업데이트
+      // 8. 참여자 수 업데이트
       await _updateParticipantCount(session, chatRoomId);
 
       // 10. 업데이트된 채팅방 정보 조회
@@ -557,23 +550,70 @@ class ChatService {
   }
 
   /// 메시지 전송
+  /// 카카오톡/당근마켓 방식: 첫 메시지 전송 시 채팅방 생성
   Future<ChatMessageResponseDto> sendMessage(
     Session session,
     int userId,
     SendMessageRequestDto request,
   ) async {
     try {
-      // 1. 채팅방 참여 확인
-      final participation = await ChatParticipant.db.findFirstRow(
-        session,
-        where: (participant) =>
-            participant.userId.equals(userId) &
-            participant.chatRoomId.equals(request.chatRoomId) &
-            participant.isActive.equals(true),
-      );
+      int chatRoomId;
+      ChatRoom? chatRoom;
 
-      if (participation == null) {
-        throw Exception('채팅방에 참여하지 않은 사용자입니다.');
+      // 1. 채팅방이 없으면 생성 (카카오톡/당근마켓 방식)
+      if (request.chatRoomId == null || request.chatRoomId == 0) {
+        // productId와 targetUserId가 필수
+        if (request.productId == null || request.targetUserId == null) {
+          throw Exception('채팅방이 없을 경우 상품 ID와 상대방 사용자 ID가 필요합니다.');
+        }
+
+        // 채팅방 생성 또는 조회
+        final createResult = await createOrGetChatRoom(
+          session,
+          userId,
+          CreateChatRoomRequestDto(
+            productId: request.productId!,
+            targetUserId: request.targetUserId,
+          ),
+        );
+
+        if (!createResult.success || createResult.chatRoomId == null) {
+          throw Exception(createResult.message ?? '채팅방 생성에 실패했습니다.');
+        }
+
+        chatRoomId = createResult.chatRoomId!;
+        chatRoom = createResult.chatRoom;
+
+        // 상대방 참여자 추가 (메시지 전송 시 두 명 모두 참여자로 추가)
+        await _addParticipant(
+          session,
+          chatRoomId,
+          request.targetUserId!,
+        );
+
+        // 참여자 수 업데이트
+        await _updateParticipantCount(session, chatRoomId);
+
+        // 업데이트된 채팅방 정보 조회
+        chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+      } else {
+        chatRoomId = request.chatRoomId!;
+
+        // 채팅방 참여 확인
+        final participation = await ChatParticipant.db.findFirstRow(
+          session,
+          where: (participant) =>
+              participant.userId.equals(userId) &
+              participant.chatRoomId.equals(chatRoomId) &
+              participant.isActive.equals(true),
+        );
+
+        if (participation == null) {
+          throw Exception('채팅방에 참여하지 않은 사용자입니다.');
+        }
+
+        // 채팅방 정보 조회
+        chatRoom = await ChatRoom.db.findById(session, chatRoomId);
       }
 
       // 2. 메시지 내용 검증
@@ -584,7 +624,7 @@ class ChatService {
       // 3. DB에 메시지 저장
       final now = DateTime.now().toUtc();
       final message = ChatMessage(
-        chatRoomId: request.chatRoomId,
+        chatRoomId: chatRoomId,
         senderId: userId,
         content: request.content,
         messageType: request.messageType,
@@ -598,10 +638,6 @@ class ChatService {
       final savedMessage = await ChatMessage.db.insertRow(session, message);
 
       // 4. 채팅방 최근 활동 시간 업데이트
-      final chatRoom = await ChatRoom.db.findById(
-        session,
-        request.chatRoomId,
-      );
       if (chatRoom != null) {
         await ChatRoom.db.updateRow(
           session,
@@ -632,14 +668,14 @@ class ChatService {
 
       // 7. 🚀 Redis 기반 글로벌 브로드캐스팅
       await session.messages.postMessage(
-        'chat_room_${request.chatRoomId}',
+        'chat_room_$chatRoomId',
         response,
         global: true, // 🔥 Redis를 통한 글로벌 브로드캐스팅
       );
 
       session.log(
         '메시지 전송 완료: '
-        'chatRoomId=${request.chatRoomId}, '
+        'chatRoomId=$chatRoomId, '
         'senderId=$userId, '
         'messageId=${savedMessage.id}',
         level: LogLevel.info,

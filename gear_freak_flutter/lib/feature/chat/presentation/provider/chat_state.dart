@@ -6,10 +6,15 @@ sealed class ChatState {
   const ChatState();
 }
 
-/// 초기 상태
+/// 초기 상태 (채팅방이 없는 상태, 카카오톡/당근마켓 방식)
 class ChatInitial extends ChatState {
   /// ChatInitial 생성자
-  const ChatInitial();
+  ///
+  /// [product]는 상품 정보입니다. (채팅방이 없을 때 상품 정보 표시용)
+  const ChatInitial({this.product});
+
+  /// 상품 정보
+  final pod.Product? product;
 }
 
 /// 로딩 상태

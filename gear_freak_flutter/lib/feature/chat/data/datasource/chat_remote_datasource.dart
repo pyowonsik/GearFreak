@@ -124,15 +124,19 @@ class ChatRemoteDataSource {
 
   /// 메시지 전송
   Future<pod.ChatMessageResponseDto> sendMessage({
-    required int chatRoomId,
     required String content,
     required pod.MessageType messageType,
+    int? chatRoomId,
+    int? productId,
+    int? targetUserId,
     String? attachmentUrl,
     String? attachmentName,
     int? attachmentSize,
   }) async {
     final request = pod.SendMessageRequestDto(
       chatRoomId: chatRoomId,
+      productId: productId,
+      targetUserId: targetUserId,
       content: content,
       messageType: messageType,
       attachmentUrl: attachmentUrl,
