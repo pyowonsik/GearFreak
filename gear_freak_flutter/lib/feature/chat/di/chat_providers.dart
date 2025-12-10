@@ -127,6 +127,8 @@ final chatNotifierProvider =
   final createOrGetChatRoomUseCase =
       ref.watch(createOrGetChatRoomUseCaseProvider);
   final getChatRoomByIdUseCase = ref.watch(getChatRoomByIdUseCaseProvider);
+  final getUserChatRoomsByProductIdUseCase =
+      ref.watch(getUserChatRoomsByProductIdUseCaseProvider);
   final joinChatRoomUseCase = ref.watch(joinChatRoomUseCaseProvider);
   final getChatParticipantsUseCase =
       ref.watch(getChatParticipantsUseCaseProvider);
@@ -138,6 +140,7 @@ final chatNotifierProvider =
   return ChatNotifier(
     createOrGetChatRoomUseCase,
     getChatRoomByIdUseCase,
+    getUserChatRoomsByProductIdUseCase,
     joinChatRoomUseCase,
     getChatParticipantsUseCase,
     getChatMessagesUseCase,

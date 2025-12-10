@@ -51,7 +51,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   /// 채팅방 로드
-  /// 카카오톡/당근마켓 방식: chatRoomId가 있으면 기존 채팅방으로 입장, 없으면 빈 상태로 유지
+  /// 1. chatRoomId가 있으면 기존 채팅방으로 직접 입장
+  /// 2. chatRoomId가 없으면 기존 채팅방 확인
+  ///    - 존재하면 이전 채팅 기록 로드
+  ///    - 존재하지 않으면 빈 상태로 유지 (메시지 입력 시 방 생성)
   Future<void> _loadChatRoom() async {
     // chatRoomId가 있으면 기존 채팅방으로 직접 입장
     if (widget.chatRoomId != null) {
@@ -61,16 +64,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
-    // chatRoomId가 없으면 채팅방을 생성하지 않고 빈 상태로 유지
-    // 첫 메시지 전송 시 채팅방이 생성됨 (카카오톡/당근마켓 방식)
-    // 상품 정보만 로드
+    // chatRoomId가 없으면 기존 채팅방 확인
     final productId = int.tryParse(widget.productId);
     if (productId == null) {
       return;
     }
 
-    // 상품 정보만 로드하여 표시
-    await ref.read(chatNotifierProvider.notifier).loadProductInfo(
+    // 기존 채팅방 확인 및 로드 (있으면 로드, 없으면 빈 상태)
+    await ref.read(chatNotifierProvider.notifier).checkAndLoadExistingChatRoom(
           productId: productId,
           targetUserId: widget.sellerId,
         );

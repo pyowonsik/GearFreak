@@ -97,6 +97,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       pagination: pagination,
       participantsMap: currentState.participantsMap,
       lastMessagesMap: currentState.lastMessagesMap,
+      productImagesMap: currentState.productImagesMap,
     );
 
     final nextPagination = pod.PaginationDto(
@@ -206,6 +207,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       pagination: pagination,
       participantsMap: currentState.participantsMap,
       lastMessagesMap: currentState.lastMessagesMap,
+      productImagesMap: currentState.productImagesMap,
     );
 
     final nextPagination = pod.PaginationDto(

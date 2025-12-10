@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/create_or_get_cha
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_messages_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_participants_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_room_by_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/join_chat_room_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/send_message_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/subscribe_chat_message_stream_usecase.dart';
@@ -18,6 +19,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   ///
   /// [createOrGetChatRoomUseCase]는 채팅방 생성/조회 UseCase입니다.
   /// [getChatRoomByIdUseCase]는 채팅방 정보 조회 UseCase입니다.
+  /// [getUserChatRoomsByProductIdUseCase]는 상품별 채팅방 목록 조회 UseCase입니다.
   /// [joinChatRoomUseCase]는 채팅방 참여 UseCase입니다.
   /// [getChatParticipantsUseCase]는 참여자 목록 조회 UseCase입니다.
   /// [getChatMessagesUseCase]는 메시지 조회 UseCase입니다.
@@ -27,6 +29,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   ChatNotifier(
     this.createOrGetChatRoomUseCase,
     this.getChatRoomByIdUseCase,
+    this.getUserChatRoomsByProductIdUseCase,
     this.joinChatRoomUseCase,
     this.getChatParticipantsUseCase,
     this.getChatMessagesUseCase,
@@ -42,6 +45,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// 채팅방 정보 조회 UseCase
   final GetChatRoomByIdUseCase getChatRoomByIdUseCase;
+
+  /// 상품별 채팅방 목록 조회 UseCase
+  final GetUserChatRoomsByProductIdUseCase getUserChatRoomsByProductIdUseCase;
 
   /// 채팅방 참여 UseCase
   final JoinChatRoomUseCase joinChatRoomUseCase;
@@ -307,6 +313,69 @@ class ChatNotifier extends StateNotifier<ChatState> {
       },
       (product) {
         state = ChatInitial(product: product);
+      },
+    );
+  }
+
+  /// 기존 채팅방 확인 및 로드
+  /// 상품 ID와 판매자 ID로 기존 채팅방이 있는지 확인하고, 있으면 로드
+  Future<void> checkAndLoadExistingChatRoom({
+    required int productId,
+    int? targetUserId,
+  }) async {
+    state = const ChatLoading();
+
+    // 1. 해당 상품의 채팅방 목록 조회 (첫 페이지만)
+    final chatRoomsResult = await getUserChatRoomsByProductIdUseCase(
+      GetUserChatRoomsByProductIdParams(
+        productId: productId,
+        pagination: pod.PaginationDto(page: 1, limit: 20),
+      ),
+    );
+
+    await chatRoomsResult.fold(
+      (failure) async {
+        // 채팅방 목록 조회 실패 시 상품 정보만 로드
+        await loadProductInfo(
+          productId: productId,
+          targetUserId: targetUserId,
+        );
+      },
+      (response) async {
+        // 2. 기존 채팅방 찾기
+        // targetUserId가 있으면 해당 사용자와의 1:1 채팅방 찾기
+        pod.ChatRoom? existingChatRoom;
+        if (targetUserId != null) {
+          // 1:1 채팅방 찾기 (direct 타입이고 참여자가 2명인 방)
+          try {
+            existingChatRoom = response.chatRooms.firstWhere(
+              (room) =>
+                  room.chatRoomType == pod.ChatRoomType.direct &&
+                  room.participantCount == 2,
+            );
+          } catch (e) {
+            // 매칭되는 채팅방이 없으면 첫 번째 채팅방 사용
+            existingChatRoom =
+                response.chatRooms.isNotEmpty ? response.chatRooms.first : null;
+          }
+        } else {
+          // targetUserId가 없으면 첫 번째 채팅방 사용
+          existingChatRoom =
+              response.chatRooms.isNotEmpty ? response.chatRooms.first : null;
+        }
+
+        if (existingChatRoom?.id != null) {
+          // 3. 기존 채팅방이 있으면 해당 채팅방으로 입장
+          await enterChatRoomByChatRoomId(
+            chatRoomId: existingChatRoom!.id!,
+          );
+        } else {
+          // 4. 기존 채팅방이 없으면 상품 정보만 로드 (빈 상태)
+          await loadProductInfo(
+            productId: productId,
+            targetUserId: targetUserId,
+          );
+        }
       },
     );
   }

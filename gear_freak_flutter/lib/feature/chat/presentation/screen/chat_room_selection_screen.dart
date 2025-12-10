@@ -96,13 +96,15 @@ class _ChatRoomSelectionScreenState
           :final chatRooms,
           :final pagination,
           :final participantsMap,
-          :final lastMessagesMap
+          :final lastMessagesMap,
+          :final productImagesMap
         ) ||
         ChatRoomListLoadingMore(
           :final chatRooms,
           :final pagination,
           :final participantsMap,
-          :final lastMessagesMap
+          :final lastMessagesMap,
+          :final productImagesMap
         ) =>
           chatRooms.isEmpty
               ? RefreshIndicator(
@@ -125,6 +127,7 @@ class _ChatRoomSelectionScreenState
                   scrollController: scrollController!,
                   participantsMap: participantsMap,
                   lastMessagesMap: lastMessagesMap,
+                  productImagesMap: productImagesMap,
                   isLoadingMore: chatRoomListState is ChatRoomListLoadingMore,
                   onRefresh: _onRefresh,
                   itemBuilder: (context, chatRoom) {
@@ -136,11 +139,15 @@ class _ChatRoomSelectionScreenState
                     final lastMessage = chatRoom.id != null
                         ? lastMessagesMap[chatRoom.id!]
                         : null;
+                    // 상품 이미지 URL 가져오기
+                    final productImageUrl =
+                        productImagesMap[chatRoom.productId];
 
                     return ChatRoomItemWidget(
                       chatRoom: chatRoom,
                       participants: participants,
                       lastMessage: lastMessage,
+                      productImageUrl: productImageUrl,
                     );
                   },
                 ),
