@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_particip
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_my_chat_rooms_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 
 /// 채팅방 목록 Notifier
 /// Presentation Layer: Riverpod 상태 관리
@@ -15,11 +16,13 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   /// [getUserChatRoomsByProductIdUseCase]는 특정 상품의 채팅방 목록 조회 UseCase입니다.
   /// [getChatParticipantsUseCase]는 채팅방 참여자 목록 조회 UseCase입니다.
   /// [getChatMessagesUseCase]는 채팅 메시지 조회 UseCase입니다.
+  /// [getProductDetailUseCase]는 상품 상세 조회 UseCase입니다.
   ChatRoomListNotifier(
     this.getMyChatRoomsUseCase,
     this.getUserChatRoomsByProductIdUseCase,
     this.getChatParticipantsUseCase,
     this.getChatMessagesUseCase,
+    this.getProductDetailUseCase,
   ) : super(const ChatRoomListInitial());
 
   /// 내 채팅방 목록 조회 UseCase
@@ -33,6 +36,9 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
 
   /// 채팅 메시지 조회 UseCase
   final GetChatMessagesUseCase getChatMessagesUseCase;
+
+  /// 상품 상세 조회 UseCase
+  final GetProductDetailUseCase getProductDetailUseCase;
 
   // ==================== Public Methods (UseCase 호출) ====================
 
@@ -61,11 +67,14 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
         final participantsMap = await _loadParticipants(response.chatRooms);
         // 마지막 메시지 조회
         final lastMessagesMap = await _loadLastMessages(response.chatRooms);
+        // 상품 이미지 조회
+        final productImagesMap = await _loadProductImages(response.chatRooms);
         state = ChatRoomListLoaded(
           chatRooms: response.chatRooms,
           pagination: response.pagination,
           participantsMap: participantsMap,
           lastMessagesMap: lastMessagesMap,
+          productImagesMap: productImagesMap,
         );
       },
     );
@@ -119,11 +128,20 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
           ...currentState.lastMessagesMap,
           ...newLastMessagesMap,
         };
+        // 새로 로드된 채팅방들의 상품 이미지 조회
+        final newProductImagesMap =
+            await _loadProductImages(response.chatRooms);
+        // 기존 상품 이미지 정보와 병합
+        final mergedProductImagesMap = {
+          ...currentState.productImagesMap,
+          ...newProductImagesMap,
+        };
         state = currentState.copyWith(
           chatRooms: [...currentState.chatRooms, ...response.chatRooms],
           pagination: response.pagination,
           participantsMap: mergedParticipantsMap,
           lastMessagesMap: mergedLastMessagesMap,
+          productImagesMap: mergedProductImagesMap,
         );
       },
     );
@@ -158,11 +176,14 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
         final participantsMap = await _loadParticipants(response.chatRooms);
         // 마지막 메시지 조회
         final lastMessagesMap = await _loadLastMessages(response.chatRooms);
+        // 상품 이미지 조회
+        final productImagesMap = await _loadProductImages(response.chatRooms);
         state = ChatRoomListLoaded(
           chatRooms: response.chatRooms,
           pagination: response.pagination,
           participantsMap: participantsMap,
           lastMessagesMap: lastMessagesMap,
+          productImagesMap: productImagesMap,
         );
       },
     );
@@ -219,11 +240,20 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
           ...currentState.lastMessagesMap,
           ...newLastMessagesMap,
         };
+        // 새로 로드된 채팅방들의 상품 이미지 조회
+        final newProductImagesMap =
+            await _loadProductImages(response.chatRooms);
+        // 기존 상품 이미지 정보와 병합
+        final mergedProductImagesMap = {
+          ...currentState.productImagesMap,
+          ...newProductImagesMap,
+        };
         state = currentState.copyWith(
           chatRooms: [...currentState.chatRooms, ...response.chatRooms],
           pagination: response.pagination,
           participantsMap: mergedParticipantsMap,
           lastMessagesMap: mergedLastMessagesMap,
+          productImagesMap: mergedProductImagesMap,
         );
       },
     );
@@ -304,5 +334,40 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       }
     }
     return lastMessagesMap;
+  }
+
+  /// 채팅방 목록의 상품 이미지 조회 (병렬 처리)
+  Future<Map<int, String>> _loadProductImages(
+    List<pod.ChatRoom> chatRooms,
+  ) async {
+    final productImagesMap = <int, String>{};
+
+    // 중복 제거된 productId 목록
+    final productIds = chatRooms.map((room) => room.productId).toSet();
+
+    // 모든 상품의 이미지를 병렬로 조회
+    final futures = productIds.map((productId) async {
+      final result = await getProductDetailUseCase(productId);
+
+      return result.fold(
+        (failure) => null,
+        (product) {
+          // 첫 번째 이미지 URL 반환
+          if (product.imageUrls != null && product.imageUrls!.isNotEmpty) {
+            return (productId, product.imageUrls!.first);
+          }
+          return null;
+        },
+      );
+    });
+
+    final results = await Future.wait(futures);
+
+    for (final result in results) {
+      if (result != null) {
+        productImagesMap[result.$1] = result.$2;
+      }
+    }
+    return productImagesMap;
   }
 }

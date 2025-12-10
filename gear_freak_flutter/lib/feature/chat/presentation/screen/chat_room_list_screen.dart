@@ -80,13 +80,15 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
         :final chatRooms,
         :final pagination,
         :final participantsMap,
-        :final lastMessagesMap
+        :final lastMessagesMap,
+        :final productImagesMap
       ) ||
       ChatRoomListLoadingMore(
         :final chatRooms,
         :final pagination,
         :final participantsMap,
-        :final lastMessagesMap
+        :final lastMessagesMap,
+        :final productImagesMap
       ) =>
         chatRooms.isEmpty
             ? RefreshIndicator(
@@ -111,6 +113,7 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
                 onRefresh: _onRefresh,
                 participantsMap: participantsMap,
                 lastMessagesMap: lastMessagesMap,
+                productImagesMap: productImagesMap,
               ),
     };
   }

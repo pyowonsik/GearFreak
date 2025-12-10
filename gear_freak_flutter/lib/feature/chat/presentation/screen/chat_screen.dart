@@ -105,6 +105,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     List<pod.ChatParticipantInfoDto> participants,
     int? currentUserId,
   ) {
+    if (messages.isEmpty) {
+      return [];
+    }
+
+    // notifier에서 이미 정렬되어 있으므로 추가 정렬 불필요
     return messages.map((message) {
       final senderId = message.senderId.toString();
       final isCurrentUser = currentUserId?.toString() == senderId;
@@ -188,15 +193,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     '사용자'
                 : '사용자',
           ),
-          prefix: CircleAvatar(
-            radius: 18,
-            backgroundColor: const Color(0xFFF3F4F6),
-            child: Icon(
-              Icons.person,
-              color: Colors.grey.shade500,
-              size: 20,
-            ),
-          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.more_vert),
@@ -279,9 +275,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   pod.ChatRoom _createDummyChatRoom() {
     final productId = int.tryParse(widget.productId) ?? 0;
     return pod.ChatRoom(
-      id: null,
       productId: productId,
-      title: null,
       chatRoomType: pod.ChatRoomType.direct,
       participantCount: 0,
       lastActivityAt: DateTime.now(),

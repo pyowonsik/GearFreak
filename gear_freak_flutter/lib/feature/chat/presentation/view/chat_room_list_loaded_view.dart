@@ -22,6 +22,7 @@ class ChatRoomListLoadedView extends StatelessWidget {
     required this.onRefresh,
     this.participantsMap = const {},
     this.lastMessagesMap = const {},
+    this.productImagesMap = const {},
     this.itemBuilder,
     super.key,
   });
@@ -46,6 +47,9 @@ class ChatRoomListLoadedView extends StatelessWidget {
 
   /// 채팅방별 마지막 메시지 정보 (chatRoomId -> 마지막 메시지)
   final Map<int, pod.ChatMessageResponseDto> lastMessagesMap;
+
+  /// 상품별 이미지 URL 정보 (productId -> imageUrl)
+  final Map<int, String> productImagesMap;
 
   /// 채팅방 아이템 빌더 (선택)
   /// 제공되지 않으면 기본 `ChatRoomItemWidget`을 사용합니다.
@@ -101,11 +105,14 @@ class ChatRoomListLoadedView extends StatelessWidget {
     // Notifier에서 조회한 마지막 메시지 정보 사용
     final lastMessage =
         chatRoom.id != null ? lastMessagesMap[chatRoom.id!] : null;
+    // Notifier에서 조회한 상품 이미지 URL 사용
+    final productImageUrl = productImagesMap[chatRoom.productId];
 
     return ChatRoomItemWidget(
       chatRoom: chatRoom,
       participants: participants,
       lastMessage: lastMessage,
+      productImageUrl: productImageUrl,
     );
   }
 }

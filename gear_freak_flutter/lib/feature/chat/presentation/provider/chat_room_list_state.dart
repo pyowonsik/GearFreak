@@ -26,11 +26,13 @@ class ChatRoomListLoaded extends ChatRoomListState {
   /// [pagination]는 페이지네이션 정보입니다.
   /// [participantsMap]는 채팅방별 참여자 정보입니다. (chatRoomId -> 참여자 목록)
   /// [lastMessagesMap]는 채팅방별 마지막 메시지 정보입니다. (chatRoomId -> 마지막 메시지)
+  /// [productImagesMap]는 상품별 이미지 URL 정보입니다. (productId -> imageUrl)
   const ChatRoomListLoaded({
     required this.chatRooms,
     required this.pagination,
     this.participantsMap = const {},
     this.lastMessagesMap = const {},
+    this.productImagesMap = const {},
   });
 
   /// 채팅방 목록
@@ -45,18 +47,23 @@ class ChatRoomListLoaded extends ChatRoomListState {
   /// 채팅방별 마지막 메시지 정보 (chatRoomId -> 마지막 메시지)
   final Map<int, pod.ChatMessageResponseDto> lastMessagesMap;
 
+  /// 상품별 이미지 URL 정보 (productId -> imageUrl)
+  final Map<int, String> productImagesMap;
+
   /// ChatRoomListLoaded 복사
   ChatRoomListLoaded copyWith({
     List<pod.ChatRoom>? chatRooms,
     pod.PaginationDto? pagination,
     Map<int, List<pod.ChatParticipantInfoDto>>? participantsMap,
     Map<int, pod.ChatMessageResponseDto>? lastMessagesMap,
+    Map<int, String>? productImagesMap,
   }) {
     return ChatRoomListLoaded(
       chatRooms: chatRooms ?? this.chatRooms,
       pagination: pagination ?? this.pagination,
       participantsMap: participantsMap ?? this.participantsMap,
       lastMessagesMap: lastMessagesMap ?? this.lastMessagesMap,
+      productImagesMap: productImagesMap ?? this.productImagesMap,
     );
   }
 }
@@ -69,6 +76,7 @@ class ChatRoomListLoadingMore extends ChatRoomListLoaded {
     required super.pagination,
     super.participantsMap = const {},
     super.lastMessagesMap = const {},
+    super.productImagesMap = const {},
   });
 }
 

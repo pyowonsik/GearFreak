@@ -135,9 +135,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
                 );
 
                 // 5. 메시지 조회 (초기 로드)
+                // 서버는 orderDescending: true로 최신 메시지부터 반환하므로 첫 페이지를 로드
                 final messagesResult = await getChatMessagesUseCase(
                   GetChatMessagesParams(
                     chatRoomId: chatRoomId,
+                    page: 1,
+                    limit: 50,
                   ),
                 );
 
@@ -146,10 +149,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
                     messages: <pod.ChatMessageResponseDto>[],
                     pagination: null as pod.PaginatedChatMessagesResponseDto?,
                   ),
-                  (pagination) => (
-                    messages: pagination.messages,
-                    pagination: pagination,
-                  ),
+                  (pagination) {
+                    // flutter_chat_ui는 내림차순(최신이 위)을 기대하므로 내림차순 정렬
+                    final sortedMessages = pagination.messages.toList()
+                      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                    return (
+                      messages: sortedMessages,
+                      pagination: pagination,
+                    );
+                  },
                 );
 
                 // 6. 상품 정보 조회
@@ -232,9 +240,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
             );
 
             // 4. 메시지 조회 (초기 로드)
+            // 서버는 orderDescending: true로 최신 메시지부터 반환하므로 첫 페이지를 로드
             final messagesResult = await getChatMessagesUseCase(
               GetChatMessagesParams(
                 chatRoomId: chatRoomId,
+                page: 1,
+                limit: 50,
               ),
             );
 
@@ -243,10 +254,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
                 messages: <pod.ChatMessageResponseDto>[],
                 pagination: null as pod.PaginatedChatMessagesResponseDto?,
               ),
-              (pagination) => (
-                messages: pagination.messages,
-                pagination: pagination,
-              ),
+              (pagination) {
+                // flutter_chat_ui는 내림차순(최신이 위)을 기대하므로 내림차순 정렬
+                final sortedMessages = pagination.messages.toList()
+                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                return (
+                  messages: sortedMessages,
+                  pagination: pagination,
+                );
+              },
             );
 
             // 5. 상품 정보 조회
@@ -370,7 +386,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   /// 이전 메시지 로드 (페이지네이션)
-  /// 채팅방에서는 위로 스크롤 시 이전 페이지(더 오래된 메시지)를 로드합니다.
+  /// 채팅방에서는 위로 스크롤 시 다음 페이지(더 오래된 메시지)를 로드합니다.
+  /// 서버는 orderDescending: true로 최신 메시지부터 반환하므로,
+  /// page=1이 최신, page=2가 그 다음 오래된 메시지입니다.
   Future<void> loadMoreMessages(int chatRoomId) async {
     final currentState = state;
     if (currentState is! ChatLoaded || currentState is ChatLoadingMore) {
@@ -378,8 +396,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
 
     final pagination = currentState.pagination;
-    // 채팅방은 위로 스크롤 시 이전 메시지를 로드하므로 hasPreviousPage 확인
-    if (pagination == null || !pagination.hasPreviousPage) {
+    // 채팅방은 위로 스크롤 시 더 오래된 메시지를 로드하므로 hasNextPage 확인
+    if (pagination == null || !pagination.hasNextPage) {
       return;
     }
 
@@ -395,7 +413,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final result = await getChatMessagesUseCase(
       GetChatMessagesParams(
         chatRoomId: chatRoomId,
-        page: pagination.currentPage - 1, // 이전 페이지 로드
+        page: pagination.currentPage + 1, // 다음 페이지 로드 (더 오래된 메시지)
         limit: pagination.pageSize,
       ),
     );
@@ -412,8 +430,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
             .where((m) => !existingIds.contains(m.id))
             .toList();
 
+        // 모든 메시지를 합치고 createdAt 기준 내림차순 정렬 (최신이 위)
+        final updatedMessages = [
+          ...currentState.messages,
+          ...newMessages,
+        ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
         state = currentState.copyWith(
-          messages: [...currentState.messages, ...newMessages],
+          messages: updatedMessages,
           pagination: newPagination,
         );
       },
@@ -442,8 +466,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
           // 중복 메시지 확인
           final existingIds = currentState.messages.map((m) => m.id).toSet();
           if (!existingIds.contains(message.id)) {
+            // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
+            final updatedMessages = [...currentState.messages, message]
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
             state = currentState.copyWith(
-              messages: [...currentState.messages, message],
+              messages: updatedMessages,
             );
           }
         }

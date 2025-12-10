@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/widget/product_avatar_widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 채팅방 아이템 위젯
@@ -12,10 +13,12 @@ class ChatRoomItemWidget extends ConsumerWidget {
   /// [chatRoom]는 채팅방 정보입니다.
   /// [participants]는 참여자 목록입니다. (선택, 제공되면 그룹 아바타에 사용)
   /// [lastMessage]는 마지막 메시지입니다. (선택, 제공되면 subtitle에 표시)
+  /// [productImageUrl]는 상품 이미지 URL입니다. (선택, 제공되면 상품 이미지 표시)
   const ChatRoomItemWidget({
     required this.chatRoom,
     this.participants,
     this.lastMessage,
+    this.productImageUrl,
     super.key,
   });
 
@@ -27,6 +30,9 @@ class ChatRoomItemWidget extends ConsumerWidget {
 
   /// 마지막 메시지 (선택)
   final pod.ChatMessageResponseDto? lastMessage;
+
+  /// 상품 이미지 URL (선택)
+  final String? productImageUrl;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,9 +50,8 @@ class ChatRoomItemWidget extends ConsumerWidget {
             horizontal: 16,
             vertical: 8,
           ),
-          leading: ChatUtil.buildChatRoomAvatar(
-            participants: participants,
-            useCircleAvatar: true,
+          leading: ProductAvatarWidget(
+            productImageUrl: productImageUrl,
           ),
           title: Text(
             otherParticipantName,
