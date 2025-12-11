@@ -719,21 +719,11 @@ class ChatService {
       // 오프셋 계산
       final offset = (request.page - 1) * request.limit;
 
-      // 전체 메시지/타입별 집계 조회
+      // 전체 메시지 조회
       Expression<Object?> baseWhere(ChatMessageTable message) =>
           message.chatRoomId.equals(request.chatRoomId);
 
       final totalCount = await ChatMessage.db.count(session, where: baseWhere);
-      final mediaTotalCount = await ChatMessage.db.count(
-        session,
-        where: (message) =>
-            baseWhere(message) & message.messageType.equals(MessageType.image),
-      );
-      final fileTotalCount = await ChatMessage.db.count(
-        session,
-        where: (message) =>
-            baseWhere(message) & message.messageType.equals(MessageType.file),
-      );
 
       // 메시지 조회 (최신 순으로 정렬)
       final messages = await ChatMessage.db.find(
@@ -787,18 +777,16 @@ class ChatService {
       }
 
       // 페이지네이션 결과 생성
-      final hasNextPage = offset + request.limit < effectiveTotalCount;
-      final hasPreviousPage = request.page > 1;
+      final hasMore = offset + request.limit < effectiveTotalCount;
 
       return PaginatedChatMessagesResponseDto(
+        pagination: PaginationDto(
+          page: request.page,
+          limit: request.limit,
+          totalCount: effectiveTotalCount,
+          hasMore: hasMore,
+        ),
         messages: messageResponses,
-        totalCount: effectiveTotalCount,
-        mediaTotalCount: mediaTotalCount,
-        fileTotalCount: fileTotalCount,
-        currentPage: request.page,
-        pageSize: request.limit,
-        hasNextPage: hasNextPage,
-        hasPreviousPage: hasPreviousPage,
       );
     } on Exception catch (e, stackTrace) {
       session.log(

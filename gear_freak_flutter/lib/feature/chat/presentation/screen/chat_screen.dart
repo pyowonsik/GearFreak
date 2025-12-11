@@ -8,7 +8,7 @@ import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/view/view.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/view/chat_loaded_view.dart';
 
 /// 채팅 화면을 표시하는 위젯입니다.
 ///

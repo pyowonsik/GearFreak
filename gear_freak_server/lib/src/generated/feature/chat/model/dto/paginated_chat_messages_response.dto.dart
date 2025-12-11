@@ -10,113 +10,61 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import '../../../../common/model/pagination_dto.dart' as _i2;
 import '../../../../feature/chat/model/dto/chat_message_response.dto.dart'
-    as _i2;
+    as _i3;
 
 /// 페이지네이션된 채팅 메시지 응답
 abstract class PaginatedChatMessagesResponseDto
     implements _i1.SerializableModel, _i1.ProtocolSerialization {
   PaginatedChatMessagesResponseDto._({
+    required this.pagination,
     required this.messages,
-    required this.totalCount,
-    required this.mediaTotalCount,
-    required this.fileTotalCount,
-    required this.currentPage,
-    required this.pageSize,
-    required this.hasNextPage,
-    required this.hasPreviousPage,
   });
 
   factory PaginatedChatMessagesResponseDto({
-    required List<_i2.ChatMessageResponseDto> messages,
-    required int totalCount,
-    required int mediaTotalCount,
-    required int fileTotalCount,
-    required int currentPage,
-    required int pageSize,
-    required bool hasNextPage,
-    required bool hasPreviousPage,
+    required _i2.PaginationDto pagination,
+    required List<_i3.ChatMessageResponseDto> messages,
   }) = _PaginatedChatMessagesResponseDtoImpl;
 
   factory PaginatedChatMessagesResponseDto.fromJson(
       Map<String, dynamic> jsonSerialization) {
     return PaginatedChatMessagesResponseDto(
+      pagination: _i2.PaginationDto.fromJson(
+          (jsonSerialization['pagination'] as Map<String, dynamic>)),
       messages: (jsonSerialization['messages'] as List)
           .map((e) =>
-              _i2.ChatMessageResponseDto.fromJson((e as Map<String, dynamic>)))
+              _i3.ChatMessageResponseDto.fromJson((e as Map<String, dynamic>)))
           .toList(),
-      totalCount: jsonSerialization['totalCount'] as int,
-      mediaTotalCount: jsonSerialization['mediaTotalCount'] as int,
-      fileTotalCount: jsonSerialization['fileTotalCount'] as int,
-      currentPage: jsonSerialization['currentPage'] as int,
-      pageSize: jsonSerialization['pageSize'] as int,
-      hasNextPage: jsonSerialization['hasNextPage'] as bool,
-      hasPreviousPage: jsonSerialization['hasPreviousPage'] as bool,
     );
   }
 
+  /// 페이지네이션 정보
+  _i2.PaginationDto pagination;
+
   /// 채팅 메시지 목록
-  List<_i2.ChatMessageResponseDto> messages;
-
-  /// 전체 메시지 수
-  int totalCount;
-
-  /// 이미지/동영상 총 개수 (messageType=image)
-  int mediaTotalCount;
-
-  /// 파일 총 개수 (messageType=file)
-  int fileTotalCount;
-
-  /// 현재 페이지
-  int currentPage;
-
-  /// 페이지당 항목 수
-  int pageSize;
-
-  /// 다음 페이지 존재 여부
-  bool hasNextPage;
-
-  /// 이전 페이지 존재 여부
-  bool hasPreviousPage;
+  List<_i3.ChatMessageResponseDto> messages;
 
   /// Returns a shallow copy of this [PaginatedChatMessagesResponseDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   PaginatedChatMessagesResponseDto copyWith({
-    List<_i2.ChatMessageResponseDto>? messages,
-    int? totalCount,
-    int? mediaTotalCount,
-    int? fileTotalCount,
-    int? currentPage,
-    int? pageSize,
-    bool? hasNextPage,
-    bool? hasPreviousPage,
+    _i2.PaginationDto? pagination,
+    List<_i3.ChatMessageResponseDto>? messages,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
+      'pagination': pagination.toJson(),
       'messages': messages.toJson(valueToJson: (v) => v.toJson()),
-      'totalCount': totalCount,
-      'mediaTotalCount': mediaTotalCount,
-      'fileTotalCount': fileTotalCount,
-      'currentPage': currentPage,
-      'pageSize': pageSize,
-      'hasNextPage': hasNextPage,
-      'hasPreviousPage': hasPreviousPage,
     };
   }
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
     return {
+      'pagination': pagination.toJsonForProtocol(),
       'messages': messages.toJson(valueToJson: (v) => v.toJsonForProtocol()),
-      'totalCount': totalCount,
-      'mediaTotalCount': mediaTotalCount,
-      'fileTotalCount': fileTotalCount,
-      'currentPage': currentPage,
-      'pageSize': pageSize,
-      'hasNextPage': hasNextPage,
-      'hasPreviousPage': hasPreviousPage,
     };
   }
 
@@ -129,23 +77,11 @@ abstract class PaginatedChatMessagesResponseDto
 class _PaginatedChatMessagesResponseDtoImpl
     extends PaginatedChatMessagesResponseDto {
   _PaginatedChatMessagesResponseDtoImpl({
-    required List<_i2.ChatMessageResponseDto> messages,
-    required int totalCount,
-    required int mediaTotalCount,
-    required int fileTotalCount,
-    required int currentPage,
-    required int pageSize,
-    required bool hasNextPage,
-    required bool hasPreviousPage,
+    required _i2.PaginationDto pagination,
+    required List<_i3.ChatMessageResponseDto> messages,
   }) : super._(
+          pagination: pagination,
           messages: messages,
-          totalCount: totalCount,
-          mediaTotalCount: mediaTotalCount,
-          fileTotalCount: fileTotalCount,
-          currentPage: currentPage,
-          pageSize: pageSize,
-          hasNextPage: hasNextPage,
-          hasPreviousPage: hasPreviousPage,
         );
 
   /// Returns a shallow copy of this [PaginatedChatMessagesResponseDto]
@@ -153,24 +89,12 @@ class _PaginatedChatMessagesResponseDtoImpl
   @_i1.useResult
   @override
   PaginatedChatMessagesResponseDto copyWith({
-    List<_i2.ChatMessageResponseDto>? messages,
-    int? totalCount,
-    int? mediaTotalCount,
-    int? fileTotalCount,
-    int? currentPage,
-    int? pageSize,
-    bool? hasNextPage,
-    bool? hasPreviousPage,
+    _i2.PaginationDto? pagination,
+    List<_i3.ChatMessageResponseDto>? messages,
   }) {
     return PaginatedChatMessagesResponseDto(
+      pagination: pagination ?? this.pagination.copyWith(),
       messages: messages ?? this.messages.map((e0) => e0.copyWith()).toList(),
-      totalCount: totalCount ?? this.totalCount,
-      mediaTotalCount: mediaTotalCount ?? this.mediaTotalCount,
-      fileTotalCount: fileTotalCount ?? this.fileTotalCount,
-      currentPage: currentPage ?? this.currentPage,
-      pageSize: pageSize ?? this.pageSize,
-      hasNextPage: hasNextPage ?? this.hasNextPage,
-      hasPreviousPage: hasPreviousPage ?? this.hasPreviousPage,
     );
   }
 }

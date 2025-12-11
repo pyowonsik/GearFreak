@@ -1,11 +1,10 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 
-/// 채팅 로드 완료 상태의 View
+/// 채팅 로드 완료 상태 UI View
 class ChatLoadedView extends ConsumerStatefulWidget {
   /// ChatLoadedView 생성자
   ///
@@ -76,18 +75,68 @@ class ChatLoadedView extends ConsumerStatefulWidget {
   ConsumerState<ChatLoadedView> createState() => _ChatLoadedViewState();
 }
 
-class _ChatLoadedViewState extends ConsumerState<ChatLoadedView> {
-  Timer? _debounceTimer;
+class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
+    with PaginationScrollMixin {
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // PaginationScrollMixin 초기화 (채팅용: reverse: true)
+    initPaginationScroll(
+      onLoadMore: () {
+        if (widget.onLoadMore != null) {
+          widget.onLoadMore!();
+        }
+      },
+      getPagination: () => widget.pagination?.pagination,
+      isLoading: () => widget.isLoadingMore,
+      screenName: 'ChatLoadedView',
+      reverse: true, // 채팅은 상단 스크롤 감지
+    );
+  }
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
+    disposePaginationScroll();
+    _messageController.dispose();
     super.dispose();
+  }
+
+  /// 메시지 전송
+  void _sendMessage() {
+    if (_messageController.text.trim().isEmpty) return;
+
+    widget.onSendPressed(
+      types.PartialText(text: _messageController.text.trim()),
+    );
+
+    _messageController.clear();
+  }
+
+  /// 시간 포맷팅
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final messageDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    final hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? '오후' : '오전';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+
+    if (messageDate == today) {
+      // 오늘인 경우: 오후 2:30 형식
+      return '$period $displayHour:$minute';
+    } else {
+      // 다른 날인 경우: 12/25 오후 2:30 형식
+      return '${dateTime.month}/${dateTime.day} $period $displayHour:$minute';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 상품 정보 표시
+    // 상품 정보
     final productName = widget.product?.title ?? '상품 정보 없음';
     final price = widget.product != null
         ? '${widget.product!.price.toString().replaceAllMapped(
@@ -108,12 +157,11 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView> {
         // 상품 정보 카드
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
             border: Border(
               bottom: BorderSide(
-                color: const Color(0xFFE5E7EB),
-                width: 1,
+                color: Color(0xFFE5E7EB),
               ),
             ),
           ),
@@ -126,7 +174,7 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView> {
                   color: const Color(0xFFF3F4F6),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: widget.product?.imageUrls?.isNotEmpty == true
+                child: widget.product?.imageUrls?.isNotEmpty ?? false
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
@@ -177,95 +225,244 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView> {
             ],
           ),
         ),
-        // 채팅 UI
+
+        // 채팅 메시지 목록
         Expanded(
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              // 위로 스크롤 시 이전 메시지 로드
-              if (notification is ScrollUpdateNotification ||
-                  notification is ScrollEndNotification) {
-                final metrics = notification.metrics;
-                // flutter_chat_ui는 reverse: true로 동작하므로,
-                // 위로 스크롤하면 pixels가 maxScrollExtent에 가까워짐
-                // 상단 300px 이내에 도달하면 이전 메시지 로드
-                final threshold = metrics.maxScrollExtent - 300;
+          child: Stack(
+            children: [
+              ListView.builder(
+                controller: scrollController,
+                reverse: true, // 최신 메시지가 하단에
+                padding: const EdgeInsets.all(16),
+                itemCount: convertedMessages.length,
+                itemBuilder: (context, index) {
+                  final message = convertedMessages[index];
+                  final isMine = message.author.id == widget.currentUser.id;
 
-                // 스크롤 위치가 임계값 이상이고, 스크롤 가능한 콘텐츠가 있을 때만 체크
-                if (metrics.pixels >= threshold &&
-                    metrics.maxScrollExtent > 0) {
-                  // 디바운스: 이전 타이머 취소
-                  _debounceTimer?.cancel();
+                  // 시간 포맷팅
+                  final currentTime = message.createdAt != null
+                      ? _formatTime(
+                          DateTime.fromMillisecondsSinceEpoch(
+                            message.createdAt!,
+                          ),
+                        )
+                      : '';
 
-                  // 300ms 후에 실행 (디바운스)
-                  _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-                    // 로딩 중이 아니고, 다음 페이지가 있고, 콜백이 있을 때만 실행
-                    if (!widget.isLoadingMore &&
-                        (widget.pagination?.hasNextPage ?? false) &&
-                        widget.onLoadMore != null) {
-                      widget.onLoadMore!();
+                  // 카카오톡 방식: 같은 시간대의 메시지 그룹에서 가장 마지막(최신) 메시지에만 시간 표시
+                  // reverse: true이므로 index 0이 최신 메시지(하단), index가 커질수록 오래된 메시지(상단)
+                  // 이전 메시지(index - 1, 더 최신 메시지)와 시간이 다르면 현재 메시지에 시간 표시
+                  var showTime = false;
+                  if (index == 0) {
+                    // 첫 번째 메시지(가장 최신)는 항상 시간 표시
+                    showTime = true;
+                  } else {
+                    // 이전 메시지(더 최신 메시지)와 시간 비교
+                    final previousMessage = convertedMessages[index - 1];
+                    if (previousMessage.createdAt != null &&
+                        message.createdAt != null) {
+                      final previousTime = _formatTime(
+                        DateTime.fromMillisecondsSinceEpoch(
+                          previousMessage.createdAt!,
+                        ),
+                      );
+                      // 이전 메시지와 시간이 다르면 현재 메시지에 시간 표시
+                      // (같은 시간대 그룹의 마지막 메시지)
+                      if (currentTime != previousTime ||
+                          previousMessage.author.id != message.author.id) {
+                        showTime = true;
+                      }
+                    } else {
+                      // 시간 정보가 없으면 표시
+                      showTime = true;
                     }
-                  });
-                }
-              }
-              return false;
-            },
-            child: Stack(
-              children: [
-                Chat(
-                  messages: convertedMessages,
-                  onSendPressed: widget.onSendPressed,
-                  user: widget.currentUser,
-                  showUserAvatars: true,
-                  showUserNames: false,
-                  theme: DefaultChatTheme(
-                    backgroundColor: Colors.white,
-                    primaryColor: const Color(0xFF2563EB),
-                    secondaryColor: const Color(0xFFF3F4F6),
-                    inputBackgroundColor: const Color(0xFFF3F4F6),
-                    inputBorderRadius: BorderRadius.circular(24),
-                    inputTextColor: const Color(0xFF1F2937),
-                    inputTextStyle: const TextStyle(fontSize: 14),
-                    messageBorderRadius: 18,
-                    receivedMessageBodyTextStyle: const TextStyle(
-                      color: Color(0xFF1F2937),
-                      fontSize: 14,
-                      height: 1.4,
-                    ),
-                    sentMessageBodyTextStyle: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      height: 1.4,
-                    ),
-                    dateDividerTextStyle: const TextStyle(
-                      color: Color(0xFF9CA3AF),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    emptyChatPlaceholderTextStyle: const TextStyle(
-                      color: Color(0xFF9CA3AF),
-                      fontSize: 14,
+                  }
+
+                  if (message is types.TextMessage) {
+                    return _buildMessageBubble(
+                      message.text,
+                      isMine,
+                      currentTime,
+                      message.author,
+                      showTime: showTime,
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+              // 로딩 인디케이터
+              if (widget.isLoadingMore)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    color: Colors.white.withValues(alpha: 0.8),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
                     ),
                   ),
                 ),
-                // 로딩 인디케이터
-                if (widget.isLoadingMore)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      color: Colors.white.withOpacity(0.8),
-                      child: const Center(
-                        child: CircularProgressIndicator(),
+            ],
+          ),
+        ),
+
+        // 메시지 입력창
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.add_circle_outline,
+                    color: Color(0xFF6B7280),
+                  ),
+                  onPressed: () {
+                    // TODO: 파일 첨부 기능
+                  },
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: '메시지를 입력하세요',
+                      hintStyle: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFFF3F4F6),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
                       ),
                     ),
+                    maxLines: null,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _sendMessage(),
                   ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _sendMessage,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2563EB),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.send,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  /// 메시지 버블 빌드
+  Widget _buildMessageBubble(
+    String text,
+    bool isMine,
+    String time,
+    types.User author, {
+    bool showTime = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment:
+            isMine ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isMine) ...[
+            // 시간이 표시될 때만 아바타 표시 (같은 시간대면 아바타도 생략)
+            if (showTime)
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: const Color(0xFFF3F4F6),
+                backgroundImage: author.imageUrl != null
+                    ? NetworkImage(author.imageUrl!)
+                    : null,
+                child: author.imageUrl == null
+                    ? Icon(
+                        Icons.person,
+                        color: Colors.grey.shade500,
+                        size: 16,
+                      )
+                    : null,
+              ),
+            if (showTime) const SizedBox(width: 8),
+            // 아바타가 없을 때 공간 확보
+            if (!showTime) const SizedBox(width: 40),
+          ],
+          // 내 메시지는 시간이 왼쪽에 표시
+          if (isMine && showTime) ...[
+            Text(
+              time,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color:
+                    isMine ? const Color(0xFF2563EB) : const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isMine ? Colors.white : const Color(0xFF1F2937),
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ),
+          // 상대방 메시지는 시간이 오른쪽에 표시
+          if (!isMine && showTime) ...[
+            const SizedBox(width: 8),
+            Text(
+              time,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

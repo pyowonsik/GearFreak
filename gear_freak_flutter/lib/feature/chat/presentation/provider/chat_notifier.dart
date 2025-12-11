@@ -465,8 +465,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
 
     final pagination = currentState.pagination;
-    // 채팅방은 위로 스크롤 시 더 오래된 메시지를 로드하므로 hasNextPage 확인
-    if (pagination == null || !pagination.hasNextPage) {
+    // 채팅방은 위로 스크롤 시 더 오래된 메시지를 로드하므로 hasMore 확인
+    if (pagination == null || pagination.pagination.hasMore != true) {
       return;
     }
 
@@ -482,8 +482,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final result = await getChatMessagesUseCase(
       GetChatMessagesParams(
         chatRoomId: chatRoomId,
-        page: pagination.currentPage + 1, // 다음 페이지 로드 (더 오래된 메시지)
-        limit: pagination.pageSize,
+        page: pagination.pagination.page + 1, // 다음 페이지 로드 (더 오래된 메시지)
+        limit: pagination.pagination.limit,
       ),
     );
 
