@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_room_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/product_avatar_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,7 +37,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 상대방 닉네임 가져오기
-    final otherParticipantName = ChatUtil.getOtherParticipantName(
+    final otherParticipantName = ChatRoomUtil.getOtherParticipantName(
       ref,
       participants: participants,
       defaultName: chatRoom.title ?? '채팅방',
@@ -71,7 +71,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
           ),
           trailing: chatRoom.lastActivityAt != null
               ? Text(
-                  ChatUtil.formatChatRoomTime(chatRoom.lastActivityAt!),
+                  ChatRoomUtil.formatChatRoomTime(chatRoom.lastActivityAt!),
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF9CA3AF),

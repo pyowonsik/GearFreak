@@ -68,6 +68,8 @@ class ChatMessageInputWidget extends StatelessWidget {
                   ),
                 ),
                 maxLines: null,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSend(),
               ),
             ),
             const SizedBox(width: 8),

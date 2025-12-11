@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 /// 채팅 메시지 버블 위젯
 class ChatMessageBubbleWidget extends StatelessWidget {
@@ -7,10 +8,14 @@ class ChatMessageBubbleWidget extends StatelessWidget {
   /// [text]는 메시지 텍스트입니다.
   /// [isMine]은 내 메시지인지 여부입니다.
   /// [time]은 메시지 시간입니다.
+  /// [author]는 메시지 작성자 정보입니다.
+  /// [showTime]은 시간을 표시할지 여부입니다. (기본값: true)
   const ChatMessageBubbleWidget({
     required this.text,
     required this.isMine,
     required this.time,
+    required this.author,
+    this.showTime = true,
     super.key,
   });
 
@@ -23,6 +28,12 @@ class ChatMessageBubbleWidget extends StatelessWidget {
   /// 메시지 시간
   final String time;
 
+  /// 메시지 작성자 정보
+  final types.User author;
+
+  /// 시간을 표시할지 여부
+  final bool showTime;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,18 +44,28 @@ class ChatMessageBubbleWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMine) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: const Color(0xFFF3F4F6),
-              child: Icon(
-                Icons.person,
-                color: Colors.grey.shade500,
-                size: 16,
+            // 시간이 표시될 때만 아바타 표시 (같은 시간대면 아바타도 생략)
+            if (showTime)
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: const Color(0xFFF3F4F6),
+                backgroundImage: author.imageUrl != null
+                    ? NetworkImage(author.imageUrl!)
+                    : null,
+                child: author.imageUrl == null
+                    ? Icon(
+                        Icons.person,
+                        color: Colors.grey.shade500,
+                        size: 16,
+                      )
+                    : null,
               ),
-            ),
-            const SizedBox(width: 8),
+            if (showTime) const SizedBox(width: 8),
+            // 아바타가 없을 때 공간 확보
+            if (!showTime) const SizedBox(width: 40),
           ],
-          if (isMine) ...[
+          // 내 메시지는 시간이 왼쪽에 표시
+          if (isMine && showTime) ...[
             Text(
               time,
               style: const TextStyle(
@@ -75,7 +96,8 @@ class ChatMessageBubbleWidget extends StatelessWidget {
               ),
             ),
           ),
-          if (!isMine) ...[
+          // 상대방 메시지는 시간이 오른쪽에 표시
+          if (!isMine && showTime) ...[
             const SizedBox(width: 8),
             Text(
               time,

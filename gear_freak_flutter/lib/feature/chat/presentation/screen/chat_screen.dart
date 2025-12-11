@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_room_util.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/view/chat_loaded_view.dart';
 
 /// 채팅 화면을 표시하는 위젯입니다.
@@ -100,51 +101,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  /// ChatMessageResponseDto를 flutter_chat_types Message로 변환
-  List<types.Message> _convertMessages(
-    List<pod.ChatMessageResponseDto> messages,
-    List<pod.ChatParticipantInfoDto> participants,
-    int? currentUserId,
-  ) {
-    if (messages.isEmpty) {
-      return [];
-    }
-
-    // notifier에서 이미 정렬되어 있으므로 추가 정렬 불필요
-    return messages.map((message) {
-      final senderId = message.senderId.toString();
-      final isCurrentUser = currentUserId?.toString() == senderId;
-
-      types.User author;
-      if (isCurrentUser) {
-        final authState = ref.read(authNotifierProvider);
-        final user = authState is AuthAuthenticated ? authState.user : null;
-        author = types.User(
-          id: senderId,
-          firstName: user?.nickname ?? '나',
-          imageUrl: user?.profileImageUrl,
-        );
-      } else {
-        final participant = participants.firstWhere(
-          (p) => p.userId.toString() == senderId,
-          orElse: () => participants.first,
-        );
-        author = types.User(
-          id: senderId,
-          firstName: participant.nickname ?? '사용자',
-          imageUrl: participant.profileImageUrl,
-        );
-      }
-
-      return types.TextMessage(
-        author: author,
-        createdAt: message.createdAt.millisecondsSinceEpoch,
-        id: message.id.toString(),
-        text: message.content,
-      );
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatNotifierProvider);
@@ -184,15 +140,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ChatLoadingMore(:final participants) =>
         GbAppBar(
           title: Text(
-            participants.isNotEmpty
-                ? participants
-                        .firstWhere(
-                          (p) => p.userId != currentUserId,
-                          orElse: () => participants.first,
-                        )
-                        .nickname ??
-                    '사용자'
-                : '사용자',
+            ChatRoomUtil.getOtherParticipantName(
+              ref,
+              participants: participants,
+              defaultName: '사용자',
+            ),
           ),
           actions: [
             IconButton(
@@ -224,7 +176,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ChatInitial(:final product) =>
         // 채팅방이 없는 상태에서도 채팅 입력 UI 표시 (카카오톡/당근마켓 방식)
         ChatLoadedView(
-          chatRoom: _createDummyChatRoom(),
+          chatRoom: ChatRoomUtil.createDummyChatRoom(
+            int.tryParse(widget.productId) ?? 0,
+          ),
           messages: const [],
           participants: const [],
           pagination: null,
@@ -234,7 +188,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           isLoadingMore: false,
           onLoadMore: null,
           onSendPressed: _handleSendPressed,
-          convertMessages: _convertMessages,
+          convertMessages: (messages, participants, currentUserId) =>
+              ChatUtil.convertChatMessages(
+            messages,
+            participants,
+            currentUserId,
+            ref,
+          ),
         ),
       ChatLoaded(
         :final chatRoom,
@@ -267,21 +227,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 }
               : null,
           onSendPressed: _handleSendPressed,
-          convertMessages: _convertMessages,
+          convertMessages: (messages, participants, currentUserId) =>
+              ChatUtil.convertChatMessages(
+            messages,
+            participants,
+            currentUserId,
+            ref,
+          ),
         ),
     };
-  }
-
-  /// 더미 채팅방 생성 (채팅방이 없을 때 UI 표시용)
-  pod.ChatRoom _createDummyChatRoom() {
-    final productId = int.tryParse(widget.productId) ?? 0;
-    return pod.ChatRoom(
-      productId: productId,
-      chatRoomType: pod.ChatRoomType.direct,
-      participantCount: 0,
-      lastActivityAt: DateTime.now(),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
   }
 }

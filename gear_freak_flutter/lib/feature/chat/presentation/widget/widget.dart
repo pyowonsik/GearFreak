@@ -5,6 +5,7 @@ library;
 
 export 'chat_message_bubble_widget.dart';
 export 'chat_message_input_widget.dart';
+export 'chat_message_list_widget.dart';
 export 'chat_product_info_card_widget.dart';
 export 'chat_room_item_widget.dart';
 export 'product_avatar_widget.dart';

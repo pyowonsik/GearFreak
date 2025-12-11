@@ -1,118 +1,119 @@
-import 'package:chat_group_avatar/group_avatar.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 
-/// 채팅 관련 유틸리티 함수
+/// 채팅 메시지 관련 유틸리티 함수
 class ChatUtil {
-  /// 상대방 닉네임 가져오기
-  ///
-  /// [ref]는 Riverpod의 WidgetRef입니다.
-  /// [participants]는 참여자 목록입니다.
-  /// [defaultName]는 기본값입니다.
-  static String getOtherParticipantName(
-    WidgetRef ref, {
-    List<pod.ChatParticipantInfoDto>? participants,
-    String defaultName = '채팅방',
-  }) {
-    // 현재 사용자 ID 가져오기
-    final authState = ref.read(authNotifierProvider);
-    final currentUserId =
-        authState is AuthAuthenticated ? authState.user.id : null;
 
-    // 참여자 정보가 있고 현재 사용자 ID가 있으면 상대방 찾기
-    if (participants != null &&
-        participants.isNotEmpty &&
-        currentUserId != null) {
-      final otherParticipant = participants.firstWhere(
-        (p) => p.userId != currentUserId,
-        orElse: () => participants.first,
-      );
-      return otherParticipant.nickname ?? '사용자';
-    }
-
-    // 참여자 정보가 없거나 현재 사용자 ID가 없으면 기본값
-    return defaultName;
-  }
-
-  /// 채팅방 아바타 위젯 빌드
-  ///
-  /// [participants]는 참여자 목록입니다.
-  /// [size]는 아바타 크기입니다. (기본값: 56)
-  /// [useCircleAvatar]는 CircleAvatar를 사용할지 여부입니다. (기본값: false)
-  /// [defaultIcon]는 기본 아이콘입니다. (기본값: Icons.person)
-  /// [defaultSize]는 기본 아이콘 크기입니다. (기본값: 28)
-  static Widget buildChatRoomAvatar({
-    List<pod.ChatParticipantInfoDto>? participants,
-    double size = 56,
-    bool useCircleAvatar = false,
-    IconData defaultIcon = Icons.person,
-    double defaultSize = 28,
-  }) {
-    // 참여자 정보가 있으면 그룹 아바타 사용
-    if (participants != null && participants.isNotEmpty) {
-      // 현재 사용자 제외하고 프로필 이미지 URL 수집
-      final imageUrls = participants
-          .map((p) => p.profileImageUrl)
-          .where((url) => url != null && url.isNotEmpty)
-          .take(4) // 최대 4명까지
-          .toList();
-
-      if (imageUrls.isNotEmpty) {
-        return GroupAvatar(
-          imageUrls: imageUrls,
-          size: size,
-          borderColor: Colors.white,
-        );
-      }
-    }
-
-    // 참여자 정보가 없거나 이미지가 없으면 기본 아이콘 표시
-    if (useCircleAvatar) {
-      return CircleAvatar(
-        radius: defaultSize,
-        backgroundColor: const Color(0xFFF3F4F6),
-        child: Icon(
-          defaultIcon,
-          color: Colors.grey.shade500,
-        ),
-      );
-    } else {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          defaultIcon,
-          size: defaultSize,
-          color: const Color(0xFF9CA3AF),
-        ),
-      );
-    }
-  }
-
-  /// 채팅방 시간 포맷팅
+  /// 채팅 메시지 시간 포맷팅
   ///
   /// [dateTime]는 포맷팅할 날짜/시간입니다.
-  static String formatChatRoomTime(DateTime dateTime) {
+  /// 오늘인 경우: "오후 2:30" 형식
+  /// 다른 날인 경우: "12/25 오후 2:30" 형식
+  static String formatChatMessageTime(DateTime dateTime) {
     final now = DateTime.now();
-    final difference = now.difference(dateTime);
+    final today = DateTime(now.year, now.month, now.day);
+    final messageDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
-    if (difference.inDays > 7) {
-      return '${dateTime.month}/${dateTime.day}';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}일 전';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}시간 전';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}분 전';
+    final hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? '오후' : '오전';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+
+    if (messageDate == today) {
+      // 오늘인 경우: 오후 2:30 형식
+      return '$period $displayHour:$minute';
     } else {
-      return '방금 전';
+      // 다른 날인 경우: 12/25 오후 2:30 형식
+      return '${dateTime.month}/${dateTime.day} $period $displayHour:$minute';
     }
+  }
+
+  /// ChatMessageResponseDto를 flutter_chat_types Message로 변환
+  ///
+  /// [messages]는 변환할 메시지 목록입니다.
+  /// [participants]는 참여자 목록입니다.
+  /// [currentUserId]는 현재 사용자 ID입니다.
+  /// [ref]는 Riverpod의 WidgetRef입니다. (현재 사용자 정보 조회용)
+  static List<types.Message> convertChatMessages(
+    List<pod.ChatMessageResponseDto> messages,
+    List<pod.ChatParticipantInfoDto> participants,
+    int? currentUserId,
+    WidgetRef ref,
+  ) {
+    if (messages.isEmpty) {
+      return [];
+    }
+
+    return messages.map((message) {
+      final senderId = message.senderId.toString();
+      final isCurrentUser = currentUserId?.toString() == senderId;
+
+      types.User author;
+      if (isCurrentUser) {
+        final authState = ref.read(authNotifierProvider);
+        final user = authState is AuthAuthenticated ? authState.user : null;
+        author = types.User(
+          id: senderId,
+          firstName: user?.nickname ?? '나',
+          imageUrl: user?.profileImageUrl,
+        );
+      } else {
+        final participant = participants.firstWhere(
+          (p) => p.userId.toString() == senderId,
+          orElse: () => participants.first,
+        );
+        author = types.User(
+          id: senderId,
+          firstName: participant.nickname ?? '사용자',
+          imageUrl: participant.profileImageUrl,
+        );
+      }
+
+      return types.TextMessage(
+        author: author,
+        createdAt: message.createdAt.millisecondsSinceEpoch,
+        id: message.id.toString(),
+        text: message.content,
+      );
+    }).toList();
+  }
+
+  /// 메시지 시간 표시 여부 결정 (카카오톡 방식)
+  ///
+  /// 같은 시간대의 메시지 그룹에서 가장 마지막(최신) 메시지에만 시간 표시
+  /// [index]는 현재 메시지의 인덱스입니다. (reverse: true일 때 index 0이 최신 메시지)
+  /// [currentMessage]는 현재 메시지입니다.
+  /// [previousMessage]는 이전 메시지입니다. (더 최신 메시지, null 가능)
+  /// [currentTime]는 현재 메시지의 포맷된 시간입니다.
+  /// [previousTime]는 이전 메시지의 포맷된 시간입니다. (null 가능)
+  static bool shouldShowMessageTime({
+    required int index,
+    required types.Message currentMessage,
+    types.Message? previousMessage,
+    required String currentTime,
+    String? previousTime,
+  }) {
+    // 첫 번째 메시지(가장 최신)는 항상 시간 표시
+    if (index == 0) {
+      return true;
+    }
+
+    // 이전 메시지가 없으면 시간 표시
+    if (previousMessage == null || previousTime == null) {
+      return true;
+    }
+
+    // 이전 메시지와 시간이 다르면 현재 메시지에 시간 표시
+    // (같은 시간대 그룹의 마지막 메시지)
+    if (currentTime != previousTime ||
+        previousMessage.author.id != currentMessage.author.id) {
+      return true;
+    }
+
+    // 같은 시간대이고 같은 작성자면 시간 표시 안 함
+    return false;
   }
 }
