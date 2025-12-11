@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:gear_freak_flutter/common/presentation/widget/full_screen_image_viewer.dart';
 
 /// 채팅 메시지 버블 위젯
 class ChatMessageBubbleWidget extends StatelessWidget {
@@ -82,8 +83,9 @@ class ChatMessageBubbleWidget extends StatelessWidget {
             const SizedBox(width: 8),
           ],
           Flexible(
-            child:
-                imageUrl != null ? _buildImageMessage() : _buildTextMessage(),
+            child: imageUrl != null
+                ? _buildImageMessage(context)
+                : _buildTextMessage(),
           ),
           // 상대방 메시지는 시간이 오른쪽에 표시
           if (!isMine && showTime) ...[
@@ -124,76 +126,85 @@ class ChatMessageBubbleWidget extends StatelessWidget {
   }
 
   /// 이미지 메시지 빌드 (카카오톡 스타일)
-  Widget _buildImageMessage() {
-    return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 220,
-        maxHeight: 300,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            // 이미지
-            CachedNetworkImage(
-              imageUrl: imageUrl!,
-              cacheKey: _extractFileKeyFromUrl(imageUrl!),
-              fit: BoxFit.cover,
-              fadeInDuration: Duration.zero, // 캐시된 이미지는 즉시 표시
-              fadeOutDuration: Duration.zero,
-              placeholderFadeInDuration: Duration.zero, // 플레이스홀더도 즉시 표시
-              memCacheWidth: 300, // 표시 크기보다 약간 크게 (220 * 1.36)
-              memCacheHeight: 400, // 표시 크기보다 약간 크게 (300 * 1.33)
-              maxWidthDiskCache: 300,
-              maxHeightDiskCache: 400,
-              useOldImageOnUrlChange: true, // URL이 변경되어도 이전 이미지 유지
-              placeholder: (context, url) => Container(
-                width: 220,
-                height: 150,
-                color: const Color(0xFFF3F4F6),
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                  ),
-                ),
-              ),
-              errorWidget: (context, url, error) => Container(
-                width: 220,
-                height: 150,
-                color: const Color(0xFFF3F4F6),
-                child: const Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    size: 48,
-                    color: Color(0xFF9CA3AF),
-                  ),
-                ),
-              ),
-            ),
-            // 흰색 테두리 효과 (패딩 느낌)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 3,
-                  ),
-                ),
-              ),
+  Widget _buildImageMessage(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // 이미지 탭 시 전체 화면으로 표시
+        FullScreenImageViewer.show(
+          context: context,
+          imageUrl: imageUrl!,
+        );
+      },
+      child: Container(
+        constraints: const BoxConstraints(
+          maxWidth: 220,
+          maxHeight: 300,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
+            children: [
+              // 이미지
+              CachedNetworkImage(
+                imageUrl: imageUrl!,
+                cacheKey: _extractFileKeyFromUrl(imageUrl!),
+                fit: BoxFit.cover,
+                fadeInDuration: Duration.zero, // 캐시된 이미지는 즉시 표시
+                fadeOutDuration: Duration.zero,
+                placeholderFadeInDuration: Duration.zero, // 플레이스홀더도 즉시 표시
+                memCacheWidth: 300, // 표시 크기보다 약간 크게 (220 * 1.36)
+                memCacheHeight: 400, // 표시 크기보다 약간 크게 (300 * 1.33)
+                maxWidthDiskCache: 300,
+                maxHeightDiskCache: 400,
+                useOldImageOnUrlChange: true, // URL이 변경되어도 이전 이미지 유지
+                placeholder: (context, url) => Container(
+                  width: 220,
+                  height: 150,
+                  color: const Color(0xFFF3F4F6),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 220,
+                  height: 150,
+                  color: const Color(0xFFF3F4F6),
+                  child: const Center(
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      size: 48,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                ),
+              ),
+              // 흰색 테두리 효과 (패딩 느낌)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 3,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
