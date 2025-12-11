@@ -1,6 +1,8 @@
 import 'dart:async';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_chat_room_image_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/create_or_get_chat_room_usecase.dart';
@@ -515,19 +517,25 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
   }
 
-  /// 이미지 업로드 및 메시지 전송
+  /// 미디어 업로드 및 메시지 전송 (이미지/동영상)
   ///
   /// [chatRoomId]는 채팅방 ID입니다.
   /// [fileBytes]는 파일 바이트 데이터입니다.
   /// [fileName]은 파일 이름입니다.
   /// [contentType]은 파일의 Content-Type입니다.
   /// [fileSize]는 파일 크기입니다.
-  Future<void> uploadAndSendImage({
+  /// [isVideo]는 동영상 파일인지 여부입니다.
+  /// [thumbnailBytes]는 동영상 썸네일 바이트 데이터입니다. (동영상인 경우)
+  /// [thumbnailFileName]는 썸네일 파일 이름입니다. (동영상인 경우)
+  Future<void> uploadAndSendMedia({
     required int chatRoomId,
     required List<int> fileBytes,
     required String fileName,
     required String contentType,
     required int fileSize,
+    required bool isVideo,
+    Uint8List? thumbnailBytes,
+    String? thumbnailFileName,
   }) async {
     final currentState = state;
     if (currentState is! ChatLoaded) {
@@ -546,7 +554,35 @@ class ChatNotifier extends StateNotifier<ChatState> {
         currentFileName: fileName,
       );
 
-      // 2. 이미지 S3 업로드
+      // 2. 동영상인 경우 썸네일 먼저 업로드
+      String? thumbnailUrl;
+      if (isVideo && thumbnailBytes != null && thumbnailFileName != null) {
+        debugPrint('📤 썸네일 업로드 시작...');
+        final thumbnailUploadResult = await uploadChatRoomImageUseCase(
+          UploadChatRoomImageParams(
+            chatRoomId: chatRoomId,
+            fileName: thumbnailFileName,
+            contentType: 'image/jpeg',
+            fileSize: thumbnailBytes.length,
+            fileBytes: thumbnailBytes,
+          ),
+        );
+
+        await thumbnailUploadResult.fold(
+          (failure) async {
+            debugPrint('❌ 썸네일 업로드 실패: ${failure.message}');
+            // 썸네일 업로드 실패해도 동영상 업로드는 진행
+          },
+          (response) async {
+            final s3BaseUrl = dotenv.env['S3_PRIVATE_BASE_URL'] ??
+                'https://gear-freak-private-storage-3059875.s3.ap-northeast-2.amazonaws.com';
+            thumbnailUrl = '$s3BaseUrl/${response.fileKey}';
+            debugPrint('✅ 썸네일 업로드 완료: $thumbnailUrl');
+          },
+        );
+      }
+
+      // 3. 메인 파일 S3 업로드 (이미지 또는 동영상)
       final uploadResult = await uploadChatRoomImageUseCase(
         UploadChatRoomImageParams(
           chatRoomId: chatRoomId,
@@ -571,24 +607,29 @@ class ChatNotifier extends StateNotifier<ChatState> {
           );
         },
         (response) async {
-          // 3. 업로드된 파일의 URL 생성 (Private 버킷)
+          // 4. 업로드된 파일의 URL 생성 (Private 버킷)
           final s3BaseUrl = dotenv.env['S3_PRIVATE_BASE_URL'] ??
               'https://gear-freak-private-storage-3059875.s3.ap-northeast-2.amazonaws.com';
-          final imageUrl = '$s3BaseUrl/${response.fileKey}';
+          final fileUrl = '$s3BaseUrl/${response.fileKey}';
 
-          // 4. 이미지 메시지 전송
+          // 5. 메시지 전송 (동영상인 경우 썸네일 URL을 content에 포함)
+          final messageContent = isVideo && thumbnailUrl != null
+              ? thumbnailUrl! // 동영상인 경우 썸네일 URL을 content로 사용
+              : fileName; // 이미지인 경우 파일 이름 사용
+
           final sendResult = await sendMessageUseCase(
             SendMessageParams(
               chatRoomId: chatRoomId,
-              content: fileName, // 이미지 메시지는 파일 이름을 content로 사용
-              messageType: pod.MessageType.image,
-              attachmentUrl: imageUrl,
+              content: messageContent,
+              messageType:
+                  isVideo ? pod.MessageType.file : pod.MessageType.image,
+              attachmentUrl: fileUrl,
               attachmentName: fileName,
               attachmentSize: fileSize,
             ),
           );
 
-          // 5. 메시지 전송 결과 처리
+          // 6. 메시지 전송 결과 처리
           await sendResult.fold(
             (failure) async {
               // 메시지 전송 실패 시 에러 상태로 변경
@@ -624,8 +665,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
           );
         },
       );
-    } catch (e) {
-      // 예외 발생 시 에러 상태로 변경
+    } catch (e, stackTrace) {
+      debugPrint('❌ 미디어 업로드 오류: $e');
+      debugPrint('Stack trace: $stackTrace');
       state = ChatImageUploadError(
         chatRoom: currentState.chatRoom,
         participants: currentState.participants,
@@ -633,7 +675,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         pagination: currentState.pagination,
         isStreamConnected: currentState.isStreamConnected,
         product: currentState.product,
-        error: '이미지 전송 중 오류가 발생했습니다: $e',
+        error: '업로드 중 오류가 발생했습니다: $e',
       );
     }
   }

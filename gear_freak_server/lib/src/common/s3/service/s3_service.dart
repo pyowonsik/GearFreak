@@ -84,15 +84,25 @@ class S3Service {
     String fileName,
     String contentType,
   ) async {
-    // 파일 타입 검증 (이미지만 허용)
+    // 파일 타입 검증 (이미지 및 동영상 허용)
     final allowedContentTypes = [
+      // 이미지
       'image/jpeg',
       'image/jpg',
       'image/png',
       'image/webp',
+      // 동영상
+      'video/quicktime', // .mov
+      'video/mp4', // .mp4
+      'video/x-msvideo', // .avi
+      'video/x-matroska', // .mkv
+      'video/webm', // .webm
+      'video/x-m4v', // .m4v
+      'video/3gpp', // .3gp
     ];
     if (!allowedContentTypes.contains(contentType.toLowerCase())) {
-      throw Exception('Invalid file type. Only images are allowed.');
+      throw Exception(
+          'Invalid file type. Only images and videos are allowed.');
     }
 
     // Private 버킷 이름 가져오기

@@ -81,13 +81,62 @@ class ChatMessageListWidget extends StatelessWidget {
                 showTime: showTime,
               );
             } else if (message is types.ImageMessage) {
+              // 이미지 또는 동영상 썸네일 표시
+              // ImageMessage로 변환된 경우 동영상일 수 있음 (chat_util에서 변환)
+              String? videoUrl;
+              var displayName = message.name;
+              var isVideo = false;
+
+              // name에서 동영상 URL 추출 (형식: "VIDEO_URL:{URL}|{파일이름}")
+              if (message.name.startsWith('VIDEO_URL:')) {
+                final parts = message.name.substring(10).split('|');
+                if (parts.length >= 2) {
+                  videoUrl = parts[0];
+                  displayName = parts[1];
+                  isVideo = true;
+                } else {
+                  // 형식이 맞지 않으면 동영상 파일 확장자로 확인
+                  isVideo = ChatUtil.isVideoFile(message.name);
+                }
+              } else {
+                // 일반 이미지인 경우 파일 확장자로 확인
+                isVideo = ChatUtil.isVideoFile(message.name);
+              }
+
               return ChatMessageBubbleWidget(
-                text: message.name, // 이미지 메시지는 name을 텍스트로 사용
+                text: displayName,
                 isMine: isMine,
                 time: currentTime,
                 author: message.author,
                 showTime: showTime,
-                imageUrl: message.uri, // 이미지 URL 전달
+                imageUrl: message.uri, // 썸네일 URL
+                isVideo: isVideo,
+                videoUrl: videoUrl, // 실제 동영상 URL
+              );
+            } else if (message is types.FileMessage) {
+              // 일반 파일 메시지
+              final isVideo = ChatUtil.isVideoFile(message.name);
+
+              // 동영상인 경우 썸네일이 없어도 표시 (나중에 썸네일 재생성 가능)
+              if (isVideo) {
+                return ChatMessageBubbleWidget(
+                  text: message.name,
+                  isMine: isMine,
+                  time: currentTime,
+                  author: message.author,
+                  showTime: showTime,
+                  isVideo: true,
+                  videoUrl: message.uri, // 동영상 URL
+                );
+              }
+
+              // 일반 파일은 텍스트로 표시
+              return ChatMessageBubbleWidget(
+                text: message.name,
+                isMine: isMine,
+                time: currentTime,
+                author: message.author,
+                showTime: showTime,
               );
             }
 

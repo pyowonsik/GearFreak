@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,8 +8,10 @@ import 'package:gear_freak_flutter/common/presentation/component/component.dart'
 import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 /// 채팅 로드 완료 상태 UI View
 class ChatLoadedView extends ConsumerStatefulWidget {
@@ -170,7 +174,7 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
       }
 
       if (media != null && mounted) {
-        await _uploadAndSendImage(media);
+        await _uploadAndSendMedia(media);
       }
     } catch (e) {
       if (mounted) {
@@ -182,8 +186,8 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
     }
   }
 
-  /// 이미지 업로드 및 메시지 전송
-  Future<void> _uploadAndSendImage(XFile media) async {
+  /// 미디어 업로드 및 메시지 전송 (이미지/동영상)
+  Future<void> _uploadAndSendMedia(XFile media) async {
     if (!mounted) return;
 
     try {
@@ -192,35 +196,75 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
       final fileName = media.path.split('/').last;
       final fileSize = fileBytes.length;
 
-      // 2. Content-Type 결정
-      var contentType = 'image/jpeg';
-      if (fileName.toLowerCase().endsWith('.png')) {
-        contentType = 'image/png';
-      } else if (fileName.toLowerCase().endsWith('.webp')) {
-        contentType = 'image/webp';
+      // 2. 파일 타입 확인
+      final isVideo = ChatUtil.isVideoFile(fileName);
+      final contentType = ChatUtil.getContentType(fileName);
+
+      // 3. 동영상인 경우 썸네일 생성
+      Uint8List? thumbnailBytes;
+      String? thumbnailFileName;
+
+      if (isVideo) {
+        debugPrint('🎬 동영상 썸네일 생성 중...');
+        try {
+          final thumbnail = await VideoThumbnail.thumbnailData(
+            video: media.path,
+            imageFormat: ImageFormat.JPEG,
+            maxWidth: 300, // 이미지와 동일한 최대 너비
+            quality: 75,
+          );
+
+          if (thumbnail != null) {
+            thumbnailBytes = thumbnail;
+            thumbnailFileName = '${fileName.split('.').first}_thumb.jpg';
+            debugPrint(
+              '✅ 썸네일 생성 완료: $thumbnailFileName (${thumbnailBytes.length} bytes)',
+            );
+          } else {
+            debugPrint('⚠️ 썸네일 생성 실패: null 반환');
+          }
+        } catch (e) {
+          debugPrint('❌ 썸네일 생성 오류: $e');
+          // 썸네일 생성 실패해도 동영상 업로드는 진행
+        }
       }
 
-      debugPrint('📤 이미지 업로드 시작:');
+      debugPrint('📤 미디어 업로드 시작:');
       debugPrint('   - 파일명: $fileName');
       debugPrint('   - 파일 크기: $fileSize bytes');
       debugPrint('   - Content-Type: $contentType');
+      debugPrint('   - 타입: ${isVideo ? "동영상" : "이미지"}');
+      if (thumbnailBytes != null) {
+        debugPrint(
+          '   - 썸네일: $thumbnailFileName (${thumbnailBytes.length} bytes)',
+        );
+      }
 
-      // 3. Notifier를 통해 S3 업로드 및 메시지 전송
-      await ref.read(chatNotifierProvider.notifier).uploadAndSendImage(
+      // 4. Notifier를 통해 S3 업로드 및 메시지 전송
+      await ref.read(chatNotifierProvider.notifier).uploadAndSendMedia(
             chatRoomId: widget.chatRoom.id!,
             fileBytes: fileBytes,
             fileName: fileName,
             contentType: contentType,
             fileSize: fileSize,
+            isVideo: isVideo,
+            thumbnailBytes: thumbnailBytes,
+            thumbnailFileName: thumbnailFileName,
           );
 
       // 상태는 실시간으로 업데이트되므로 여기서는 추가 처리 불필요
       // 에러는 ChatImageUploadError 상태로 관리됨
     } catch (e) {
-      debugPrint('❌ 이미지 업로드 오류: $e');
+      debugPrint('❌ 미디어 업로드 오류: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('이미지 전송 중 오류가 발생했습니다.')),
+          SnackBar(
+            content: Text(
+              ChatUtil.isVideoFile(media.path.split('/').last)
+                  ? '동영상 전송 중 오류가 발생했습니다.'
+                  : '이미지 전송 중 오류가 발생했습니다.',
+            ),
+          ),
         );
       }
     }
@@ -275,7 +319,7 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
         // 이미지 업로드 로딩 인디케이터
         if (widget.isImageUploading)
           Positioned.fill(
-            child: Container(
+            child: ColoredBox(
               color: Colors.black.withValues(alpha: 0.3),
               child: const Center(
                 child: CircularProgressIndicator(),

@@ -653,10 +653,14 @@ class ChatService {
       // 5. 발신자 정보 조회
       final user = await User.db.findById(session, userId);
 
-      // 6. Private 버킷 이미지인 경우 Presigned URL로 변환
+      // 6. Private 버킷 이미지/파일인 경우 Presigned URL로 변환
       String? attachmentUrl = savedMessage.attachmentUrl;
+      String content = savedMessage.content;
+
+      // attachmentUrl이 Private 버킷인 경우 Presigned URL로 변환
       if (attachmentUrl != null &&
-          savedMessage.messageType == MessageType.image) {
+          (savedMessage.messageType == MessageType.image ||
+              savedMessage.messageType == MessageType.file)) {
         try {
           // URL에서 파일 키 추출
           final fileKey = S3Util.extractKeyFromUrl(attachmentUrl);
@@ -670,7 +674,29 @@ class ChatService {
         } catch (e) {
           // Presigned URL 생성 실패 시 원본 URL 유지
           session.log(
-            '⚠️ Presigned URL 생성 실패: $e',
+            '⚠️ Presigned URL 생성 실패 (attachmentUrl): $e',
+            level: LogLevel.warning,
+          );
+        }
+      }
+
+      // content가 URL 형식이고 Private 버킷인 경우 Presigned URL로 변환 (동영상 썸네일)
+      if (savedMessage.messageType == MessageType.file &&
+          (content.startsWith('http://') || content.startsWith('https://'))) {
+        try {
+          // URL에서 파일 키 추출
+          final fileKey = S3Util.extractKeyFromUrl(content);
+          // chatRoom 경로인 경우 Private 버킷이므로 Presigned URL 생성
+          if (fileKey.startsWith('chatRoom/')) {
+            content = await S3Service.generatePresignedDownloadUrl(
+              session,
+              fileKey,
+            );
+          }
+        } catch (e) {
+          // Presigned URL 생성 실패 시 원본 URL 유지
+          session.log(
+            '⚠️ Presigned URL 생성 실패 (content/thumbnail): $e',
             level: LogLevel.warning,
           );
         }
@@ -682,7 +708,7 @@ class ChatService {
         chatRoomId: savedMessage.chatRoomId,
         senderId: savedMessage.senderId,
         senderNickname: user?.nickname,
-        content: savedMessage.content,
+        content: content,
         messageType: savedMessage.messageType,
         attachmentUrl: attachmentUrl,
         attachmentName: savedMessage.attachmentName,
@@ -785,10 +811,14 @@ class ChatService {
         // 발신자 정보 조회
         final user = await User.db.findById(session, message.senderId);
 
-        // Private 버킷 이미지인 경우 Presigned URL로 변환
+        // Private 버킷 이미지/파일인 경우 Presigned URL로 변환
         String? attachmentUrl = message.attachmentUrl;
+        String content = message.content;
+
+        // attachmentUrl이 Private 버킷인 경우 Presigned URL로 변환
         if (attachmentUrl != null &&
-            message.messageType == MessageType.image) {
+            (message.messageType == MessageType.image ||
+                message.messageType == MessageType.file)) {
           try {
             // URL에서 파일 키 추출
             final fileKey = S3Util.extractKeyFromUrl(attachmentUrl);
@@ -802,7 +832,29 @@ class ChatService {
           } catch (e) {
             // Presigned URL 생성 실패 시 원본 URL 유지
             session.log(
-              '⚠️ Presigned URL 생성 실패: $e',
+              '⚠️ Presigned URL 생성 실패 (attachmentUrl): $e',
+              level: LogLevel.warning,
+            );
+          }
+        }
+
+        // content가 URL 형식이고 Private 버킷인 경우 Presigned URL로 변환 (동영상 썸네일)
+        if (message.messageType == MessageType.file &&
+            (content.startsWith('http://') || content.startsWith('https://'))) {
+          try {
+            // URL에서 파일 키 추출
+            final fileKey = S3Util.extractKeyFromUrl(content);
+            // chatRoom 경로인 경우 Private 버킷이므로 Presigned URL 생성
+            if (fileKey.startsWith('chatRoom/')) {
+              content = await S3Service.generatePresignedDownloadUrl(
+                session,
+                fileKey,
+              );
+            }
+          } catch (e) {
+            // Presigned URL 생성 실패 시 원본 URL 유지
+            session.log(
+              '⚠️ Presigned URL 생성 실패 (content/thumbnail): $e',
               level: LogLevel.warning,
             );
           }
@@ -813,7 +865,7 @@ class ChatService {
           chatRoomId: message.chatRoomId,
           senderId: message.senderId,
           senderNickname: user?.nickname,
-          content: message.content,
+          content: content,
           messageType: message.messageType,
           attachmentUrl: attachmentUrl,
           attachmentName: message.attachmentName,

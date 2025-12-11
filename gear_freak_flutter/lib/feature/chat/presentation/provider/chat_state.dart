@@ -106,12 +106,12 @@ class ChatImageUploading extends ChatLoaded {
   /// [currentFileName]은 현재 업로드 중인 파일 이름입니다.
   const ChatImageUploading({
     required super.chatRoom,
+    required this.currentFileName,
     super.participants,
     super.messages,
     super.pagination,
     super.isStreamConnected,
     super.product,
-    required this.currentFileName,
   });
 
   /// 현재 업로드 중인 파일 이름
@@ -131,12 +131,12 @@ class ChatImageUploadError extends ChatLoaded {
   /// [error]는 에러 메시지입니다.
   const ChatImageUploadError({
     required super.chatRoom,
+    required this.error,
     super.participants,
     super.messages,
     super.pagination,
     super.isStreamConnected,
     super.product,
-    required this.error,
   });
 
   /// 에러 메시지
