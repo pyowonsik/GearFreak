@@ -52,7 +52,7 @@ class S3Service {
     );
 
     // Presigned URL 생성
-    final presignedUrl = await generatePresignedUploadUrl(
+    final presignedUrl = await _generatePresignedUploadUrl(
       session,
       bucketName,
       fileKey,
@@ -67,7 +67,122 @@ class S3Service {
     );
   }
 
-  /// Presigned URL 생성 (업로드용)
+  /// 채팅방 이미지 업로드를 위한 Presigned URL 생성 (temp 없이 바로 업로드)
+  ///
+  /// [session] - Serverpod 세션
+  /// [chatRoomId] - 채팅방 ID
+  /// [userId] - 사용자 ID
+  /// [fileName] - 파일 이름
+  /// [contentType] - 파일의 Content-Type
+  ///
+  /// 반환: Presigned URL 응답 DTO
+  static Future<GeneratePresignedUploadUrlResponseDto>
+      generateChatRoomImageUploadUrl(
+    Session session,
+    int chatRoomId,
+    int userId,
+    String fileName,
+    String contentType,
+  ) async {
+    // 파일 타입 검증 (이미지만 허용)
+    final allowedContentTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+    ];
+    if (!allowedContentTypes.contains(contentType.toLowerCase())) {
+      throw Exception('Invalid file type. Only images are allowed.');
+    }
+
+    // Private 버킷 이름 가져오기
+    final bucketName = S3Util.getBucketName(session, 'private');
+
+    // 파일 키 생성 (temp 없이 바로 chatRoom/{chatRoomId}/ 경로에 저장)
+    final fileKey = S3Util.generateChatRoomFileKey(
+      chatRoomId: chatRoomId,
+      userId: userId,
+      fileName: fileName,
+    );
+
+    // Presigned URL 생성
+    final presignedUrl = await _generatePresignedUploadUrl(
+      session,
+      bucketName,
+      fileKey,
+      contentType,
+      expiresIn: 3600, // 1시간
+    );
+
+    return GeneratePresignedUploadUrlResponseDto(
+      presignedUrl: presignedUrl,
+      fileKey: fileKey,
+      expiresIn: 3600,
+    );
+  }
+
+  /// Presigned URL 생성 (다운로드용) - Private 버킷 이미지 접근용
+  ///
+  /// [session] - Serverpod 세션
+  /// [fileKey] - S3 파일 키 (예: chatRoom/22/1/xxx.jpg)
+  /// [expiresIn] - URL 만료 시간 (초 단위, 기본 1시간)
+  ///
+  /// 반환: Presigned Download URL
+  static Future<String> generatePresignedDownloadUrl(
+    Session session,
+    String fileKey, {
+    int expiresIn = 3600, // 1시간
+  }) async {
+    // Private 버킷 이름 가져오기
+    final bucketName = S3Util.getBucketName(session, 'private');
+
+    // 환경변수에서 AWS 정보 가져오기
+    final awsAccessKeyId = Platform.environment['AWS_ACCESS_KEY_ID'] ?? '';
+    final awsSecretAccessKey =
+        Platform.environment['AWS_SECRET_ACCESS_KEY'] ?? '';
+    final region = Platform.environment['AWS_REGION'] ??
+        Platform.environment['AWS_DEFAULT_REGION'] ??
+        'ap-northeast-2';
+
+    final credentials = AWSCredentials(
+      awsAccessKeyId,
+      awsSecretAccessKey,
+    );
+
+    // S3 엔드포인트
+    final uri =
+        Uri.parse('https://$bucketName.s3.$region.amazonaws.com/$fileKey');
+
+    // Presigned URL 생성 (다운로드용: GET 메서드)
+    final signer = AWSSigV4Signer(
+      credentialsProvider: AWSCredentialsProvider(credentials),
+    );
+
+    final serviceConfiguration = S3ServiceConfiguration();
+
+    // GET 메서드로 Presigned URL 생성
+    final request = AWSHttpRequest(
+      method: AWSHttpMethod.get,
+      uri: uri,
+      headers: {
+        AWSHeaders.host: uri.host,
+      },
+    );
+
+    final presignedUrl = await signer.presign(
+      request,
+      credentialScope: AWSCredentialScope(
+        region: region,
+        service: AWSService.s3,
+      ),
+      serviceConfiguration: serviceConfiguration,
+      expiresIn: Duration(seconds: expiresIn),
+    );
+
+    return presignedUrl.toString();
+  }
+
+  /// Presigned URL 생성 (업로드용) - 내부 헬퍼 메서드
   ///
   /// [session] - Serverpod 세션
   /// [bucketName] - S3 버킷 이름
@@ -76,7 +191,7 @@ class S3Service {
   /// [expiresIn] - URL 만료 시간 (초 단위, 기본 1시간)
   ///
   /// 반환: Presigned URL
-  static Future<String> generatePresignedUploadUrl(
+  static Future<String> _generatePresignedUploadUrl(
     Session session,
     String bucketName,
     String objectKey,

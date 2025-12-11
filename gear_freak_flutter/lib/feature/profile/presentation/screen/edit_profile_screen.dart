@@ -56,83 +56,78 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               (profileState.user.profileImageUrl?.isNotEmpty ?? false));
     }
 
-    await showModalBottomSheet<void>(
+    final items = <GbBottomSheetItem>[
+      GbBottomSheetItem(
+        leading: Icons.photo_library,
+        title: '갤러리에서 선택',
+        onTap: () async {
+          final image = await picker.pickImage(
+            source: ImageSource.gallery,
+            maxWidth: 512,
+            maxHeight: 512,
+          );
+          if (image != null && mounted) {
+            final imageFile = File(image.path);
+            // 이미지 선택 시 즉시 업로드
+            await ref.read(profileNotifierProvider.notifier).uploadProfileImage(
+                  imageFile: imageFile,
+                  prefix: 'profile',
+                );
+            // 새 이미지 업로드 시 기존 이미지 삭제 플래그 초기화
+            if (_removedExistingImage) {
+              setState(() {
+                _removedExistingImage = false;
+              });
+            }
+          }
+        },
+      ),
+    ];
+
+    // 프로필 이미지가 있으면 삭제 옵션 추가
+    if (hasProfileImage) {
+      items.add(
+        GbBottomSheetItem(
+          leading: Icons.delete,
+          title: '프로필 이미지 삭제',
+          textColor: Colors.red,
+          onTap: () async {
+            if (!mounted) return;
+
+            final currentState = ref.read(profileNotifierProvider);
+            final notifier = ref.read(profileNotifierProvider.notifier);
+
+            // ProfileLoaded 또는 그 하위 클래스인 경우 user와 uploadedFileKey 접근 가능
+            if (currentState is ProfileLoaded) {
+              if (currentState.uploadedFileKey != null) {
+                // 새로 업로드된 이미지가 있으면 S3에서 삭제
+                await notifier.removeUploadedFileKey(
+                  currentState.uploadedFileKey!,
+                );
+                // 새로 업로드한 이미지를 삭제한 경우, 기존 이미지가 있으면 그것도 제거
+                if (currentState.user.profileImageUrl != null &&
+                    currentState.user.profileImageUrl!.isNotEmpty) {
+                  setState(() {
+                    _removedExistingImage = true;
+                  });
+                }
+              } else if (currentState.user.profileImageUrl != null &&
+                  currentState.user.profileImageUrl!.isNotEmpty) {
+                // 기존 프로필 이미지가 있으면 제거 표시 (로컬 상태만 변경)
+                // S3 삭제는 최종 updateProfile 엔드포인트에서 처리
+                setState(() {
+                  _removedExistingImage = true;
+                });
+              }
+            }
+          },
+        ),
+      );
+    }
+
+    await GbBottomSheet.show(
       context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('갤러리에서 선택'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final image = await picker.pickImage(
-                    source: ImageSource.gallery,
-                    maxWidth: 512,
-                    maxHeight: 512,
-                  );
-                  if (image != null && mounted) {
-                    final imageFile = File(image.path);
-                    // 이미지 선택 시 즉시 업로드
-                    await ref
-                        .read(profileNotifierProvider.notifier)
-                        .uploadProfileImage(
-                          imageFile: imageFile,
-                          prefix: 'profile',
-                        );
-                    // 새 이미지 업로드 시 기존 이미지 삭제 플래그 초기화
-                    if (_removedExistingImage) {
-                      setState(() {
-                        _removedExistingImage = false;
-                      });
-                    }
-                  }
-                },
-              ),
-              if (hasProfileImage)
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text(
-                    '프로필 이미지 삭제',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    if (!mounted) return;
-
-                    final currentState = ref.read(profileNotifierProvider);
-                    final notifier = ref.read(profileNotifierProvider.notifier);
-
-                    // ProfileLoaded 또는 그 하위 클래스인 경우 user와 uploadedFileKey 접근 가능
-                    if (currentState is ProfileLoaded) {
-                      if (currentState.uploadedFileKey != null) {
-                        // 새로 업로드된 이미지가 있으면 S3에서 삭제
-                        await notifier.removeUploadedFileKey(
-                          currentState.uploadedFileKey!,
-                        );
-                        // 새로 업로드한 이미지를 삭제한 경우, 기존 이미지가 있으면 그것도 제거
-                        if (currentState.user.profileImageUrl != null &&
-                            currentState.user.profileImageUrl!.isNotEmpty) {
-                          setState(() {
-                            _removedExistingImage = true;
-                          });
-                        }
-                      } else if (currentState.user.profileImageUrl != null &&
-                          currentState.user.profileImageUrl!.isNotEmpty) {
-                        // 기존 프로필 이미지가 있으면 제거 표시 (로컬 상태만 변경)
-                        // S3 삭제는 최종 updateProfile 엔드포인트에서 처리
-                        setState(() {
-                          _removedExistingImage = true;
-                        });
-                      }
-                    }
-                  },
-                ),
-            ],
-          ),
-        );
-      },
+      items: items,
     );
   }
 

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_chat_room_image_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/create_or_get_chat_room_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_messages_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_participants_usecase.dart';
@@ -25,6 +27,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// [getChatMessagesUseCase]는 메시지 조회 UseCase입니다.
   /// [sendMessageUseCase]는 메시지 전송 UseCase입니다.
   /// [subscribeChatMessageStreamUseCase]는 메시지 스트림 구독 UseCase입니다.
+  /// [uploadChatRoomImageUseCase]는 채팅방 이미지 업로드 UseCase입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase입니다.
   ChatNotifier(
     this.createOrGetChatRoomUseCase,
@@ -35,6 +38,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     this.getChatMessagesUseCase,
     this.sendMessageUseCase,
     this.subscribeChatMessageStreamUseCase,
+    this.uploadChatRoomImageUseCase,
     this.getProductDetailUseCase,
   ) : super(const ChatInitial()) {
     _messageStreamSubscription = null;
@@ -63,6 +67,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// 메시지 스트림 구독 UseCase
   final SubscribeChatMessageStreamUseCase subscribeChatMessageStreamUseCase;
+
+  /// 채팅방 이미지 업로드 UseCase
+  final UploadChatRoomImageUseCase uploadChatRoomImageUseCase;
 
   /// 상품 상세 조회 UseCase
   final GetProductDetailUseCase getProductDetailUseCase;
@@ -508,6 +515,129 @@ class ChatNotifier extends StateNotifier<ChatState> {
     );
   }
 
+  /// 이미지 업로드 및 메시지 전송
+  ///
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [fileBytes]는 파일 바이트 데이터입니다.
+  /// [fileName]은 파일 이름입니다.
+  /// [contentType]은 파일의 Content-Type입니다.
+  /// [fileSize]는 파일 크기입니다.
+  Future<void> uploadAndSendImage({
+    required int chatRoomId,
+    required List<int> fileBytes,
+    required String fileName,
+    required String contentType,
+    required int fileSize,
+  }) async {
+    final currentState = state;
+    if (currentState is! ChatLoaded) {
+      return;
+    }
+
+    try {
+      // 1. 업로드 시작 상태로 변경
+      state = ChatImageUploading(
+        chatRoom: currentState.chatRoom,
+        participants: currentState.participants,
+        messages: currentState.messages,
+        pagination: currentState.pagination,
+        isStreamConnected: currentState.isStreamConnected,
+        product: currentState.product,
+        currentFileName: fileName,
+      );
+
+      // 2. 이미지 S3 업로드
+      final uploadResult = await uploadChatRoomImageUseCase(
+        UploadChatRoomImageParams(
+          chatRoomId: chatRoomId,
+          fileName: fileName,
+          contentType: contentType,
+          fileSize: fileSize,
+          fileBytes: fileBytes,
+        ),
+      );
+
+      await uploadResult.fold(
+        (failure) async {
+          // 업로드 실패 시 에러 상태로 변경
+          state = ChatImageUploadError(
+            chatRoom: currentState.chatRoom,
+            participants: currentState.participants,
+            messages: currentState.messages,
+            pagination: currentState.pagination,
+            isStreamConnected: currentState.isStreamConnected,
+            product: currentState.product,
+            error: failure.message,
+          );
+        },
+        (response) async {
+          // 3. 업로드된 파일의 URL 생성 (Private 버킷)
+          final s3BaseUrl = dotenv.env['S3_PRIVATE_BASE_URL'] ??
+              'https://gear-freak-private-storage-3059875.s3.ap-northeast-2.amazonaws.com';
+          final imageUrl = '$s3BaseUrl/${response.fileKey}';
+
+          // 4. 이미지 메시지 전송
+          final sendResult = await sendMessageUseCase(
+            SendMessageParams(
+              chatRoomId: chatRoomId,
+              content: fileName, // 이미지 메시지는 파일 이름을 content로 사용
+              messageType: pod.MessageType.image,
+              attachmentUrl: imageUrl,
+              attachmentName: fileName,
+              attachmentSize: fileSize,
+            ),
+          );
+
+          // 5. 메시지 전송 결과 처리
+          await sendResult.fold(
+            (failure) async {
+              // 메시지 전송 실패 시 에러 상태로 변경
+              state = ChatImageUploadError(
+                chatRoom: currentState.chatRoom,
+                participants: currentState.participants,
+                messages: currentState.messages,
+                pagination: currentState.pagination,
+                isStreamConnected: currentState.isStreamConnected,
+                product: currentState.product,
+                error: '메시지 전송에 실패했습니다: ${failure.message}',
+              );
+            },
+            (sentMessage) async {
+              // 메시지 전송 성공 시 메시지를 즉시 추가하고 상태 복원
+              // (스트림을 통해 중복 수신될 수 있지만 중복 체크로 처리됨)
+              final existingIds =
+                  currentState.messages.map((m) => m.id).toSet();
+              final updatedMessages = existingIds.contains(sentMessage.id)
+                  ? currentState.messages
+                  : [...currentState.messages, sentMessage]
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+              state = ChatLoaded(
+                chatRoom: currentState.chatRoom,
+                participants: currentState.participants,
+                messages: updatedMessages,
+                pagination: currentState.pagination,
+                isStreamConnected: currentState.isStreamConnected,
+                product: currentState.product,
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      // 예외 발생 시 에러 상태로 변경
+      state = ChatImageUploadError(
+        chatRoom: currentState.chatRoom,
+        participants: currentState.participants,
+        messages: currentState.messages,
+        pagination: currentState.pagination,
+        isStreamConnected: currentState.isStreamConnected,
+        product: currentState.product,
+        error: '이미지 전송 중 오류가 발생했습니다: $e',
+      );
+    }
+  }
+
   // ==================== Public Methods (Service 호출) ====================
 
   // ==================== Private Helper Methods ====================
@@ -526,18 +656,89 @@ class ChatNotifier extends StateNotifier<ChatState> {
       (message) {
         // 실시간 메시지 수신
         final currentState = state;
-        if (currentState is ChatLoaded) {
-          // 중복 메시지 확인
-          final existingIds = currentState.messages.map((m) => m.id).toSet();
-          if (!existingIds.contains(message.id)) {
-            // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
-            final updatedMessages = [...currentState.messages, message]
-              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-            state = currentState.copyWith(
-              messages: updatedMessages,
-            );
-          }
+        // ChatLoaded를 상속한 모든 상태에서 메시지 추가 가능
+        switch (currentState) {
+          case ChatImageUploading(
+              :final chatRoom,
+              :final participants,
+              :final messages,
+              :final pagination,
+              :final isStreamConnected,
+              :final product,
+              :final currentFileName
+            ):
+            // 중복 메시지 확인
+            final existingIds = messages.map((m) => m.id).toSet();
+            if (!existingIds.contains(message.id)) {
+              // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
+              final updatedMessages = [...messages, message]
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+              // 업로드 중이면 메시지만 추가하고 상태 유지
+              state = ChatImageUploading(
+                chatRoom: chatRoom,
+                participants: participants,
+                messages: updatedMessages,
+                pagination: pagination,
+                isStreamConnected: isStreamConnected,
+                product: product,
+                currentFileName: currentFileName,
+              );
+            }
+          case ChatImageUploadError(
+              :final chatRoom,
+              :final participants,
+              :final messages,
+              :final pagination,
+              :final isStreamConnected,
+              :final product,
+              :final error
+            ):
+            // 중복 메시지 확인
+            final existingIds = messages.map((m) => m.id).toSet();
+            if (!existingIds.contains(message.id)) {
+              // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
+              final updatedMessages = [...messages, message]
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+              // 에러 상태면 메시지만 추가하고 상태 유지
+              state = ChatImageUploadError(
+                chatRoom: chatRoom,
+                participants: participants,
+                messages: updatedMessages,
+                pagination: pagination,
+                isStreamConnected: isStreamConnected,
+                product: product,
+                error: error,
+              );
+            }
+          case ChatLoaded(:final messages) || ChatLoadingMore(:final messages):
+            // 중복 메시지 확인
+            final existingIds = messages.map((m) => m.id).toSet();
+            if (!existingIds.contains(message.id)) {
+              // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
+              final updatedMessages = [...messages, message]
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+              // 일반 ChatLoaded 또는 ChatLoadingMore 상태
+              if (currentState is ChatLoaded) {
+                state = currentState.copyWith(
+                  messages: updatedMessages,
+                );
+              } else if (currentState is ChatLoadingMore) {
+                state = ChatLoadingMore(
+                  chatRoom: currentState.chatRoom,
+                  participants: currentState.participants,
+                  messages: updatedMessages,
+                  pagination: currentState.pagination,
+                  isStreamConnected: currentState.isStreamConnected,
+                  product: currentState.product,
+                );
+              }
+            }
+          default:
+            break;
         }
       },
       onError: (error) {

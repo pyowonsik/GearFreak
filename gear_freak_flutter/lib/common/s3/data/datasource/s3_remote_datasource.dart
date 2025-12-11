@@ -91,4 +91,26 @@ class S3RemoteDataSource {
       throw Exception('파일 삭제에 실패했습니다: $e');
     }
   }
+
+  /// 채팅방 이미지 업로드를 위한 Presigned URL 생성
+  Future<pod.GeneratePresignedUploadUrlResponseDto>
+      generateChatRoomImageUploadUrl({
+    required int chatRoomId,
+    required String fileName,
+    required String contentType,
+    required int fileSize,
+  }) async {
+    try {
+      final response = await _client.chat.generateChatRoomImageUploadUrl(
+        chatRoomId,
+        fileName,
+        contentType,
+        fileSize,
+      );
+      return response;
+    } catch (e) {
+      debugPrint('❌ 채팅방 이미지 Presigned URL 생성 실패: $e');
+      throw Exception('Presigned URL 생성에 실패했습니다: $e');
+    }
+  }
 }

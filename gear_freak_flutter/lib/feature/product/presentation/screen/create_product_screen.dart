@@ -80,8 +80,8 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
       },
       child: Scaffold(
         appBar: GbAppBar(
-          title: const Text('상품 등록'),
-          actions: [
+        title: const Text('상품 등록'),
+        actions: [
             Consumer(
               builder: (context, ref, child) {
                 final state = ref.watch(createProductNotifierProvider);
@@ -99,17 +99,17 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
                           ),
                         )
                       : const Text(
-                          '완료',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+              '완료',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
                 );
               },
-            ),
-          ],
-        ),
+          ),
+        ],
+      ),
         body: ProductEditorForm(
           formKey: _formKey,
           titleController: _titleController,
@@ -127,17 +127,17 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
             });
           },
           onConditionChanged: (condition) {
-            setState(() {
+                          setState(() {
               _selectedCondition = condition;
             });
           },
           onTradeMethodChanged: (method) {
-            setState(() {
+                          setState(() {
               _selectedTradeMethod = method;
             });
           },
           onBaseAddressChanged: (address) {
-            setState(() {
+                          setState(() {
               _baseAddress = address;
             });
           },
@@ -155,19 +155,19 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
   /// 이미지 추가 (선택 및 업로드)
   Future<void> _addImage(List<XFile> images) async {
     // 선택한 이미지들을 순차적으로 업로드
-    final notifier = ref.read(createProductNotifierProvider.notifier);
+        final notifier = ref.read(createProductNotifierProvider.notifier);
     for (final image in images) {
-      await notifier.uploadImage(
-        imageFile: File(image.path),
-        prefix: 'product',
-      );
+        await notifier.uploadImage(
+          imageFile: File(image.path),
+          prefix: 'product',
+        );
 
-      // 업로드 성공 시 이미지 목록에 추가
-      final currentState = ref.read(createProductNotifierProvider);
-      if (currentState is CreateProductUploadSuccess) {
-        setState(() {
-          _selectedImages.add(image);
-        });
+        // 업로드 성공 시 이미지 목록에 추가
+        final currentState = ref.read(createProductNotifierProvider);
+        if (currentState is CreateProductUploadSuccess) {
+          setState(() {
+            _selectedImages.add(image);
+          });
       } else if (currentState is CreateProductUploadError) {
         if (!mounted) return;
         // 업로드 실패 시 해당 이미지 건너뛰기
@@ -206,16 +206,16 @@ class _CreateProductScreenState extends ConsumerState<CreateProductScreen> {
       return;
     }
 
-    if (_selectedImages.isEmpty) {
+      if (_selectedImages.isEmpty) {
       GbSnackBar.showWarning(context, '최소 1장의 이미지를 추가해주세요');
-      return;
-    }
+        return;
+      }
 
-    if (isDirectTrade(_selectedTradeMethod) &&
-        (_baseAddress == null || _baseAddress!.isEmpty)) {
+      if (isDirectTrade(_selectedTradeMethod) &&
+          (_baseAddress == null || _baseAddress!.isEmpty)) {
       GbSnackBar.showWarning(context, '주소를 검색해주세요');
-      return;
-    }
+        return;
+      }
 
     // 가격 파싱
     final price = int.tryParse(_priceController.text);

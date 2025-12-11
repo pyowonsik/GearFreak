@@ -85,4 +85,20 @@ class S3Util {
     }
     throw Exception('Invalid temp key format: $tempKey');
   }
+
+  /// 채팅방 이미지 파일 키 생성 (temp 없이 바로 chatRoom 경로)
+  /// 형식: chatRoom/{chatRoomId}/{userId}/{timestamp}-{random}.{extension}
+  static String generateChatRoomFileKey({
+    required int chatRoomId,
+    required int userId,
+    required String fileName,
+  }) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final random = DateTime.now().microsecondsSinceEpoch % 100000;
+
+    // 파일 확장자 추출
+    final extension = fileName.split('.').last;
+
+    return 'chatRoom/$chatRoomId/$userId/$timestamp-$random.$extension';
+  }
 }

@@ -80,6 +80,15 @@ class ChatMessageListWidget extends StatelessWidget {
                 author: message.author,
                 showTime: showTime,
               );
+            } else if (message is types.ImageMessage) {
+              return ChatMessageBubbleWidget(
+                text: message.name, // 이미지 메시지는 name을 텍스트로 사용
+                isMine: isMine,
+                time: currentTime,
+                author: message.author,
+                showTime: showTime,
+                imageUrl: message.uri, // 이미지 URL 전달
+              );
             }
 
             return const SizedBox.shrink();

@@ -1,3 +1,5 @@
+import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
+import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -651,7 +653,30 @@ class ChatService {
       // 5. 발신자 정보 조회
       final user = await User.db.findById(session, userId);
 
-      // 6. 응답 DTO 생성
+      // 6. Private 버킷 이미지인 경우 Presigned URL로 변환
+      String? attachmentUrl = savedMessage.attachmentUrl;
+      if (attachmentUrl != null &&
+          savedMessage.messageType == MessageType.image) {
+        try {
+          // URL에서 파일 키 추출
+          final fileKey = S3Util.extractKeyFromUrl(attachmentUrl);
+          // chatRoom 경로인 경우 Private 버킷이므로 Presigned URL 생성
+          if (fileKey.startsWith('chatRoom/')) {
+            attachmentUrl = await S3Service.generatePresignedDownloadUrl(
+              session,
+              fileKey,
+            );
+          }
+        } catch (e) {
+          // Presigned URL 생성 실패 시 원본 URL 유지
+          session.log(
+            '⚠️ Presigned URL 생성 실패: $e',
+            level: LogLevel.warning,
+          );
+        }
+      }
+
+      // 7. 응답 DTO 생성
       final response = ChatMessageResponseDto(
         id: savedMessage.id!,
         chatRoomId: savedMessage.chatRoomId,
@@ -659,14 +684,14 @@ class ChatService {
         senderNickname: user?.nickname,
         content: savedMessage.content,
         messageType: savedMessage.messageType,
-        attachmentUrl: savedMessage.attachmentUrl,
+        attachmentUrl: attachmentUrl,
         attachmentName: savedMessage.attachmentName,
         attachmentSize: savedMessage.attachmentSize,
         createdAt: savedMessage.createdAt ?? now,
         updatedAt: savedMessage.updatedAt,
       );
 
-      // 7. 🚀 Redis 기반 글로벌 브로드캐스팅
+      // 8. 🚀 Redis 기반 글로벌 브로드캐스팅
       await session.messages.postMessage(
         'chat_room_$chatRoomId',
         response,
@@ -760,6 +785,29 @@ class ChatService {
         // 발신자 정보 조회
         final user = await User.db.findById(session, message.senderId);
 
+        // Private 버킷 이미지인 경우 Presigned URL로 변환
+        String? attachmentUrl = message.attachmentUrl;
+        if (attachmentUrl != null &&
+            message.messageType == MessageType.image) {
+          try {
+            // URL에서 파일 키 추출
+            final fileKey = S3Util.extractKeyFromUrl(attachmentUrl);
+            // chatRoom 경로인 경우 Private 버킷이므로 Presigned URL 생성
+            if (fileKey.startsWith('chatRoom/')) {
+              attachmentUrl = await S3Service.generatePresignedDownloadUrl(
+                session,
+                fileKey,
+              );
+            }
+          } catch (e) {
+            // Presigned URL 생성 실패 시 원본 URL 유지
+            session.log(
+              '⚠️ Presigned URL 생성 실패: $e',
+              level: LogLevel.warning,
+            );
+          }
+        }
+
         final response = ChatMessageResponseDto(
           id: message.id!,
           chatRoomId: message.chatRoomId,
@@ -767,7 +815,7 @@ class ChatService {
           senderNickname: user?.nickname,
           content: message.content,
           messageType: message.messageType,
-          attachmentUrl: message.attachmentUrl,
+          attachmentUrl: attachmentUrl,
           attachmentName: message.attachmentName,
           attachmentSize: message.attachmentSize,
           createdAt: message.createdAt ?? DateTime.now().toUtc(),

@@ -4,6 +4,7 @@
 library;
 
 export 'gb_app_bar.dart';
+export 'gb_bottom_sheet.dart';
 export 'gb_dialog.dart';
 export 'gb_divider.dart';
 export 'gb_snackbar.dart';

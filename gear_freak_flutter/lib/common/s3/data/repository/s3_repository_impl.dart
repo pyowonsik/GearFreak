@@ -42,4 +42,20 @@ class S3RepositoryImpl implements S3Repository {
       bucketType: bucketType,
     );
   }
+
+  @override
+  Future<pod.GeneratePresignedUploadUrlResponseDto>
+      generateChatRoomImageUploadUrl({
+    required int chatRoomId,
+    required String fileName,
+    required String contentType,
+    required int fileSize,
+  }) async {
+    return remoteDataSource.generateChatRoomImageUploadUrl(
+      chatRoomId: chatRoomId,
+      fileName: fileName,
+      contentType: contentType,
+      fileSize: fileSize,
+    );
+  }
 }

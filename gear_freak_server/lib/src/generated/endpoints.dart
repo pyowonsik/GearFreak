@@ -376,6 +376,43 @@ class Endpoints extends _i1.EndpointDispatch {
             params['chatRoomId'],
           ),
         ),
+        'generateChatRoomImageUploadUrl': _i1.MethodConnector(
+          name: 'generateChatRoomImageUploadUrl',
+          params: {
+            'chatRoomId': _i1.ParameterDescription(
+              name: 'chatRoomId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'fileName': _i1.ParameterDescription(
+              name: 'fileName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'contentType': _i1.ParameterDescription(
+              name: 'contentType',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'fileSize': _i1.ParameterDescription(
+              name: 'fileSize',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint)
+                  .generateChatRoomImageUploadUrl(
+            session,
+            params['chatRoomId'],
+            params['fileName'],
+            params['contentType'],
+            params['fileSize'],
+          ),
+        ),
       },
     );
     connectors['chatStream'] = _i1.EndpointConnector(

@@ -71,6 +71,20 @@ class ChatUtil {
         );
       }
 
+      // 이미지 메시지인 경우 ImageMessage로 변환
+      if (message.messageType == pod.MessageType.image &&
+          message.attachmentUrl != null) {
+        return types.ImageMessage(
+          author: author,
+          createdAt: message.createdAt.millisecondsSinceEpoch,
+          id: message.id.toString(),
+          name: message.attachmentName ?? message.content,
+          size: message.attachmentSize?.toDouble() ?? 0,
+          uri: message.attachmentUrl!,
+        );
+      }
+
+      // 기본적으로 TextMessage로 변환
       return types.TextMessage(
         author: author,
         createdAt: message.createdAt.millisecondsSinceEpoch,

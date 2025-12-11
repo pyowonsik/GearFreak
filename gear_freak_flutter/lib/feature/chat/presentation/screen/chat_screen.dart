@@ -209,6 +209,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         :final participants,
         :final pagination,
         :final product,
+      ) ||
+      ChatImageUploading(
+        :final chatRoom,
+        :final messages,
+        :final participants,
+        :final pagination,
+        :final product,
+      ) ||
+      ChatImageUploadError(
+        :final chatRoom,
+        :final messages,
+        :final participants,
+        :final pagination,
+        :final product,
       ) =>
         ChatLoadedView(
           chatRoom: chatRoom,
@@ -219,6 +233,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           currentUser: currentUser,
           currentUserId: currentUserId,
           isLoadingMore: state is ChatLoadingMore,
+          isImageUploading: state is ChatImageUploading,
+          imageUploadError: switch (state) {
+            ChatImageUploadError(:final error) => error,
+            _ => null,
+          },
           onLoadMore: _chatRoomId != null
               ? () {
                   ref

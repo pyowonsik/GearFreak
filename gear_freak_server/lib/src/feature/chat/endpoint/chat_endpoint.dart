@@ -1,4 +1,5 @@
 import 'package:gear_freak_server/src/common/authenticated_mixin.dart';
+import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 import 'package:gear_freak_server/src/feature/chat/service/chat_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
@@ -129,5 +130,39 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     int chatRoomId,
   ) async {
     return await chatService.getLastMessageByChatRoomId(session, chatRoomId);
+  }
+
+  /// 채팅방 이미지 업로드를 위한 Presigned URL 생성
+  /// Private 버킷의 chatRoom/{chatRoomId}/ 경로에 바로 업로드
+  Future<GeneratePresignedUploadUrlResponseDto> generateChatRoomImageUploadUrl(
+    Session session,
+    int chatRoomId,
+    String fileName,
+    String contentType,
+    int fileSize,
+  ) async {
+    final user = await UserService.getMe(session);
+
+    // 채팅방 존재 및 참여 여부 확인
+    final participation = await ChatParticipant.db.findFirstRow(
+      session,
+      where: (participant) =>
+          participant.userId.equals(user.id!) &
+          participant.chatRoomId.equals(chatRoomId) &
+          participant.isActive.equals(true),
+    );
+
+    if (participation == null) {
+      throw Exception('채팅방에 참여하지 않은 사용자입니다.');
+    }
+
+    // Presigned URL 생성
+    return await S3Service.generateChatRoomImageUploadUrl(
+      session,
+      chatRoomId,
+      user.id!,
+      fileName,
+      contentType,
+    );
   }
 }

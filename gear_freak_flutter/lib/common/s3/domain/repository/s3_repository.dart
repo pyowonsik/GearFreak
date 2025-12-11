@@ -19,4 +19,19 @@ abstract class S3Repository {
     required String fileKey,
     required String bucketType,
   });
+
+  /// 채팅방 이미지 업로드를 위한 Presigned URL 생성
+  ///
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [fileName]은 파일 이름입니다.
+  /// [contentType]은 파일의 Content-Type입니다.
+  /// [fileSize]는 파일 크기입니다.
+  /// 반환: Presigned URL 응답 DTO
+  Future<pod.GeneratePresignedUploadUrlResponseDto>
+      generateChatRoomImageUploadUrl({
+    required int chatRoomId,
+    required String fileName,
+    required String contentType,
+    required int fileSize,
+  });
 }

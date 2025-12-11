@@ -93,6 +93,56 @@ class ChatLoadingMore extends ChatLoaded {
   });
 }
 
+/// 이미지 업로드 중 상태
+class ChatImageUploading extends ChatLoaded {
+  /// ChatImageUploading 생성자
+  ///
+  /// [chatRoom]는 채팅방 정보입니다.
+  /// [participants]는 참여자 목록입니다.
+  /// [messages]는 메시지 목록입니다.
+  /// [pagination]는 페이지네이션 정보입니다.
+  /// [isStreamConnected]는 스트림 연결 상태입니다.
+  /// [product]는 상품 정보입니다.
+  /// [currentFileName]은 현재 업로드 중인 파일 이름입니다.
+  const ChatImageUploading({
+    required super.chatRoom,
+    super.participants,
+    super.messages,
+    super.pagination,
+    super.isStreamConnected,
+    super.product,
+    required this.currentFileName,
+  });
+
+  /// 현재 업로드 중인 파일 이름
+  final String currentFileName;
+}
+
+/// 이미지 업로드 실패 상태
+class ChatImageUploadError extends ChatLoaded {
+  /// ChatImageUploadError 생성자
+  ///
+  /// [chatRoom]는 채팅방 정보입니다.
+  /// [participants]는 참여자 목록입니다.
+  /// [messages]는 메시지 목록입니다.
+  /// [pagination]는 페이지네이션 정보입니다.
+  /// [isStreamConnected]는 스트림 연결 상태입니다.
+  /// [product]는 상품 정보입니다.
+  /// [error]는 에러 메시지입니다.
+  const ChatImageUploadError({
+    required super.chatRoom,
+    super.participants,
+    super.messages,
+    super.pagination,
+    super.isStreamConnected,
+    super.product,
+    required this.error,
+  });
+
+  /// 에러 메시지
+  final String error;
+}
+
 /// 에러 상태
 class ChatError extends ChatState {
   /// ChatError 생성자

@@ -240,6 +240,26 @@ class EndpointChat extends _i1.EndpointRef {
         'getLastMessageByChatRoomId',
         {'chatRoomId': chatRoomId},
       );
+
+  /// 채팅방 이미지 업로드를 위한 Presigned URL 생성
+  /// Private 버킷의 chatRoom/{chatRoomId}/ 경로에 바로 업로드
+  _i2.Future<_i3.GeneratePresignedUploadUrlResponseDto>
+      generateChatRoomImageUploadUrl(
+    int chatRoomId,
+    String fileName,
+    String contentType,
+    int fileSize,
+  ) =>
+          caller.callServerEndpoint<_i3.GeneratePresignedUploadUrlResponseDto>(
+            'chat',
+            'generateChatRoomImageUploadUrl',
+            {
+              'chatRoomId': chatRoomId,
+              'fileName': fileName,
+              'contentType': contentType,
+              'fileSize': fileSize,
+            },
+          );
 }
 
 /// Redis 기반 실시간 채팅 스트림 관리 엔드포인트

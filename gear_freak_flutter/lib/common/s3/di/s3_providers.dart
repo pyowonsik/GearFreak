@@ -3,6 +3,7 @@ import 'package:gear_freak_flutter/common/s3/data/datasource/s3_remote_datasourc
 import 'package:gear_freak_flutter/common/s3/data/repository/s3_repository_impl.dart';
 import 'package:gear_freak_flutter/common/s3/domain/repository/s3_repository.dart';
 import 'package:gear_freak_flutter/common/s3/domain/usecase/delete_image_usecase.dart';
+import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_chat_room_image_usecase.dart';
 import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
 
 /// S3 Remote DataSource Provider
@@ -26,4 +27,11 @@ final uploadImageUseCaseProvider = Provider<UploadImageUseCase>((ref) {
 final deleteImageUseCaseProvider = Provider<DeleteImageUseCase>((ref) {
   final repository = ref.watch(s3RepositoryProvider);
   return DeleteImageUseCase(repository);
+});
+
+/// Upload Chat Room Image UseCase Provider
+final uploadChatRoomImageUseCaseProvider =
+    Provider<UploadChatRoomImageUseCase>((ref) {
+  final repository = ref.watch(s3RepositoryProvider);
+  return UploadChatRoomImageUseCase(repository);
 });

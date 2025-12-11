@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/data/datasource/chat_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/chat/data/repository/chat_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/repository/chat_repository.dart';
@@ -136,6 +137,8 @@ final chatNotifierProvider =
   final sendMessageUseCase = ref.watch(sendMessageUseCaseProvider);
   final subscribeChatMessageStreamUseCase =
       ref.watch(subscribeChatMessageStreamUseCaseProvider);
+  final uploadChatRoomImageUseCase =
+      ref.watch(uploadChatRoomImageUseCaseProvider);
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
   return ChatNotifier(
     createOrGetChatRoomUseCase,
@@ -146,6 +149,7 @@ final chatNotifierProvider =
     getChatMessagesUseCase,
     sendMessageUseCase,
     subscribeChatMessageStreamUseCase,
+    uploadChatRoomImageUseCase,
     getProductDetailUseCase,
   );
 });
