@@ -218,7 +218,8 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
             thumbnailBytes = thumbnail;
             thumbnailFileName = '${fileName.split('.').first}_thumb.jpg';
             debugPrint(
-              '✅ 썸네일 생성 완료: $thumbnailFileName (${thumbnailBytes.length} bytes)',
+              '✅ 썸네일 생성 완료: '
+              '$thumbnailFileName (${thumbnailBytes.length} bytes)',
             );
           } else {
             debugPrint('⚠️ 썸네일 생성 실패: null 반환');
