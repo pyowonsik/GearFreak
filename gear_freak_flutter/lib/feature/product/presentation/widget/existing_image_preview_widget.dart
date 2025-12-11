@@ -44,6 +44,14 @@ class ExistingImagePreviewWidget extends StatelessWidget {
               width: 100,
               height: 100,
               fit: BoxFit.cover,
+              fadeInDuration: Duration.zero,
+              fadeOutDuration: Duration.zero,
+              placeholderFadeInDuration: Duration.zero,
+              memCacheWidth: 150, // 표시 크기보다 약간 크게 (100 * 1.5)
+              memCacheHeight: 150,
+              maxWidthDiskCache: 150,
+              maxHeightDiskCache: 150,
+              useOldImageOnUrlChange: true,
               placeholder: (context, url) => const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9CA3AF)),

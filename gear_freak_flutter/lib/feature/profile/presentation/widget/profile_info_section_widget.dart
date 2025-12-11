@@ -39,6 +39,14 @@ class ProfileInfoSectionWidget extends StatelessWidget {
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
+                      fadeInDuration: Duration.zero,
+                      fadeOutDuration: Duration.zero,
+                      placeholderFadeInDuration: Duration.zero,
+                      memCacheWidth: 120, // 표시 크기보다 약간 크게 (80 * 1.5)
+                      memCacheHeight: 120,
+                      maxWidthDiskCache: 120,
+                      maxHeightDiskCache: 120,
+                      useOldImageOnUrlChange: true,
                       placeholder: (context, url) => const Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 2,

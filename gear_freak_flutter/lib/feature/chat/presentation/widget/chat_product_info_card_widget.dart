@@ -54,6 +54,14 @@ class ChatProductInfoCardWidget extends StatelessWidget {
                       width: 48,
                       height: 48,
                       fit: BoxFit.cover,
+                      fadeInDuration: Duration.zero,
+                      fadeOutDuration: Duration.zero,
+                      placeholderFadeInDuration: Duration.zero,
+                      memCacheWidth: 72, // 표시 크기보다 약간 크게 (48 * 1.5)
+                      memCacheHeight: 72,
+                      maxWidthDiskCache: 72,
+                      maxHeightDiskCache: 72,
+                      useOldImageOnUrlChange: true,
                       placeholder: (context, url) => const Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 2,

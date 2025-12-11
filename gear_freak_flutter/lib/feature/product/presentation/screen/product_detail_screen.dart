@@ -253,6 +253,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             return CachedNetworkImage(
                               imageUrl: productData.imageUrls![index],
                               fit: BoxFit.cover,
+                              fadeInDuration: Duration.zero,
+                              fadeOutDuration: Duration.zero,
+                              placeholderFadeInDuration: Duration.zero,
+                              memCacheWidth: 1200, // 화면 크기 고려 (약 1.5x)
+                              memCacheHeight: 960, // 화면 크기 고려 (약 1.5x)
+                              maxWidthDiskCache: 1200,
+                              maxHeightDiskCache: 960,
+                              useOldImageOnUrlChange: true,
                               placeholder: (context, url) => const Center(
                                 child: CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(

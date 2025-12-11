@@ -55,6 +55,14 @@ class ProductCardWidget extends StatelessWidget {
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
+                        fadeInDuration: Duration.zero,
+                        fadeOutDuration: Duration.zero,
+                        placeholderFadeInDuration: Duration.zero,
+                        memCacheWidth: 150, // 표시 크기보다 약간 크게 (100 * 1.5)
+                        memCacheHeight: 150,
+                        maxWidthDiskCache: 150,
+                        maxHeightDiskCache: 150,
+                        useOldImageOnUrlChange: true,
                         placeholder: (context, url) => const Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
@@ -73,9 +81,9 @@ class ProductCardWidget extends StatelessWidget {
                       )
                     : const Center(
                         child: Icon(
-                Icons.shopping_bag,
-                size: 48,
-                color: Color(0xFF9CA3AF),
+                          Icons.shopping_bag,
+                          size: 48,
+                          color: Color(0xFF9CA3AF),
                         ),
                       ),
               ),

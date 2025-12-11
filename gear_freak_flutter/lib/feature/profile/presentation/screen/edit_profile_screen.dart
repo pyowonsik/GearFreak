@@ -267,6 +267,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                         width: 120,
                                         height: 120,
                                         fit: BoxFit.cover,
+                                        fadeInDuration: Duration.zero,
+                                        fadeOutDuration: Duration.zero,
+                                        placeholderFadeInDuration:
+                                            Duration.zero,
+                                        memCacheWidth:
+                                            180, // 표시 크기보다 약간 크게 (120 * 1.5)
+                                        memCacheHeight: 180,
+                                        maxWidthDiskCache: 180,
+                                        maxHeightDiskCache: 180,
+                                        useOldImageOnUrlChange: true,
                                         placeholder: (context, url) =>
                                             const Center(
                                           child: CircularProgressIndicator(

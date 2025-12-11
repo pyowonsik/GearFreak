@@ -153,10 +153,10 @@ class ChatMessageBubbleWidget extends StatelessWidget {
               fadeInDuration: Duration.zero, // 캐시된 이미지는 즉시 표시
               fadeOutDuration: Duration.zero,
               placeholderFadeInDuration: Duration.zero, // 플레이스홀더도 즉시 표시
-              memCacheWidth: 440, // 2x 해상도 (220 * 2)
-              memCacheHeight: 600, // 2x 해상도 (300 * 2)
-              maxWidthDiskCache: 440,
-              maxHeightDiskCache: 600,
+              memCacheWidth: 300, // 표시 크기보다 약간 크게 (220 * 1.36)
+              memCacheHeight: 400, // 표시 크기보다 약간 크게 (300 * 1.33)
+              maxWidthDiskCache: 300,
+              maxHeightDiskCache: 400,
               useOldImageOnUrlChange: true, // URL이 변경되어도 이전 이미지 유지
               placeholder: (context, url) => Container(
                 width: 220,
