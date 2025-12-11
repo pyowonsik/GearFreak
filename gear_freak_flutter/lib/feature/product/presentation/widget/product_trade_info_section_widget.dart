@@ -54,7 +54,7 @@ class ProductTradeInfoSectionWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<pod.TradeMethod>(
-            value: selectedTradeMethod,
+            initialValue: selectedTradeMethod,
             decoration: const InputDecoration(
               labelText: '거래 방법',
               border: OutlineInputBorder(),

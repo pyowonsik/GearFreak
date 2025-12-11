@@ -25,7 +25,7 @@ class ProductAvatarWidget extends StatelessWidget {
     // 상품 이미지 URL이 있으면 GroupAvatar로 표시 (하나의 이미지)
     if (productImageUrl != null && productImageUrl!.isNotEmpty) {
       return GroupAvatar(
-        imageUrls: [productImageUrl!],
+        imageUrls: [productImageUrl],
         size: size,
         borderColor: Colors.white,
       );
@@ -43,4 +43,3 @@ class ProductAvatarWidget extends StatelessWidget {
     );
   }
 }
-

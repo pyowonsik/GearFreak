@@ -6,7 +6,6 @@ import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state
 
 /// 채팅 메시지 관련 유틸리티 함수
 class ChatUtil {
-
   /// 채팅 메시지 시간 포맷팅
   ///
   /// [dateTime]는 포맷팅할 날짜/시간입니다.
@@ -92,8 +91,8 @@ class ChatUtil {
   static bool shouldShowMessageTime({
     required int index,
     required types.Message currentMessage,
-    types.Message? previousMessage,
     required String currentTime,
+    types.Message? previousMessage,
     String? previousTime,
   }) {
     // 첫 번째 메시지(가장 최신)는 항상 시간 표시

@@ -87,9 +87,7 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
     // PaginationScrollMixin 초기화 (채팅용: reverse: true)
     initPaginationScroll(
       onLoadMore: () {
-        if (widget.onLoadMore != null) {
-          widget.onLoadMore!();
-        }
+        widget.onLoadMore?.call();
       },
       getPagination: () => widget.pagination?.pagination,
       isLoading: () => widget.isLoadingMore,

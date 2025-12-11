@@ -39,11 +39,11 @@ abstract class ChatRepository {
 
   /// 메시지 전송
   Future<pod.ChatMessageResponseDto> sendMessage({
+    required String content,
+    required pod.MessageType messageType,
     int? chatRoomId,
     int? productId,
     int? targetUserId,
-    required String content,
-    required pod.MessageType messageType,
     String? attachmentUrl,
     String? attachmentName,
     int? attachmentSize,

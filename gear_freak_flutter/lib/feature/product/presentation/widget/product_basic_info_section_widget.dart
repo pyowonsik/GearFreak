@@ -68,7 +68,7 @@ class ProductBasicInfoSectionWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<pod.ProductCategory>(
-            value: selectedCategory,
+            initialValue: selectedCategory,
             decoration: const InputDecoration(
               labelText: '카테고리',
               border: OutlineInputBorder(),
@@ -101,7 +101,7 @@ class ProductBasicInfoSectionWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<pod.ProductCondition>(
-            value: selectedCondition,
+            initialValue: selectedCondition,
             decoration: const InputDecoration(
               labelText: '상품 상태',
               border: OutlineInputBorder(),

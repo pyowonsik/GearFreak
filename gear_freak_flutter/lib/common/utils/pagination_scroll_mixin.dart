@@ -87,7 +87,7 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
       return;
     }
 
-    bool shouldLoadMore = false;
+    var shouldLoadMore = false;
     final threshold = position.maxScrollExtent - 300;
 
     if (_reverse) {

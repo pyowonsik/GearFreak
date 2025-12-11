@@ -145,8 +145,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
                 final messagesResult = await getChatMessagesUseCase(
                   GetChatMessagesParams(
                     chatRoomId: chatRoomId,
-                    page: 1,
-                    limit: 50,
                   ),
                 );
 
@@ -250,8 +248,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
             final messagesResult = await getChatMessagesUseCase(
               GetChatMessagesParams(
                 chatRoomId: chatRoomId,
-                page: 1,
-                limit: 50,
               ),
             );
 
@@ -426,7 +422,6 @@ class ChatNotifier extends StateNotifier<ChatState> {
     // 메시지 전송 (서버에서 채팅방이 없으면 생성)
     final result = await sendMessageUseCase(
       SendMessageParams(
-        chatRoomId: null, // 채팅방이 없음을 명시
         productId: productId,
         targetUserId: targetUserId,
         content: content,
