@@ -2,13 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:gear_freak_flutter/common/route/router_provider.dart';
 import 'package:gear_freak_flutter/common/service/deep_link_service.dart';
 
 import 'package:gear_freak_flutter/common/service/pod_service.dart';
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint('백그라운드 메시지 수신: ${message.messageId}');
+  debugPrint('제목: ${message.notification?.title}');
+  debugPrint('내용: ${message.notification?.body}');
+  debugPrint('데이터: ${message.data}');
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase 초기화
+  await Firebase.initializeApp();
+
+  // 백그라운드 메시지 핸들러 등록
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // // FCM 토큰 확인 (테스트용)
+  // try {
+  //   final messaging = FirebaseMessaging.instance;
+  //   final settings = await messaging.requestPermission(
+  //     alert: true,
+  //     badge: true,
+  //     sound: true,
+  //   );
+
+  //   if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+  //       settings.authorizationStatus == AuthorizationStatus.provisional) {
+  //     try {
+  //       final token = await messaging.getToken();
+  //       debugPrint('========================================');
+  //       debugPrint('FCM 토큰: $token');
+  //       debugPrint('========================================');
+  //     } catch (e) {
+  //       debugPrint('FCM 토큰 가져오기 실패 (시뮬레이터일 수 있음): $e');
+  //     }
+  //   } else {
+  //     debugPrint('FCM 알림 권한이 거부되었습니다.');
+  //   }
+  // } catch (e) {
+  //   debugPrint('FCM 초기화 실패 (시뮬레이터일 수 있음): $e');
+  // }
 
   // .env 파일 로드
   await dotenv.load(fileName: '.env');
