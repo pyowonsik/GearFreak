@@ -62,25 +62,22 @@ class ChatMessageBubbleWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMine) ...[
-            // 시간이 표시될 때만 아바타 표시 (같은 시간대면 아바타도 생략)
-            if (showTime)
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: const Color(0xFFF3F4F6),
-                backgroundImage: author.imageUrl != null
-                    ? CachedNetworkImageProvider(author.imageUrl!)
-                    : null,
-                child: author.imageUrl == null
-                    ? Icon(
-                        Icons.person,
-                        color: Colors.grey.shade500,
-                        size: 16,
-                      )
-                    : null,
-              ),
-            if (showTime) const SizedBox(width: 8),
-            // 아바타가 없을 때 공간 확보
-            if (!showTime) const SizedBox(width: 40),
+            // 상대방 메시지는 항상 프로필 이미지 표시
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: const Color(0xFFF3F4F6),
+              backgroundImage: author.imageUrl != null
+                  ? CachedNetworkImageProvider(author.imageUrl!)
+                  : null,
+              child: author.imageUrl == null
+                  ? Icon(
+                      Icons.person,
+                      color: Colors.grey.shade500,
+                      size: 16,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 8),
           ],
           // 내 메시지는 시간이 왼쪽에 표시
           if (isMine && showTime) ...[
