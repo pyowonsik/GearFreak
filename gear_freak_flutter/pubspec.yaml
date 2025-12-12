@@ -28,10 +28,13 @@ dependencies:
   cupertino_icons: ^1.0.5
   dartz: ^0.10.1
   file_picker: ^8.0.1
+  firebase_core: ^2.24.2
+  firebase_messaging: ^14.7.9
   flutter:
     sdk: flutter
   flutter_chat_types: ^3.6.2
   flutter_dotenv: ^5.1.0
+  flutter_local_notifications: ^16.3.0
   flutter_riverpod: ^2.6.1
   gear_freak_client:
     path: ../gear_freak_client
