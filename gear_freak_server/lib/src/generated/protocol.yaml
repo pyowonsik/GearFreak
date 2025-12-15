@@ -16,6 +16,7 @@ chat:
   - getChatMessagesPaginated:
   - getLastMessageByChatRoomId:
   - generateChatRoomImageUploadUrl:
+  - markChatRoomAsRead:
 chatStream:
   - chatMessageStream:
 product:

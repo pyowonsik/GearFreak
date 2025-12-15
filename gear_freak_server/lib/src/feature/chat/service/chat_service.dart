@@ -1,5 +1,7 @@
+import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
 import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
+import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -249,8 +251,20 @@ class ChatService {
         offset: offset,
       );
 
+      // 각 채팅방별로 안 읽은 메시지 개수 계산
+      final chatRoomsWithUnreadCount = await Future.wait(
+        chatRooms.map((chatRoom) async {
+          final unreadCount = await getUnreadCount(
+            session,
+            userId,
+            chatRoom.id!,
+          );
+          return chatRoom.copyWith(unreadCount: unreadCount);
+        }),
+      );
+
       return _buildChatRoomsPaginationResponse(
-          chatRooms, totalCount, pagination);
+          chatRoomsWithUnreadCount, totalCount, pagination);
     } on Exception catch (e, stackTrace) {
       session.log(
         '❌ 사용자 채팅방 목록 조회 실패: $e',
@@ -304,8 +318,20 @@ class ChatService {
         offset: offset,
       );
 
+      // 각 채팅방별로 안 읽은 메시지 개수 계산
+      final chatRoomsWithUnreadCount = await Future.wait(
+        chatRooms.map((chatRoom) async {
+          final unreadCount = await getUnreadCount(
+            session,
+            userId,
+            chatRoom.id!,
+          );
+          return chatRoom.copyWith(unreadCount: unreadCount);
+        }),
+      );
+
       return _buildChatRoomsPaginationResponse(
-          chatRooms, totalCount, pagination);
+          chatRoomsWithUnreadCount, totalCount, pagination);
     } on Exception catch (e, stackTrace) {
       session.log(
         '❌ 내 채팅방 목록 조회 실패: $e',
@@ -724,6 +750,19 @@ class ChatService {
         global: true, // 🔥 Redis를 통한 글로벌 브로드캐스팅
       );
 
+      // 9. 📱 FCM 알림 전송 (비동기, 실패해도 메시지 전송은 성공)
+      // Session이 닫힌 후에도 실행될 수 있으므로 unawaited로 실행
+      _sendFcmNotification(
+        session: session,
+        chatRoomId: chatRoomId,
+        senderId: userId,
+        senderNickname: user?.nickname,
+        message: response,
+      ).catchError((error) {
+        // Session이 닫힌 후에는 로깅할 수 없으므로 print 사용
+        print('⚠️ FCM 알림 전송 실패 (무시): $error');
+      });
+
       session.log(
         '메시지 전송 완료: '
         'chatRoomId=$chatRoomId, '
@@ -1074,6 +1113,231 @@ class ChatService {
         updatedAt: DateTime.now().toUtc(),
       );
       await ChatRoom.db.updateRow(session, updatedChatRoom);
+    }
+  }
+
+  /// 채팅방 읽음 처리
+  /// 사용자가 채팅방의 모든 메시지를 읽음 처리합니다.
+  Future<void> markChatRoomAsRead(
+    Session session,
+    int userId,
+    int chatRoomId,
+  ) async {
+    try {
+      // 1. 채팅방 존재 확인
+      final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+      if (chatRoom == null) {
+        session.log(
+          '채팅방을 찾을 수 없음: chatRoomId=$chatRoomId',
+          level: LogLevel.warning,
+        );
+        return;
+      }
+
+      // 2. 참여자 정보 조회
+      final participant = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (p) =>
+            p.chatRoomId.equals(chatRoomId) &
+            p.userId.equals(userId) &
+            p.isActive.equals(true),
+      );
+
+      if (participant == null) {
+        session.log(
+          '채팅방에 참여하지 않은 사용자: userId=$userId, chatRoomId=$chatRoomId',
+          level: LogLevel.warning,
+        );
+        return;
+      }
+
+      // 3. lastReadAt을 현재 시간으로 업데이트
+      final now = DateTime.now().toUtc();
+      await ChatParticipant.db.updateRow(
+        session,
+        participant.copyWith(
+          lastReadAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      session.log(
+        '✅ 채팅방 읽음 처리 완료: userId=$userId, chatRoomId=$chatRoomId',
+        level: LogLevel.info,
+      );
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 채팅방 읽음 처리 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 안 읽은 메시지 개수 계산
+  /// 사용자가 특정 채팅방에서 읽지 않은 메시지 개수를 반환합니다.
+  Future<int> getUnreadCount(
+    Session session,
+    int userId,
+    int chatRoomId,
+  ) async {
+    try {
+      // 1. 참여자 정보 조회
+      final participant = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (p) =>
+            p.chatRoomId.equals(chatRoomId) &
+            p.userId.equals(userId) &
+            p.isActive.equals(true),
+      );
+
+      if (participant == null) {
+        return 0;
+      }
+
+      // 2. 모든 메시지 조회 (자신이 보낸 메시지 제외를 위해)
+      final allMessages = await ChatMessage.db.find(
+        session,
+        where: (message) => message.chatRoomId.equals(chatRoomId),
+      );
+
+      // 3. 안 읽은 메시지 개수 계산 (자신이 보낸 메시지는 제외)
+      // lastReadAt이 null이면 모든 메시지를 읽지 않은 것으로 간주 (자신이 보낸 메시지 제외)
+      if (participant.lastReadAt == null) {
+        final unreadCount =
+            allMessages.where((message) => message.senderId != userId).length;
+        return unreadCount;
+      }
+
+      // 4. lastReadAt 이후의 메시지 개수 계산 (자신이 보낸 메시지는 제외)
+      final unreadCount = allMessages.where((message) {
+        return message.senderId != userId &&
+            message.createdAt != null &&
+            message.createdAt!.isAfter(participant.lastReadAt!);
+      }).length;
+
+      return unreadCount;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 안 읽은 메시지 개수 계산 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      return 0;
+    }
+  }
+
+  // ==================== Private Helper Methods ====================
+
+  /// FCM 알림 전송 (비동기)
+  ///
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [senderId]는 발신자 ID입니다.
+  /// [senderNickname]은 발신자 닉네임입니다.
+  /// [message]는 전송된 메시지입니다.
+  ///
+  /// 비동기로 실행되며, 실패해도 메시지 전송에는 영향을 주지 않습니다.
+  /// Session이 닫힌 후에도 실행될 수 있으므로 Session 로깅은 안전하게 처리합니다.
+  Future<void> _sendFcmNotification({
+    required Session session,
+    required int chatRoomId,
+    required int senderId,
+    String? senderNickname,
+    required ChatMessageResponseDto message,
+  }) async {
+    // Session이 닫힌 후에도 실행될 수 있으므로 안전한 로깅 헬퍼
+    void safeLog(String message, {LogLevel level = LogLevel.info}) {
+      try {
+        session.log(message, level: level);
+      } catch (e) {
+        // Session이 닫혔으면 print 사용
+        print('📱 $message');
+      }
+    }
+
+    try {
+      // 1. 채팅방 참여자들의 FCM 토큰 조회 (발신자 제외)
+      safeLog('📱 FCM 알림 전송 시작: chatRoomId=$chatRoomId, senderId=$senderId');
+
+      final fcmTokens = await FcmTokenService.getTokensByChatRoomId(
+        session: session,
+        chatRoomId: chatRoomId,
+        excludeUserId: senderId,
+      );
+
+      safeLog(
+          '📱 FCM 토큰 조회 완료: chatRoomId=$chatRoomId, 토큰 개수=${fcmTokens.length}');
+
+      if (fcmTokens.isEmpty) {
+        safeLog(
+            '⚠️ FCM 알림 전송 건너뜀: 채팅방 참여자의 FCM 토큰이 없음 (chatRoomId=$chatRoomId)');
+        return;
+      }
+
+      // 2. 알림 제목 및 본문 생성
+      final title = senderNickname ?? '알 수 없음';
+      String body = message.content;
+
+      // 메시지 타입에 따라 본문 변경
+      switch (message.messageType) {
+        case MessageType.image:
+          body = '사진을 보냈습니다';
+          break;
+        case MessageType.file:
+          body = '파일을 보냈습니다';
+          break;
+        case MessageType.text:
+        default:
+          // 텍스트 메시지는 내용을 그대로 사용 (너무 길면 자르기)
+          if (body.length > 50) {
+            body = '${body.substring(0, 50)}...';
+          }
+          break;
+      }
+
+      // 3. 추가 데이터 설정
+      final data = {
+        'type': 'chat_message',
+        'chatRoomId': chatRoomId.toString(),
+        'messageId': message.id.toString(),
+        'senderId': senderId.toString(),
+      };
+
+      // 4. FCM 알림 전송
+      await FcmService.sendNotifications(
+        session: session,
+        fcmTokens: fcmTokens,
+        title: title,
+        body: body,
+        data: data,
+      );
+
+      safeLog(
+        '✅ FCM 알림 전송 완료: '
+        'chatRoomId=$chatRoomId, '
+        'senderId=$senderId, '
+        'senderNickname="$senderNickname", '
+        'tokens=${fcmTokens.length}, '
+        'title="$title", '
+        'body="$body"',
+      );
+    } on Exception catch (e, stackTrace) {
+      // FCM 알림 전송 실패는 로그만 남기고 예외를 던지지 않음
+      try {
+        session.log(
+          '❌ FCM 알림 전송 실패: $e',
+          exception: e,
+          stackTrace: stackTrace,
+          level: LogLevel.warning,
+        );
+      } catch (_) {
+        // Session이 닫혔으면 print 사용
+        print('❌ FCM 알림 전송 실패: $e');
+        print('Stack trace: $stackTrace');
+      }
     }
   }
 }

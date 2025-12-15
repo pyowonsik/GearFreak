@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_messages_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_participants_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_my_chat_rooms_usecase.dart';
@@ -18,12 +20,34 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   /// [getChatMessagesUseCase]는 채팅 메시지 조회 UseCase입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase입니다.
   ChatRoomListNotifier(
+    this.ref,
     this.getMyChatRoomsUseCase,
     this.getUserChatRoomsByProductIdUseCase,
     this.getChatParticipantsUseCase,
     this.getChatMessagesUseCase,
     this.getProductDetailUseCase,
-  ) : super(const ChatRoomListInitial());
+  ) : super(const ChatRoomListInitial()) {
+    // 채팅방 읽음 처리 이벤트 감지하여 자동으로 unreadCount 업데이트
+    ref
+      ..listen<int?>(chatRoomReadProvider, (previous, next) {
+        if (next != null) {
+          _updateChatRoomUnreadCount(next, 0);
+        }
+      })
+
+      // 새 메시지 이벤트 감지하여 자동으로 마지막 메시지와 시간 업데이트
+      ..listen<pod.ChatMessageResponseDto?>(
+        newChatMessageProvider,
+        (previous, next) {
+          if (next != null) {
+            _updateLastMessage(next);
+          }
+        },
+      );
+  }
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 내 채팅방 목록 조회 UseCase
   final GetMyChatRoomsUseCase getMyChatRoomsUseCase;
@@ -371,5 +395,179 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       }
     }
     return productImagesMap;
+  }
+
+  /// 채팅방의 안 읽은 메시지 개수 업데이트 (읽음 처리 이벤트에 의해 자동 호출)
+  void _updateChatRoomUnreadCount(int chatRoomId, int unreadCount) {
+    final currentState = state;
+
+    if (currentState is ChatRoomListLoaded) {
+      _updateUnreadCountInLoaded(chatRoomId, unreadCount, currentState);
+    } else if (currentState is ChatRoomListLoadingMore) {
+      _updateUnreadCountInLoadingMore(chatRoomId, unreadCount, currentState);
+    }
+  }
+
+  /// ChatRoomListLoaded 상태에서 안 읽은 메시지 개수 업데이트
+  void _updateUnreadCountInLoaded(
+    int chatRoomId,
+    int unreadCount,
+    ChatRoomListLoaded currentState,
+  ) {
+    final updatedChatRooms = _updateChatRoomInList(
+      currentState.chatRooms,
+      chatRoomId,
+      (chatRoom) => chatRoom.copyWith(unreadCount: unreadCount),
+    );
+
+    if (_hasChatRoom(currentState.chatRooms, chatRoomId)) {
+      debugPrint(
+        '✅ [ChatRoomListNotifier] 안 읽은 메시지 개수 업데이트: chatRoomId=$chatRoomId, unreadCount=$unreadCount',
+      );
+
+      state = currentState.copyWith(chatRooms: updatedChatRooms);
+    }
+  }
+
+  /// ChatRoomListLoadingMore 상태에서 안 읽은 메시지 개수 업데이트
+  void _updateUnreadCountInLoadingMore(
+    int chatRoomId,
+    int unreadCount,
+    ChatRoomListLoadingMore currentState,
+  ) {
+    final updatedChatRooms = _updateChatRoomInList(
+      currentState.chatRooms,
+      chatRoomId,
+      (chatRoom) => chatRoom.copyWith(unreadCount: unreadCount),
+    );
+
+    if (_hasChatRoom(currentState.chatRooms, chatRoomId)) {
+      debugPrint(
+        '✅ [ChatRoomListNotifier] 안 읽은 메시지 개수 업데이트: chatRoomId=$chatRoomId, unreadCount=$unreadCount',
+      );
+
+      state = currentState.copyWith(chatRooms: updatedChatRooms);
+    }
+  }
+
+  /// 마지막 메시지 업데이트 (새 메시지 이벤트에 의해 자동 호출)
+  void _updateLastMessage(pod.ChatMessageResponseDto message) {
+    final currentState = state;
+
+    if (currentState is ChatRoomListLoaded) {
+      _updateLastMessageInLoaded(message, currentState);
+    } else if (currentState is ChatRoomListLoadingMore) {
+      _updateLastMessageInLoadingMore(message, currentState);
+    }
+  }
+
+  /// 채팅방 목록에서 특정 채팅방을 업데이트
+  List<pod.ChatRoom> _updateChatRoomInList(
+    List<pod.ChatRoom> chatRooms,
+    int chatRoomId,
+    pod.ChatRoom Function(pod.ChatRoom) updateFn,
+  ) {
+    return chatRooms.map((chatRoom) {
+      if (chatRoom.id == chatRoomId) {
+        return updateFn(chatRoom);
+      }
+      return chatRoom;
+    }).toList();
+  }
+
+  /// 채팅방 목록에 특정 채팅방이 존재하는지 확인
+  bool _hasChatRoom(List<pod.ChatRoom> chatRooms, int chatRoomId) {
+    return chatRooms.any((room) => room.id == chatRoomId);
+  }
+
+  /// 채팅방 목록을 lastActivityAt 기준으로 내림차순 정렬 (최신이 위)
+  /// null인 경우 맨 아래로 정렬
+  void _sortChatRoomsByLastActivity(List<pod.ChatRoom> chatRooms) {
+    chatRooms.sort((a, b) {
+      final aTime = a.lastActivityAt;
+      final bTime = b.lastActivityAt;
+
+      // null인 경우 맨 아래로
+      if (aTime == null && bTime == null) return 0;
+      if (aTime == null) return 1;
+      if (bTime == null) return -1;
+
+      // 내림차순 정렬 (최신이 위)
+      return bTime.compareTo(aTime);
+    });
+  }
+
+  /// ChatRoomListLoaded 상태에서 마지막 메시지 업데이트
+  void _updateLastMessageInLoaded(
+    pod.ChatMessageResponseDto message,
+    ChatRoomListLoaded currentState,
+  ) {
+    final chatRoomId = message.chatRoomId;
+
+    // 마지막 메시지 맵 업데이트
+    final updatedLastMessagesMap = {
+      ...currentState.lastMessagesMap,
+      chatRoomId: message,
+    };
+
+    // 채팅방의 lastActivityAt 업데이트
+    final updatedChatRooms = _updateChatRoomInList(
+      currentState.chatRooms,
+      chatRoomId,
+      (chatRoom) => chatRoom.copyWith(
+        lastActivityAt: message.createdAt,
+      ),
+    );
+
+    // 정렬 (공통 메서드 호출)
+    _sortChatRoomsByLastActivity(updatedChatRooms);
+
+    if (_hasChatRoom(currentState.chatRooms, chatRoomId)) {
+      debugPrint(
+        '📩 [ChatRoomListNotifier] 마지막 메시지 업데이트 및 정렬: chatRoomId=$chatRoomId',
+      );
+
+      state = currentState.copyWith(
+        chatRooms: updatedChatRooms,
+        lastMessagesMap: updatedLastMessagesMap,
+      );
+    }
+  }
+
+  /// ChatRoomListLoadingMore 상태에서 마지막 메시지 업데이트
+  void _updateLastMessageInLoadingMore(
+    pod.ChatMessageResponseDto message,
+    ChatRoomListLoadingMore currentState,
+  ) {
+    final chatRoomId = message.chatRoomId;
+
+    // 마지막 메시지 맵 업데이트
+    final updatedLastMessagesMap = {
+      ...currentState.lastMessagesMap,
+      chatRoomId: message,
+    };
+
+    // 채팅방의 lastActivityAt 업데이트
+    final updatedChatRooms = _updateChatRoomInList(
+      currentState.chatRooms,
+      chatRoomId,
+      (chatRoom) => chatRoom.copyWith(
+        lastActivityAt: message.createdAt,
+      ),
+    );
+
+    // 정렬 (공통 메서드 호출)
+    _sortChatRoomsByLastActivity(updatedChatRooms);
+
+    if (_hasChatRoom(currentState.chatRooms, chatRoomId)) {
+      debugPrint(
+        '📩 [ChatRoomListNotifier] 마지막 메시지 업데이트 및 정렬: chatRoomId=$chatRoomId',
+      );
+
+      state = currentState.copyWith(
+        chatRooms: updatedChatRooms,
+        lastMessagesMap: updatedLastMessagesMap,
+      );
+    }
   }
 }

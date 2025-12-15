@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/data/datasource/chat_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/chat/data/repository/chat_repository_impl.dart';
@@ -20,6 +21,17 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
   final remoteDataSource = ref.watch(chatRemoteDataSourceProvider);
   return ChatRepositoryImpl(remoteDataSource);
 });
+
+/// 채팅방 읽음 처리 이벤트 Provider
+/// 채팅방에서 읽음 처리가 완료되면 이 Provider에 chatRoomId를 설정하면
+/// 채팅방 목록 Notifier가 자동으로 해당 채팅방의 unreadCount를 0으로 업데이트합니다.
+final chatRoomReadProvider = StateProvider<int?>((ref) => null);
+
+/// 새 메시지 이벤트 Provider
+/// 메시지가 전송/수신되면 이 Provider에 ChatMessageResponseDto를 설정하면
+/// 채팅방 목록 Notifier가 자동으로 해당 채팅방의 마지막 메시지와 시간을 업데이트합니다.
+final newChatMessageProvider =
+    StateProvider<pod.ChatMessageResponseDto?>((ref) => null);
 
 /// Create Or Get Chat Room UseCase Provider
 final createOrGetChatRoomUseCaseProvider =
@@ -79,6 +91,13 @@ final subscribeChatMessageStreamUseCaseProvider =
   return SubscribeChatMessageStreamUseCase(repository);
 });
 
+/// Mark Chat Room As Read UseCase Provider
+final markChatRoomAsReadUseCaseProvider =
+    Provider<MarkChatRoomAsReadUseCase>((ref) {
+  final repository = ref.watch(chatRepositoryProvider);
+  return MarkChatRoomAsReadUseCase(repository);
+});
+
 /// Chat Room List Notifier Provider (채팅방 목록 화면용 - 전체 채팅방)
 final chatRoomListNotifierProvider =
     StateNotifierProvider.autoDispose<ChatRoomListNotifier, ChatRoomListState>(
@@ -91,6 +110,7 @@ final chatRoomListNotifierProvider =
     final getChatMessagesUseCase = ref.watch(getChatMessagesUseCaseProvider);
     final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
     return ChatRoomListNotifier(
+      ref,
       getMyChatRoomsUseCase,
       getUserChatRoomsByProductIdUseCase,
       getChatParticipantsUseCase,
@@ -113,6 +133,7 @@ final chatRoomSelectionNotifierProvider = StateNotifierProvider.autoDispose
     final getChatMessagesUseCase = ref.watch(getChatMessagesUseCaseProvider);
     final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
     return ChatRoomListNotifier(
+      ref,
       getMyChatRoomsUseCase,
       getUserChatRoomsByProductIdUseCase,
       getChatParticipantsUseCase,
@@ -140,7 +161,10 @@ final chatNotifierProvider =
   final uploadChatRoomImageUseCase =
       ref.watch(uploadChatRoomImageUseCaseProvider);
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
+  final markChatRoomAsReadUseCase =
+      ref.watch(markChatRoomAsReadUseCaseProvider);
   return ChatNotifier(
+    ref,
     createOrGetChatRoomUseCase,
     getChatRoomByIdUseCase,
     getUserChatRoomsByProductIdUseCase,
@@ -151,5 +175,6 @@ final chatNotifierProvider =
     subscribeChatMessageStreamUseCase,
     uploadChatRoomImageUseCase,
     getProductDetailUseCase,
+    markChatRoomAsReadUseCase,
   );
 });

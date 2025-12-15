@@ -146,6 +146,12 @@ class ChatRemoteDataSource {
     return _client.chat.sendMessage(request);
   }
 
+  /// 채팅방 읽음 처리
+  /// 채팅방의 모든 메시지를 읽음 처리합니다.
+  Future<void> markChatRoomAsRead(int chatRoomId) async {
+    await _client.chat.markChatRoomAsRead(chatRoomId);
+  }
+
   /// 채팅 메시지 스트림 구독 (실시간 메시지 수신)
   ///
   /// [chatRoomId]는 채팅방 ID입니다.

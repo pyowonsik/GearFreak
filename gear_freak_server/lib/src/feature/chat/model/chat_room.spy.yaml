@@ -13,6 +13,8 @@ fields:
   participantCount: int
   ### 최근 활동 일시
   lastActivityAt: DateTime?
+  ### 안 읽은 메시지 개수 (계산된 값, DB에 저장되지 않음)
+  unreadCount: int?
   ### 채팅방 생성일
   createdAt: DateTime?
   ### 수정일

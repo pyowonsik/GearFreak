@@ -69,15 +69,41 @@ class ChatRoomItemWidget extends ConsumerWidget {
               color: Color(0xFF6B7280),
             ),
           ),
-          trailing: chatRoom.lastActivityAt != null
-              ? Text(
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (chatRoom.lastActivityAt != null)
+                Text(
                   ChatRoomUtil.formatChatRoomTime(chatRoom.lastActivityAt!),
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF9CA3AF),
                   ),
-                )
-              : null,
+                ),
+              if (chatRoom.unreadCount != null && chatRoom.unreadCount! > 0) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    chatRoom.unreadCount! > 99 ? '99+' : '${chatRoom.unreadCount}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
           onTap: () {
             context.push(
               '/chat/${chatRoom.productId}?chatRoomId=${chatRoom.id}',

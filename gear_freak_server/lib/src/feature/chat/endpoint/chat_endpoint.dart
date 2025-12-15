@@ -165,4 +165,18 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
       contentType,
     );
   }
+
+  /// 채팅방 읽음 처리
+  /// 채팅방의 모든 메시지를 읽음 처리합니다.
+  Future<void> markChatRoomAsRead(
+    Session session,
+    int chatRoomId,
+  ) async {
+    final user = await UserService.getMe(session);
+    await chatService.markChatRoomAsRead(
+      session,
+      user.id!,
+      chatRoomId,
+    );
+  }
 }

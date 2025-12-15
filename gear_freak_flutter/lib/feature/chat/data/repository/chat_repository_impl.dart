@@ -103,6 +103,11 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<void> markAsRead(String messageId) async {}
 
   @override
+  Future<void> markChatRoomAsRead(int chatRoomId) async {
+    return remoteDataSource.markChatRoomAsRead(chatRoomId);
+  }
+
+  @override
   Stream<pod.ChatMessageResponseDto> subscribeChatMessageStream(
     int chatRoomId,
   ) {

@@ -13,6 +13,8 @@ fields:
   isActive: bool
   ### 참여 종료 일시
   leftAt: DateTime?
+  ### 마지막 읽은 시간 (읽음 처리용)
+  lastReadAt: DateTime?
   ### 생성일
   createdAt: DateTime?
   ### 수정일

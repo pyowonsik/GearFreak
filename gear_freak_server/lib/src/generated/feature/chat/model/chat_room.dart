@@ -22,6 +22,7 @@ abstract class ChatRoom
     required this.chatRoomType,
     required this.participantCount,
     this.lastActivityAt,
+    this.unreadCount,
     this.createdAt,
     this.updatedAt,
   });
@@ -33,6 +34,7 @@ abstract class ChatRoom
     required _i2.ChatRoomType chatRoomType,
     required int participantCount,
     DateTime? lastActivityAt,
+    int? unreadCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _ChatRoomImpl;
@@ -49,6 +51,7 @@ abstract class ChatRoom
           ? null
           : _i1.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastActivityAt']),
+      unreadCount: jsonSerialization['unreadCount'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -80,6 +83,9 @@ abstract class ChatRoom
   /// 최근 활동 일시
   DateTime? lastActivityAt;
 
+  /// 안 읽은 메시지 개수 (계산된 값, DB에 저장되지 않음)
+  int? unreadCount;
+
   /// 채팅방 생성일
   DateTime? createdAt;
 
@@ -99,6 +105,7 @@ abstract class ChatRoom
     _i2.ChatRoomType? chatRoomType,
     int? participantCount,
     DateTime? lastActivityAt,
+    int? unreadCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -111,6 +118,7 @@ abstract class ChatRoom
       'chatRoomType': chatRoomType.toJson(),
       'participantCount': participantCount,
       if (lastActivityAt != null) 'lastActivityAt': lastActivityAt?.toJson(),
+      if (unreadCount != null) 'unreadCount': unreadCount,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
     };
@@ -125,6 +133,7 @@ abstract class ChatRoom
       'chatRoomType': chatRoomType.toJson(),
       'participantCount': participantCount,
       if (lastActivityAt != null) 'lastActivityAt': lastActivityAt?.toJson(),
+      if (unreadCount != null) 'unreadCount': unreadCount,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
     };
@@ -170,6 +179,7 @@ class _ChatRoomImpl extends ChatRoom {
     required _i2.ChatRoomType chatRoomType,
     required int participantCount,
     DateTime? lastActivityAt,
+    int? unreadCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -179,6 +189,7 @@ class _ChatRoomImpl extends ChatRoom {
           chatRoomType: chatRoomType,
           participantCount: participantCount,
           lastActivityAt: lastActivityAt,
+          unreadCount: unreadCount,
           createdAt: createdAt,
           updatedAt: updatedAt,
         );
@@ -194,6 +205,7 @@ class _ChatRoomImpl extends ChatRoom {
     _i2.ChatRoomType? chatRoomType,
     int? participantCount,
     Object? lastActivityAt = _Undefined,
+    Object? unreadCount = _Undefined,
     Object? createdAt = _Undefined,
     Object? updatedAt = _Undefined,
   }) {
@@ -205,6 +217,7 @@ class _ChatRoomImpl extends ChatRoom {
       participantCount: participantCount ?? this.participantCount,
       lastActivityAt:
           lastActivityAt is DateTime? ? lastActivityAt : this.lastActivityAt,
+      unreadCount: unreadCount is int? ? unreadCount : this.unreadCount,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
       updatedAt: updatedAt is DateTime? ? updatedAt : this.updatedAt,
     );
@@ -234,6 +247,10 @@ class ChatRoomTable extends _i1.Table<int?> {
       'lastActivityAt',
       this,
     );
+    unreadCount = _i1.ColumnInt(
+      'unreadCount',
+      this,
+    );
     createdAt = _i1.ColumnDateTime(
       'createdAt',
       this,
@@ -259,6 +276,9 @@ class ChatRoomTable extends _i1.Table<int?> {
   /// 최근 활동 일시
   late final _i1.ColumnDateTime lastActivityAt;
 
+  /// 안 읽은 메시지 개수 (계산된 값, DB에 저장되지 않음)
+  late final _i1.ColumnInt unreadCount;
+
   /// 채팅방 생성일
   late final _i1.ColumnDateTime createdAt;
 
@@ -273,6 +293,7 @@ class ChatRoomTable extends _i1.Table<int?> {
         chatRoomType,
         participantCount,
         lastActivityAt,
+        unreadCount,
         createdAt,
         updatedAt,
       ];

@@ -124,9 +124,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _chatRoomId = chatState.chatRoom.id;
     }
 
-    return Scaffold(
-      appBar: _buildAppBar(chatState, currentUserId),
-      body: _buildBody(chatState, currentUser, currentUserId),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) async {
+        // 뒤로가기 시 읽음 처리
+        if (didPop && _chatRoomId != null) {
+          await ref
+              .read(chatNotifierProvider.notifier)
+              .markChatRoomAsRead(_chatRoomId!);
+        }
+      },
+      child: Scaffold(
+        appBar: _buildAppBar(chatState, currentUserId),
+        body: _buildBody(chatState, currentUser, currentUserId),
+      ),
     );
   }
 

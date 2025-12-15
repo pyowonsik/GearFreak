@@ -20,6 +20,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
     this.joinedAt,
     required this.isActive,
     this.leftAt,
+    this.lastReadAt,
     this.createdAt,
     this.updatedAt,
   });
@@ -31,6 +32,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
     DateTime? joinedAt,
     required bool isActive,
     DateTime? leftAt,
+    DateTime? lastReadAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _ChatParticipantImpl;
@@ -47,6 +49,9 @@ abstract class ChatParticipant implements _i1.SerializableModel {
       leftAt: jsonSerialization['leftAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['leftAt']),
+      lastReadAt: jsonSerialization['lastReadAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['lastReadAt']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -76,6 +81,9 @@ abstract class ChatParticipant implements _i1.SerializableModel {
   /// 참여 종료 일시
   DateTime? leftAt;
 
+  /// 마지막 읽은 시간 (읽음 처리용)
+  DateTime? lastReadAt;
+
   /// 생성일
   DateTime? createdAt;
 
@@ -92,6 +100,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
     DateTime? joinedAt,
     bool? isActive,
     DateTime? leftAt,
+    DateTime? lastReadAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -104,6 +113,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
       if (joinedAt != null) 'joinedAt': joinedAt?.toJson(),
       'isActive': isActive,
       if (leftAt != null) 'leftAt': leftAt?.toJson(),
+      if (lastReadAt != null) 'lastReadAt': lastReadAt?.toJson(),
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
     };
@@ -125,6 +135,7 @@ class _ChatParticipantImpl extends ChatParticipant {
     DateTime? joinedAt,
     required bool isActive,
     DateTime? leftAt,
+    DateTime? lastReadAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -134,6 +145,7 @@ class _ChatParticipantImpl extends ChatParticipant {
           joinedAt: joinedAt,
           isActive: isActive,
           leftAt: leftAt,
+          lastReadAt: lastReadAt,
           createdAt: createdAt,
           updatedAt: updatedAt,
         );
@@ -149,6 +161,7 @@ class _ChatParticipantImpl extends ChatParticipant {
     Object? joinedAt = _Undefined,
     bool? isActive,
     Object? leftAt = _Undefined,
+    Object? lastReadAt = _Undefined,
     Object? createdAt = _Undefined,
     Object? updatedAt = _Undefined,
   }) {
@@ -159,6 +172,7 @@ class _ChatParticipantImpl extends ChatParticipant {
       joinedAt: joinedAt is DateTime? ? joinedAt : this.joinedAt,
       isActive: isActive ?? this.isActive,
       leftAt: leftAt is DateTime? ? leftAt : this.leftAt,
+      lastReadAt: lastReadAt is DateTime? ? lastReadAt : this.lastReadAt,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
       updatedAt: updatedAt is DateTime? ? updatedAt : this.updatedAt,
     );

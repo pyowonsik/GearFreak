@@ -260,6 +260,15 @@ class EndpointChat extends _i1.EndpointRef {
               'fileSize': fileSize,
             },
           );
+
+  /// 채팅방 읽음 처리
+  /// 채팅방의 모든 메시지를 읽음 처리합니다.
+  _i2.Future<void> markChatRoomAsRead(int chatRoomId) =>
+      caller.callServerEndpoint<void>(
+        'chat',
+        'markChatRoomAsRead',
+        {'chatRoomId': chatRoomId},
+      );
 }
 
 /// Redis 기반 실시간 채팅 스트림 관리 엔드포인트

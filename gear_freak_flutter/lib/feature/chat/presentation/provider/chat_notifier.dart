@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_chat_room_image_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/create_or_get_chat_room_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_messages_usecase.dart';
@@ -12,6 +13,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_room_by_
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/join_chat_room_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/send_message_usecase.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/mark_chat_room_as_read_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/subscribe_chat_message_stream_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
@@ -21,6 +23,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_de
 class ChatNotifier extends StateNotifier<ChatState> {
   /// ChatNotifier 생성자
   ///
+  /// [ref]는 Riverpod의 Ref 인스턴스입니다.
   /// [createOrGetChatRoomUseCase]는 채팅방 생성/조회 UseCase입니다.
   /// [getChatRoomByIdUseCase]는 채팅방 정보 조회 UseCase입니다.
   /// [getUserChatRoomsByProductIdUseCase]는 상품별 채팅방 목록 조회 UseCase입니다.
@@ -31,7 +34,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// [subscribeChatMessageStreamUseCase]는 메시지 스트림 구독 UseCase입니다.
   /// [uploadChatRoomImageUseCase]는 채팅방 이미지 업로드 UseCase입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase입니다.
+  /// [markChatRoomAsReadUseCase]는 채팅방 읽음 처리 UseCase입니다.
   ChatNotifier(
+    this.ref,
     this.createOrGetChatRoomUseCase,
     this.getChatRoomByIdUseCase,
     this.getUserChatRoomsByProductIdUseCase,
@@ -42,9 +47,13 @@ class ChatNotifier extends StateNotifier<ChatState> {
     this.subscribeChatMessageStreamUseCase,
     this.uploadChatRoomImageUseCase,
     this.getProductDetailUseCase,
+    this.markChatRoomAsReadUseCase,
   ) : super(const ChatInitial()) {
     _messageStreamSubscription = null;
   }
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 채팅방 생성/조회 UseCase
   final CreateOrGetChatRoomUseCase createOrGetChatRoomUseCase;
@@ -75,6 +84,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// 상품 상세 조회 UseCase
   final GetProductDetailUseCase getProductDetailUseCase;
+
+  /// 채팅방 읽음 처리 UseCase
+  final MarkChatRoomAsReadUseCase markChatRoomAsReadUseCase;
 
   /// 메시지 스트림 구독
   StreamSubscription<pod.ChatMessageResponseDto>? _messageStreamSubscription;
@@ -109,98 +121,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
         final chatRoomId = response.chatRoomId!;
 
-        // 2. 채팅방 정보 조회
-        final roomResult = await getChatRoomByIdUseCase(
-          GetChatRoomByIdParams(chatRoomId: chatRoomId),
-        );
-
-        await roomResult.fold(
-          (failure) async {
-            state = ChatError(failure.message);
-          },
-          (chatRoom) async {
-            if (chatRoom == null) {
-              state = const ChatError('채팅방 정보를 찾을 수 없습니다.');
-              return;
-            }
-
-            // 3. 채팅방 참여
-            final joinResult = await joinChatRoomUseCase(
-              JoinChatRoomParams(chatRoomId: chatRoomId),
-            );
-
-            await joinResult.fold(
-              (failure) async {
-                state = ChatError(failure.message);
-              },
-              (joinResponse) async {
-                if (!joinResponse.success) {
-                  state = ChatError(joinResponse.message ?? '채팅방 참여에 실패했습니다.');
-                  return;
-                }
-
-                // 4. 참여자 목록 조회
-                final participantsResult = await getChatParticipantsUseCase(
-                  GetChatParticipantsParams(chatRoomId: chatRoomId),
-                );
-
-                final participants = participantsResult.fold(
-                  (failure) => <pod.ChatParticipantInfoDto>[],
-                  (list) => list,
-                );
-
-                // 5. 메시지 조회 (초기 로드)
-                // 서버는 orderDescending: true로 최신 메시지부터 반환하므로 첫 페이지를 로드
-                final messagesResult = await getChatMessagesUseCase(
-                  GetChatMessagesParams(
-                    chatRoomId: chatRoomId,
-                  ),
-                );
-
-                final messagesData = messagesResult.fold(
-                  (failure) => (
-                    messages: <pod.ChatMessageResponseDto>[],
-                    pagination: null as pod.PaginatedChatMessagesResponseDto?,
-                  ),
-                  (pagination) {
-                    // flutter_chat_ui는 내림차순(최신이 위)을 기대하므로 내림차순 정렬
-                    final sortedMessages = pagination.messages.toList()
-                      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-                    return (
-                      messages: sortedMessages,
-                      pagination: pagination,
-                    );
-                  },
-                );
-
-                // 6. 상품 정보 조회
-                pod.Product? product;
-                final productResult =
-                    await getProductDetailUseCase(chatRoom.productId);
-                productResult.fold(
-                  (failure) {
-                    // 상품 정보 조회 실패해도 채팅은 계속 진행
-                  },
-                  (productData) {
-                    product = productData;
-                  },
-                );
-
-                // 7. 스트림 연결
-                _connectMessageStream(chatRoomId);
-
-                state = ChatLoaded(
-                  chatRoom: chatRoom,
-                  participants: participants,
-                  messages: messagesData.messages,
-                  pagination: messagesData.pagination,
-                  isStreamConnected: true,
-                  product: product,
-                );
-              },
-            );
-          },
-        );
+        // 2. 채팅방 로드 및 진입 (공통 로직)
+        await _loadAndEnterChatRoom(chatRoomId);
       },
     );
   }
@@ -212,98 +134,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }) async {
     state = const ChatLoading();
 
-    // 1. 채팅방 정보 조회
-    final roomResult = await getChatRoomByIdUseCase(
-      GetChatRoomByIdParams(chatRoomId: chatRoomId),
-    );
-
-    await roomResult.fold(
-      (failure) async {
-        state = ChatError(failure.message);
-      },
-      (chatRoom) async {
-        if (chatRoom == null) {
-          state = const ChatError('채팅방 정보를 찾을 수 없습니다.');
-          return;
-        }
-
-        // 2. 채팅방 참여
-        final joinResult = await joinChatRoomUseCase(
-          JoinChatRoomParams(chatRoomId: chatRoomId),
-        );
-
-        await joinResult.fold(
-          (failure) async {
-            state = ChatError(failure.message);
-          },
-          (joinResponse) async {
-            if (!joinResponse.success) {
-              state = ChatError(joinResponse.message ?? '채팅방 참여에 실패했습니다.');
-              return;
-            }
-
-            // 3. 참여자 목록 조회
-            final participantsResult = await getChatParticipantsUseCase(
-              GetChatParticipantsParams(chatRoomId: chatRoomId),
-            );
-
-            final participants = participantsResult.fold(
-              (failure) => <pod.ChatParticipantInfoDto>[],
-              (list) => list,
-            );
-
-            // 4. 메시지 조회 (초기 로드)
-            // 서버는 orderDescending: true로 최신 메시지부터 반환하므로 첫 페이지를 로드
-            final messagesResult = await getChatMessagesUseCase(
-              GetChatMessagesParams(
-                chatRoomId: chatRoomId,
-              ),
-            );
-
-            final messagesData = messagesResult.fold(
-              (failure) => (
-                messages: <pod.ChatMessageResponseDto>[],
-                pagination: null as pod.PaginatedChatMessagesResponseDto?,
-              ),
-              (pagination) {
-                // flutter_chat_ui는 내림차순(최신이 위)을 기대하므로 내림차순 정렬
-                final sortedMessages = pagination.messages.toList()
-                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-                return (
-                  messages: sortedMessages,
-                  pagination: pagination,
-                );
-              },
-            );
-
-            // 5. 상품 정보 조회
-            pod.Product? product;
-            final productResult =
-                await getProductDetailUseCase(chatRoom.productId);
-            productResult.fold(
-              (failure) {
-                // 상품 정보 조회 실패해도 채팅은 계속 진행
-              },
-              (productData) {
-                product = productData;
-              },
-            );
-
-            // 6. 스트림 연결
-            _connectMessageStream(chatRoomId);
-
-            state = ChatLoaded(
-              chatRoom: chatRoom,
-              participants: participants,
-              messages: messagesData.messages,
-              pagination: messagesData.pagination,
-              isStreamConnected: true,
-              product: product,
-            );
-          },
-        );
-      },
-    );
+    // 채팅방 로드 및 진입 (공통 로직)
+    await _loadAndEnterChatRoom(chatRoomId);
   }
 
   /// 상품 정보만 로드 (채팅방이 없을 때)
@@ -410,7 +242,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
         // 에러는 스낵바로 표시 (호출하는 곳에서 처리)
       },
       (message) {
-        // 스트림을 통해 자동으로 수신되므로 별도 처리 불필요
+        // 새 메시지 이벤트 발행 (채팅방 목록 Notifier가 자동으로 반응)
+        ref.read(newChatMessageProvider.notifier).state = message;
+        // 이벤트 처리 후 초기화 (다음 메시지를 위해)
+        Future.microtask(() {
+          ref.read(newChatMessageProvider.notifier).state = null;
+        });
       },
     );
   }
@@ -507,7 +344,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         final updatedMessages = [
           ...currentState.messages,
           ...newMessages,
-        ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        ];
+        _sortMessagesByCreatedAt(updatedMessages);
 
         state = currentState.copyWith(
           messages: updatedMessages,
@@ -650,8 +488,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
                   currentState.messages.map((m) => m.id).toSet();
               final updatedMessages = existingIds.contains(sentMessage.id)
                   ? currentState.messages
-                  : [...currentState.messages, sentMessage]
-                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                  : [...currentState.messages, sentMessage];
+              _sortMessagesByCreatedAt(updatedMessages);
 
               state = ChatLoaded(
                 chatRoom: currentState.chatRoom,
@@ -680,9 +518,152 @@ class ChatNotifier extends StateNotifier<ChatState> {
     }
   }
 
-  // ==================== Public Methods (Service 호출) ====================
+  /// 채팅방 읽음 처리 (뒤로가기 시 호출)
+  Future<void> markChatRoomAsRead(int chatRoomId) async {
+    final markReadResult = await markChatRoomAsReadUseCase(
+      MarkChatRoomAsReadParams(chatRoomId: chatRoomId),
+    );
+    markReadResult.fold(
+      (failure) {
+        // 읽음 처리 실패해도 에러 표시하지 않음 (뒤로가기 중이므로)
+        debugPrint('채팅방 읽음 처리 실패: ${failure.message}');
+      },
+      (_) {
+        // 읽음 처리 성공 시 이벤트 발행 (채팅방 목록 Notifier가 자동으로 반응)
+        ref.read(chatRoomReadProvider.notifier).state = chatRoomId;
+        // 이벤트 처리 후 초기화 (다음 읽음 처리를 위해)
+        Future.microtask(() {
+          ref.read(chatRoomReadProvider.notifier).state = null;
+        });
+      },
+    );
+  }
 
   // ==================== Private Helper Methods ====================
+
+  /// 메시지를 createdAt 기준으로 내림차순 정렬 (최신이 위)
+  void _sortMessagesByCreatedAt(List<pod.ChatMessageResponseDto> messages) {
+    messages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  /// 중복 메시지 확인 및 이벤트 발행
+  /// 중복이 아닌 경우 이벤트를 발행하고 true를 반환합니다.
+  bool _addMessageIfNotDuplicate(
+    List<pod.ChatMessageResponseDto> messages,
+    pod.ChatMessageResponseDto message,
+  ) {
+    final existingIds = messages.map((m) => m.id).toSet();
+    if (!existingIds.contains(message.id)) {
+      // 새 메시지 이벤트 발행 (채팅방 목록 Notifier가 자동으로 반응)
+      ref.read(newChatMessageProvider.notifier).state = message;
+      // 이벤트 처리 후 초기화 (다음 메시지를 위해)
+      Future.microtask(() {
+        ref.read(newChatMessageProvider.notifier).state = null;
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /// 채팅방 로드 및 진입 (공통 로직)
+  /// 채팅방 정보 조회부터 스트림 연결까지의 모든 공통 로직을 처리합니다.
+  Future<void> _loadAndEnterChatRoom(int chatRoomId) async {
+    // 1. 채팅방 정보 조회
+    final roomResult = await getChatRoomByIdUseCase(
+      GetChatRoomByIdParams(chatRoomId: chatRoomId),
+    );
+
+    await roomResult.fold(
+      (failure) async {
+        state = ChatError(failure.message);
+      },
+      (chatRoom) async {
+        if (chatRoom == null) {
+          state = const ChatError('채팅방 정보를 찾을 수 없습니다.');
+          return;
+        }
+
+        // 2. 채팅방 참여
+        final joinResult = await joinChatRoomUseCase(
+          JoinChatRoomParams(chatRoomId: chatRoomId),
+        );
+
+        await joinResult.fold(
+          (failure) async {
+            state = ChatError(failure.message);
+          },
+          (joinResponse) async {
+            if (!joinResponse.success) {
+              state = ChatError(joinResponse.message ?? '채팅방 참여에 실패했습니다.');
+              return;
+            }
+
+            // 3. 참여자 목록 조회
+            final participantsResult = await getChatParticipantsUseCase(
+              GetChatParticipantsParams(chatRoomId: chatRoomId),
+            );
+
+            final participants = participantsResult.fold(
+              (failure) => <pod.ChatParticipantInfoDto>[],
+              (list) => list,
+            );
+
+            // 4. 메시지 조회 (초기 로드)
+            // 서버는 orderDescending: true로 최신 메시지부터 반환하므로 첫 페이지를 로드
+            final messagesResult = await getChatMessagesUseCase(
+              GetChatMessagesParams(
+                chatRoomId: chatRoomId,
+              ),
+            );
+
+            final messagesData = messagesResult.fold(
+              (failure) => (
+                messages: <pod.ChatMessageResponseDto>[],
+                pagination: null as pod.PaginatedChatMessagesResponseDto?,
+              ),
+              (pagination) {
+                // flutter_chat_ui는 내림차순(최신이 위)을 기대하므로 내림차순 정렬
+                final sortedMessages = pagination.messages.toList();
+                _sortMessagesByCreatedAt(sortedMessages);
+                return (
+                  messages: sortedMessages,
+                  pagination: pagination,
+                );
+              },
+            );
+
+            // 5. 상품 정보 조회
+            pod.Product? product;
+            final productResult =
+                await getProductDetailUseCase(chatRoom.productId);
+            productResult.fold(
+              (failure) {
+                // 상품 정보 조회 실패해도 채팅은 계속 진행
+              },
+              (productData) {
+                product = productData;
+              },
+            );
+
+            // 6. 읽음 처리 (공통 메서드 호출)
+            await markChatRoomAsRead(chatRoomId);
+
+            // 7. 스트림 연결
+            _connectMessageStream(chatRoomId);
+
+            state = ChatLoaded(
+              chatRoom: chatRoom,
+              participants: participants,
+              messages: messagesData.messages,
+              pagination: messagesData.pagination,
+              isStreamConnected: true,
+              product: product,
+            );
+          },
+        );
+      },
+    );
+  }
 
   /// 메시지 스트림 연결
   void _connectMessageStream(int chatRoomId) {
@@ -710,12 +691,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
               :final product,
               :final currentFileName
             ):
-            // 중복 메시지 확인
-            final existingIds = messages.map((m) => m.id).toSet();
-            if (!existingIds.contains(message.id)) {
+            // 중복 메시지 확인 및 이벤트 발행
+            if (_addMessageIfNotDuplicate(messages, message)) {
               // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
-              final updatedMessages = [...messages, message]
-                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              final updatedMessages = [...messages, message];
+              _sortMessagesByCreatedAt(updatedMessages);
 
               // 업로드 중이면 메시지만 추가하고 상태 유지
               state = ChatImageUploading(
@@ -737,12 +717,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
               :final product,
               :final error
             ):
-            // 중복 메시지 확인
-            final existingIds = messages.map((m) => m.id).toSet();
-            if (!existingIds.contains(message.id)) {
+            // 중복 메시지 확인 및 이벤트 발행
+            if (_addMessageIfNotDuplicate(messages, message)) {
               // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
-              final updatedMessages = [...messages, message]
-                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              final updatedMessages = [...messages, message];
+              _sortMessagesByCreatedAt(updatedMessages);
 
               // 에러 상태면 메시지만 추가하고 상태 유지
               state = ChatImageUploadError(
@@ -756,12 +735,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
               );
             }
           case ChatLoaded(:final messages) || ChatLoadingMore(:final messages):
-            // 중복 메시지 확인
-            final existingIds = messages.map((m) => m.id).toSet();
-            if (!existingIds.contains(message.id)) {
+            // 중복 메시지 확인 및 이벤트 발행
+            if (_addMessageIfNotDuplicate(messages, message)) {
               // 메시지 추가 후 createdAt 기준 내림차순 정렬 (최신이 위)
-              final updatedMessages = [...messages, message]
-                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              final updatedMessages = [...messages, message];
+              _sortMessagesByCreatedAt(updatedMessages);
 
               // 일반 ChatLoaded 또는 ChatLoadingMore 상태
               if (currentState is ChatLoaded) {
