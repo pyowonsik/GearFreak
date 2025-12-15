@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/common/service/fcm_service.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
@@ -47,12 +48,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       ),
     );
 
-    result.fold(
+    await result.fold(
       (failure) {
         state = AuthError(failure.message);
       },
-      (user) {
+      (user) async {
         state = AuthAuthenticated(user);
+        // FCM 토큰 등록
+        await FcmService.instance.initialize();
       },
     );
   }
@@ -68,12 +71,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       LoginParams(email: email, password: password),
     );
 
-    result.fold(
+    await result.fold(
       (failure) {
         state = AuthError(failure.message);
       },
-      (user) {
+      (user) async {
         state = AuthAuthenticated(user);
+        // FCM 토큰 등록
+        await FcmService.instance.initialize();
       },
     );
   }
@@ -83,6 +88,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthLoading();
 
     try {
+      // FCM 토큰 삭제
+      await FcmService.instance.deleteToken();
+
       // Repository를 통해 로그아웃 (SessionManager.signOutDevice() 호출)
       await loginUseCase.repo.logout();
 
@@ -102,14 +110,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     final result = await getMeUseCase(null);
 
-    result.fold(
+    await result.fold(
       (failure) {
         // 세션이 없거나 만료된 경우
         state = const AuthUnauthenticated();
       },
-      (user) {
+      (user) async {
         if (user != null) {
           state = AuthAuthenticated(user);
+          // 세션 확인 후 FCM 토큰 등록
+          await FcmService.instance.initialize();
         } else {
           state = const AuthUnauthenticated();
         }

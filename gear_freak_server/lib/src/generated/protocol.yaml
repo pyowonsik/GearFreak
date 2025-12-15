@@ -31,6 +31,9 @@ product:
   - getMyFavoriteProducts:
   - updateProductStatus:
   - getProductStats:
+fcm:
+  - registerFcmToken:
+  - deleteFcmToken:
 user:
   - getMe:
   - getUserById:

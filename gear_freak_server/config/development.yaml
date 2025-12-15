@@ -51,6 +51,13 @@ sessionLogs:
   consoleEnabled: true
   consoleLogFormat: text # Defaults to "json", options are "text" or "json"
 
+# FCM 설정
+fcm:
+  # Firebase Console → 프로젝트 설정 → Cloud Messaging → 서버 키
+  serverKey: 'YOUR_FCM_SERVER_KEY'
+  # Firebase Console → 프로젝트 설정 → 일반 → 프로젝트 ID
+  projectId: 'YOUR_FCM_PROJECT_ID'
+
 # futureCallExecutionEnabled: true # Defaults to true
 
 #futureCall:

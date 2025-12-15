@@ -393,6 +393,43 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 }
 
+/// FCM 엔드포인트
+/// FCM 토큰 등록 및 삭제를 처리합니다.
+/// {@category Endpoint}
+class EndpointFcm extends _i1.EndpointRef {
+  EndpointFcm(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'fcm';
+
+  /// FCM 토큰 등록
+  ///
+  /// [token]은 FCM 토큰입니다.
+  /// [deviceType]은 디바이스 타입입니다 (ios, android).
+  _i2.Future<bool> registerFcmToken(
+    String token,
+    String? deviceType,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'fcm',
+        'registerFcmToken',
+        {
+          'token': token,
+          'deviceType': deviceType,
+        },
+      );
+
+  /// FCM 토큰 삭제
+  ///
+  /// [token]은 FCM 토큰입니다.
+  _i2.Future<bool> deleteFcmToken(String token) =>
+      caller.callServerEndpoint<bool>(
+        'fcm',
+        'deleteFcmToken',
+        {'token': token},
+      );
+}
+
 /// 사용자 엔드포인트
 /// {@category Endpoint}
 class EndpointUser extends _i1.EndpointRef {
@@ -473,6 +510,7 @@ class Client extends _i1.ServerpodClientShared {
     chat = EndpointChat(this);
     chatStream = EndpointChatStream(this);
     product = EndpointProduct(this);
+    fcm = EndpointFcm(this);
     user = EndpointUser(this);
     modules = Modules(this);
   }
@@ -487,6 +525,8 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointProduct product;
 
+  late final EndpointFcm fcm;
+
   late final EndpointUser user;
 
   late final Modules modules;
@@ -498,6 +538,7 @@ class Client extends _i1.ServerpodClientShared {
         'chat': chat,
         'chatStream': chatStream,
         'product': product,
+        'fcm': fcm,
         'user': user,
       };
 

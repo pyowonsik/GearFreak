@@ -1,0 +1,24 @@
+### FCM 토큰 정보
+class: FcmToken
+
+table: fcm_token
+
+fields:
+  ### 사용자 ID (User.id)
+  userId: int, relation(parent=user, onDelete=Cascade)
+  ### FCM 토큰
+  token: String
+  ### 디바이스 타입 (ios, android)
+  deviceType: String?
+  ### 토큰 생성/업데이트 시간
+  updatedAt: DateTime?
+  ### 토큰 생성 시간
+  createdAt: DateTime?
+
+indexes:
+  user_id_token_unique_idx:
+    fields: userId, token
+    unique: true
+  user_id_idx:
+    fields: userId
+
