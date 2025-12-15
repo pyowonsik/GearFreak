@@ -26,6 +26,9 @@ abstract class ChatRepository {
   /// 채팅방 참여
   Future<pod.JoinChatRoomResponseDto> joinChatRoom(int chatRoomId);
 
+  /// 채팅방 나가기
+  Future<pod.LeaveChatRoomResponseDto> leaveChatRoom(int chatRoomId);
+
   /// 채팅방 참여자 목록 조회
   Future<List<pod.ChatParticipantInfoDto>> getChatParticipants(int chatRoomId);
 

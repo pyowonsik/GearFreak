@@ -55,6 +55,11 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<pod.LeaveChatRoomResponseDto> leaveChatRoom(int chatRoomId) async {
+    return remoteDataSource.leaveChatRoom(chatRoomId);
+  }
+
+  @override
   Future<List<pod.ChatParticipantInfoDto>> getChatParticipants(
     int chatRoomId,
   ) async {

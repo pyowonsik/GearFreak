@@ -7,6 +7,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_particip
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_room_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_my_chat_rooms_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/leave_chat_room_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 
@@ -21,6 +22,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   /// [getChatMessagesUseCase]는 채팅 메시지 조회 UseCase입니다.
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase입니다.
   /// [getChatRoomByIdUseCase]는 채팅방 정보 조회 UseCase입니다.
+  /// [leaveChatRoomUseCase]는 채팅방 나가기 UseCase입니다.
   ChatRoomListNotifier(
     this.ref,
     this.getMyChatRoomsUseCase,
@@ -29,6 +31,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
     this.getChatMessagesUseCase,
     this.getProductDetailUseCase,
     this.getChatRoomByIdUseCase,
+    this.leaveChatRoomUseCase,
   ) : super(const ChatRoomListInitial()) {
     // 채팅방 읽음 처리 이벤트 감지하여 자동으로 unreadCount 업데이트 및 최신 정보 갱신
     ref
@@ -71,6 +74,9 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
 
   /// 채팅방 정보 조회 UseCase
   final GetChatRoomByIdUseCase getChatRoomByIdUseCase;
+
+  /// 채팅방 나가기 UseCase
+  final LeaveChatRoomUseCase leaveChatRoomUseCase;
 
   // ==================== Public Methods (UseCase 호출) ====================
 
@@ -458,6 +464,45 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
     await _refreshChatRoomInfo(chatRoomId);
   }
 
+  /// 채팅방 나가기
+  /// 외부에서 호출 가능한 public 메서드
+  Future<bool> leaveChatRoom(int chatRoomId) async {
+    try {
+      debugPrint(
+          '🚪 [ChatRoomListNotifier] 채팅방 나가기 시도: chatRoomId=$chatRoomId');
+
+      final result = await leaveChatRoomUseCase(
+        LeaveChatRoomParams(chatRoomId: chatRoomId),
+      );
+
+      return result.fold(
+        (failure) {
+          debugPrint(
+            '❌ [ChatRoomListNotifier] 채팅방 나가기 실패: '
+            'chatRoomId=$chatRoomId, error=${failure.message}',
+          );
+          return false;
+        },
+        (response) {
+          debugPrint(
+            '✅ [ChatRoomListNotifier] 채팅방 나가기 성공: '
+            'chatRoomId=$chatRoomId, message=${response.message}',
+          );
+
+          // UI에서 채팅방 제거
+          _removeChatRoomFromList(chatRoomId);
+          return true;
+        },
+      );
+    } catch (e) {
+      debugPrint(
+        '❌ [ChatRoomListNotifier] 채팅방 나가기 실패: '
+        'chatRoomId=$chatRoomId, error=$e',
+      );
+      return false;
+    }
+  }
+
   /// 채팅방 정보 갱신 (내부 구현)
   Future<void> _refreshChatRoomInfo(int chatRoomId) async {
     final currentState = state;
@@ -714,6 +759,63 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
         chatRooms: updatedChatRooms,
         lastMessagesMap: updatedLastMessagesMap,
       );
+    }
+  }
+
+  /// 채팅방 목록에서 특정 채팅방 제거 (나가기 후)
+  void _removeChatRoomFromList(int chatRoomId) {
+    final currentState = state;
+    if (currentState is! ChatRoomListLoaded &&
+        currentState is! ChatRoomListLoadingMore) {
+      return;
+    }
+
+    if (currentState is ChatRoomListLoaded) {
+      final updatedChatRooms =
+          currentState.chatRooms.where((r) => r.id != chatRoomId).toList();
+      final updatedParticipantsMap =
+          Map<int, List<pod.ChatParticipantInfoDto>>.from(
+        currentState.participantsMap,
+      )..remove(chatRoomId);
+      final updatedLastMessagesMap = Map<int, pod.ChatMessageResponseDto>.from(
+        currentState.lastMessagesMap,
+      )..remove(chatRoomId);
+      final updatedProductImagesMap = Map<int, String>.from(
+        currentState.productImagesMap,
+      )..remove(chatRoomId);
+
+      state = currentState.copyWith(
+        chatRooms: updatedChatRooms,
+        participantsMap: updatedParticipantsMap,
+        lastMessagesMap: updatedLastMessagesMap,
+        productImagesMap: updatedProductImagesMap,
+      );
+
+      debugPrint(
+          '🗑️ [ChatRoomListNotifier] 채팅방 목록에서 제거: chatRoomId=$chatRoomId');
+    } else if (currentState is ChatRoomListLoadingMore) {
+      final updatedChatRooms =
+          currentState.chatRooms.where((r) => r.id != chatRoomId).toList();
+      final updatedParticipantsMap =
+          Map<int, List<pod.ChatParticipantInfoDto>>.from(
+        currentState.participantsMap,
+      )..remove(chatRoomId);
+      final updatedLastMessagesMap = Map<int, pod.ChatMessageResponseDto>.from(
+        currentState.lastMessagesMap,
+      )..remove(chatRoomId);
+      final updatedProductImagesMap = Map<int, String>.from(
+        currentState.productImagesMap,
+      )..remove(chatRoomId);
+
+      state = currentState.copyWith(
+        chatRooms: updatedChatRooms,
+        participantsMap: updatedParticipantsMap,
+        lastMessagesMap: updatedLastMessagesMap,
+        productImagesMap: updatedProductImagesMap,
+      );
+
+      debugPrint(
+          '🗑️ [ChatRoomListNotifier] 채팅방 목록에서 제거: chatRoomId=$chatRoomId');
     }
   }
 }

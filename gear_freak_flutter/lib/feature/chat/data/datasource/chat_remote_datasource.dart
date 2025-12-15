@@ -99,6 +99,12 @@ class ChatRemoteDataSource {
     return _client.chat.joinChatRoom(request);
   }
 
+  /// 채팅방 나가기
+  Future<pod.LeaveChatRoomResponseDto> leaveChatRoom(int chatRoomId) async {
+    final request = pod.LeaveChatRoomRequestDto(chatRoomId: chatRoomId);
+    return _client.chat.leaveChatRoom(request);
+  }
+
   /// 채팅방 참여자 목록 조회
   Future<List<pod.ChatParticipantInfoDto>> getChatParticipants(
     int chatRoomId,

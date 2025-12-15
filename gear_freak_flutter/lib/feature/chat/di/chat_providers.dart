@@ -65,6 +65,12 @@ final joinChatRoomUseCaseProvider = Provider<JoinChatRoomUseCase>((ref) {
   return JoinChatRoomUseCase(repository);
 });
 
+/// Leave Chat Room UseCase Provider
+final leaveChatRoomUseCaseProvider = Provider<LeaveChatRoomUseCase>((ref) {
+  final repository = ref.watch(chatRepositoryProvider);
+  return LeaveChatRoomUseCase(repository);
+});
+
 /// Get Chat Participants UseCase Provider
 final getChatParticipantsUseCaseProvider =
     Provider<GetChatParticipantsUseCase>((ref) {
@@ -110,6 +116,7 @@ final chatRoomListNotifierProvider =
     final getChatMessagesUseCase = ref.watch(getChatMessagesUseCaseProvider);
     final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
     final getChatRoomByIdUseCase = ref.watch(getChatRoomByIdUseCaseProvider);
+    final leaveChatRoomUseCase = ref.watch(leaveChatRoomUseCaseProvider);
     return ChatRoomListNotifier(
       ref,
       getMyChatRoomsUseCase,
@@ -118,6 +125,7 @@ final chatRoomListNotifierProvider =
       getChatMessagesUseCase,
       getProductDetailUseCase,
       getChatRoomByIdUseCase,
+      leaveChatRoomUseCase,
     );
   },
 );
@@ -135,6 +143,7 @@ final chatRoomSelectionNotifierProvider = StateNotifierProvider.autoDispose
     final getChatMessagesUseCase = ref.watch(getChatMessagesUseCaseProvider);
     final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
     final getChatRoomByIdUseCase = ref.watch(getChatRoomByIdUseCaseProvider);
+    final leaveChatRoomUseCase = ref.watch(leaveChatRoomUseCaseProvider);
     return ChatRoomListNotifier(
       ref,
       getMyChatRoomsUseCase,
@@ -143,6 +152,7 @@ final chatRoomSelectionNotifierProvider = StateNotifierProvider.autoDispose
       getChatMessagesUseCase,
       getProductDetailUseCase,
       getChatRoomByIdUseCase,
+      leaveChatRoomUseCase,
     );
   },
 );
