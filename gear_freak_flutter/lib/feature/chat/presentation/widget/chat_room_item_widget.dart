@@ -81,7 +81,8 @@ class ChatRoomItemWidget extends ConsumerWidget {
                     color: Color(0xFF9CA3AF),
                   ),
                 ),
-              if (chatRoom.unreadCount != null && chatRoom.unreadCount! > 0) ...[
+              if (chatRoom.unreadCount != null &&
+                  chatRoom.unreadCount! > 0) ...[
                 const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -93,7 +94,9 @@ class ChatRoomItemWidget extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    chatRoom.unreadCount! > 99 ? '99+' : '${chatRoom.unreadCount}',
+                    chatRoom.unreadCount! > 99
+                        ? '99+'
+                        : '${chatRoom.unreadCount}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,

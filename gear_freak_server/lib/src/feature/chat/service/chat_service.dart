@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
 import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
@@ -770,15 +771,19 @@ class ChatService {
 
       // 9. 📱 FCM 알림 전송 (비동기, 실패해도 메시지 전송은 성공)
       // Session이 닫힌 후에도 실행될 수 있으므로 unawaited로 실행
-      _sendFcmNotification(
+      await _sendFcmNotification(
         session: session,
         chatRoomId: chatRoomId,
         senderId: userId,
         senderNickname: user?.nickname,
         message: response,
       ).catchError((error) {
-        // Session이 닫힌 후에는 로깅할 수 없으므로 print 사용
-        print('⚠️ FCM 알림 전송 실패 (무시): $error');
+        // Session이 닫힌 후에는 로깅할 수 없으므로 log 사용
+        developer.log(
+          '⚠️ FCM 알림 전송 실패 (무시): $error',
+          name: 'ChatService',
+          error: error,
+        );
       });
 
       session.log(
@@ -1271,8 +1276,8 @@ class ChatService {
       try {
         session.log(message, level: level);
       } catch (e) {
-        // Session이 닫혔으면 print 사용
-        print('📱 $message');
+        // Session이 닫혔으면 log 사용
+        developer.log(message, name: 'ChatService');
       }
     }
 
@@ -1362,9 +1367,13 @@ class ChatService {
           level: LogLevel.warning,
         );
       } catch (_) {
-        // Session이 닫혔으면 print 사용
-        print('❌ FCM 알림 전송 실패: $e');
-        print('Stack trace: $stackTrace');
+        // Session이 닫혔으면 log 사용
+        developer.log(
+          '❌ FCM 알림 전송 실패: $e',
+          name: 'ChatService',
+          error: e,
+          stackTrace: stackTrace,
+        );
       }
     }
   }

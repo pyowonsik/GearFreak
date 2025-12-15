@@ -498,7 +498,8 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
           await messagesResult.fold(
             (failure) {
               debugPrint(
-                '⚠️ [ChatRoomListNotifier] 마지막 메시지 조회 실패: chatRoomId=$chatRoomId, error=${failure.message}',
+                '⚠️ [ChatRoomListNotifier] 마지막 메시지 조회 실패: '
+                'chatRoomId=$chatRoomId, error=${failure.message}',
               );
             },
             (messagesData) async {

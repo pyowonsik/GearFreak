@@ -5,11 +5,11 @@ import 'package:serverpod/serverpod.dart';
 /// FCM 토큰 관련 비즈니스 로직을 처리합니다.
 class FcmTokenService {
   /// FCM 토큰 등록 또는 업데이트
-  /// 
+  ///
   /// [userId]는 사용자 ID입니다.
   /// [token]은 FCM 토큰입니다.
   /// [deviceType]은 디바이스 타입입니다 (ios, android).
-  /// 
+  ///
   /// 성공 시 true를 반환하고, 실패 시 false를 반환합니다.
   static Future<bool> registerToken({
     required Session session,
@@ -23,8 +23,7 @@ class FcmTokenService {
       // 기존 토큰 조회
       final existingToken = await FcmToken.db.findFirstRow(
         session,
-        where: (t) =>
-            t.userId.equals(userId) & t.token.equals(token),
+        where: (t) => t.userId.equals(userId) & t.token.equals(token),
       );
 
       if (existingToken != null) {
@@ -68,10 +67,10 @@ class FcmTokenService {
   }
 
   /// FCM 토큰 삭제
-  /// 
+  ///
   /// [userId]는 사용자 ID입니다.
   /// [token]은 FCM 토큰입니다.
-  /// 
+  ///
   /// 성공 시 true를 반환하고, 실패 시 false를 반환합니다.
   static Future<bool> deleteToken({
     required Session session,
@@ -81,8 +80,7 @@ class FcmTokenService {
     try {
       await FcmToken.db.deleteWhere(
         session,
-        where: (t) =>
-            t.userId.equals(userId) & t.token.equals(token),
+        where: (t) => t.userId.equals(userId) & t.token.equals(token),
       );
 
       session.log(
@@ -103,9 +101,9 @@ class FcmTokenService {
   }
 
   /// 사용자의 모든 FCM 토큰 조회
-  /// 
+  ///
   /// [userId]는 사용자 ID입니다.
-  /// 
+  ///
   /// FCM 토큰 리스트를 반환합니다.
   static Future<List<String>> getTokensByUserId({
     required Session session,
@@ -130,10 +128,10 @@ class FcmTokenService {
   }
 
   /// 채팅방 참여자들의 FCM 토큰 조회 (발신자 제외)
-  /// 
+  ///
   /// [chatRoomId]는 채팅방 ID입니다.
   /// [excludeUserId]는 제외할 사용자 ID입니다 (발신자).
-  /// 
+  ///
   /// FCM 토큰 리스트를 반환합니다.
   static Future<List<String>> getTokensByChatRoomId({
     required Session session,
@@ -187,4 +185,3 @@ class FcmTokenService {
     }
   }
 }
-

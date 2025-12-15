@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
@@ -12,9 +13,14 @@ class FcmService {
     // 환경 변수에서 가져오기
     final projectId = Platform.environment['FCM_PROJECT_ID'];
     if (projectId == null || projectId.isEmpty) {
-      print('⚠️ FCM_PROJECT_ID 환경 변수가 설정되지 않았습니다.');
-      print(
-          '⚠️ 현재 환경 변수: ${Platform.environment.keys.where((k) => k.contains('FCM')).join(', ')}');
+      developer.log(
+        '⚠️ FCM_PROJECT_ID 환경 변수가 설정되지 않았습니다.',
+        name: 'FcmService',
+      );
+      developer.log(
+        '⚠️ 현재 환경 변수: ${Platform.environment.keys.where((k) => k.contains('FCM')).join(', ')}',
+        name: 'FcmService',
+      );
     }
     return projectId;
   }
@@ -32,8 +38,8 @@ class FcmService {
       try {
         session.log(message, level: level);
       } catch (e) {
-        // Session이 닫혔으면 print 사용
-        print('📱 $message');
+        // Session이 닫혔으면 log 사용
+        developer.log(message, name: 'FcmService');
       }
     }
 
@@ -70,9 +76,13 @@ class FcmService {
           level: LogLevel.error,
         );
       } catch (_) {
-        // Session이 닫혔으면 print 사용
-        print('❌ OAuth2 토큰 가져오기 실패: $e');
-        print('Stack trace: $stackTrace');
+        // Session이 닫혔으면 log 사용
+        developer.log(
+          '❌ OAuth2 토큰 가져오기 실패: $e',
+          name: 'FcmService',
+          error: e,
+          stackTrace: stackTrace,
+        );
       }
       return null;
     }
@@ -98,8 +108,8 @@ class FcmService {
       try {
         session.log(message, level: level);
       } catch (e) {
-        // Session이 닫혔으면 print 사용
-        print('📱 $message');
+        // Session이 닫혔으면 log 사용
+        developer.log(message, name: 'FcmService');
       }
     }
 
@@ -194,9 +204,13 @@ class FcmService {
           level: LogLevel.error,
         );
       } catch (_) {
-        // Session이 닫혔으면 print 사용
-        print('❌ FCM 알림 전송 예외: $e');
-        print('Stack trace: $stackTrace');
+        // Session이 닫혔으면 log 사용
+        developer.log(
+          '❌ FCM 알림 전송 예외: $e',
+          name: 'FcmService',
+          error: e,
+          stackTrace: stackTrace,
+        );
       }
       return false;
     }
@@ -246,14 +260,15 @@ class FcmService {
         level: LogLevel.info,
       );
     } catch (e) {
-      // Session이 닫혔으면 print 사용
-      print(
+      // Session이 닫혔으면 log 사용
+      developer.log(
         '📱 FCM 알림 전송 완료: '
         '전체=${fcmTokens.length}, '
         '성공=$successCount, '
         '실패=$failureCount, '
         'title="$title", '
         'body="$body"',
+        name: 'FcmService',
       );
     }
 
