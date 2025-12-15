@@ -47,22 +47,24 @@ import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/get_chat_m
     as _i19;
 import 'package:gear_freak_client/src/protocol/feature/chat/model/chat_message.dart'
     as _i20;
-import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
+import 'package:gear_freak_client/src/protocol/feature/chat/model/dto/update_chat_room_notification_request.dto.dart'
     as _i21;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/create_product_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/product.dart'
     as _i22;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/create_product_request.dto.dart'
     as _i23;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_request.dto.dart'
     as _i24;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_status_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/paginated_products_response.dto.dart'
     as _i25;
-import 'package:gear_freak_client/src/protocol/feature/product/model/dto/product_stats.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_product_status_request.dto.dart'
     as _i26;
-import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/product_stats.dto.dart'
     as _i27;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i28;
-import 'protocol.dart' as _i29;
+import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i28;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i29;
+import 'protocol.dart' as _i30;
 
 /// S3 엔드포인트 (공통 사용)
 /// {@category Endpoint}
@@ -270,6 +272,16 @@ class EndpointChat extends _i1.EndpointRef {
         'markChatRoomAsRead',
         {'chatRoomId': chatRoomId},
       );
+
+  /// 채팅방 알림 설정 변경
+  /// 사용자가 특정 채팅방의 알림을 켜거나 끕니다.
+  _i2.Future<void> updateChatRoomNotification(
+          _i21.UpdateChatRoomNotificationRequestDto request) =>
+      caller.callServerEndpoint<void>(
+        'chat',
+        'updateChatRoomNotification',
+        {'request': request},
+      );
 }
 
 /// Redis 기반 실시간 채팅 스트림 관리 엔드포인트
@@ -301,34 +313,34 @@ class EndpointProduct extends _i1.EndpointRef {
   String get name => 'product';
 
   /// 상품 생성
-  _i2.Future<_i21.Product> createProduct(
-          _i22.CreateProductRequestDto request) =>
-      caller.callServerEndpoint<_i21.Product>(
+  _i2.Future<_i22.Product> createProduct(
+          _i23.CreateProductRequestDto request) =>
+      caller.callServerEndpoint<_i22.Product>(
         'product',
         'createProduct',
         {'request': request},
       );
 
   /// 상품 수정
-  _i2.Future<_i21.Product> updateProduct(
-          _i23.UpdateProductRequestDto request) =>
-      caller.callServerEndpoint<_i21.Product>(
+  _i2.Future<_i22.Product> updateProduct(
+          _i24.UpdateProductRequestDto request) =>
+      caller.callServerEndpoint<_i22.Product>(
         'product',
         'updateProduct',
         {'request': request},
       );
 
-  _i2.Future<_i21.Product> getProduct(int id) =>
-      caller.callServerEndpoint<_i21.Product>(
+  _i2.Future<_i22.Product> getProduct(int id) =>
+      caller.callServerEndpoint<_i22.Product>(
         'product',
         'getProduct',
         {'id': id},
       );
 
   /// 페이지네이션된 상품 목록 조회
-  _i2.Future<_i24.PaginatedProductsResponseDto> getPaginatedProducts(
+  _i2.Future<_i25.PaginatedProductsResponseDto> getPaginatedProducts(
           _i10.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i24.PaginatedProductsResponseDto>(
+      caller.callServerEndpoint<_i25.PaginatedProductsResponseDto>(
         'product',
         'getPaginatedProducts',
         {'pagination': pagination},
@@ -359,35 +371,35 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 내가 등록한 상품 목록 조회 (페이지네이션)
-  _i2.Future<_i24.PaginatedProductsResponseDto> getMyProducts(
+  _i2.Future<_i25.PaginatedProductsResponseDto> getMyProducts(
           _i10.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i24.PaginatedProductsResponseDto>(
+      caller.callServerEndpoint<_i25.PaginatedProductsResponseDto>(
         'product',
         'getMyProducts',
         {'pagination': pagination},
       );
 
   /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
-  _i2.Future<_i24.PaginatedProductsResponseDto> getMyFavoriteProducts(
+  _i2.Future<_i25.PaginatedProductsResponseDto> getMyFavoriteProducts(
           _i10.PaginationDto pagination) =>
-      caller.callServerEndpoint<_i24.PaginatedProductsResponseDto>(
+      caller.callServerEndpoint<_i25.PaginatedProductsResponseDto>(
         'product',
         'getMyFavoriteProducts',
         {'pagination': pagination},
       );
 
   /// 상품 상태 변경
-  _i2.Future<_i21.Product> updateProductStatus(
-          _i25.UpdateProductStatusRequestDto request) =>
-      caller.callServerEndpoint<_i21.Product>(
+  _i2.Future<_i22.Product> updateProductStatus(
+          _i26.UpdateProductStatusRequestDto request) =>
+      caller.callServerEndpoint<_i22.Product>(
         'product',
         'updateProductStatus',
         {'request': request},
       );
 
   /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
-  _i2.Future<_i26.ProductStatsDto> getProductStats() =>
-      caller.callServerEndpoint<_i26.ProductStatsDto>(
+  _i2.Future<_i27.ProductStatsDto> getProductStats() =>
+      caller.callServerEndpoint<_i27.ProductStatsDto>(
         'product',
         'getProductStats',
         {},
@@ -464,7 +476,7 @@ class EndpointUser extends _i1.EndpointRef {
 
   /// 사용자 프로필 수정
   _i2.Future<_i5.User> updateUserProfile(
-          _i27.UpdateUserProfileRequestDto request) =>
+          _i28.UpdateUserProfileRequestDto request) =>
       caller.callServerEndpoint<_i5.User>(
         'user',
         'updateUserProfile',
@@ -474,10 +486,10 @@ class EndpointUser extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i28.Caller(client);
+    auth = _i29.Caller(client);
   }
 
-  late final _i28.Caller auth;
+  late final _i29.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -496,7 +508,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i29.Protocol(),
+          _i30.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

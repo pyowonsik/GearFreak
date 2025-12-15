@@ -20,6 +20,7 @@ abstract class ChatParticipantInfoDto
     this.profileImageUrl,
     this.joinedAt,
     required this.isActive,
+    required this.isNotificationEnabled,
   });
 
   factory ChatParticipantInfoDto({
@@ -28,6 +29,7 @@ abstract class ChatParticipantInfoDto
     String? profileImageUrl,
     DateTime? joinedAt,
     required bool isActive,
+    required bool isNotificationEnabled,
   }) = _ChatParticipantInfoDtoImpl;
 
   factory ChatParticipantInfoDto.fromJson(
@@ -40,6 +42,7 @@ abstract class ChatParticipantInfoDto
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['joinedAt']),
       isActive: jsonSerialization['isActive'] as bool,
+      isNotificationEnabled: jsonSerialization['isNotificationEnabled'] as bool,
     );
   }
 
@@ -58,6 +61,9 @@ abstract class ChatParticipantInfoDto
   /// 활성 상태
   bool isActive;
 
+  /// 알림 활성화 여부
+  bool isNotificationEnabled;
+
   /// Returns a shallow copy of this [ChatParticipantInfoDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -67,6 +73,7 @@ abstract class ChatParticipantInfoDto
     String? profileImageUrl,
     DateTime? joinedAt,
     bool? isActive,
+    bool? isNotificationEnabled,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -76,6 +83,7 @@ abstract class ChatParticipantInfoDto
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       if (joinedAt != null) 'joinedAt': joinedAt?.toJson(),
       'isActive': isActive,
+      'isNotificationEnabled': isNotificationEnabled,
     };
   }
 
@@ -87,6 +95,7 @@ abstract class ChatParticipantInfoDto
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
       if (joinedAt != null) 'joinedAt': joinedAt?.toJson(),
       'isActive': isActive,
+      'isNotificationEnabled': isNotificationEnabled,
     };
   }
 
@@ -105,12 +114,14 @@ class _ChatParticipantInfoDtoImpl extends ChatParticipantInfoDto {
     String? profileImageUrl,
     DateTime? joinedAt,
     required bool isActive,
+    required bool isNotificationEnabled,
   }) : super._(
           userId: userId,
           nickname: nickname,
           profileImageUrl: profileImageUrl,
           joinedAt: joinedAt,
           isActive: isActive,
+          isNotificationEnabled: isNotificationEnabled,
         );
 
   /// Returns a shallow copy of this [ChatParticipantInfoDto]
@@ -123,6 +134,7 @@ class _ChatParticipantInfoDtoImpl extends ChatParticipantInfoDto {
     Object? profileImageUrl = _Undefined,
     Object? joinedAt = _Undefined,
     bool? isActive,
+    bool? isNotificationEnabled,
   }) {
     return ChatParticipantInfoDto(
       userId: userId ?? this.userId,
@@ -131,6 +143,8 @@ class _ChatParticipantInfoDtoImpl extends ChatParticipantInfoDto {
           profileImageUrl is String? ? profileImageUrl : this.profileImageUrl,
       joinedAt: joinedAt is DateTime? ? joinedAt : this.joinedAt,
       isActive: isActive ?? this.isActive,
+      isNotificationEnabled:
+          isNotificationEnabled ?? this.isNotificationEnabled,
     );
   }
 }

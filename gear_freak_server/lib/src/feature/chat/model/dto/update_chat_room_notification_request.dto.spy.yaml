@@ -1,0 +1,9 @@
+### 채팅방 알림 설정 요청
+class: UpdateChatRoomNotificationRequestDto
+
+fields:
+  ### 채팅방 ID
+  chatRoomId: int
+  ### 알림 활성화 여부
+  isNotificationEnabled: bool
+

@@ -185,4 +185,19 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
       chatRoomId,
     );
   }
+
+  /// 채팅방 알림 설정 변경
+  /// 사용자가 특정 채팅방의 알림을 켜거나 끕니다.
+  Future<void> updateChatRoomNotification(
+    Session session,
+    UpdateChatRoomNotificationRequestDto request,
+  ) async {
+    final user = await UserService.getMe(session);
+    await chatService.updateChatRoomNotification(
+      session,
+      user.id!,
+      request.chatRoomId,
+      request.isNotificationEnabled,
+    );
+  }
 }

@@ -12,4 +12,6 @@ fields:
   joinedAt: DateTime?
   ### 활성 상태
   isActive: bool
+  ### 알림 활성화 여부
+  isNotificationEnabled: bool
 

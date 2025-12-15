@@ -579,6 +579,7 @@ class ChatService {
           profileImageUrl: user?.profileImageUrl,
           joinedAt: participant.joinedAt,
           isActive: participant.isActive,
+          isNotificationEnabled: participant.isNotificationEnabled,
         );
 
         participantInfos.add(participantInfo);
@@ -1086,7 +1087,7 @@ class ChatService {
     );
 
     if (existing != null) {
-      // 이미 존재하면 활성화
+      // 이미 존재하면 활성화 (알림 설정은 유지)
       if (!existing.isActive) {
         final now = DateTime.now().toUtc();
         await ChatParticipant.db.updateRow(
@@ -1096,6 +1097,7 @@ class ChatService {
             joinedAt: now,
             leftAt: null,
             updatedAt: now,
+            // isNotificationEnabled는 기존 값 유지 (명시하지 않으면 기존 값 유지)
           ),
         );
       }
@@ -1110,6 +1112,7 @@ class ChatService {
       joinedAt: now,
       isActive: true,
       leftAt: null,
+      isNotificationEnabled: true, // 기본값: 알림 활성화
       createdAt: now,
       updatedAt: now,
     );
@@ -1136,6 +1139,66 @@ class ChatService {
         updatedAt: DateTime.now().toUtc(),
       );
       await ChatRoom.db.updateRow(session, updatedChatRoom);
+    }
+  }
+
+  /// 채팅방 알림 설정 변경
+  /// 사용자가 특정 채팅방의 알림을 켜거나 끕니다.
+  Future<void> updateChatRoomNotification(
+    Session session,
+    int userId,
+    int chatRoomId,
+    bool isNotificationEnabled,
+  ) async {
+    try {
+      // 1. 채팅방 존재 확인
+      final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+      if (chatRoom == null) {
+        session.log(
+          '채팅방을 찾을 수 없음: chatRoomId=$chatRoomId',
+          level: LogLevel.warning,
+        );
+        throw Exception('채팅방을 찾을 수 없습니다.');
+      }
+
+      // 2. 참여자 정보 조회
+      final participant = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (p) =>
+            p.chatRoomId.equals(chatRoomId) &
+            p.userId.equals(userId),
+      );
+
+      if (participant == null) {
+        session.log(
+          '채팅방에 참여하지 않은 사용자: userId=$userId, chatRoomId=$chatRoomId',
+          level: LogLevel.warning,
+        );
+        throw Exception('채팅방에 참여하지 않은 사용자입니다.');
+      }
+
+      // 3. 알림 설정 업데이트
+      final now = DateTime.now().toUtc();
+      await ChatParticipant.db.updateRow(
+        session,
+        participant.copyWith(
+          isNotificationEnabled: isNotificationEnabled,
+          updatedAt: now,
+        ),
+      );
+
+      session.log(
+        '✅ 채팅방 알림 설정 변경 완료: userId=$userId, chatRoomId=$chatRoomId, isNotificationEnabled=$isNotificationEnabled',
+        level: LogLevel.info,
+      );
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 채팅방 알림 설정 변경 실패: $e',
+        exception: e,
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     }
   }
 

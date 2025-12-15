@@ -139,12 +139,13 @@ class FcmTokenService {
     required int excludeUserId,
   }) async {
     try {
-      // 채팅방 참여자 조회
+      // 채팅방 참여자 조회 (알림 활성화된 참여자만)
       final participants = await ChatParticipant.db.find(
         session,
         where: (p) =>
             p.chatRoomId.equals(chatRoomId) &
             p.isActive.equals(true) &
+            p.isNotificationEnabled.equals(true) &
             p.userId.notEquals(excludeUserId),
       );
 

@@ -17,6 +17,7 @@ chat:
   - getLastMessageByChatRoomId:
   - generateChatRoomImageUploadUrl:
   - markChatRoomAsRead:
+  - updateChatRoomNotification:
 chatStream:
   - chatMessageStream:
 product:

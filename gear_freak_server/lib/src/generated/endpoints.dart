@@ -31,15 +31,17 @@ import 'package:gear_freak_server/src/generated/feature/chat/model/dto/send_mess
     as _i14;
 import 'package:gear_freak_server/src/generated/feature/chat/model/dto/get_chat_messages_request.dto.dart'
     as _i15;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/update_chat_room_notification_request.dto.dart'
     as _i16;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
     as _i17;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
     as _i18;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
     as _i19;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i20;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i20;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i21;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -438,6 +440,25 @@ class Endpoints extends _i1.EndpointDispatch {
             params['chatRoomId'],
           ),
         ),
+        'updateChatRoomNotification': _i1.MethodConnector(
+          name: 'updateChatRoomNotification',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i16.UpdateChatRoomNotificationRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['chat'] as _i4.ChatEndpoint)
+                  .updateChatRoomNotification(
+            session,
+            params['request'],
+          ),
+        ),
       },
     );
     connectors['chatStream'] = _i1.EndpointConnector(
@@ -477,7 +498,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i16.CreateProductRequestDto>(),
+              type: _i1.getType<_i17.CreateProductRequestDto>(),
               nullable: false,
             )
           },
@@ -495,7 +516,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i17.UpdateProductRequestDto>(),
+              type: _i1.getType<_i18.UpdateProductRequestDto>(),
               nullable: false,
             )
           },
@@ -641,7 +662,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i18.UpdateProductStatusRequestDto>(),
+              type: _i1.getType<_i19.UpdateProductStatusRequestDto>(),
               nullable: false,
             )
           },
@@ -759,7 +780,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i19.UpdateUserProfileRequestDto>(),
+              type: _i1.getType<_i20.UpdateUserProfileRequestDto>(),
               nullable: false,
             )
           },
@@ -774,6 +795,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth'] = _i20.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i21.Endpoints()..initializeEndpoints(server);
   }
 }

@@ -21,6 +21,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
     required this.isActive,
     this.leftAt,
     this.lastReadAt,
+    required this.isNotificationEnabled,
     this.createdAt,
     this.updatedAt,
   });
@@ -33,6 +34,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
     required bool isActive,
     DateTime? leftAt,
     DateTime? lastReadAt,
+    required bool isNotificationEnabled,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _ChatParticipantImpl;
@@ -52,6 +54,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
       lastReadAt: jsonSerialization['lastReadAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['lastReadAt']),
+      isNotificationEnabled: jsonSerialization['isNotificationEnabled'] as bool,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -84,6 +87,9 @@ abstract class ChatParticipant implements _i1.SerializableModel {
   /// 마지막 읽은 시간 (읽음 처리용)
   DateTime? lastReadAt;
 
+  /// 알림 활성화 여부
+  bool isNotificationEnabled;
+
   /// 생성일
   DateTime? createdAt;
 
@@ -101,6 +107,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
     bool? isActive,
     DateTime? leftAt,
     DateTime? lastReadAt,
+    bool? isNotificationEnabled,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -114,6 +121,7 @@ abstract class ChatParticipant implements _i1.SerializableModel {
       'isActive': isActive,
       if (leftAt != null) 'leftAt': leftAt?.toJson(),
       if (lastReadAt != null) 'lastReadAt': lastReadAt?.toJson(),
+      'isNotificationEnabled': isNotificationEnabled,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
     };
@@ -136,6 +144,7 @@ class _ChatParticipantImpl extends ChatParticipant {
     required bool isActive,
     DateTime? leftAt,
     DateTime? lastReadAt,
+    required bool isNotificationEnabled,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -146,6 +155,7 @@ class _ChatParticipantImpl extends ChatParticipant {
           isActive: isActive,
           leftAt: leftAt,
           lastReadAt: lastReadAt,
+          isNotificationEnabled: isNotificationEnabled,
           createdAt: createdAt,
           updatedAt: updatedAt,
         );
@@ -162,6 +172,7 @@ class _ChatParticipantImpl extends ChatParticipant {
     bool? isActive,
     Object? leftAt = _Undefined,
     Object? lastReadAt = _Undefined,
+    bool? isNotificationEnabled,
     Object? createdAt = _Undefined,
     Object? updatedAt = _Undefined,
   }) {
@@ -173,6 +184,8 @@ class _ChatParticipantImpl extends ChatParticipant {
       isActive: isActive ?? this.isActive,
       leftAt: leftAt is DateTime? ? leftAt : this.leftAt,
       lastReadAt: lastReadAt is DateTime? ? lastReadAt : this.lastReadAt,
+      isNotificationEnabled:
+          isNotificationEnabled ?? this.isNotificationEnabled,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
       updatedAt: updatedAt is DateTime? ? updatedAt : this.updatedAt,
     );
