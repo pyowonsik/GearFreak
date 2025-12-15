@@ -26,11 +26,17 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
   }
 
   /// 채팅방 정보 조회
+  /// 현재 사용자의 unreadCount도 함께 계산하여 반환
   Future<ChatRoom?> getChatRoomById(
     Session session,
     int chatRoomId,
   ) async {
-    return await chatService.getChatRoomById(session, chatRoomId);
+    final user = await UserService.getMe(session);
+    return await chatService.getChatRoomById(
+      session,
+      chatRoomId,
+      userId: user.id,
+    );
   }
 
   /// 상품 ID로 채팅방 목록 조회

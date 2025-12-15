@@ -135,10 +135,11 @@ class ChatService {
       // 8. 참여자 수 업데이트
       await _updateParticipantCount(session, chatRoomId);
 
-      // 10. 업데이트된 채팅방 정보 조회
-      final updatedChatRoom = await ChatRoom.db.findById(
+      // 10. 업데이트된 채팅방 정보 조회 (unreadCount 포함)
+      final updatedChatRoom = await getChatRoomById(
         session,
         createdChatRoom.id!,
+        userId: userId,
       );
 
       return CreateChatRoomResponseDto(
@@ -164,12 +165,29 @@ class ChatService {
   }
 
   /// 채팅방 정보 조회
+  /// [userId]가 제공되면 해당 사용자의 unreadCount를 계산하여 반환
   Future<ChatRoom?> getChatRoomById(
     Session session,
-    int chatRoomId,
-  ) async {
+    int chatRoomId, {
+    int? userId,
+  }) async {
     try {
       final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+
+      if (chatRoom == null) {
+        return null;
+      }
+
+      // userId가 제공되면 unreadCount 계산
+      if (userId != null) {
+        final unreadCount = await getUnreadCount(
+          session,
+          userId,
+          chatRoomId,
+        );
+        return chatRoom.copyWith(unreadCount: unreadCount);
+      }
+
       return chatRoom;
     } on Exception catch (e, stackTrace) {
       session.log(
@@ -1259,7 +1277,16 @@ class ChatService {
     }
 
     try {
-      // 1. 채팅방 참여자들의 FCM 토큰 조회 (발신자 제외)
+      // 1. 채팅방 정보 조회 (productId 가져오기)
+      final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
+      if (chatRoom == null) {
+        safeLog(
+          '⚠️ FCM 알림 전송 건너뜀: 채팅방을 찾을 수 없음 (chatRoomId=$chatRoomId)',
+        );
+        return;
+      }
+
+      // 2. 채팅방 참여자들의 FCM 토큰 조회 (발신자 제외)
       safeLog('📱 FCM 알림 전송 시작: chatRoomId=$chatRoomId, senderId=$senderId');
 
       final fcmTokens = await FcmTokenService.getTokensByChatRoomId(
@@ -1277,7 +1304,7 @@ class ChatService {
         return;
       }
 
-      // 2. 알림 제목 및 본문 생성
+      // 3. 알림 제목 및 본문 생성
       final title = senderNickname ?? '알 수 없음';
       String body = message.content;
 
@@ -1298,10 +1325,11 @@ class ChatService {
           break;
       }
 
-      // 3. 추가 데이터 설정
+      // 4. 추가 데이터 설정 (딥링크를 위해 productId 포함)
       final data = {
         'type': 'chat_message',
         'chatRoomId': chatRoomId.toString(),
+        'productId': chatRoom.productId.toString(),
         'messageId': message.id.toString(),
         'senderId': senderId.toString(),
       };

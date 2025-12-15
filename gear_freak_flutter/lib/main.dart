@@ -6,11 +6,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/route/router_provider.dart';
 import 'package:gear_freak_flutter/common/service/deep_link_service.dart';
+import 'package:gear_freak_flutter/common/service/fcm_service.dart';
 import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 
 /// 백그라운드 메시지 핸들러
 /// 앱이 백그라운드에서 열렸을 때 FCM이 이 함수를 호출함
 /// 주의: 이 함수는 알림을 표시하지 않음 (FCM이 자동으로 표시)
+/// 주의: 이 함수는 top-level 함수여야 하며, Riverpod Provider에 접근할 수 없음
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('========================================');
@@ -20,6 +23,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('내용: ${message.notification?.body}');
   debugPrint('데이터: ${message.data}');
   debugPrint('========================================');
+  // 백그라운드에서는 Provider에 접근할 수 없으므로
+  // 앱이 포그라운드로 돌아올 때 처리됨 (onMessageOpenedApp 또는 getInitialMessage)
 }
 
 Future<void> main() async {
@@ -80,9 +85,44 @@ class _MyAppState extends ConsumerState<MyApp> {
         if (mounted) {
           final router = ref.read(routerProvider);
           DeepLinkService.instance.initialize(router);
+          // FCM 서비스에 라우터 설정
+          FcmService.instance.setRouter(router);
+          // FCM 메시지 수신 콜백 설정 (채팅방 정보 갱신)
+          FcmService.instance.setOnMessageReceived((chatRoomId) {
+            // 채팅방 정보 갱신 (마지막 메시지 조회 및 업데이트)
+            ref
+                .read(chatRoomListNotifierProvider.notifier)
+                .refreshChatRoomInfo(chatRoomId);
+          });
+          // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
+          _handleInitialMessage();
         }
       });
     });
+  }
+
+  /// 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
+  Future<void> _handleInitialMessage() async {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      final initialMessage = await messaging.getInitialMessage();
+      if (initialMessage != null) {
+        debugPrint('========================================');
+        debugPrint('📱 [앱 시작] FCM 알림으로 앱 시작됨');
+        debugPrint('메시지 ID: ${initialMessage.messageId}');
+        debugPrint('제목: ${initialMessage.notification?.title}');
+        debugPrint('내용: ${initialMessage.notification?.body}');
+        debugPrint('데이터: ${initialMessage.data}');
+        debugPrint('========================================');
+
+        // 알림 탭 처리
+        final router = ref.read(routerProvider);
+        await FcmService.instance.setRouter(router);
+        FcmService.instance.handleNotificationTap(initialMessage);
+      }
+    } catch (e) {
+      debugPrint('⚠️ 초기 메시지 처리 실패: $e');
+    }
   }
 
   @override

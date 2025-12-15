@@ -1,7 +1,9 @@
 import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:go_router/go_router.dart';
 
 /// FCM 서비스
 /// Firebase Cloud Messaging 토큰 관리 및 알림 처리를 담당합니다.
@@ -13,10 +15,16 @@ class FcmService {
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   String? _currentToken;
+  GoRouter? _router;
+
+  /// FCM 메시지 수신 콜백 (chatRoomId를 받아서 채팅방 정보 갱신)
+  void Function(int chatRoomId)? onMessageReceived;
 
   /// FCM 초기화 및 토큰 등록
   /// 로그인 성공 후 호출해야 합니다.
-  Future<void> initialize() async {
+  /// [router]는 딥링크 처리를 위한 GoRouter 인스턴스입니다. (선택사항)
+  Future<void> initialize({GoRouter? router}) async {
+    _router = router;
     try {
       debugPrint('📱 FCM 초기화 시작...');
 
@@ -50,6 +58,7 @@ class FcmService {
           debugPrint('내용: ${message.notification?.body}');
           debugPrint('데이터: ${message.data}');
           debugPrint('========================================');
+          _handleMessageReceived(message);
         });
 
         // 앱이 백그라운드에서 열렸을 때 메시지 처리
@@ -61,6 +70,7 @@ class FcmService {
           debugPrint('내용: ${message.notification?.body}');
           debugPrint('데이터: ${message.data}');
           debugPrint('========================================');
+          handleNotificationTap(message);
         });
 
         // 토큰 갱신 리스너
@@ -101,6 +111,57 @@ class FcmService {
       }
     } catch (e) {
       debugPrint('❌ FCM 토큰 서버 삭제 실패: $e');
+    }
+  }
+
+  /// 알림 탭 처리 (채팅 화면으로 이동)
+  void handleNotificationTap(RemoteMessage message) {
+    final data = message.data;
+
+    // 채팅 메시지 알림인 경우
+    if (data['type'] == 'chat_message' &&
+        data['chatRoomId'] != null &&
+        data['productId'] != null) {
+      final chatRoomId = data['chatRoomId'];
+      final productId = data['productId'];
+
+      debugPrint('🔗 채팅 화면으로 이동: productId=$productId, chatRoomId=$chatRoomId');
+
+      // 라우터가 설정되어 있으면 채팅 화면으로 이동
+      if (_router != null) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _router?.push('/chat/$productId?chatRoomId=$chatRoomId');
+          debugPrint('✅ 채팅 화면으로 이동 완료');
+        });
+      } else {
+        debugPrint('⚠️ GoRouter가 설정되지 않아 채팅 화면으로 이동할 수 없습니다');
+      }
+    }
+  }
+
+  /// GoRouter 설정 (앱 초기화 시 호출)
+  Future<void> setRouter(GoRouter router) async {
+    _router = router;
+  }
+
+  /// FCM 메시지 수신 콜백 설정
+  Future<void> setOnMessageReceived(
+    void Function(int chatRoomId) callback,
+  ) async {
+    onMessageReceived = callback;
+  }
+
+  /// FCM 메시지 수신 처리 (포그라운드/백그라운드)
+  void _handleMessageReceived(RemoteMessage message) {
+    final data = message.data;
+
+    // 채팅 메시지 알림인 경우
+    if (data['type'] == 'chat_message' && data['chatRoomId'] != null) {
+      final chatRoomId = int.tryParse(data['chatRoomId'].toString());
+      if (chatRoomId != null && onMessageReceived != null) {
+        debugPrint('📩 FCM 알림으로 채팅방 정보 갱신 트리거: chatRoomId=$chatRoomId');
+        onMessageReceived!(chatRoomId);
+      }
     }
   }
 }

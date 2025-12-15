@@ -150,6 +150,7 @@ class EndpointChat extends _i1.EndpointRef {
       );
 
   /// 채팅방 정보 조회
+  /// 현재 사용자의 unreadCount도 함께 계산하여 반환
   _i2.Future<_i8.ChatRoom?> getChatRoomById(int chatRoomId) =>
       caller.callServerEndpoint<_i8.ChatRoom?>(
         'chat',
