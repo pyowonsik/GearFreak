@@ -10,6 +10,7 @@ import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_center_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/screen/write_review_screen.dart';
 import 'package:go_router/go_router.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -140,6 +141,22 @@ abstract final class AppRoutes {
           name: 'my-favorite',
           builder: (context, state) =>
               const ProfileProductsScreen(type: 'myFavorite'),
+        ),
+
+        // 후기 작성 화면
+        GoRoute(
+          path: '/product/:productId/review/write',
+          name: 'write-review',
+          builder: (context, state) {
+            final productId = state.pathParameters['productId'] ?? '';
+            final buyerId = state.uri.queryParameters['buyerId'];
+            final chatRoomId = state.uri.queryParameters['chatRoomId'];
+            return WriteReviewScreen(
+              productId: int.parse(productId),
+              buyerId: buyerId != null ? int.parse(buyerId) : 0,
+              chatRoomId: chatRoomId != null ? int.parse(chatRoomId) : 0,
+            );
+          },
         ),
       ];
 }

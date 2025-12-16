@@ -13,6 +13,7 @@ import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/widget/buyer_selection_modal.dart';
 import 'package:go_router/go_router.dart';
 
 /// 상품 상세 화면
@@ -627,21 +628,42 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       return;
     }
 
-    // 확인 다이얼로그 표시
-    final statusLabel = getProductStatusLabel(newStatus);
-    final shouldChange = await GbDialog.show(
-      context: context,
-      title: '상태 변경',
-      content: '정말 $statusLabel 상태로 변경하시겠습니까?',
-      confirmText: '변경',
-    );
+    // "판매완료"로 변경하는 경우 구매자 선택 모달 표시
+    if (newStatus == pod.ProductStatus.sold && mounted) {
+      BuyerSelectionModal.show(
+        context,
+        productId: productData.id!,
+        productName: productData.title,
+        onBuyerSelected: () async {
+          // 구매자 선택 시 상태 변경
+          await ref
+              .read(productDetailNotifierProvider.notifier)
+              .updateProductStatus(productData.id!, newStatus);
+        },
+        onCancel: () async {
+          // 선택하지 않기 클릭 시 상태 변경
+          await ref
+              .read(productDetailNotifierProvider.notifier)
+              .updateProductStatus(productData.id!, newStatus);
+        },
+      );
+    } else {
+      // 다른 상태로 변경하는 경우 확인 다이얼로그 표시
+      final statusLabel = getProductStatusLabel(newStatus);
+      final shouldChange = await GbDialog.show(
+        context: context,
+        title: '상태 변경',
+        content: '정말 $statusLabel 상태로 변경하시겠습니까?',
+        confirmText: '변경',
+      );
 
-    if (shouldChange != true || !mounted) {
-      return;
+      if (shouldChange != true || !mounted) {
+        return;
+      }
+
+      await ref
+          .read(productDetailNotifierProvider.notifier)
+          .updateProductStatus(productData.id!, newStatus);
     }
-
-    await ref
-        .read(productDetailNotifierProvider.notifier)
-        .updateProductStatus(productData.id!, newStatus);
   }
 }
