@@ -156,13 +156,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               defaultName: '사용자',
             ),
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.more_vert),
-              onPressed: () {
-                // TODO: 더보기 메뉴
-              },
-            ),
+          actions: const [
+            // IconButton(
+            //   icon: const Icon(Icons.more_vert),
+            //   onPressed: () {
+            //   },
+            // ),
           ],
         ),
       _ => const GbAppBar(

@@ -511,7 +511,8 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   Future<bool> leaveChatRoom(int chatRoomId) async {
     try {
       debugPrint(
-          '🚪 [ChatRoomListNotifier] 채팅방 나가기 시도: chatRoomId=$chatRoomId');
+        '🚪 [ChatRoomListNotifier] 채팅방 나가기 시도: chatRoomId=$chatRoomId',
+      );
 
       final result = await leaveChatRoomUseCase(
         LeaveChatRoomParams(chatRoomId: chatRoomId),
@@ -851,7 +852,8 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       );
 
       debugPrint(
-          '🗑️ [ChatRoomListNotifier] 채팅방 목록에서 제거: chatRoomId=$chatRoomId');
+        '🗑️ [ChatRoomListNotifier] 채팅방 목록에서 제거: chatRoomId=$chatRoomId',
+      );
     } else if (currentState is ChatRoomListLoadingMore) {
       final updatedChatRooms =
           currentState.chatRooms.where((r) => r.id != chatRoomId).toList();
@@ -874,7 +876,8 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       );
 
       debugPrint(
-          '🗑️ [ChatRoomListNotifier] 채팅방 목록에서 제거: chatRoomId=$chatRoomId');
+        '🗑️ [ChatRoomListNotifier] 채팅방 목록에서 제거: chatRoomId=$chatRoomId',
+      );
     }
   }
 }

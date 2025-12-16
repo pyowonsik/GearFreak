@@ -63,5 +63,3 @@ class UpdateChatRoomNotificationFailure extends Failure {
     super.exception,
   });
 }
-
-

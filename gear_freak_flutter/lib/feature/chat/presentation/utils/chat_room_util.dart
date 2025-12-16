@@ -176,7 +176,7 @@ class ChatRoomUtil {
       case pod.MessageType.file:
         return '파일을 보냈습니다.';
       case pod.MessageType.text:
-      default:
+      case pod.MessageType.system:
         return message.content;
     }
   }

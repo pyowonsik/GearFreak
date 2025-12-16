@@ -67,7 +67,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
               CustomSlidableAction(
                 onPressed: (slidableContext) async {
                   // Slidable을 먼저 닫기
-                  Slidable.of(slidableContext)?.close();
+                  await Slidable.of(slidableContext)?.close();
 
                   // build context가 여전히 유효한지 확인
                   if (!buildContext.mounted) {
@@ -84,7 +84,6 @@ class ChatRoomItemWidget extends ConsumerWidget {
                     title: '알림 설정',
                     content: actionText,
                     confirmText: '확인',
-                    cancelText: '취소',
                   );
 
                   if ((confirmed ?? false) && buildContext.mounted) {
@@ -138,7 +137,8 @@ class ChatRoomItemWidget extends ConsumerWidget {
                     builder: (context) => AlertDialog(
                       title: const Text('채팅방 나가기'),
                       content: const Text(
-                        '채팅방을 나가시겠습니까?\n나가기 후에도 상대방이 메시지를 보내면 다시 채팅방에 입장할 수 있습니다.',
+                        '채팅방을 나가시겠습니까?\n'
+                        '나가기 후에도 상대방이 메시지를 보내면 다시 채팅방에 입장할 수 있습니다.',
                       ),
                       actions: [
                         TextButton(
@@ -156,7 +156,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
                     ),
                   );
 
-                  if (confirmed == true) {
+                  if (confirmed ?? false) {
                     // 나가기 실행
                     final success = await ref
                         .read(chatRoomListNotifierProvider.notifier)
@@ -190,7 +190,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -254,7 +254,6 @@ class ChatRoomItemWidget extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // 알림이 꺼졌을 때 회색 아이콘 표시 (읽지 않은 메시지 왼쪽)
                       if (!isNotificationEnabled) ...[
