@@ -229,7 +229,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
               ),
             ),
             subtitle: Text(
-              lastMessage?.content ?? '채팅내용이 없습니다.',
+              ChatRoomUtil.getLastMessageText(lastMessage),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(

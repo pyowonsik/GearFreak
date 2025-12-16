@@ -159,4 +159,25 @@ class ChatRoomUtil {
       updatedAt: DateTime.now(),
     );
   }
+
+  /// 채팅방 목록에서 표시할 메시지 텍스트 가져오기
+  ///
+  /// [message]는 메시지 정보입니다.
+  /// 메시지 타입에 따라 적절한 텍스트를 반환합니다.
+  static String getLastMessageText(pod.ChatMessageResponseDto? message) {
+    if (message == null) {
+      return '채팅내용이 없습니다.';
+    }
+
+    // 메시지 타입에 따라 다른 텍스트 표시
+    switch (message.messageType) {
+      case pod.MessageType.image:
+        return '사진을 보냈습니다.';
+      case pod.MessageType.file:
+        return '파일을 보냈습니다.';
+      case pod.MessageType.text:
+      default:
+        return message.content;
+    }
+  }
 }
