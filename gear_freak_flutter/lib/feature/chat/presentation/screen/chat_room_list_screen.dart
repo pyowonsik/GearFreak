@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
+import 'package:gear_freak_flutter/common/service/fcm_service.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
@@ -19,6 +20,8 @@ class ChatRoomListScreen extends ConsumerStatefulWidget {
 
 class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
     with PaginationScrollMixin {
+  AppLifecycleListener? _lifecycleListener;
+
   @override
   void initState() {
     super.initState();
@@ -41,11 +44,30 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen>
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
+
+      // FCM 메시지 수신 시 채팅방 리스트 갱신
+      FcmService.instance.setOnMessageReceived((chatRoomId) {
+        // 포그라운드에서 FCM 메시지를 받으면 채팅방 리스트 갱신
+        ref
+            .read(chatRoomListNotifierProvider.notifier)
+            .refreshChatRoomInfo(chatRoomId);
+      });
     });
+
+    // 앱 생명주기 감지 (백그라운드 -> 포그라운드)
+    _lifecycleListener = AppLifecycleListener(
+      onStateChange: (AppLifecycleState state) {
+        // 백그라운드에서 포그라운드로 돌아올 때 채팅방 리스트 새로고침
+        if (state == AppLifecycleState.resumed) {
+          ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
+    _lifecycleListener?.dispose();
     disposePaginationScroll();
     super.dispose();
   }

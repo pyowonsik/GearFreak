@@ -194,12 +194,12 @@ class FcmTokenService {
     required int excludeUserId,
   }) async {
     try {
-      // 채팅방 참여자 조회 (모든 활성 참여자, 알림 설정 무관)
+      // 채팅방 참여자 조회 (활성 + 비활성 참여자 모두 포함)
+      // 비활성 참여자도 재활성화 후 메시지를 받을 수 있도록 FCM 전송
       final participants = await ChatParticipant.db.find(
         session,
         where: (p) =>
             p.chatRoomId.equals(chatRoomId) &
-            p.isActive.equals(true) &
             p.userId.notEquals(excludeUserId),
       );
 

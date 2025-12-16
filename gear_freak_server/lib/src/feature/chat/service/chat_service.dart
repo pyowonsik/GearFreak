@@ -3,6 +3,7 @@ import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
 import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
+import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -384,40 +385,59 @@ class ChatService {
         );
       }
 
-      // 2. 이미 참여 중인지 확인
+      // 2. 참여자 확인 (isActive 여부와 관계없이 조회)
       final existingParticipant = await ChatParticipant.db.findFirstRow(
         session,
         where: (participant) =>
             participant.chatRoomId.equals(request.chatRoomId) &
-            participant.userId.equals(userId) &
-            participant.isActive.equals(true),
+            participant.userId.equals(userId),
       );
+
+      final now = DateTime.now().toUtc();
 
       if (existingParticipant != null) {
-        // 이미 참여 중인 경우
-        session.log(
-          '이미 참여 중인 사용자: '
-          'chatRoomId=${request.chatRoomId}, '
-          'userId=$userId',
-          level: LogLevel.info,
-        );
+        // 참여자가 이미 존재하는 경우
+        if (existingParticipant.isActive) {
+          // 이미 활성 상태인 경우
+          session.log(
+            '이미 참여 중인 사용자: '
+            'chatRoomId=${request.chatRoomId}, '
+            'userId=$userId',
+            level: LogLevel.info,
+          );
 
-        return JoinChatRoomResponseDto(
-          success: true,
-          chatRoomId: request.chatRoomId,
-          joinedAt: existingParticipant.joinedAt ?? DateTime.now().toUtc(),
-          message: '이미 참여 중인 채팅방입니다.',
-          participantCount: chatRoom.participantCount,
+          return JoinChatRoomResponseDto(
+            success: true,
+            chatRoomId: request.chatRoomId,
+            joinedAt: existingParticipant.joinedAt ?? now,
+            message: '이미 참여 중인 채팅방입니다.',
+            participantCount: chatRoom.participantCount,
+          );
+        } else {
+          // 비활성 상태인 경우 재활성화
+          final previousLeftAt = existingParticipant.leftAt; // 이전 leftAt 값 유지
+          await ChatParticipant.db.updateRow(
+            session,
+            existingParticipant.copyWith(
+              isActive: true,
+              joinedAt: now,
+              leftAt: previousLeftAt, // leftAt 유지 (재참여 후 필터링 기준)
+              updatedAt: now,
+            ),
+          );
+          session.log(
+            '채팅방 재참여 (joinChatRoom): chatRoomId=${request.chatRoomId}, userId=$userId, previousLeftAt=$previousLeftAt',
+            level: LogLevel.info,
+          );
+        }
+      } else {
+        // 3. 새로운 참여자 추가
+        await _addParticipant(
+          session,
+          request.chatRoomId,
+          userId,
         );
       }
-
-      // 3. 새로운 참여자 추가
-      final now = DateTime.now().toUtc();
-      await _addParticipant(
-        session,
-        request.chatRoomId,
-        userId,
-      );
 
       // 4. 참여자 수 업데이트
       await _updateParticipantCount(session, request.chatRoomId);
@@ -647,18 +667,71 @@ class ChatService {
       } else {
         chatRoomId = request.chatRoomId!;
 
-        // 채팅방 참여 확인
+        // 채팅방 참여 확인 (isActive 여부와 관계없이 조회)
         final participation = await ChatParticipant.db.findFirstRow(
           session,
           where: (participant) =>
               participant.userId.equals(userId) &
-              participant.chatRoomId.equals(chatRoomId) &
-              participant.isActive.equals(true),
+              participant.chatRoomId.equals(chatRoomId),
         );
 
         if (participation == null) {
           throw Exception('채팅방에 참여하지 않은 사용자입니다.');
         }
+
+        // 발신자가 비활성 상태인 경우 재활성화
+        // leftAt은 유지하여 재참여 후 leftAt 이후 메시지만 보이도록 함
+        if (!participation.isActive) {
+          final now = DateTime.now().toUtc();
+          final previousLeftAt = participation.leftAt; // 이전 leftAt 값 유지
+          await ChatParticipant.db.updateRow(
+            session,
+            participation.copyWith(
+              isActive: true,
+              joinedAt: now,
+              leftAt: previousLeftAt, // leftAt 유지 (재참여 후 필터링 기준)
+              updatedAt: now,
+            ),
+          );
+          session.log(
+            '채팅방 재참여: chatRoomId=$chatRoomId, userId=$userId, previousLeftAt=$previousLeftAt',
+            level: LogLevel.info,
+          );
+        }
+
+        // 채팅방의 다른 참여자들 중 비활성 상태인 참여자들 재활성화
+        // (상대방이 메시지를 보내면 내 채팅방에 다시 나타나도록)
+        // leftAt은 유지하여 재참여 후 leftAt 이후 메시지만 보이도록 함
+        final inactiveParticipants = await ChatParticipant.db.find(
+          session,
+          where: (participant) =>
+              participant.chatRoomId.equals(chatRoomId) &
+              participant.userId.notEquals(userId) &
+              participant.isActive.equals(false),
+        );
+
+        if (inactiveParticipants.isNotEmpty) {
+          final now = DateTime.now().toUtc();
+          for (final participant in inactiveParticipants) {
+            final previousLeftAt = participant.leftAt; // 이전 leftAt 값 유지
+            await ChatParticipant.db.updateRow(
+              session,
+              participant.copyWith(
+                isActive: true,
+                joinedAt: now,
+                leftAt: previousLeftAt, // leftAt 유지 (재참여 후 필터링 기준)
+                updatedAt: now,
+              ),
+            );
+          }
+          session.log(
+            '채팅방 참여자 재활성화: chatRoomId=$chatRoomId, 재활성화된 참여자 수=${inactiveParticipants.length}',
+            level: LogLevel.info,
+          );
+        }
+
+        // 참여자 수 업데이트
+        await _updateParticipantCount(session, chatRoomId);
 
         // 채팅방 정보 조회
         chatRoom = await ChatRoom.db.findById(session, chatRoomId);
@@ -830,20 +903,32 @@ class ChatService {
         throw Exception('채팅방을 찾을 수 없습니다.');
       }
 
+      // 현재 사용자 정보 조회
+      final user = await UserService.getMe(session);
+      if (user.id == null) {
+        throw Exception('사용자 정보를 찾을 수 없습니다.');
+      }
+
+      // 현재 사용자의 채팅방 참여 정보 조회 (leftAt 확인용)
+      final participation = await ChatParticipant.db.findFirstRow(
+        session,
+        where: (p) =>
+            p.chatRoomId.equals(request.chatRoomId) & p.userId.equals(user.id!),
+      );
+
+      // leftAt 이후 메시지만 필터링하기 위한 기준 시각
+      // 재참여 시 leftAt을 유지하므로, leftAt이 있으면 재참여 전에 나간 시점 이후 메시지만 보여야 함
+      DateTime? leftAtFilter;
+      if (participation != null && participation.leftAt != null) {
+        leftAtFilter = participation.leftAt;
+      }
+
       // 오프셋 계산
       final offset = (request.page - 1) * request.limit;
 
-      // 전체 메시지 조회
-      Expression<Object?> baseWhere(ChatMessageTable message) =>
-          message.chatRoomId.equals(request.chatRoomId);
-
-      final totalCount = await ChatMessage.db.count(session, where: baseWhere);
-
-      // 메시지 조회 (최신 순으로 정렬)
-      final messages = await ChatMessage.db.find(
+      // 메시지 조회 (최신 순으로 정렬, leftAt 필터는 메모리에서 적용)
+      final allMessages = await ChatMessage.db.find(
         session,
-        limit: request.limit,
-        offset: offset,
         orderBy: (message) => message.createdAt,
         orderDescending: true,
         where: (message) {
@@ -857,16 +942,20 @@ class ChatService {
         },
       );
 
+      // leftAt 이후 메시지만 필터링 (메모리에서 필터링)
+      final filteredMessages = leftAtFilter != null
+          ? allMessages.where((msg) {
+              return msg.createdAt != null &&
+                  msg.createdAt!.isAfter(leftAtFilter!);
+            }).toList()
+          : allMessages;
+
+      // 페이지네이션 적용
+      final messages =
+          filteredMessages.skip(offset).take(request.limit).toList();
+
       // 필터가 적용된 경우, 페이지네이션 기준 카운트도 필터 기준으로 계산
-      var effectiveTotalCount = totalCount;
-      if (request.messageType != null) {
-        effectiveTotalCount = await ChatMessage.db.count(
-          session,
-          where: (message) =>
-              message.chatRoomId.equals(request.chatRoomId) &
-              message.messageType.equals(request.messageType),
-        );
-      }
+      var effectiveTotalCount = filteredMessages.length;
 
       // ChatMessageResponseDto 리스트 생성
       final messageResponses = <ChatMessageResponseDto>[];
@@ -1236,11 +1325,13 @@ class ChatService {
       }
 
       // 3. lastReadAt을 현재 시간으로 업데이트
+      // leftAt이 있으면 null로 설정 (재참여 후 읽음 처리 시 leftAt 제거)
       final now = DateTime.now().toUtc();
       await ChatParticipant.db.updateRow(
         session,
         participant.copyWith(
           lastReadAt: now,
+          leftAt: null, // 읽음 처리 시 leftAt 제거 (재참여 완료)
           updatedAt: now,
         ),
       );
@@ -1287,7 +1378,18 @@ class ChatService {
         where: (message) => message.chatRoomId.equals(chatRoomId),
       );
 
-      // 3. 안 읽은 메시지 개수 계산 (자신이 보낸 메시지는 제외)
+      // 3. leftAt이 있으면 leftAt 이후 메시지만 카운트 (lastReadAt 무시)
+      // 재참여한 경우 나가기 이전 메시지는 읽은 것으로 간주
+      if (participant.leftAt != null) {
+        final unreadCount = allMessages.where((message) {
+          return message.senderId != userId &&
+              message.createdAt != null &&
+              message.createdAt!.isAfter(participant.leftAt!);
+        }).length;
+        return unreadCount;
+      }
+
+      // 4. leftAt이 없으면 기존 로직대로 lastReadAt 기준으로 계산
       // lastReadAt이 null이면 모든 메시지를 읽지 않은 것으로 간주 (자신이 보낸 메시지 제외)
       if (participant.lastReadAt == null) {
         final unreadCount =
@@ -1295,7 +1397,7 @@ class ChatService {
         return unreadCount;
       }
 
-      // 4. lastReadAt 이후의 메시지 개수 계산 (자신이 보낸 메시지는 제외)
+      // 5. lastReadAt 이후의 메시지 개수 계산 (자신이 보낸 메시지는 제외)
       final unreadCount = allMessages.where((message) {
         return message.senderId != userId &&
             message.createdAt != null &&
