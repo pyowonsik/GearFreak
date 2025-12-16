@@ -1,0 +1,37 @@
+### 거래 후기
+class: TransactionReview
+table: transaction_review
+
+fields:
+  ### 상품 ID
+  productId: int, relation(parent=product, onDelete=Cascade)
+  ### 채팅방 ID
+  chatRoomId: int, relation(parent=chat_room, onDelete=Cascade)
+  ### 리뷰 작성자 ID
+  reviewerId: int, relation(parent=user)
+  ### 리뷰 대상자 ID
+  revieweeId: int, relation(parent=user)
+  ### 평점 (1~5)
+  rating: int
+  ### 후기 내용
+  content: String?
+  ### 리뷰 타입
+  reviewType: ReviewType
+  ### 생성일
+  createdAt: DateTime?
+  ### 수정일
+  updatedAt: DateTime?
+
+indexes:
+  unique_review_idx:
+    fields: productId, chatRoomId, reviewerId, reviewType
+    unique: true
+  product_reviews_idx:
+    fields: productId
+  reviewee_reviews_idx:
+    fields: revieweeId
+  reviewer_reviews_idx:
+    fields: reviewerId
+  review_created_at_idx:
+    fields: createdAt
+

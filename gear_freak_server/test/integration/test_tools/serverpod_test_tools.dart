@@ -64,8 +64,14 @@ import 'package:gear_freak_server/src/generated/feature/product/model/dto/update
     as _i27;
 import 'package:gear_freak_server/src/generated/feature/product/model/dto/product_stats.dto.dart'
     as _i28;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/review/model/dto/transaction_review_response.dto.dart'
     as _i29;
+import 'package:gear_freak_server/src/generated/feature/review/model/dto/create_transaction_review_request.dto.dart'
+    as _i30;
+import 'package:gear_freak_server/src/generated/feature/review/model/dto/transaction_review_list_response.dto.dart'
+    as _i31;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i32;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -162,6 +168,8 @@ class TestEndpoints {
 
   late final _ProductEndpoint product;
 
+  late final _ReviewEndpoint review;
+
   late final _FcmEndpoint fcm;
 
   late final _UserEndpoint user;
@@ -191,6 +199,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     product = _ProductEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    review = _ReviewEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1127,6 +1139,141 @@ class _ProductEndpoint {
   }
 }
 
+class _ReviewEndpoint {
+  _ReviewEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i29.TransactionReviewResponseDto> createTransactionReview(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i30.CreateTransactionReviewRequestDto request,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'review',
+        method: 'createTransactionReview',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'createTransactionReview',
+          parameters: _i1.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i29.TransactionReviewResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i31.TransactionReviewListResponseDto> getBuyerReviews(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required int page,
+    required int limit,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'review',
+        method: 'getBuyerReviews',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'getBuyerReviews',
+          parameters: _i1.testObjectToJson({
+            'page': page,
+            'limit': limit,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i31.TransactionReviewListResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i31.TransactionReviewListResponseDto> getSellerReviews(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required int page,
+    required int limit,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'review',
+        method: 'getSellerReviews',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'getSellerReviews',
+          parameters: _i1.testObjectToJson({
+            'page': page,
+            'limit': limit,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i31.TransactionReviewListResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> deleteTransactionReview(
+    _i1.TestSessionBuilder sessionBuilder,
+    int reviewId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'review',
+        method: 'deleteTransactionReview',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'deleteTransactionReview',
+          parameters: _i1.testObjectToJson({'reviewId': reviewId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _FcmEndpoint {
   _FcmEndpoint(
     this._endpointDispatch,
@@ -1294,7 +1441,7 @@ class _UserEndpoint {
 
   _i3.Future<_i6.User> updateUserProfile(
     _i1.TestSessionBuilder sessionBuilder,
-    _i29.UpdateUserProfileRequestDto request,
+    _i32.UpdateUserProfileRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =

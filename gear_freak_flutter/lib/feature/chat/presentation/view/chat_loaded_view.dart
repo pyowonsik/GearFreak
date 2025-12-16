@@ -10,6 +10,7 @@ import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -295,6 +296,11 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
               productName: productName,
               price: price,
               product: widget.product,
+              onTap: widget.product?.id != null
+                  ? () {
+                      context.push('/product/${widget.product!.id}');
+                    }
+                  : null,
             ),
 
             // 채팅 메시지 목록

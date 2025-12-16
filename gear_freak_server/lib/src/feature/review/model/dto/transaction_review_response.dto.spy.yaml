@@ -1,0 +1,29 @@
+### 거래 후기 응답
+class: TransactionReviewResponseDto
+
+fields:
+  ### 후기 ID
+  id: int
+  ### 상품 ID
+  productId: int
+  ### 채팅방 ID
+  chatRoomId: int
+  ### 리뷰 작성자 ID
+  reviewerId: int
+  ### 리뷰 작성자 닉네임
+  reviewerNickname: String?
+  ### 리뷰 작성자 프로필 이미지
+  reviewerProfileImageUrl: String?
+  ### 리뷰 대상자 ID
+  revieweeId: int
+  ### 리뷰 대상자 닉네임
+  revieweeNickname: String?
+  ### 평점 (1~5)
+  rating: int
+  ### 후기 내용
+  content: String?
+  ### 리뷰 타입
+  reviewType: ReviewType
+  ### 생성일
+  createdAt: DateTime?
+

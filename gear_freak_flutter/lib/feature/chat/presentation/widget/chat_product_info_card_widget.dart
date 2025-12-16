@@ -9,10 +9,12 @@ class ChatProductInfoCardWidget extends StatelessWidget {
   /// [productName]는 상품명입니다.
   /// [price]는 상품 가격입니다.
   /// [product]는 상품 정보입니다. (이미지 표시용)
+  /// [onTap]는 카드 클릭 시 호출되는 콜백입니다.
   const ChatProductInfoCardWidget({
     required this.productName,
     required this.price,
     this.product,
+    this.onTap,
     super.key,
   });
 
@@ -25,19 +27,24 @@ class ChatProductInfoCardWidget extends StatelessWidget {
   /// 상품 정보 (이미지 표시용)
   final pod.Product? product;
 
+  /// 카드 클릭 시 호출되는 콜백
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(
+              color: Color(0xFFE5E7EB),
+            ),
           ),
         ),
-      ),
-      child: Row(
+        child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
@@ -115,6 +122,7 @@ class ChatProductInfoCardWidget extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

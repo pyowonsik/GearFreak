@@ -1,0 +1,103 @@
+import 'package:gear_freak_server/src/generated/protocol.dart';
+import 'package:gear_freak_server/src/feature/review/service/review_service.dart';
+import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
+import 'package:serverpod/serverpod.dart';
+
+/// 리뷰 엔드포인트
+class ReviewEndpoint extends Endpoint {
+  /// 거래 후기 작성
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [request]는 후기 작성 요청 정보입니다.
+  /// 반환: 생성된 후기 응답 DTO
+  Future<TransactionReviewResponseDto> createTransactionReview(
+    Session session,
+    CreateTransactionReviewRequestDto request,
+  ) async {
+    // 인증 확인 및 User 테이블의 실제 ID 가져오기
+    final user = await UserService.getMe(session);
+    if (user.id == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    return await ReviewService.createTransactionReview(
+      session: session,
+      reviewerId: user.id!,
+      request: request,
+    );
+  }
+
+  /// 구매자 후기 목록 조회 (페이지네이션)
+  /// 구매자가 나에게 쓴 후기 (reviewType = buyer_to_seller)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [page]는 페이지 번호입니다 (기본값: 1).
+  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
+  /// 반환: 후기 목록 응답 DTO
+  Future<TransactionReviewListResponseDto> getBuyerReviews(
+    Session session, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    // 인증 확인 및 User 테이블의 실제 ID 가져오기
+    final user = await UserService.getMe(session);
+    if (user.id == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    return await ReviewService.getBuyerReviews(
+      session: session,
+      userId: user.id!,
+      page: page,
+      limit: limit,
+    );
+  }
+
+  /// 판매자 후기 목록 조회 (페이지네이션)
+  /// 판매자가 나에게 쓴 후기 (reviewType = seller_to_buyer)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [page]는 페이지 번호입니다 (기본값: 1).
+  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
+  /// 반환: 후기 목록 응답 DTO
+  Future<TransactionReviewListResponseDto> getSellerReviews(
+    Session session, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    // 인증 확인 및 User 테이블의 실제 ID 가져오기
+    final user = await UserService.getMe(session);
+    if (user.id == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    return await ReviewService.getSellerReviews(
+      session: session,
+      userId: user.id!,
+      page: page,
+      limit: limit,
+    );
+  }
+
+  /// 거래 후기 삭제
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [reviewId]는 삭제할 후기 ID입니다.
+  /// 반환: 삭제 성공 여부
+  Future<bool> deleteTransactionReview(
+    Session session,
+    int reviewId,
+  ) async {
+    // 인증 확인 및 User 테이블의 실제 ID 가져오기
+    final user = await UserService.getMe(session);
+    if (user.id == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    return await ReviewService.deleteTransactionReview(
+      session: session,
+      reviewId: reviewId,
+      userId: user.id!,
+    );
+  }
+}

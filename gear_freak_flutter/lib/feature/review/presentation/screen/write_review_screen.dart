@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
+import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/provider/review_notifier.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/widget/star_rating_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -68,29 +70,38 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
     });
 
     try {
-      // TODO: API 호출
-      // final result = await ref
-      //     .read(writeReviewNotifierProvider.notifier)
-      //     .createReview(
-      //       productId: widget.productId,
-      //       buyerId: widget.buyerId,
-      //       chatRoomId: widget.chatRoomId,
-      //       rating: _rating.toInt(),
-      //       content: _contentController.text.isEmpty
-      //           ? null
-      //           : _contentController.text,
-      //     );
-
-      // 임시로 성공 처리
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+      final success =
+          await ref.read(reviewNotifierProvider.notifier).createBuyerReview(
+                productId: widget.productId,
+                chatRoomId: widget.chatRoomId,
+                revieweeId: widget.buyerId,
+                rating: _rating.toInt(),
+                content: _contentController.text.isEmpty
+                    ? null
+                    : _contentController.text,
+              );
 
       if (!mounted) return;
 
-      GbSnackBar.showSuccess(context, '후기가 작성되었습니다');
-      context.pop();
+      if (success) {
+        GbSnackBar.showSuccess(context, '후기가 작성되었습니다');
+        // 스낵바 표시 후 약간의 딜레이를 주고 화면 닫기
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        context.pop();
+      } else {
+        // ReviewNotifier의 상태를 확인하기 전에 mounted 체크
+        if (!mounted) return;
+        final state = ref.read(reviewNotifierProvider);
+        if (state is ReviewError) {
+          GbSnackBar.showError(context, state.message);
+        } else {
+          GbSnackBar.showError(context, '후기 작성에 실패했습니다');
+        }
+      }
     } catch (e) {
       if (!mounted) return;
-      GbSnackBar.showError(context, '후기 작성에 실패했습니다');
+      GbSnackBar.showError(context, '후기 작성에 실패했습니다: $e');
     } finally {
       if (mounted) {
         setState(() {

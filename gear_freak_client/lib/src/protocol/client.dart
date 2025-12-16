@@ -61,10 +61,16 @@ import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_
     as _i26;
 import 'package:gear_freak_client/src/protocol/feature/product/model/dto/product_stats.dto.dart'
     as _i27;
-import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/review/model/dto/transaction_review_response.dto.dart'
     as _i28;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i29;
-import 'protocol.dart' as _i30;
+import 'package:gear_freak_client/src/protocol/feature/review/model/dto/create_transaction_review_request.dto.dart'
+    as _i29;
+import 'package:gear_freak_client/src/protocol/feature/review/model/dto/transaction_review_list_response.dto.dart'
+    as _i30;
+import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i31;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i32;
+import 'protocol.dart' as _i33;
 
 /// S3 엔드포인트 (공통 사용)
 /// {@category Endpoint}
@@ -406,6 +412,80 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 }
 
+/// 리뷰 엔드포인트
+/// {@category Endpoint}
+class EndpointReview extends _i1.EndpointRef {
+  EndpointReview(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'review';
+
+  /// 거래 후기 작성
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [request]는 후기 작성 요청 정보입니다.
+  /// 반환: 생성된 후기 응답 DTO
+  _i2.Future<_i28.TransactionReviewResponseDto> createTransactionReview(
+          _i29.CreateTransactionReviewRequestDto request) =>
+      caller.callServerEndpoint<_i28.TransactionReviewResponseDto>(
+        'review',
+        'createTransactionReview',
+        {'request': request},
+      );
+
+  /// 구매자 후기 목록 조회 (페이지네이션)
+  /// 구매자가 나에게 쓴 후기 (reviewType = buyer_to_seller)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [page]는 페이지 번호입니다 (기본값: 1).
+  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
+  /// 반환: 후기 목록 응답 DTO
+  _i2.Future<_i30.TransactionReviewListResponseDto> getBuyerReviews({
+    required int page,
+    required int limit,
+  }) =>
+      caller.callServerEndpoint<_i30.TransactionReviewListResponseDto>(
+        'review',
+        'getBuyerReviews',
+        {
+          'page': page,
+          'limit': limit,
+        },
+      );
+
+  /// 판매자 후기 목록 조회 (페이지네이션)
+  /// 판매자가 나에게 쓴 후기 (reviewType = seller_to_buyer)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [page]는 페이지 번호입니다 (기본값: 1).
+  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
+  /// 반환: 후기 목록 응답 DTO
+  _i2.Future<_i30.TransactionReviewListResponseDto> getSellerReviews({
+    required int page,
+    required int limit,
+  }) =>
+      caller.callServerEndpoint<_i30.TransactionReviewListResponseDto>(
+        'review',
+        'getSellerReviews',
+        {
+          'page': page,
+          'limit': limit,
+        },
+      );
+
+  /// 거래 후기 삭제
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [reviewId]는 삭제할 후기 ID입니다.
+  /// 반환: 삭제 성공 여부
+  _i2.Future<bool> deleteTransactionReview(int reviewId) =>
+      caller.callServerEndpoint<bool>(
+        'review',
+        'deleteTransactionReview',
+        {'reviewId': reviewId},
+      );
+}
+
 /// FCM 엔드포인트
 /// FCM 토큰 등록 및 삭제를 처리합니다.
 /// {@category Endpoint}
@@ -476,7 +556,7 @@ class EndpointUser extends _i1.EndpointRef {
 
   /// 사용자 프로필 수정
   _i2.Future<_i5.User> updateUserProfile(
-          _i28.UpdateUserProfileRequestDto request) =>
+          _i31.UpdateUserProfileRequestDto request) =>
       caller.callServerEndpoint<_i5.User>(
         'user',
         'updateUserProfile',
@@ -486,10 +566,10 @@ class EndpointUser extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i29.Caller(client);
+    auth = _i32.Caller(client);
   }
 
-  late final _i29.Caller auth;
+  late final _i32.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -508,7 +588,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i30.Protocol(),
+          _i33.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -523,6 +603,7 @@ class Client extends _i1.ServerpodClientShared {
     chat = EndpointChat(this);
     chatStream = EndpointChatStream(this);
     product = EndpointProduct(this);
+    review = EndpointReview(this);
     fcm = EndpointFcm(this);
     user = EndpointUser(this);
     modules = Modules(this);
@@ -538,6 +619,8 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointProduct product;
 
+  late final EndpointReview review;
+
   late final EndpointFcm fcm;
 
   late final EndpointUser user;
@@ -551,6 +634,7 @@ class Client extends _i1.ServerpodClientShared {
         'chat': chat,
         'chatStream': chatStream,
         'product': product,
+        'review': review,
         'fcm': fcm,
         'user': user,
       };

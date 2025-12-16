@@ -1,0 +1,9 @@
+### 거래 후기 목록 응답
+class: TransactionReviewListResponseDto
+
+fields:
+  ### 후기 목록
+  reviews: List<TransactionReviewResponseDto>
+  ### 페이지네이션 정보
+  pagination: PaginationDto
+

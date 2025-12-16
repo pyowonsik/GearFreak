@@ -74,4 +74,3 @@ class BuyerSelectionError extends BuyerSelectionState {
   /// 에러 메시지
   final String message;
 }
-

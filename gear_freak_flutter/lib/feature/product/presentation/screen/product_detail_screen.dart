@@ -288,6 +288,34 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ),
                         ),
                 ),
+                // 판매완료 오버레이
+                if (productData.status == pod.ProductStatus.sold)
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      child: const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              size: 64,
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              '판매완료',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 // 이미지 인디케이터 (여러 이미지가 있을 때만 표시)
                 if ((productData.imageUrls?.length ?? 0) > 1)
                   Positioned(

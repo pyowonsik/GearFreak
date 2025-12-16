@@ -32,6 +32,11 @@ product:
   - getMyFavoriteProducts:
   - updateProductStatus:
   - getProductStats:
+review:
+  - createTransactionReview:
+  - getBuyerReviews:
+  - getSellerReviews:
+  - deleteTransactionReview:
 fcm:
   - registerFcmToken:
   - deleteFcmToken:

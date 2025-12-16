@@ -1,30 +1,108 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/view/view.dart';
+import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_notifier.dart';
 
 /// 후기 관리 화면
 /// Presentation Layer: UI
-class ReviewListScreen extends StatefulWidget {
+class ReviewListScreen extends ConsumerStatefulWidget {
   /// ReviewListScreen 생성자
   const ReviewListScreen({super.key});
 
   @override
-  State<ReviewListScreen> createState() => _ReviewListScreenState();
+  ConsumerState<ReviewListScreen> createState() => _ReviewListScreenState();
 }
 
-class _ReviewListScreenState extends State<ReviewListScreen>
-    with SingleTickerProviderStateMixin {
+class _ReviewListScreenState extends ConsumerState<ReviewListScreen>
+    with SingleTickerProviderStateMixin, PaginationScrollMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // 탭 변경 감지
+    _tabController.addListener(_onTabChanged);
+
+    // 초기 데이터 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadInitialData();
+    });
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
+    disposePaginationScroll();
     super.dispose();
+  }
+
+  /// 탭 변경 핸들러
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      _loadInitialData();
+    }
+  }
+
+  /// 초기 데이터 로드
+  void _loadInitialData() {
+    if (_tabController.index == 0) {
+      // 구매자 후기
+      ref.read(buyerReviewListNotifierProvider.notifier).loadReviews();
+      _initPaginationForBuyer();
+    } else {
+      // 판매자 후기
+      ref.read(sellerReviewListNotifierProvider.notifier).loadReviews();
+      _initPaginationForSeller();
+    }
+  }
+
+  /// 구매자 후기 페이지네이션 초기화
+  void _initPaginationForBuyer() {
+    initPaginationScroll(
+      onLoadMore: () {
+        ref.read(buyerReviewListNotifierProvider.notifier).loadMoreReviews();
+      },
+      getPagination: () {
+        final state = ref.read(buyerReviewListNotifierProvider);
+        if (state is ReviewListLoaded) {
+          return state.pagination;
+        }
+        return null;
+      },
+      isLoading: () {
+        final state = ref.read(buyerReviewListNotifierProvider);
+        return state is ReviewListLoadingMore;
+      },
+      screenName: 'BuyerReviewsTab',
+    );
+  }
+
+  /// 판매자 후기 페이지네이션 초기화
+  void _initPaginationForSeller() {
+    initPaginationScroll(
+      onLoadMore: () {
+        ref.read(sellerReviewListNotifierProvider.notifier).loadMoreReviews();
+      },
+      getPagination: () {
+        final state = ref.read(sellerReviewListNotifierProvider);
+        if (state is ReviewListLoaded) {
+          return state.pagination;
+        }
+        return null;
+      },
+      isLoading: () {
+        final state = ref.read(sellerReviewListNotifierProvider);
+        return state is ReviewListLoadingMore;
+      },
+      screenName: 'SellerReviewsTab',
+    );
   }
 
   @override
@@ -47,179 +125,157 @@ class _ReviewListScreenState extends State<ReviewListScreen>
             fontWeight: FontWeight.w500,
           ),
           tabs: const [
-            Tab(text: '받은 후기'),
-            Tab(text: '쓴 후기'),
+            Tab(text: '구매자 후기'),
+            Tab(text: '판매자 후기'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: const [
-          _ReceivedReviewsTab(),
-          _WrittenReviewsTab(),
+          _BuyerReviewsTab(),
+          _SellerReviewsTab(),
         ],
       ),
     );
   }
 }
 
-/// 받은 후기 탭
-class _ReceivedReviewsTab extends StatelessWidget {
-  const _ReceivedReviewsTab();
+/// 구매자 후기 탭
+class _BuyerReviewsTab extends ConsumerWidget {
+  const _BuyerReviewsTab();
 
   @override
-  Widget build(BuildContext context) {
-    // 하드코딩 데이터
-    final reviews = [
-      {
-        'reviewerNickname': '김철수',
-        'reviewerProfileImage': null,
-        'rating': 5,
-        'content': '빠른 답변과 친절한 거래 감사합니다. 상품 상태도 좋고 만족스러운 거래였어요!',
-        'productName': '나이키 에어맥스 270',
-        'createdAt': DateTime.now().subtract(const Duration(days: 1)),
-      },
-      {
-        'reviewerNickname': '이영희',
-        'reviewerProfileImage': null,
-        'rating': 5,
-        'content': '깔끔하게 포장해주셔서 감사합니다. 다음에도 또 거래하고 싶어요.',
-        'productName': '아디다스 슈퍼스타',
-        'createdAt': DateTime.now().subtract(const Duration(days: 3)),
-      },
-      {
-        'reviewerNickname': '박민수',
-        'reviewerProfileImage': null,
-        'rating': 4,
-        'content': '좋은 거래였습니다!',
-        'productName': '뉴발란스 530',
-        'createdAt': DateTime.now().subtract(const Duration(days: 7)),
-      },
-      {
-        'reviewerNickname': '최지우',
-        'reviewerProfileImage': null,
-        'rating': 5,
-        'content': '친절하고 빠른 응대 감사합니다. 상품도 설명과 똑같아요.',
-        'productName': '컨버스 척테일러',
-        'createdAt': DateTime.now().subtract(const Duration(days: 14)),
-      },
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(buyerReviewListNotifierProvider);
 
-    if (reviews.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.rate_review_outlined,
-              size: 80,
-              color: Color(0xFFE5E7EB),
-            ),
-            SizedBox(height: 16),
-            Text(
-              '받은 후기가 없습니다',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF9CA3AF),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+    return switch (state) {
+      ReviewListInitial() || ReviewListLoading() => const GbLoadingView(),
+      ReviewListError(:final message) => GbErrorView(
+          message: message,
+          onRetry: () {
+            ref.read(buyerReviewListNotifierProvider.notifier).loadReviews();
+          },
         ),
-      );
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: reviews.length,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        thickness: 8,
-        color: Color(0xFFF3F4F6),
-      ),
-      itemBuilder: (context, index) {
-        final review = reviews[index];
-        return _ReviewItemWidget(
-          reviewerNickname: review['reviewerNickname'] as String,
-          reviewerProfileImage: review['reviewerProfileImage'] as String?,
-          rating: review['rating'] as int,
-          content: review['content'] as String,
-          productName: review['productName'] as String,
-          createdAt: review['createdAt'] as DateTime,
-        );
-      },
-    );
+      ReviewListLoaded(:final reviews) ||
+      ReviewListLoadingMore(:final reviews) =>
+        reviews.isEmpty
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.rate_review_outlined,
+                      size: 80,
+                      color: Color(0xFFE5E7EB),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      '구매자 후기가 없습니다',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF9CA3AF),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : _ReviewListView(
+                reviews: reviews,
+                isLoadingMore: state is ReviewListLoadingMore,
+              ),
+    };
   }
 }
 
-/// 쓴 후기 탭
-class _WrittenReviewsTab extends StatelessWidget {
-  const _WrittenReviewsTab();
+/// 판매자 후기 탭
+class _SellerReviewsTab extends ConsumerWidget {
+  const _SellerReviewsTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(sellerReviewListNotifierProvider);
+
+    return switch (state) {
+      ReviewListInitial() || ReviewListLoading() => const GbLoadingView(),
+      ReviewListError(:final message) => GbErrorView(
+          message: message,
+          onRetry: () {
+            ref.read(sellerReviewListNotifierProvider.notifier).loadReviews();
+          },
+        ),
+      ReviewListLoaded(:final reviews) ||
+      ReviewListLoadingMore(:final reviews) =>
+        reviews.isEmpty
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.edit_note_outlined,
+                      size: 80,
+                      color: Color(0xFFE5E7EB),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      '판매자 후기가 없습니다',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF9CA3AF),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : _ReviewListView(
+                reviews: reviews,
+                isLoadingMore: state is ReviewListLoadingMore,
+              ),
+    };
+  }
+}
+
+/// 후기 목록 뷰
+class _ReviewListView extends StatelessWidget {
+  const _ReviewListView({
+    required this.reviews,
+    required this.isLoadingMore,
+  });
+
+  final List<pod.TransactionReviewResponseDto> reviews;
+  final bool isLoadingMore;
 
   @override
   Widget build(BuildContext context) {
-    // 하드코딩 데이터
-    final reviews = [
-      {
-        'revieweeNickname': '정다은',
-        'revieweeProfileImage': null,
-        'rating': 5,
-        'content': '믿고 거래할 수 있는 좋은 분이었습니다. 감사합니다!',
-        'productName': '아식스 젤카야노',
-        'createdAt': DateTime.now().subtract(const Duration(days: 2)),
-      },
-      {
-        'revieweeNickname': '강민호',
-        'revieweeProfileImage': null,
-        'rating': 4,
-        'content': '거래 감사합니다.',
-        'productName': '반스 올드스쿨',
-        'createdAt': DateTime.now().subtract(const Duration(days: 5)),
-      },
-    ];
-
-    if (reviews.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.edit_note_outlined,
-              size: 80,
-              color: Color(0xFFE5E7EB),
-            ),
-            SizedBox(height: 16),
-            Text(
-              '쓴 후기가 없습니다',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF9CA3AF),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: reviews.length,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        thickness: 8,
-        color: Color(0xFFF3F4F6),
-      ),
-      itemBuilder: (context, index) {
-        final review = reviews[index];
-        return _ReviewItemWidget(
-          reviewerNickname: review['revieweeNickname'] as String,
-          reviewerProfileImage: review['revieweeProfileImage'] as String?,
-          rating: review['rating'] as int,
-          content: review['content'] as String,
-          productName: review['productName'] as String,
-          createdAt: review['createdAt'] as DateTime,
+      itemCount: reviews.length + (isLoadingMore ? 1 : 0),
+      separatorBuilder: (context, index) {
+        if (index == reviews.length - 1 && isLoadingMore) {
+          return const SizedBox.shrink();
+        }
+        return const Divider(
+          height: 1,
+          thickness: 8,
+          color: Color(0xFFF3F4F6),
         );
+      },
+      itemBuilder: (context, index) {
+        if (index == reviews.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+              ),
+            ),
+          );
+        }
+
+        final review = reviews[index];
+        return _ReviewItemWidget(review: review);
       },
     );
   }
@@ -227,21 +283,9 @@ class _WrittenReviewsTab extends StatelessWidget {
 
 /// 후기 아이템 위젯
 class _ReviewItemWidget extends StatelessWidget {
-  const _ReviewItemWidget({
-    required this.reviewerNickname,
-    required this.rating,
-    required this.content,
-    required this.productName,
-    required this.createdAt,
-    this.reviewerProfileImage,
-  });
+  const _ReviewItemWidget({required this.review});
 
-  final String reviewerNickname;
-  final String? reviewerProfileImage;
-  final int rating;
-  final String content;
-  final String productName;
-  final DateTime createdAt;
+  final pod.TransactionReviewResponseDto review;
 
   @override
   Widget build(BuildContext context) {
@@ -258,10 +302,11 @@ class _ReviewItemWidget extends StatelessWidget {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: const Color(0xFFF3F4F6),
-                backgroundImage: reviewerProfileImage != null
-                    ? CachedNetworkImageProvider(reviewerProfileImage!)
+                backgroundImage: review.reviewerProfileImageUrl != null
+                    ? CachedNetworkImageProvider(
+                        review.reviewerProfileImageUrl!)
                     : null,
-                child: reviewerProfileImage == null
+                child: review.reviewerProfileImageUrl == null
                     ? const Icon(
                         Icons.person,
                         size: 24,
@@ -277,7 +322,7 @@ class _ReviewItemWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      reviewerNickname,
+                      review.reviewerNickname ?? '사용자',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -286,7 +331,7 @@ class _ReviewItemWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatDate(createdAt),
+                      _formatDate(review.createdAt),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF9CA3AF),
@@ -300,9 +345,9 @@ class _ReviewItemWidget extends StatelessWidget {
               Row(
                 children: List.generate(5, (index) {
                   return Icon(
-                    index < rating ? Icons.star : Icons.star_border,
+                    index < review.rating ? Icons.star : Icons.star_border,
                     size: 18,
-                    color: index < rating
+                    color: index < review.rating
                         ? const Color(0xFFFFB800)
                         : const Color(0xFFE5E7EB),
                   );
@@ -313,52 +358,25 @@ class _ReviewItemWidget extends StatelessWidget {
           const SizedBox(height: 16),
 
           // 후기 내용
-          Text(
-            content,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF1F2937),
-              height: 1.5,
+          if (review.content != null && review.content!.isNotEmpty)
+            Text(
+              review.content!,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF1F2937),
+                height: 1.5,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // 상품명
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 14,
-                  color: Color(0xFF6B7280),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  productName,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          if (review.content != null && review.content!.isNotEmpty)
+            const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+
     final now = DateTime.now();
     final difference = now.difference(date);
 

@@ -1,0 +1,6 @@
+### 리뷰 타입
+enum: ReviewType
+values:
+  - seller_to_buyer # 판매자 → 구매자
+  - buyer_to_seller # 구매자 → 판매자
+

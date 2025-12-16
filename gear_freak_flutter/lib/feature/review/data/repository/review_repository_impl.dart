@@ -1,3 +1,4 @@
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/review/data/datasource/review_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/review/domain/repository/review_repository.dart';
 
@@ -10,6 +11,37 @@ class ReviewRepositoryImpl implements ReviewRepository {
   /// 원격 데이터 소스
   final ReviewRemoteDataSource remoteDataSource;
 
-  // TODO: Repository 메서드 구현
-}
+  @override
+  Future<pod.TransactionReviewResponseDto> createTransactionReview(
+    pod.CreateTransactionReviewRequestDto request,
+  ) async {
+    return await remoteDataSource.createTransactionReview(request);
+  }
 
+  @override
+  Future<pod.TransactionReviewListResponseDto> getBuyerReviews({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return await remoteDataSource.getBuyerReviews(
+      page: page,
+      limit: limit,
+    );
+  }
+
+  @override
+  Future<pod.TransactionReviewListResponseDto> getSellerReviews({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return await remoteDataSource.getSellerReviews(
+      page: page,
+      limit: limit,
+    );
+  }
+
+  @override
+  Future<bool> deleteTransactionReview(int reviewId) async {
+    return await remoteDataSource.deleteTransactionReview(reviewId);
+  }
+}

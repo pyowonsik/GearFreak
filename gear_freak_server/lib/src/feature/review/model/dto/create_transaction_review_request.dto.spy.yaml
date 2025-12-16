@@ -1,0 +1,15 @@
+### 거래 후기 작성 요청
+class: CreateTransactionReviewRequestDto
+
+fields:
+  ### 상품 ID
+  productId: int
+  ### 채팅방 ID
+  chatRoomId: int
+  ### 리뷰 대상자 ID (구매자 ID)
+  revieweeId: int
+  ### 평점 (1~5)
+  rating: int
+  ### 후기 내용
+  content: String?
+
