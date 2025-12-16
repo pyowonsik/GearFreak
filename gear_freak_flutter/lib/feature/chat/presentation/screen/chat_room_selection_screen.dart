@@ -135,19 +135,10 @@ class _ChatRoomSelectionScreenState
                     final participants = chatRoom.id != null
                         ? participantsMap[chatRoom.id!]
                         : null;
-                    // 마지막 메시지 정보 가져오기
-                    final lastMessage = chatRoom.id != null
-                        ? lastMessagesMap[chatRoom.id!]
-                        : null;
-                    // 상품 이미지 URL 가져오기
-                    final productImageUrl =
-                        productImagesMap[chatRoom.productId];
 
-                    return ChatRoomItemWidget(
+                    return ChatRoomSelectionItemWidget(
                       chatRoom: chatRoom,
                       participants: participants,
-                      lastMessage: lastMessage,
-                      productImageUrl: productImageUrl,
                     );
                   },
                 ),

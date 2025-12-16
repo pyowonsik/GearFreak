@@ -7,15 +7,14 @@ import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state
 
 /// 채팅방 관련 유틸리티 함수
 class ChatRoomUtil {
-  /// 상대방 닉네임 가져오기
+  /// 상대방 참여자 정보 가져오기
   ///
   /// [ref]는 Riverpod의 WidgetRef입니다.
   /// [participants]는 참여자 목록입니다.
-  /// [defaultName]는 기본값입니다.
-  static String getOtherParticipantName(
+  /// 반환: 상대방 참여자 정보 (없으면 null)
+  static pod.ChatParticipantInfoDto? getOtherParticipant(
     WidgetRef ref, {
     List<pod.ChatParticipantInfoDto>? participants,
-    String defaultName = '채팅방',
   }) {
     // 현재 사용자 ID 가져오기
     final authState = ref.read(authNotifierProvider);
@@ -26,10 +25,36 @@ class ChatRoomUtil {
     if (participants != null &&
         participants.isNotEmpty &&
         currentUserId != null) {
-      final otherParticipant = participants.firstWhere(
-        (p) => p.userId != currentUserId,
-        orElse: () => participants.first,
-      );
+      try {
+        return participants.firstWhere(
+          (p) => p.userId != currentUserId,
+        );
+      } catch (e) {
+        // 상대방을 찾지 못한 경우 첫 번째 참여자 반환
+        return participants.first;
+      }
+    }
+
+    // 참여자 정보가 없거나 현재 사용자 ID가 없으면 null
+    return null;
+  }
+
+  /// 상대방 닉네임 가져오기
+  ///
+  /// [ref]는 Riverpod의 WidgetRef입니다.
+  /// [participants]는 참여자 목록입니다.
+  /// [defaultName]는 기본값입니다.
+  static String getOtherParticipantName(
+    WidgetRef ref, {
+    List<pod.ChatParticipantInfoDto>? participants,
+    String defaultName = '채팅방',
+  }) {
+    final otherParticipant = getOtherParticipant(
+      ref,
+      participants: participants,
+    );
+
+    if (otherParticipant != null) {
       return otherParticipant.nickname ?? '사용자';
     }
 
