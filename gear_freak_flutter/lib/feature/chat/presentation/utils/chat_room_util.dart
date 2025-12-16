@@ -116,6 +116,36 @@ class ChatRoomUtil {
     }
   }
 
+  /// 현재 사용자의 알림 설정 상태 가져오기
+  ///
+  /// [ref]는 Riverpod의 WidgetRef입니다.
+  /// [participants]는 참여자 목록입니다.
+  /// 반환: 알림 활성화 여부 (기본값: true)
+  static bool getCurrentUserNotificationEnabled(
+    WidgetRef ref, {
+    List<pod.ChatParticipantInfoDto>? participants,
+  }) {
+    // 현재 사용자 ID 가져오기
+    final authState = ref.read(authNotifierProvider);
+    final currentUserId =
+        authState is AuthAuthenticated ? authState.user.id : null;
+
+    // 참여자 정보가 있고 현재 사용자 ID가 있으면 현재 사용자의 알림 설정 확인
+    if (participants != null &&
+        participants.isNotEmpty &&
+        currentUserId != null) {
+      final currentUserParticipant = participants.firstWhere(
+        (p) => p.userId == currentUserId,
+        orElse: () => participants.first,
+      );
+
+      return currentUserParticipant.isNotificationEnabled;
+    }
+
+    // 기본값: 알림 활성화
+    return true;
+  }
+
   /// 더미 채팅방 생성 (채팅방이 없을 때 UI 표시용)
   ///
   /// [productId]는 상품 ID입니다.

@@ -113,6 +113,17 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  Future<void> updateChatRoomNotification({
+    required int chatRoomId,
+    required bool isNotificationEnabled,
+  }) async {
+    return remoteDataSource.updateChatRoomNotification(
+      chatRoomId: chatRoomId,
+      isNotificationEnabled: isNotificationEnabled,
+    );
+  }
+
+  @override
   Stream<pod.ChatMessageResponseDto> subscribeChatMessageStream(
     int chatRoomId,
   ) {

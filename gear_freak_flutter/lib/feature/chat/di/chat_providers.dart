@@ -104,6 +104,13 @@ final markChatRoomAsReadUseCaseProvider =
   return MarkChatRoomAsReadUseCase(repository);
 });
 
+/// Update Chat Room Notification UseCase Provider
+final updateChatRoomNotificationUseCaseProvider =
+    Provider<UpdateChatRoomNotificationUseCase>((ref) {
+  final repository = ref.watch(chatRepositoryProvider);
+  return UpdateChatRoomNotificationUseCase(repository);
+});
+
 /// Chat Room List Notifier Provider (채팅방 목록 화면용 - 전체 채팅방)
 final chatRoomListNotifierProvider =
     StateNotifierProvider.autoDispose<ChatRoomListNotifier, ChatRoomListState>(
@@ -117,6 +124,8 @@ final chatRoomListNotifierProvider =
     final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
     final getChatRoomByIdUseCase = ref.watch(getChatRoomByIdUseCaseProvider);
     final leaveChatRoomUseCase = ref.watch(leaveChatRoomUseCaseProvider);
+    final updateChatRoomNotificationUseCase =
+        ref.watch(updateChatRoomNotificationUseCaseProvider);
     return ChatRoomListNotifier(
       ref,
       getMyChatRoomsUseCase,
@@ -126,6 +135,7 @@ final chatRoomListNotifierProvider =
       getProductDetailUseCase,
       getChatRoomByIdUseCase,
       leaveChatRoomUseCase,
+      updateChatRoomNotificationUseCase,
     );
   },
 );
@@ -144,6 +154,8 @@ final chatRoomSelectionNotifierProvider = StateNotifierProvider.autoDispose
     final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
     final getChatRoomByIdUseCase = ref.watch(getChatRoomByIdUseCaseProvider);
     final leaveChatRoomUseCase = ref.watch(leaveChatRoomUseCaseProvider);
+    final updateChatRoomNotificationUseCase =
+        ref.watch(updateChatRoomNotificationUseCaseProvider);
     return ChatRoomListNotifier(
       ref,
       getMyChatRoomsUseCase,
@@ -153,6 +165,7 @@ final chatRoomSelectionNotifierProvider = StateNotifierProvider.autoDispose
       getProductDetailUseCase,
       getChatRoomByIdUseCase,
       leaveChatRoomUseCase,
+      updateChatRoomNotificationUseCase,
     );
   },
 );

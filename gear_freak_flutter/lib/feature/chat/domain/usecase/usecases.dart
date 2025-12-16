@@ -9,3 +9,4 @@ export 'leave_chat_room_usecase.dart';
 export 'mark_chat_room_as_read_usecase.dart';
 export 'send_message_usecase.dart';
 export 'subscribe_chat_message_stream_usecase.dart';
+export 'update_chat_room_notification_usecase.dart';

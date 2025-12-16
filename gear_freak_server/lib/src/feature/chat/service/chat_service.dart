@@ -1354,19 +1354,17 @@ class ChatService {
         return;
       }
 
-      // 2. 채팅방 참여자들의 FCM 토큰 조회 (발신자 제외)
+      // 2. 채팅방 참여자별 FCM 토큰과 알림 설정 조회 (발신자 제외)
       safeLog('📱 FCM 알림 전송 시작: chatRoomId=$chatRoomId, senderId=$senderId');
 
-      final fcmTokens = await FcmTokenService.getTokensByChatRoomId(
+      final tokensWithSettings =
+          await FcmTokenService.getTokensByChatRoomIdWithNotificationSettings(
         session: session,
         chatRoomId: chatRoomId,
         excludeUserId: senderId,
       );
 
-      safeLog(
-          '📱 FCM 토큰 조회 완료: chatRoomId=$chatRoomId, 토큰 개수=${fcmTokens.length}');
-
-      if (fcmTokens.isEmpty) {
+      if (tokensWithSettings.isEmpty) {
         safeLog(
             '⚠️ FCM 알림 전송 건너뜀: 채팅방 참여자의 FCM 토큰이 없음 (chatRoomId=$chatRoomId)');
         return;
@@ -1402,21 +1400,64 @@ class ChatService {
         'senderId': senderId.toString(),
       };
 
-      // 4. FCM 알림 전송
-      await FcmService.sendNotifications(
-        session: session,
-        fcmTokens: fcmTokens,
-        title: title,
-        body: body,
-        data: data,
-      );
+      // 5. 알림 설정에 따라 토큰 분류
+      final tokensWithNotification = <String>[];
+      final tokensWithoutNotification = <String>[];
+
+      for (final tokenMap in tokensWithSettings.values) {
+        for (final entry in tokenMap.entries) {
+          if (entry.value) {
+            // 알림 활성화: notification 포함
+            tokensWithNotification.add(entry.key);
+          } else {
+            // 알림 비활성화: data만 전송 (포그라운드에서 메시지 수신 가능)
+            tokensWithoutNotification.add(entry.key);
+          }
+        }
+      }
+
+      // 6. FCM 알림 전송 (알림 설정에 따라 분기)
+      final futures = <Future<int>>[];
+
+      // 알림 활성화된 사용자에게는 notification 포함하여 전송
+      if (tokensWithNotification.isNotEmpty) {
+        futures.add(
+          FcmService.sendNotifications(
+            session: session,
+            fcmTokens: tokensWithNotification,
+            title: title,
+            body: body,
+            data: data,
+            includeNotification: true,
+          ),
+        );
+      }
+
+      // 알림 비활성화된 사용자에게는 data만 전송 (포그라운드에서 메시지 수신 가능)
+      if (tokensWithoutNotification.isNotEmpty) {
+        futures.add(
+          FcmService.sendNotifications(
+            session: session,
+            fcmTokens: tokensWithoutNotification,
+            title: title,
+            body: body,
+            data: data,
+            includeNotification: false,
+          ),
+        );
+      }
+
+      if (futures.isNotEmpty) {
+        await Future.wait(futures);
+      }
 
       safeLog(
         '✅ FCM 알림 전송 완료: '
         'chatRoomId=$chatRoomId, '
         'senderId=$senderId, '
         'senderNickname="$senderNickname", '
-        'tokens=${fcmTokens.length}, '
+        '알림ON=${tokensWithNotification.length}, '
+        '알림OFF=${tokensWithoutNotification.length}, '
         'title="$title", '
         'body="$body"',
       );

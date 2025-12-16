@@ -139,13 +139,12 @@ class FcmTokenService {
     required int excludeUserId,
   }) async {
     try {
-      // 채팅방 참여자 조회 (알림 활성화된 참여자만)
+      // 채팅방 참여자 조회 (모든 활성 참여자, 알림 설정 무관)
       final participants = await ChatParticipant.db.find(
         session,
         where: (p) =>
             p.chatRoomId.equals(chatRoomId) &
             p.isActive.equals(true) &
-            p.isNotificationEnabled.equals(true) &
             p.userId.notEquals(excludeUserId),
       );
 
@@ -154,11 +153,7 @@ class FcmTokenService {
       }
 
       // 참여자들의 사용자 ID 추출
-      final userIds = participants
-          .map((p) => p.userId)
-          .where((id) => id != null)
-          .cast<int>()
-          .toList();
+      final userIds = participants.map((p) => p.userId).toList();
 
       if (userIds.isEmpty) {
         return [];
@@ -183,6 +178,65 @@ class FcmTokenService {
         level: LogLevel.error,
       );
       return [];
+    }
+  }
+
+  /// 채팅방 참여자별 FCM 토큰과 알림 설정 조회 (발신자 제외)
+  ///
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [excludeUserId]는 제외할 사용자 ID입니다 (발신자).
+  ///
+  /// Map<userId, Map<token, isNotificationEnabled>> 형태로 반환합니다.
+  static Future<Map<int, Map<String, bool>>>
+      getTokensByChatRoomIdWithNotificationSettings({
+    required Session session,
+    required int chatRoomId,
+    required int excludeUserId,
+  }) async {
+    try {
+      // 채팅방 참여자 조회 (모든 활성 참여자, 알림 설정 무관)
+      final participants = await ChatParticipant.db.find(
+        session,
+        where: (p) =>
+            p.chatRoomId.equals(chatRoomId) &
+            p.isActive.equals(true) &
+            p.userId.notEquals(excludeUserId),
+      );
+
+      if (participants.isEmpty) {
+        return {};
+      }
+
+      // 참여자별 토큰과 알림 설정 매핑
+      final result = <int, Map<String, bool>>{};
+      for (final participant in participants) {
+        final userId = participant.userId;
+
+        final tokens = await getTokensByUserId(
+          session: session,
+          userId: userId,
+        );
+
+        if (tokens.isEmpty) continue;
+
+        // 각 토큰에 대해 알림 설정 매핑
+        final tokenMap = <String, bool>{};
+        for (final token in tokens) {
+          tokenMap[token] = participant.isNotificationEnabled;
+        }
+
+        result[userId] = tokenMap;
+      }
+
+      return result;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '채팅방 참여자 FCM 토큰 및 알림 설정 조회 실패: $e',
+        exception: e,
+        stackTrace: stackTrace,
+        level: LogLevel.error,
+      );
+      return {};
     }
   }
 }

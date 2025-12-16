@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/presentation/component/gb_dialog.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_room_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/product_avatar_widget.dart';
@@ -45,6 +46,16 @@ class ChatRoomItemWidget extends ConsumerWidget {
       defaultName: chatRoom.title ?? '채팅방',
     );
 
+    // 현재 사용자의 알림 설정 상태 확인
+    final isNotificationEnabled =
+        ChatRoomUtil.getCurrentUserNotificationEnabled(
+      ref,
+      participants: participants,
+    );
+
+    // build 메서드의 context 저장 (Slidable의 context와 구분하기 위해)
+    final buildContext = context;
+
     return Column(
       children: [
         Slidable(
@@ -54,9 +65,37 @@ class ChatRoomItemWidget extends ConsumerWidget {
             children: [
               // 알림 설정/해제 버튼
               CustomSlidableAction(
-                onPressed: (context) {
-                  // TODO: 알림 설정/해제 로직 구현
-                  debugPrint('알림 설정/해제: ${chatRoom.id}');
+                onPressed: (slidableContext) async {
+                  // Slidable을 먼저 닫기
+                  Slidable.of(slidableContext)?.close();
+
+                  // build context가 여전히 유효한지 확인
+                  if (!buildContext.mounted) {
+                    return;
+                  }
+
+                  final newNotificationState = !isNotificationEnabled;
+                  final actionText =
+                      newNotificationState ? '알림을 켜시겠습니까?' : '알림을 끄시겠습니까?';
+
+                  // build context를 사용하여 다이얼로그 표시
+                  final confirmed = await GbDialog.show(
+                    context: buildContext,
+                    title: '알림 설정',
+                    content: actionText,
+                    confirmText: '확인',
+                    cancelText: '취소',
+                  );
+
+                  if ((confirmed ?? false) && buildContext.mounted) {
+                    // 알림 설정 변경 (스낵바 없이 UI 아이콘으로만 상태 표시)
+                    await ref
+                        .read(chatRoomListNotifierProvider.notifier)
+                        .updateChatRoomNotification(
+                          chatRoomId: chatRoom.id!,
+                          isNotificationEnabled: newNotificationState,
+                        );
+                  }
                 },
                 backgroundColor: const Color(0xFF3B82F6),
                 padding: EdgeInsets.zero,
@@ -70,16 +109,18 @@ class ChatRoomItemWidget extends ConsumerWidget {
                         color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.notifications_off_outlined,
+                      child: Icon(
+                        isNotificationEnabled
+                            ? Icons.notifications_outlined
+                            : Icons.notifications_off_outlined,
                         color: Colors.white,
                         size: 24,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      '알림',
-                      style: TextStyle(
+                    Text(
+                      isNotificationEnabled ? '알림 끄기' : '알림 켜기',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -101,15 +142,15 @@ class ChatRoomItemWidget extends ConsumerWidget {
                       ),
                       actions: [
                         TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('취소'),
-                        ),
-                        TextButton(
                           onPressed: () => Navigator.of(context).pop(true),
                           child: const Text(
                             '나가기',
                             style: TextStyle(color: Color(0xFFEF4444)),
                           ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('취소'),
                         ),
                       ],
                     ),
@@ -211,25 +252,48 @@ class ChatRoomItemWidget extends ConsumerWidget {
                 if (chatRoom.unreadCount != null &&
                     chatRoom.unreadCount! > 0) ...[
                   const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      chatRoom.unreadCount! > 99
-                          ? '99+'
-                          : '${chatRoom.unreadCount}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // 알림이 꺼졌을 때 회색 아이콘 표시 (읽지 않은 메시지 왼쪽)
+                      if (!isNotificationEnabled) ...[
+                        const Icon(
+                          Icons.notifications_off_outlined,
+                          size: 14,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2563EB),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          chatRoom.unreadCount! > 99
+                              ? '99+'
+                              : '${chatRoom.unreadCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
+                  ),
+                ] else if (!isNotificationEnabled) ...[
+                  // 읽지 않은 메시지가 없을 때만 알림 아이콘만 표시
+                  const SizedBox(height: 4),
+                  const Icon(
+                    Icons.notifications_off_outlined,
+                    size: 14,
+                    color: Color(0xFF9CA3AF),
                   ),
                 ],
               ],

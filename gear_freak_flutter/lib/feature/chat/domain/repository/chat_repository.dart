@@ -59,6 +59,12 @@ abstract class ChatRepository {
   /// 채팅방의 모든 메시지를 읽음 처리합니다.
   Future<void> markChatRoomAsRead(int chatRoomId);
 
+  /// 채팅방 알림 설정 변경
+  Future<void> updateChatRoomNotification({
+    required int chatRoomId,
+    required bool isNotificationEnabled,
+  });
+
   /// 채팅 메시지 스트림 구독 (실시간 메시지 수신)
   ///
   /// [chatRoomId]는 채팅방 ID입니다.

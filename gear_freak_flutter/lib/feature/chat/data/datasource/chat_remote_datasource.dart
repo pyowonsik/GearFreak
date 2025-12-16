@@ -158,6 +158,18 @@ class ChatRemoteDataSource {
     await _client.chat.markChatRoomAsRead(chatRoomId);
   }
 
+  /// 채팅방 알림 설정 변경
+  Future<void> updateChatRoomNotification({
+    required int chatRoomId,
+    required bool isNotificationEnabled,
+  }) async {
+    final request = pod.UpdateChatRoomNotificationRequestDto(
+      chatRoomId: chatRoomId,
+      isNotificationEnabled: isNotificationEnabled,
+    );
+    await _client.chat.updateChatRoomNotification(request);
+  }
+
   /// 채팅 메시지 스트림 구독 (실시간 메시지 수신)
   ///
   /// [chatRoomId]는 채팅방 ID입니다.

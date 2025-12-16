@@ -8,6 +8,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_room_by_
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_my_chat_rooms_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/leave_chat_room_usecase.dart';
+import 'package:gear_freak_flutter/feature/chat/domain/usecase/update_chat_room_notification_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 
@@ -32,6 +33,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
     this.getProductDetailUseCase,
     this.getChatRoomByIdUseCase,
     this.leaveChatRoomUseCase,
+    this.updateChatRoomNotificationUseCase,
   ) : super(const ChatRoomListInitial()) {
     // 채팅방 읽음 처리 이벤트 감지하여 자동으로 unreadCount 업데이트 및 최신 정보 갱신
     ref
@@ -77,6 +79,9 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
 
   /// 채팅방 나가기 UseCase
   final LeaveChatRoomUseCase leaveChatRoomUseCase;
+
+  /// 채팅방 알림 설정 변경 UseCase
+  final UpdateChatRoomNotificationUseCase updateChatRoomNotificationUseCase;
 
   // ==================== Public Methods (UseCase 호출) ====================
 
@@ -464,6 +469,43 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
     await _refreshChatRoomInfo(chatRoomId);
   }
 
+  /// 채팅방 알림 설정 변경
+  /// 외부에서 호출 가능한 public 메서드
+  Future<bool> updateChatRoomNotification({
+    required int chatRoomId,
+    required bool isNotificationEnabled,
+  }) async {
+    try {
+      final result = await updateChatRoomNotificationUseCase(
+        UpdateChatRoomNotificationParams(
+          chatRoomId: chatRoomId,
+          isNotificationEnabled: isNotificationEnabled,
+        ),
+      );
+
+      return result.fold(
+        (failure) {
+          debugPrint(
+            '❌ [ChatRoomListNotifier] 채팅방 알림 설정 변경 실패: '
+            'chatRoomId=$chatRoomId, error=${failure.message}',
+          );
+          return false;
+        },
+        (_) {
+          // 참여자 정보 갱신 (알림 설정이 변경되었으므로)
+          _refreshChatRoomInfo(chatRoomId);
+          return true;
+        },
+      );
+    } catch (e) {
+      debugPrint(
+        '❌ [ChatRoomListNotifier] 채팅방 알림 설정 변경 실패: '
+        'chatRoomId=$chatRoomId, error=$e',
+      );
+      return false;
+    }
+  }
+
   /// 채팅방 나가기
   /// 외부에서 호출 가능한 public 메서드
   Future<bool> leaveChatRoom(int chatRoomId) async {
@@ -512,7 +554,23 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
     }
 
     try {
-      // 1. 채팅방 정보 조회
+      // 1. 참여자 정보 조회 (알림 설정 변경 반영)
+      final participantsResult = await getChatParticipantsUseCase(
+        GetChatParticipantsParams(chatRoomId: chatRoomId),
+      );
+
+      final participants = participantsResult.fold(
+        (failure) {
+          debugPrint(
+            '⚠️ [ChatRoomListNotifier] 참여자 정보 조회 실패: '
+            'chatRoomId=$chatRoomId, error=${failure.message}',
+          );
+          return <pod.ChatParticipantInfoDto>[];
+        },
+        (list) => list,
+      );
+
+      // 2. 채팅방 정보 조회
       final roomResult = await getChatRoomByIdUseCase(
         GetChatRoomByIdParams(chatRoomId: chatRoomId),
       );
@@ -526,13 +584,10 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
         },
         (chatRoom) async {
           if (chatRoom == null) {
-            debugPrint(
-              '⚠️ [ChatRoomListNotifier] 채팅방을 찾을 수 없음: chatRoomId=$chatRoomId',
-            );
             return;
           }
 
-          // 2. 마지막 메시지 조회
+          // 3. 마지막 메시지 조회
           final messagesResult = await getChatMessagesUseCase(
             GetChatMessagesParams(
               chatRoomId: chatRoomId,
@@ -552,28 +607,18 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
                   ? messagesData.messages.first
                   : null;
 
-              // 3. 새 메시지 이벤트 발행 (FCM 알림으로 받은 경우)
-              // 이렇게 하면 채팅방 리스트가 자동으로 업데이트됨
-              // _updateLastMessage가 리스너에서 호출되어 마지막 메시지와 시간이 업데이트됨
-              if (lastMessage != null) {
-                ref.read(newChatMessageProvider.notifier).state = lastMessage;
-                // 이벤트 처리 후 초기화 (다음 메시지를 위해)
-                await Future.microtask(() {
-                  ref.read(newChatMessageProvider.notifier).state = null;
-                });
-              }
-
-              // 4. 채팅방 정보 업데이트 (unreadCount 등)
-              // 채팅방 정보가 변경되었을 수 있으므로 업데이트
+              // 4. 채팅방 정보 업데이트 (참여자 정보 포함)
               if (currentState is ChatRoomListLoaded) {
                 _updateChatRoomWithLatestInfoLoaded(
                   chatRoom,
+                  participants,
                   lastMessage,
                   currentState,
                 );
               } else if (currentState is ChatRoomListLoadingMore) {
                 _updateChatRoomWithLatestInfoLoadingMore(
                   chatRoom,
+                  participants,
                   lastMessage,
                   currentState,
                 );
@@ -593,6 +638,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   /// 채팅방 정보를 최신 정보로 업데이트 (Loaded 상태)
   void _updateChatRoomWithLatestInfoLoaded(
     pod.ChatRoom chatRoom,
+    List<pod.ChatParticipantInfoDto> participants,
     pod.ChatMessageResponseDto? lastMessage,
     ChatRoomListLoaded currentState,
   ) {
@@ -604,6 +650,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
 
     List<pod.ChatRoom> updatedChatRooms;
     Map<int, pod.ChatMessageResponseDto> updatedLastMessagesMap;
+    Map<int, List<pod.ChatParticipantInfoDto>> updatedParticipantsMap;
 
     if (existingChatRoomIndex >= 0) {
       // 기존 채팅방 업데이트
@@ -615,6 +662,10 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       if (lastMessage != null) {
         updatedLastMessagesMap[chatRoomId] = lastMessage;
       }
+      updatedParticipantsMap = {
+        ...currentState.participantsMap,
+        chatRoomId: participants,
+      };
     } else {
       // 새 채팅방 추가 (리스트 맨 위에 추가)
       updatedChatRooms = [chatRoom, ...currentState.chatRooms];
@@ -624,17 +675,18 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       if (lastMessage != null) {
         updatedLastMessagesMap[chatRoomId] = lastMessage;
       }
+      updatedParticipantsMap = {
+        ...currentState.participantsMap,
+        chatRoomId: participants,
+      };
     }
 
     // 정렬
     _sortChatRoomsByLastActivity(updatedChatRooms);
 
-    debugPrint(
-      '✅ [ChatRoomListNotifier] 채팅방 정보 갱신 완료: chatRoomId=$chatRoomId',
-    );
-
     state = currentState.copyWith(
       chatRooms: updatedChatRooms,
+      participantsMap: updatedParticipantsMap,
       lastMessagesMap: updatedLastMessagesMap,
     );
   }
@@ -642,6 +694,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
   /// 채팅방 정보를 최신 정보로 업데이트 (LoadingMore 상태)
   void _updateChatRoomWithLatestInfoLoadingMore(
     pod.ChatRoom chatRoom,
+    List<pod.ChatParticipantInfoDto> participants,
     pod.ChatMessageResponseDto? lastMessage,
     ChatRoomListLoadingMore currentState,
   ) {
@@ -653,6 +706,7 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
 
     List<pod.ChatRoom> updatedChatRooms;
     Map<int, pod.ChatMessageResponseDto> updatedLastMessagesMap;
+    Map<int, List<pod.ChatParticipantInfoDto>> updatedParticipantsMap;
 
     if (existingChatRoomIndex >= 0) {
       // 기존 채팅방 업데이트
@@ -664,6 +718,10 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       if (lastMessage != null) {
         updatedLastMessagesMap[chatRoomId] = lastMessage;
       }
+      updatedParticipantsMap = {
+        ...currentState.participantsMap,
+        chatRoomId: participants,
+      };
     } else {
       // 새 채팅방 추가 (리스트 맨 위에 추가)
       updatedChatRooms = [chatRoom, ...currentState.chatRooms];
@@ -673,17 +731,18 @@ class ChatRoomListNotifier extends StateNotifier<ChatRoomListState> {
       if (lastMessage != null) {
         updatedLastMessagesMap[chatRoomId] = lastMessage;
       }
+      updatedParticipantsMap = {
+        ...currentState.participantsMap,
+        chatRoomId: participants,
+      };
     }
 
     // 정렬
     _sortChatRoomsByLastActivity(updatedChatRooms);
 
-    debugPrint(
-      '✅ [ChatRoomListNotifier] 채팅방 정보 갱신 완료: chatRoomId=$chatRoomId',
-    );
-
     state = currentState.copyWith(
       chatRooms: updatedChatRooms,
+      participantsMap: updatedParticipantsMap,
       lastMessagesMap: updatedLastMessagesMap,
     );
   }

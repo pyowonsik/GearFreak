@@ -94,6 +94,7 @@ class FcmService {
   /// [title]은 알림 제목입니다.
   /// [body]는 알림 본문입니다.
   /// [data]는 추가 데이터입니다 (선택사항).
+  /// [includeNotification]은 알림 표시 여부입니다 (true: 백그라운드 알림 표시, false: data만 전송).
   ///
   /// 성공 시 true를 반환하고, 실패 시 false를 반환합니다.
   static Future<bool> sendNotification({
@@ -102,6 +103,7 @@ class FcmService {
     required String title,
     required String body,
     Map<String, dynamic>? data,
+    bool includeNotification = true,
   }) async {
     // Session이 닫힌 후에도 실행될 수 있으므로 안전한 로깅 헬퍼
     void safeLog(String message, {LogLevel level = LogLevel.info}) {
@@ -131,38 +133,57 @@ class FcmService {
           'https://fcm.googleapis.com/v1/projects/$projectId/messages:send';
 
       // FCM V1 API 메시지 형식
-      final message = {
-        'message': {
+      final message = <String, dynamic>{
+        'message': <String, dynamic>{
           'token': fcmToken,
-          'notification': {
-            'title': title,
-            'body': body,
-          },
           'data':
               data?.map((key, value) => MapEntry(key, value.toString())) ?? {},
-          'android': {
-            'priority': 'high',
-            'notification': {
-              'channel_id': 'chat_channel',
-            },
-          },
-          'apns': {
-            'headers': {
-              'apns-priority': '10',
-            },
-            'payload': {
-              'aps': {
-                'alert': {
-                  'title': title,
-                  'body': body,
-                },
-                'sound': 'default',
-                'badge': 1,
-              },
-            },
-          },
         },
       };
+
+      // 알림 표시가 필요한 경우에만 notification 포함
+      if (includeNotification) {
+        message['message']!['notification'] = {
+          'title': title,
+          'body': body,
+        };
+        message['message']!['android'] = {
+          'priority': 'high',
+          'notification': {
+            'channel_id': 'chat_channel',
+          },
+        };
+        message['message']!['apns'] = {
+          'headers': {
+            'apns-priority': '10',
+          },
+          'payload': {
+            'aps': {
+              'alert': {
+                'title': title,
+                'body': body,
+              },
+              'sound': 'default',
+              'badge': 1,
+            },
+          },
+        };
+      } else {
+        // data만 전송하는 경우에도 priority 설정 (포그라운드에서도 받을 수 있도록)
+        message['message']!['android'] = {
+          'priority': 'high',
+        };
+        message['message']!['apns'] = {
+          'headers': {
+            'apns-priority': '10',
+          },
+          'payload': {
+            'aps': {
+              'content-available': 1,
+            },
+          },
+        };
+      }
 
       final response = await http.post(
         Uri.parse(url),
@@ -222,6 +243,7 @@ class FcmService {
   /// [title]은 알림 제목입니다.
   /// [body]는 알림 본문입니다.
   /// [data]는 추가 데이터입니다 (선택사항).
+  /// [includeNotification]은 알림 표시 여부입니다 (true: 백그라운드 알림 표시, false: data만 전송).
   ///
   /// 성공한 전송 수를 반환합니다.
   static Future<int> sendNotifications({
@@ -230,6 +252,7 @@ class FcmService {
     required String title,
     required String body,
     Map<String, dynamic>? data,
+    bool includeNotification = true,
   }) async {
     if (fcmTokens.isEmpty) {
       return 0;
@@ -242,6 +265,7 @@ class FcmService {
           title: title,
           body: body,
           data: data,
+          includeNotification: includeNotification,
         ));
 
     final results = await Future.wait(futures);
