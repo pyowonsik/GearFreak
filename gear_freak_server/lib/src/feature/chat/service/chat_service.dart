@@ -1164,9 +1164,7 @@ class ChatService {
       // 2. 참여자 정보 조회
       final participant = await ChatParticipant.db.findFirstRow(
         session,
-        where: (p) =>
-            p.chatRoomId.equals(chatRoomId) &
-            p.userId.equals(userId),
+        where: (p) => p.chatRoomId.equals(chatRoomId) & p.userId.equals(userId),
       );
 
       if (participant == null) {

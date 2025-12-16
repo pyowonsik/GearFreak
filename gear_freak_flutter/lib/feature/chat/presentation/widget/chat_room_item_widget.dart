@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -67,7 +69,7 @@ class ChatRoomItemWidget extends ConsumerWidget {
               CustomSlidableAction(
                 onPressed: (slidableContext) async {
                   // Slidable을 먼저 닫기
-                  await Slidable.of(slidableContext)?.close();
+                  unawaited(Slidable.of(slidableContext)?.close());
 
                   // build context가 여전히 유효한지 확인
                   if (!buildContext.mounted) {
