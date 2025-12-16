@@ -270,4 +270,64 @@ class ReviewService {
       rethrow;
     }
   }
+
+  /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [productId]는 상품 ID입니다.
+  /// [userId]는 요청한 사용자 ID입니다 (상품 판매자).
+  /// 반환: 삭제된 후기 개수
+  static Future<int> deleteReviewsByProductId({
+    required Session session,
+    required int productId,
+    required int userId,
+  }) async {
+    try {
+      // 1. 상품 조회 및 권한 확인 (판매자만 삭제 가능)
+      final product = await Product.db.findById(session, productId);
+      if (product == null) {
+        throw Exception('상품을 찾을 수 없습니다.');
+      }
+
+      if (product.sellerId != userId) {
+        throw Exception('상품 판매자만 후기를 삭제할 수 있습니다.');
+      }
+
+      // 2. 해당 상품의 모든 후기 조회
+      final reviews = await TransactionReview.db.find(
+        session,
+        where: (review) => review.productId.equals(productId),
+      );
+
+      if (reviews.isEmpty) {
+        session.log(
+          'ℹ️ 삭제할 후기가 없습니다: productId=$productId',
+          level: LogLevel.info,
+        );
+        return 0;
+      }
+
+      // 3. 모든 후기 삭제
+      int deletedCount = 0;
+      for (final review in reviews) {
+        await TransactionReview.db.deleteRow(session, review);
+        deletedCount++;
+      }
+
+      session.log(
+        '✅ 상품 후기 삭제 완료: productId=$productId, deletedCount=$deletedCount, userId=$userId',
+        level: LogLevel.info,
+      );
+
+      return deletedCount;
+    } catch (e, stackTrace) {
+      session.log(
+        '❌ 상품 후기 삭제 실패: $e',
+        exception: e,
+        stackTrace: stackTrace,
+        level: LogLevel.error,
+      );
+      rethrow;
+    }
+  }
 }

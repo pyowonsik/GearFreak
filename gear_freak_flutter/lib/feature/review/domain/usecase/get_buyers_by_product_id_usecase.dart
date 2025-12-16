@@ -2,8 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/domain.dart';
-import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_participants_usecase.dart';
-import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_user_chat_rooms_by_product_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/review/domain/failures/review_failure.dart';
 
@@ -162,4 +160,3 @@ class BuyerInfo {
   /// 구매자 프로필 이미지 URL
   final String? profileImageUrl;
 }
-

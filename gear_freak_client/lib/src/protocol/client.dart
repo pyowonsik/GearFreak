@@ -484,6 +484,18 @@ class EndpointReview extends _i1.EndpointRef {
         'deleteTransactionReview',
         {'reviewId': reviewId},
       );
+
+  /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [productId]는 상품 ID입니다.
+  /// 반환: 삭제된 후기 개수
+  _i2.Future<int> deleteReviewsByProductId(int productId) =>
+      caller.callServerEndpoint<int>(
+        'review',
+        'deleteReviewsByProductId',
+        {'productId': productId},
+      );
 }
 
 /// FCM 엔드포인트

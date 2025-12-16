@@ -100,4 +100,26 @@ class ReviewEndpoint extends Endpoint {
       userId: user.id!,
     );
   }
+
+  /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [productId]는 상품 ID입니다.
+  /// 반환: 삭제된 후기 개수
+  Future<int> deleteReviewsByProductId(
+    Session session,
+    int productId,
+  ) async {
+    // 인증 확인 및 User 테이블의 실제 ID 가져오기
+    final user = await UserService.getMe(session);
+    if (user.id == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    return await ReviewService.deleteReviewsByProductId(
+      session: session,
+      productId: productId,
+      userId: user.id!,
+    );
+  }
 }

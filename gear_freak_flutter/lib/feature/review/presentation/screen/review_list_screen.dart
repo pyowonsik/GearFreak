@@ -5,7 +5,7 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_notifier.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
 
 /// 후기 관리 화면
 /// Presentation Layer: UI

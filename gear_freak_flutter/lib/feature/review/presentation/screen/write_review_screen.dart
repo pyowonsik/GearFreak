@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_notifier.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/provider/review_state.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/widget/star_rating_widget.dart';
 import 'package:go_router/go_router.dart';
 

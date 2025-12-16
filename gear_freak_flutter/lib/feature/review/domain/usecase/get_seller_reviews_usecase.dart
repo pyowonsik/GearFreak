@@ -23,7 +23,9 @@ class GetSellerReviewsParams {
 /// 판매자 후기 목록 조회 UseCase
 /// 판매자가 나에게 쓴 후기
 class GetSellerReviewsUseCase
-    implements UseCase<pod.TransactionReviewListResponseDto, GetSellerReviewsParams, ReviewRepository> {
+    implements
+        UseCase<pod.TransactionReviewListResponseDto, GetSellerReviewsParams,
+            ReviewRepository> {
   /// GetSellerReviewsUseCase 생성자
   const GetSellerReviewsUseCase(this.repository);
 
@@ -54,4 +56,3 @@ class GetSellerReviewsUseCase
     }
   }
 }
-

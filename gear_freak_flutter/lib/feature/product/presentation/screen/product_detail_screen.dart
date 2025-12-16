@@ -676,13 +676,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         },
       );
     } else {
-      // 다른 상태로 변경하는 경우 확인 다이얼로그 표시
+      // 판매완료에서 판매중/예약중으로 변경하는 경우 후기 삭제 경고
+      final isRevertingFromSold = currentStatus == pod.ProductStatus.sold &&
+          (newStatus == pod.ProductStatus.selling ||
+              newStatus == pod.ProductStatus.reserved);
+
       final statusLabel = getProductStatusLabel(newStatus);
       final shouldChange = await GbDialog.show(
         context: context,
-        title: '상태 변경',
-        content: '정말 $statusLabel 상태로 변경하시겠습니까?',
+        title: isRevertingFromSold ? '⚠️ 후기 삭제 경고' : '상태 변경',
+        content: isRevertingFromSold
+            ? '판매완료 상품입니다.\n상태 변경 시 기존 후기는 삭제됩니다.\n\n정말로 변경하시겠습니까?'
+            : '정말 $statusLabel 상태로 변경하시겠습니까?',
         confirmText: '변경',
+        confirmColor: isRevertingFromSold ? Colors.red : null,
       );
 
       if (shouldChange != true || !mounted) {

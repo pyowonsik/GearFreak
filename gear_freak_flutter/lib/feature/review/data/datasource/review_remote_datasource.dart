@@ -61,4 +61,13 @@ class ReviewRemoteDataSource {
       throw Exception('후기 삭제에 실패했습니다: $e');
     }
   }
+
+  /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
+  Future<int> deleteReviewsByProductId(int productId) async {
+    try {
+      return await _client.review.deleteReviewsByProductId(productId);
+    } catch (e) {
+      throw Exception('상품 후기 삭제에 실패했습니다: $e');
+    }
+  }
 }

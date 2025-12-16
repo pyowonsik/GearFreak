@@ -44,4 +44,9 @@ class ReviewRepositoryImpl implements ReviewRepository {
   Future<bool> deleteTransactionReview(int reviewId) async {
     return await remoteDataSource.deleteTransactionReview(reviewId);
   }
+
+  @override
+  Future<int> deleteReviewsByProductId(int productId) async {
+    return await remoteDataSource.deleteReviewsByProductId(productId);
+  }
 }

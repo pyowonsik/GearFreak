@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_notifier.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_state.dart';
 
 /// 구매자 선택 모달
 /// Presentation Layer: UI

@@ -37,6 +37,7 @@ review:
   - getBuyerReviews:
   - getSellerReviews:
   - deleteTransactionReview:
+  - deleteReviewsByProductId:
 fcm:
   - registerFcmToken:
   - deleteFcmToken:

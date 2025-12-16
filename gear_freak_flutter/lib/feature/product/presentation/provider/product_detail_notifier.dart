@@ -9,6 +9,8 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorit
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
+import 'package:gear_freak_flutter/feature/review/domain/usecase/delete_reviews_by_product_id_usecase.dart';
 
 /// 상품 상세 Notifier
 class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
@@ -51,6 +53,10 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
 
   /// 상품 상태 변경 UseCase 인스턴스
   final UpdateProductStatusUseCase updateProductStatusUseCase;
+
+  /// 상품 ID로 후기 삭제 UseCase 인스턴스
+  DeleteReviewsByProductIdUseCase get _deleteReviewsByProductIdUseCase =>
+      ref.read(deleteReviewsByProductIdUseCaseProvider);
 
   // ==================== Public Methods (UseCase 호출) ====================
 
@@ -177,6 +183,27 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
   ) async {
     final currentState = state;
     if (currentState is! ProductDetailLoaded) return false;
+
+    final currentStatus =
+        currentState.product.status ?? pod.ProductStatus.selling;
+
+    // 판매완료에서 판매중/예약중으로 변경하는 경우 후기 삭제
+    if (currentStatus == pod.ProductStatus.sold &&
+        (status == pod.ProductStatus.selling ||
+            status == pod.ProductStatus.reserved)) {
+      debugPrint('🔄 상품 상태 변경: 판매완료 -> ${status.name}, 후기 삭제 시작');
+      final deleteResult = await _deleteReviewsByProductIdUseCase(
+        DeleteReviewsByProductIdParams(productId: productId),
+      );
+      deleteResult.fold(
+        (failure) {
+          debugPrint('⚠️ 후기 삭제 실패 (상태 변경은 계속 진행): ${failure.message}');
+        },
+        (deletedCount) {
+          debugPrint('✅ 후기 삭제 완료: $deletedCount개 삭제됨');
+        },
+      );
+    }
 
     // 낙관적 업데이트
     final updatedProduct = pod.Product(
