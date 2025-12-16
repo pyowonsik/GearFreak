@@ -97,7 +97,7 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.shade300,
+              color: const Color(0xFFE5E7EB),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -113,12 +113,15 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Color(0xFF1F2937),
                   ),
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.black),
+                  icon: const Icon(
+                    Icons.close,
+                    color: Color(0xFF6B7280),
+                  ),
                   onPressed: () {
                     // 닫기 버튼 클릭 시 상태 변경 없이 모달만 닫기
                     context.pop();
@@ -128,20 +131,27 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
             ),
           ),
 
-          const Divider(height: 1),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            color: Color(0xFFE5E7EB),
+          ),
 
           // 상품 정보 카드
           Container(
-            margin: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(20),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.shade100),
             ),
             child: Row(
               children: [
-                Icon(Icons.shopping_bag, color: Colors.blue.shade700, size: 24),
+                const Icon(
+                  Icons.shopping_bag_outlined,
+                  color: Color(0xFF2563EB),
+                  size: 24,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -151,16 +161,16 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                         '거래한 상품',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: Color(0xFF6B7280),
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         widget.productName,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Colors.blue.shade900,
+                          color: Color(0xFF1F2937),
                         ),
                       ),
                     ],
@@ -171,13 +181,13 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
           ),
 
           // 안내 문구
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               '후기를 작성할 구매자를 선택해주세요',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: Color(0xFF6B7280),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -192,7 +202,11 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(32.0),
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF2563EB),
+                      ),
+                    ),
                   ),
                 ),
               BuyerSelectionError(:final message) => Center(
@@ -216,7 +230,25 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                                 .read(buyerSelectionNotifierProvider.notifier)
                                 .loadBuyers(widget.productId);
                           },
-                          child: const Text('다시 시도'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            '다시 시도',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -236,10 +268,13 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                       ),
                     )
                   : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: buyers.length,
-                      separatorBuilder: (context, index) =>
-                          const Divider(height: 1),
+                      separatorBuilder: (context, index) => const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Color(0xFFE5E7EB),
+                      ),
                       itemBuilder: (context, index) {
                         final buyer = buyers[index];
 
@@ -251,8 +286,12 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                               '/product/${widget.productId}/review/write?buyerId=${buyer.userId}&chatRoomId=${buyer.chatRoomId}',
                             );
                           },
+                          borderRadius: BorderRadius.circular(8),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 16,
+                            ),
                             child: Row(
                               children: [
                                 // 프로필 이미지
@@ -265,10 +304,10 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                                         )
                                       : null,
                                   child: buyer.profileImageUrl == null
-                                      ? Icon(
+                                      ? const Icon(
                                           Icons.person,
                                           size: 28,
-                                          color: Colors.grey.shade500,
+                                          color: Color(0xFF9CA3AF),
                                         )
                                       : null,
                                 ),
@@ -281,15 +320,15 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                                     style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.black,
+                                      color: Color(0xFF1F2937),
                                     ),
                                   ),
                                 ),
 
                                 // 화살표 아이콘
-                                Icon(
+                                const Icon(
                                   Icons.chevron_right,
-                                  color: Colors.grey.shade400,
+                                  color: Color(0xFF9CA3AF),
                                   size: 24,
                                 ),
                               ],
@@ -302,9 +341,13 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
           ),
 
           // 선택하지 않기 버튼
-          const Divider(height: 1),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            color: Color(0xFFE5E7EB),
+          ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: SizedBox(
               width: double.infinity,
               child: OutlinedButton(
@@ -314,7 +357,10 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: Color(0xFFE5E7EB)),
+                  side: const BorderSide(
+                    color: Color(0xFFE5E7EB),
+                    width: 1.5,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

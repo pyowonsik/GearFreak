@@ -63,6 +63,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onSellingTap: _handleMyProducts,
             onSoldTap: _handleSoldProducts,
             onFavoriteTap: _handleMyFavorite,
+            onReviewManagement: _handleReviewManagement,
           ),
       },
     );
@@ -131,5 +132,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   /// 관심 목록 화면 이동
   void _handleMyFavorite() {
     context.push('/profile/my-favorite');
+  }
+
+  /// 후기 관리 화면 이동
+  void _handleReviewManagement() {
+    context.push('/profile/reviews');
   }
 }

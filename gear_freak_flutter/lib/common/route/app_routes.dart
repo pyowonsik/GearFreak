@@ -10,6 +10,7 @@ import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_center_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/screen/review_list_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/write_review_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -141,6 +142,13 @@ abstract final class AppRoutes {
           name: 'my-favorite',
           builder: (context, state) =>
               const ProfileProductsScreen(type: 'myFavorite'),
+        ),
+
+        // 후기 관리 화면
+        GoRoute(
+          path: '/profile/reviews',
+          name: 'profile-reviews',
+          builder: (context, state) => const ReviewListScreen(),
         ),
 
         // 후기 작성 화면

@@ -22,6 +22,7 @@ class ProfileLoadedView extends StatelessWidget {
     this.onSellingTap,
     this.onSoldTap,
     this.onFavoriteTap,
+    this.onReviewManagement,
     super.key,
   });
 
@@ -52,6 +53,9 @@ class ProfileLoadedView extends StatelessWidget {
   /// 관심목록 통계 클릭 콜백
   final VoidCallback? onFavoriteTap;
 
+  /// 후기 관리 메뉴 클릭 콜백
+  final VoidCallback? onReviewManagement;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -76,9 +80,10 @@ class ProfileLoadedView extends StatelessWidget {
           // 메뉴 리스트
           Column(
             children: [
-              const ProfileMenuItemWidget(
+              ProfileMenuItemWidget(
                 icon: Icons.star_outline,
                 title: '후기 관리',
+                onTap: onReviewManagement,
               ),
               ProfileMenuItemWidget(
                 icon: Icons.help_outline,

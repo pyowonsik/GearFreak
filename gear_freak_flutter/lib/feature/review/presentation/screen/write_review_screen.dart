@@ -29,8 +29,7 @@ class WriteReviewScreen extends ConsumerStatefulWidget {
   final int chatRoomId;
 
   @override
-  ConsumerState<WriteReviewScreen> createState() =>
-      _WriteReviewScreenState();
+  ConsumerState<WriteReviewScreen> createState() => _WriteReviewScreenState();
 }
 
 class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
@@ -155,9 +154,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  _rating == 0
-                      ? '평점을 선택해주세요'
-                      : '${_rating.toInt()}점',
+                  _rating == 0 ? '평점을 선택해주세요' : '${_rating.toInt()}점',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
