@@ -1,0 +1,10 @@
+### 알림 목록 응답
+class: NotificationListResponseDto
+
+fields:
+  ### 알림 목록
+  notifications: List<NotificationResponseDto>
+  ### 페이지네이션 정보
+  pagination: PaginationDto
+  ### 읽지 않은 알림 개수
+  unreadCount: int

@@ -52,26 +52,28 @@ import 'package:gear_freak_server/src/generated/feature/chat/model/chat_message.
     as _i21;
 import 'package:gear_freak_server/src/generated/feature/chat/model/dto/update_chat_room_notification_request.dto.dart'
     as _i22;
-import 'package:gear_freak_server/src/generated/feature/product/model/product.dart'
+import 'package:gear_freak_server/src/generated/feature/notification/model/dto/notification_list_response.dto.dart'
     as _i23;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/product.dart'
     as _i24;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/create_product_request.dto.dart'
     as _i25;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/paginated_products_response.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_request.dto.dart'
     as _i26;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/paginated_products_response.dto.dart'
     as _i27;
-import 'package:gear_freak_server/src/generated/feature/product/model/dto/product_stats.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/update_product_status_request.dto.dart'
     as _i28;
-import 'package:gear_freak_server/src/generated/feature/review/model/dto/transaction_review_response.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/product/model/dto/product_stats.dto.dart'
     as _i29;
-import 'package:gear_freak_server/src/generated/feature/review/model/dto/create_transaction_review_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/review/model/dto/transaction_review_response.dto.dart'
     as _i30;
-import 'package:gear_freak_server/src/generated/feature/review/model/dto/transaction_review_list_response.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/review/model/dto/create_transaction_review_request.dto.dart'
     as _i31;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/review/model/dto/transaction_review_list_response.dto.dart'
     as _i32;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i33;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -166,6 +168,8 @@ class TestEndpoints {
 
   late final _ChatStreamEndpoint chatStream;
 
+  late final _NotificationEndpoint notification;
+
   late final _ProductEndpoint product;
 
   late final _ReviewEndpoint review;
@@ -195,6 +199,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     chatStream = _ChatStreamEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    notification = _NotificationEndpoint(
       endpoints,
       serializationManager,
     );
@@ -811,6 +819,134 @@ class _ChatStreamEndpoint {
   }
 }
 
+class _NotificationEndpoint {
+  _NotificationEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i23.NotificationListResponseDto> getNotifications(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required int page,
+    required int limit,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'notification',
+        method: 'getNotifications',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'notification',
+          methodName: 'getNotifications',
+          parameters: _i1.testObjectToJson({
+            'page': page,
+            'limit': limit,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i23.NotificationListResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> markAsRead(
+    _i1.TestSessionBuilder sessionBuilder,
+    int notificationId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'notification',
+        method: 'markAsRead',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'notification',
+          methodName: 'markAsRead',
+          parameters: _i1.testObjectToJson({'notificationId': notificationId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> deleteNotification(
+    _i1.TestSessionBuilder sessionBuilder,
+    int notificationId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'notification',
+        method: 'deleteNotification',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'notification',
+          methodName: 'deleteNotification',
+          parameters: _i1.testObjectToJson({'notificationId': notificationId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<int> getUnreadCount(_i1.TestSessionBuilder sessionBuilder) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'notification',
+        method: 'getUnreadCount',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'notification',
+          methodName: 'getUnreadCount',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<int>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _ProductEndpoint {
   _ProductEndpoint(
     this._endpointDispatch,
@@ -821,9 +957,9 @@ class _ProductEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i23.Product> createProduct(
+  _i3.Future<_i24.Product> createProduct(
     _i1.TestSessionBuilder sessionBuilder,
-    _i24.CreateProductRequestDto request,
+    _i25.CreateProductRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -842,7 +978,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i23.Product>);
+        ) as _i3.Future<_i24.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -850,9 +986,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i23.Product> updateProduct(
+  _i3.Future<_i24.Product> updateProduct(
     _i1.TestSessionBuilder sessionBuilder,
-    _i25.UpdateProductRequestDto request,
+    _i26.UpdateProductRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -871,7 +1007,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i23.Product>);
+        ) as _i3.Future<_i24.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -879,7 +1015,7 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i23.Product> getProduct(
+  _i3.Future<_i24.Product> getProduct(
     _i1.TestSessionBuilder sessionBuilder,
     int id,
   ) async {
@@ -900,7 +1036,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i23.Product>);
+        ) as _i3.Future<_i24.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -908,7 +1044,7 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i26.PaginatedProductsResponseDto> getPaginatedProducts(
+  _i3.Future<_i27.PaginatedProductsResponseDto> getPaginatedProducts(
     _i1.TestSessionBuilder sessionBuilder,
     _i11.PaginationDto pagination,
   ) async {
@@ -929,7 +1065,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i26.PaginatedProductsResponseDto>);
+        ) as _i3.Future<_i27.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1024,7 +1160,7 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i26.PaginatedProductsResponseDto> getMyProducts(
+  _i3.Future<_i27.PaginatedProductsResponseDto> getMyProducts(
     _i1.TestSessionBuilder sessionBuilder,
     _i11.PaginationDto pagination,
   ) async {
@@ -1045,7 +1181,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i26.PaginatedProductsResponseDto>);
+        ) as _i3.Future<_i27.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1053,7 +1189,7 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i26.PaginatedProductsResponseDto> getMyFavoriteProducts(
+  _i3.Future<_i27.PaginatedProductsResponseDto> getMyFavoriteProducts(
     _i1.TestSessionBuilder sessionBuilder,
     _i11.PaginationDto pagination,
   ) async {
@@ -1074,7 +1210,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i26.PaginatedProductsResponseDto>);
+        ) as _i3.Future<_i27.PaginatedProductsResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1082,9 +1218,9 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i23.Product> updateProductStatus(
+  _i3.Future<_i24.Product> updateProductStatus(
     _i1.TestSessionBuilder sessionBuilder,
-    _i27.UpdateProductStatusRequestDto request,
+    _i28.UpdateProductStatusRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1103,7 +1239,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i23.Product>);
+        ) as _i3.Future<_i24.Product>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1111,7 +1247,7 @@ class _ProductEndpoint {
     });
   }
 
-  _i3.Future<_i28.ProductStatsDto> getProductStats(
+  _i3.Future<_i29.ProductStatsDto> getProductStats(
       _i1.TestSessionBuilder sessionBuilder) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1130,7 +1266,7 @@ class _ProductEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i28.ProductStatsDto>);
+        ) as _i3.Future<_i29.ProductStatsDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1149,9 +1285,9 @@ class _ReviewEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i29.TransactionReviewResponseDto> createTransactionReview(
+  _i3.Future<_i30.TransactionReviewResponseDto> createTransactionReview(
     _i1.TestSessionBuilder sessionBuilder,
-    _i30.CreateTransactionReviewRequestDto request,
+    _i31.CreateTransactionReviewRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1170,7 +1306,7 @@ class _ReviewEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i29.TransactionReviewResponseDto>);
+        ) as _i3.Future<_i30.TransactionReviewResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1178,7 +1314,7 @@ class _ReviewEndpoint {
     });
   }
 
-  _i3.Future<_i31.TransactionReviewListResponseDto> getBuyerReviews(
+  _i3.Future<_i32.TransactionReviewListResponseDto> getBuyerReviews(
     _i1.TestSessionBuilder sessionBuilder, {
     required int page,
     required int limit,
@@ -1203,7 +1339,7 @@ class _ReviewEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i31.TransactionReviewListResponseDto>);
+        ) as _i3.Future<_i32.TransactionReviewListResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1211,7 +1347,7 @@ class _ReviewEndpoint {
     });
   }
 
-  _i3.Future<_i31.TransactionReviewListResponseDto> getSellerReviews(
+  _i3.Future<_i32.TransactionReviewListResponseDto> getSellerReviews(
     _i1.TestSessionBuilder sessionBuilder, {
     required int page,
     required int limit,
@@ -1236,7 +1372,7 @@ class _ReviewEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i31.TransactionReviewListResponseDto>);
+        ) as _i3.Future<_i32.TransactionReviewListResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1244,38 +1380,9 @@ class _ReviewEndpoint {
     });
   }
 
-  _i3.Future<bool> deleteTransactionReview(
+  _i3.Future<_i30.TransactionReviewResponseDto> createSellerReview(
     _i1.TestSessionBuilder sessionBuilder,
-    int reviewId,
-  ) async {
-    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
-      var _localUniqueSession =
-          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-        endpoint: 'review',
-        method: 'deleteTransactionReview',
-      );
-      try {
-        var _localCallContext = await _endpointDispatch.getMethodCallContext(
-          createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'review',
-          methodName: 'deleteTransactionReview',
-          parameters: _i1.testObjectToJson({'reviewId': reviewId}),
-          serializationManager: _serializationManager,
-        );
-        var _localReturnValue = await (_localCallContext.method.call(
-          _localUniqueSession,
-          _localCallContext.arguments,
-        ) as _i3.Future<bool>);
-        return _localReturnValue;
-      } finally {
-        await _localUniqueSession.close();
-      }
-    });
-  }
-
-  _i3.Future<_i29.TransactionReviewResponseDto> createSellerReview(
-    _i1.TestSessionBuilder sessionBuilder,
-    _i30.CreateTransactionReviewRequestDto request,
+    _i31.CreateTransactionReviewRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1294,7 +1401,7 @@ class _ReviewEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i29.TransactionReviewResponseDto>);
+        ) as _i3.Future<_i30.TransactionReviewResponseDto>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1499,7 +1606,7 @@ class _UserEndpoint {
 
   _i3.Future<_i6.User> updateUserProfile(
     _i1.TestSessionBuilder sessionBuilder,
-    _i32.UpdateUserProfileRequestDto request,
+    _i33.UpdateUserProfileRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =

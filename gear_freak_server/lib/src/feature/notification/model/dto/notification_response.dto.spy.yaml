@@ -1,0 +1,20 @@
+### 알림 응답
+class: NotificationResponseDto
+
+fields:
+  ### 알림 ID
+  id: int
+  ### 알림 타입
+  notificationType: NotificationType
+  ### 알림 제목
+  title: String
+  ### 알림 본문
+  body: String
+  ### 알림 데이터 (JSON 파싱된 Map)
+  data: Map<String, String>?
+  ### 읽음 여부
+  isRead: bool
+  ### 읽은 시간
+  readAt: DateTime?
+  ### 생성일
+  createdAt: DateTime?

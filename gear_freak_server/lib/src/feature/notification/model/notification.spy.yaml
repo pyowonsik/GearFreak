@@ -1,0 +1,31 @@
+### 알림 정보
+class: Notification
+table: notification
+
+fields:
+  ### 수신자 사용자 ID
+  userId: int, relation(parent=user, onDelete=Cascade)
+  ### 알림 타입
+  notificationType: NotificationType
+  ### 알림 제목
+  title: String
+  ### 알림 본문
+  body: String
+  ### 알림 데이터 (JSON 형태로 딥링크 정보 저장)
+  data: String? # JSON string: {"type": "review_received", "productId": "1", "reviewerId": "2", "chatRoomId": "3"}
+  ### 읽음 여부
+  isRead: bool
+  ### 읽은 시간
+  readAt: DateTime?
+  ### 생성일
+  createdAt: DateTime?
+  ### 수정일
+  updatedAt: DateTime?
+
+indexes:
+  user_notifications_idx:
+    fields: userId, createdAt
+  user_unread_idx:
+    fields: userId, isRead
+  notification_type_idx:
+    fields: notificationType

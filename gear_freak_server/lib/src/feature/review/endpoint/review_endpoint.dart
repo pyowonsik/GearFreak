@@ -79,28 +79,6 @@ class ReviewEndpoint extends Endpoint {
     );
   }
 
-  /// 거래 후기 삭제
-  ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [reviewId]는 삭제할 후기 ID입니다.
-  /// 반환: 삭제 성공 여부
-  Future<bool> deleteTransactionReview(
-    Session session,
-    int reviewId,
-  ) async {
-    // 인증 확인 및 User 테이블의 실제 ID 가져오기
-    final user = await UserService.getMe(session);
-    if (user.id == null) {
-      throw Exception('사용자 정보를 찾을 수 없습니다.');
-    }
-
-    return await ReviewService.deleteTransactionReview(
-      session: session,
-      reviewId: reviewId,
-      userId: user.id!,
-    );
-  }
-
   /// 판매자에 대한 후기 작성 (구매자 → 판매자)
   ///
   /// [session]은 Serverpod 세션입니다.

@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
+import 'package:gear_freak_server/src/feature/notification/service/notification_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -184,7 +185,24 @@ class ReviewService {
       final reviewer = await User.db.findById(session, reviewerId);
       final reviewee = await User.db.findById(session, request.revieweeId);
 
-      // 6. 응답 DTO 생성
+      // 6. 📱 FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
+      await _sendReviewNotification(
+        session: session,
+        reviewerId: reviewerId,
+        reviewerNickname: reviewer?.nickname,
+        revieweeId: request.revieweeId,
+        rating: request.rating,
+        productId: request.productId,
+        chatRoomId: request.chatRoomId,
+      ).catchError((error) {
+        developer.log(
+          '⚠️ 후기 FCM 알림 전송 실패 (무시): $error',
+          name: 'ReviewService',
+          error: error,
+        );
+      });
+
+      // 7. 응답 DTO 생성
       return TransactionReviewResponseDto(
         id: createdReview.id!,
         productId: createdReview.productId,
@@ -343,50 +361,6 @@ class ReviewService {
     );
   }
 
-  /// 거래 후기 삭제
-  ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [reviewId]는 삭제할 후기 ID입니다.
-  /// [userId]는 요청한 사용자 ID입니다.
-  /// 반환: 삭제 성공 여부
-  static Future<bool> deleteTransactionReview({
-    required Session session,
-    required int reviewId,
-    required int userId,
-  }) async {
-    try {
-      // 1. 후기 조회
-      final review = await TransactionReview.db.findById(session, reviewId);
-
-      if (review == null) {
-        throw Exception('후기를 찾을 수 없습니다.');
-      }
-
-      // 2. 권한 확인 (본인이 작성한 후기만 삭제 가능)
-      if (review.reviewerId != userId) {
-        throw Exception('본인이 작성한 후기만 삭제할 수 있습니다.');
-      }
-
-      // 3. 후기 삭제
-      await TransactionReview.db.deleteRow(session, review);
-
-      session.log(
-        '✅ 거래 후기 삭제 완료: reviewId=$reviewId, userId=$userId',
-        level: LogLevel.info,
-      );
-
-      return true;
-    } catch (e, stackTrace) {
-      session.log(
-        '❌ 거래 후기 삭제 실패: $e',
-        exception: e,
-        stackTrace: stackTrace,
-        level: LogLevel.error,
-      );
-      rethrow;
-    }
-  }
-
   /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
   ///
   /// [session]은 Serverpod 세션입니다.
@@ -434,6 +408,20 @@ class ReviewService {
         '✅ 상품 후기 삭제 완료: productId=$productId, deletedCount=$deletedCount, userId=$userId',
         level: LogLevel.info,
       );
+
+      // 4. 📌 관련 알림 삭제 (비동기, 실패해도 후기 삭제는 성공)
+      try {
+        await NotificationService.deleteNotificationsByProductId(
+          session: session,
+          productId: productId,
+        );
+      } catch (error) {
+        developer.log(
+          '⚠️ 상품 후기 관련 알림 삭제 실패 (무시): $error',
+          name: 'ReviewService',
+          error: error,
+        );
+      }
 
       return deletedCount;
     } catch (e, stackTrace) {
@@ -515,6 +503,31 @@ class ReviewService {
 
       safeLog(
           '✅ 후기 FCM 알림 전송 완료: revieweeId=$revieweeId, tokens=${fcmTokens.length}개');
+
+      // 5. 📌 notification 테이블에 저장 (알림 목록 화면에서 조회하기 위해)
+      try {
+        await NotificationService.createNotification(
+          session: session,
+          userId: revieweeId,
+          notificationType: NotificationType.review_received,
+          title: title,
+          body: body,
+          data: data,
+        );
+        safeLog('✅ 알림 DB 저장 완료: revieweeId=$revieweeId');
+      } catch (error) {
+        safeLog(
+          '⚠️ 알림 DB 저장 실패 (무시): $error',
+          level: LogLevel.warning,
+        );
+        developer.log(
+          '⚠️ 알림 DB 저장 실패: $error',
+          name: 'ReviewService',
+          error: error,
+        );
+      }
+
+      safeLog('✅ 알림 DB 저장 완료: revieweeId=$revieweeId');
     } catch (e, stackTrace) {
       safeLog(
         '❌ 후기 FCM 알림 전송 실패: $e',

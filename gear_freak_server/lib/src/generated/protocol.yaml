@@ -20,6 +20,11 @@ chat:
   - updateChatRoomNotification:
 chatStream:
   - chatMessageStream:
+notification:
+  - getNotifications:
+  - markAsRead:
+  - deleteNotification:
+  - getUnreadCount:
 product:
   - createProduct:
   - updateProduct:
@@ -36,7 +41,6 @@ review:
   - createTransactionReview:
   - getBuyerReviews:
   - getSellerReviews:
-  - deleteTransactionReview:
   - createSellerReview:
   - deleteReviewsByProductId:
 fcm:
