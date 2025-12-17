@@ -288,24 +288,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           ),
                         ),
                 ),
-                // 판매완료 오버레이
-                if (productData.status == pod.ProductStatus.sold)
+                // 판매완료 또는 예약중 오버레이
+                if (productData.status == pod.ProductStatus.sold ||
+                    productData.status == pod.ProductStatus.reserved)
                   Positioned.fill(
                     child: ColoredBox(
                       color: Colors.black.withValues(alpha: 0.6),
-                      child: const Center(
+                      child: Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.check_circle_outline,
+                              productData.status == pod.ProductStatus.sold
+                                  ? Icons.check_circle_outline
+                                  : Icons.schedule_outlined,
                               size: 64,
                               color: Colors.white,
                             ),
-                            SizedBox(height: 12),
+                            const SizedBox(height: 12),
                             Text(
-                              '판매완료',
-                              style: TextStyle(
+                              productData.status == pod.ProductStatus.sold
+                                  ? '판매완료'
+                                  : '예약중',
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,

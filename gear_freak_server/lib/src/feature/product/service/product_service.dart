@@ -524,16 +524,9 @@ class ProductService {
           p.sellerId.equals(userId) & p.status.equals(ProductStatus.sold),
     );
 
-    // 예약 상품 개수 (status = reserved)
-    final reservedCount = await Product.db.count(
-      session,
-      where: (p) =>
-          p.sellerId.equals(userId) & p.status.equals(ProductStatus.reserved),
-    );
-
-    // 판매중 상품 개수 = 전체 - 거래완료 - 예약
-    // (status가 null이거나 selling인 경우 모두 판매중으로 간주)
-    final sellingCount = totalCount - soldCount - reservedCount;
+    // 판매중 상품 개수 = 전체 - 거래완료
+    // (status가 null, selling, reserved인 경우 모두 판매중으로 간주)
+    final sellingCount = totalCount - soldCount;
 
     // 관심목록 상품 개수 (Favorite 테이블에서 userId로 카운트)
     final favoriteCount = await Favorite.db.count(
