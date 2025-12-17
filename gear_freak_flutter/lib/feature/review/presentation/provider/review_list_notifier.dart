@@ -14,7 +14,7 @@ class BuyerReviewListNotifier extends StateNotifier<ReviewListState> {
   final GetBuyerReviewsUseCase getBuyerReviewsUseCase;
 
   /// 구매자 후기 목록 로드
-  Future<void> loadReviews({int page = 1, int limit = 10}) async {
+  Future<void> loadReviews({int page = 1, int limit = 20}) async {
     state = const ReviewListLoading();
 
     final result = await getBuyerReviewsUseCase(
@@ -120,7 +120,7 @@ class SellerReviewListNotifier extends StateNotifier<ReviewListState> {
   final GetSellerReviewsUseCase getSellerReviewsUseCase;
 
   /// 판매자 후기 목록 로드
-  Future<void> loadReviews({int page = 1, int limit = 10}) async {
+  Future<void> loadReviews({int page = 1, int limit = 20}) async {
     state = const ReviewListLoading();
 
     final result = await getSellerReviewsUseCase(

@@ -15,14 +15,14 @@ class ReviewRepositoryImpl implements ReviewRepository {
   Future<pod.TransactionReviewResponseDto> createTransactionReview(
     pod.CreateTransactionReviewRequestDto request,
   ) async {
-    return await remoteDataSource.createTransactionReview(request);
+    return remoteDataSource.createTransactionReview(request);
   }
 
   @override
   Future<pod.TransactionReviewResponseDto> createSellerReview(
     pod.CreateTransactionReviewRequestDto request,
   ) async {
-    return await remoteDataSource.createSellerReview(request);
+    return remoteDataSource.createSellerReview(request);
   }
 
   @override
@@ -30,7 +30,7 @@ class ReviewRepositoryImpl implements ReviewRepository {
     int page = 1,
     int limit = 10,
   }) async {
-    return await remoteDataSource.getBuyerReviews(
+    return remoteDataSource.getBuyerReviews(
       page: page,
       limit: limit,
     );
@@ -41,19 +41,14 @@ class ReviewRepositoryImpl implements ReviewRepository {
     int page = 1,
     int limit = 10,
   }) async {
-    return await remoteDataSource.getSellerReviews(
+    return remoteDataSource.getSellerReviews(
       page: page,
       limit: limit,
     );
   }
 
   @override
-  Future<bool> deleteTransactionReview(int reviewId) async {
-    return await remoteDataSource.deleteTransactionReview(reviewId);
-  }
-
-  @override
   Future<int> deleteReviewsByProductId(int productId) async {
-    return await remoteDataSource.deleteReviewsByProductId(productId);
+    return remoteDataSource.deleteReviewsByProductId(productId);
   }
 }

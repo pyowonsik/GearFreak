@@ -355,11 +355,8 @@ class _ReviewListView extends StatelessWidget {
         controller: scrollController,
         padding: const EdgeInsets.symmetric(vertical: 8),
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: reviews.length + (isLoadingMore ? 1 : 0),
+        itemCount: reviews.length,
         separatorBuilder: (context, index) {
-          if (index == reviews.length - 1 && isLoadingMore) {
-            return const SizedBox.shrink();
-          }
           return const Divider(
             height: 1,
             thickness: 8,
@@ -367,17 +364,6 @@ class _ReviewListView extends StatelessWidget {
           );
         },
         itemBuilder: (context, index) {
-          if (index == reviews.length) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
-                ),
-              ),
-            );
-          }
-
           final review = reviews[index];
           return _ReviewItemWidget(review: review);
         },

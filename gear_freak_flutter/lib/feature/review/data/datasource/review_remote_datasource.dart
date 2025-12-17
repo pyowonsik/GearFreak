@@ -160,15 +160,6 @@ class ReviewRemoteDataSource {
     }
   }
 
-  /// 거래 후기 삭제
-  Future<bool> deleteTransactionReview(int reviewId) async {
-    try {
-      return await _client.review.deleteTransactionReview(reviewId);
-    } catch (e) {
-      throw Exception('후기 삭제에 실패했습니다: $e');
-    }
-  }
-
   /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
   Future<int> deleteReviewsByProductId(int productId) async {
     try {

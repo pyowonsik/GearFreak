@@ -27,9 +27,6 @@ abstract class ReviewRepository {
     int limit = 10,
   });
 
-  /// 거래 후기 삭제
-  Future<bool> deleteTransactionReview(int reviewId);
-
   /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
   Future<int> deleteReviewsByProductId(int productId);
 }

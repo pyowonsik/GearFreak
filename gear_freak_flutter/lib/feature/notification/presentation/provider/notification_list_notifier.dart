@@ -1,0 +1,253 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/feature/notification/domain/usecase/delete_notification_usecase.dart';
+import 'package:gear_freak_flutter/feature/notification/domain/usecase/get_notifications_usecase.dart';
+import 'package:gear_freak_flutter/feature/notification/domain/usecase/mark_as_read_usecase.dart';
+import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
+
+/// 알림 목록 Notifier
+class NotificationListNotifier extends StateNotifier<NotificationListState> {
+  /// NotificationListNotifier 생성자
+  NotificationListNotifier(
+    this.getNotificationsUseCase,
+    this.markAsReadUseCase,
+    this.deleteNotificationUseCase,
+  ) : super(const NotificationListInitial());
+
+  /// 알림 목록 조회 UseCase
+  final GetNotificationsUseCase getNotificationsUseCase;
+
+  /// 알림 읽음 처리 UseCase
+  final MarkAsReadUseCase markAsReadUseCase;
+
+  /// 알림 삭제 UseCase
+  final DeleteNotificationUseCase deleteNotificationUseCase;
+
+  /// 알림 목록 로드
+  Future<void> loadNotifications({int page = 1, int limit = 20}) async {
+    state = const NotificationListLoading();
+
+    final result = await getNotificationsUseCase(
+      GetNotificationsParams(page: page, limit: limit),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [NotificationListNotifier] 알림 목록 로드 실패:'
+            ' ${failure.message}');
+        state = NotificationListError(failure.message);
+      },
+      (response) {
+        debugPrint('✅ [NotificationListNotifier] 알림 목록 로드 성공: '
+            'page=${response.pagination.page}, '
+            'totalCount=${response.pagination.totalCount}, '
+            'hasMore=${response.pagination.hasMore}, '
+            'notifications=${response.notifications.length}개, '
+            'unreadCount=${response.unreadCount}');
+        state = NotificationListLoaded(
+          notifications: response.notifications,
+          pagination: response.pagination,
+          unreadCount: response.unreadCount,
+        );
+      },
+    );
+  }
+
+  /// 더 많은 알림 불러오기
+  Future<void> loadMoreNotifications() async {
+    final currentState = state;
+
+    if (currentState is! NotificationListLoaded) {
+      debugPrint('⚠️ [NotificationListNotifier] loadMoreNotifications: '
+          '현재 상태가 NotificationListLoaded가 아닙니다. '
+          '(${currentState.runtimeType})');
+      return;
+    }
+
+    final currentPagination = currentState.pagination;
+
+    if (currentPagination.hasMore != true) {
+      debugPrint('⚠️ [NotificationListNotifier] loadMoreNotifications:'
+          ' 더 이상 불러올 데이터가 없습니다.');
+      return;
+    }
+
+    if (state is NotificationListLoadingMore) {
+      debugPrint('⚠️ [NotificationListNotifier] loadMoreNotifications:'
+          ' 이미 로딩 중입니다.');
+      return;
+    }
+
+    final nextPage = currentPagination.page + 1;
+    debugPrint('🔄 [NotificationListNotifier] 다음 페이지 로드: page=$nextPage '
+        '(현재: ${currentPagination.page}, '
+        '전체: ${currentPagination.totalCount})');
+
+    state = NotificationListLoadingMore(
+      notifications: currentState.notifications,
+      pagination: currentPagination,
+      unreadCount: currentState.unreadCount,
+    );
+
+    final result = await getNotificationsUseCase(
+      GetNotificationsParams(
+        page: nextPage,
+        limit: currentPagination.limit,
+      ),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [NotificationListNotifier] 다음 페이지 로드 실패:'
+            ' ${failure.message}');
+        state = currentState;
+      },
+      (response) {
+        final updatedNotifications = [
+          ...currentState.notifications,
+          ...response.notifications,
+        ];
+
+        debugPrint('✅ [NotificationListNotifier] 다음 페이지 로드 성공: '
+            'page=${response.pagination.page}, '
+            '추가된 알림=${response.notifications.length}개, '
+            '총 알림=${updatedNotifications.length}개, '
+            'hasMore=${response.pagination.hasMore}');
+
+        state = NotificationListLoaded(
+          notifications: updatedNotifications,
+          pagination: response.pagination,
+          unreadCount: response.unreadCount,
+        );
+      },
+    );
+  }
+
+  /// 알림 읽음 처리
+  Future<void> markAsRead(int notificationId) async {
+    final result = await markAsReadUseCase(
+      MarkAsReadParams(notificationId: notificationId),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [NotificationListNotifier] 알림 읽음 처리 실패:'
+            ' ${failure.message}');
+      },
+      (success) {
+        debugPrint('✅ [NotificationListNotifier] 알림 읽음 처리 성공: '
+            'notificationId=$notificationId');
+        // 현재 상태 업데이트
+        final currentState = state;
+        if (currentState is NotificationListLoaded) {
+          final updatedNotifications = currentState.notifications.map((n) {
+            if (n.id == notificationId) {
+              return pod.NotificationResponseDto(
+                id: n.id,
+                notificationType: n.notificationType,
+                title: n.title,
+                body: n.body,
+                data: n.data,
+                isRead: true,
+                readAt: DateTime.now(),
+                createdAt: n.createdAt,
+              );
+            }
+            return n;
+          }).toList();
+
+          // unreadCount 감소
+          final newUnreadCount =
+              currentState.unreadCount > 0 ? currentState.unreadCount - 1 : 0;
+
+          state = NotificationListLoaded(
+            notifications: updatedNotifications,
+            pagination: currentState.pagination,
+            unreadCount: newUnreadCount,
+          );
+        } else if (currentState is NotificationListLoadingMore) {
+          final updatedNotifications = currentState.notifications.map((n) {
+            if (n.id == notificationId) {
+              return pod.NotificationResponseDto(
+                id: n.id,
+                notificationType: n.notificationType,
+                title: n.title,
+                body: n.body,
+                data: n.data,
+                isRead: true,
+                readAt: DateTime.now(),
+                createdAt: n.createdAt,
+              );
+            }
+            return n;
+          }).toList();
+
+          final newUnreadCount =
+              currentState.unreadCount > 0 ? currentState.unreadCount - 1 : 0;
+
+          state = NotificationListLoadingMore(
+            notifications: updatedNotifications,
+            pagination: currentState.pagination,
+            unreadCount: newUnreadCount,
+          );
+        }
+      },
+    );
+  }
+
+  /// 알림 삭제
+  Future<void> deleteNotification(int notificationId) async {
+    final result = await deleteNotificationUseCase(
+      DeleteNotificationParams(notificationId: notificationId),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [NotificationListNotifier] 알림 삭제 실패: ${failure.message}');
+      },
+      (success) {
+        debugPrint('✅ [NotificationListNotifier] 알림 삭제 성공: '
+            'notificationId=$notificationId');
+        // 현재 상태에서 알림 제거
+        final currentState = state;
+        if (currentState is NotificationListLoaded) {
+          final deletedNotification = currentState.notifications
+              .firstWhere((n) => n.id == notificationId);
+          final updatedNotifications = currentState.notifications
+              .where((n) => n.id != notificationId)
+              .toList();
+
+          // unreadCount 업데이트 (삭제된 알림이 읽지 않았으면 감소)
+          final newUnreadCount =
+              !deletedNotification.isRead && currentState.unreadCount > 0
+                  ? currentState.unreadCount - 1
+                  : currentState.unreadCount;
+
+          state = NotificationListLoaded(
+            notifications: updatedNotifications,
+            pagination: currentState.pagination,
+            unreadCount: newUnreadCount,
+          );
+        } else if (currentState is NotificationListLoadingMore) {
+          final deletedNotification = currentState.notifications
+              .firstWhere((n) => n.id == notificationId);
+          final updatedNotifications = currentState.notifications
+              .where((n) => n.id != notificationId)
+              .toList();
+
+          final newUnreadCount =
+              !deletedNotification.isRead && currentState.unreadCount > 0
+                  ? currentState.unreadCount - 1
+                  : currentState.unreadCount;
+
+          state = NotificationListLoadingMore(
+            notifications: updatedNotifications,
+            pagination: currentState.pagination,
+            unreadCount: newUnreadCount,
+          );
+        }
+      },
+    );
+  }
+}
