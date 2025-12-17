@@ -10,6 +10,7 @@ import 'package:gear_freak_flutter/feature/product/presentation/screen/update_pr
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_center_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/screen/other_user_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/review_already_written_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/review_list_screen.dart';
@@ -193,6 +194,16 @@ abstract final class AppRoutes {
             final reviewType =
                 state.uri.queryParameters['reviewType'] ?? 'seller';
             return ReviewAlreadyWrittenScreen(reviewType: reviewType);
+          },
+        ),
+
+        // 다른 사용자 프로필 화면
+        GoRoute(
+          path: '/profile/user/:userId',
+          name: 'other-user-profile',
+          builder: (context, state) {
+            final userId = state.pathParameters['userId'] ?? '';
+            return OtherUserProfileScreen(userId: userId);
           },
         ),
       ];

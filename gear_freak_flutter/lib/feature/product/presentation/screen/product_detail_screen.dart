@@ -358,59 +358,68 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 판매자 정보
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: const Color(0xFFF3F4F6),
-                        backgroundImage: (sellerData?.profileImageUrl != null &&
-                                sellerData!.profileImageUrl!.isNotEmpty)
-                            ? CachedNetworkImageProvider(
-                                sellerData.profileImageUrl!,
-                              )
-                            : (productData.seller?.profileImageUrl != null &&
-                                    productData
-                                        .seller!.profileImageUrl!.isNotEmpty)
-                                ? CachedNetworkImageProvider(
-                                    productData.seller!.profileImageUrl!,
-                                  )
-                                : null,
-                        child: (sellerData?.profileImageUrl == null ||
-                                    sellerData!.profileImageUrl!.isEmpty) &&
-                                (productData.seller?.profileImageUrl == null ||
-                                    productData
-                                        .seller!.profileImageUrl!.isEmpty)
-                            ? Icon(
-                                Icons.person,
-                                color: Colors.grey.shade500,
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            sellerData?.nickname ??
-                                productData.seller?.nickname ??
-                                '판매자',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1F2937),
+                  InkWell(
+                    onTap: () {
+                      // 판매자 프로필 화면으로 이동
+                      final sellerId = sellerData?.id ?? productData.sellerId;
+                      context.push('/profile/user/$sellerId');
+                    },
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: const Color(0xFFF3F4F6),
+                          backgroundImage: (sellerData?.profileImageUrl !=
+                                      null &&
+                                  sellerData!.profileImageUrl!.isNotEmpty)
+                              ? CachedNetworkImageProvider(
+                                  sellerData.profileImageUrl!,
+                                )
+                              : (productData.seller?.profileImageUrl != null &&
+                                      productData
+                                          .seller!.profileImageUrl!.isNotEmpty)
+                                  ? CachedNetworkImageProvider(
+                                      productData.seller!.profileImageUrl!,
+                                    )
+                                  : null,
+                          child: (sellerData?.profileImageUrl == null ||
+                                      sellerData!.profileImageUrl!.isEmpty) &&
+                                  (productData.seller?.profileImageUrl ==
+                                          null ||
+                                      productData
+                                          .seller!.profileImageUrl!.isEmpty)
+                              ? Icon(
+                                  Icons.person,
+                                  color: Colors.grey.shade500,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              sellerData?.nickname ??
+                                  productData.seller?.nickname ??
+                                  '판매자',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1F2937),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            getProductLocation(productData),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF9CA3AF),
+                            const SizedBox(height: 2),
+                            Text(
+                              getProductLocation(productData),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF9CA3AF),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                   const Divider(color: Color(0xFFE5E7EB)),

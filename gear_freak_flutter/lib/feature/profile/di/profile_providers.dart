@@ -7,6 +7,8 @@ import 'package:gear_freak_flutter/feature/profile/data/repository/profile_repos
 import 'package:gear_freak_flutter/feature/profile/domain/repository/profile_repository.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/update_user_profile_usecase.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_notifier.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_state.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_notifier.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 
@@ -55,3 +57,12 @@ final profileNotifierProvider =
     getProductStatsUseCase,
   );
 });
+
+/// 다른 사용자 프로필 Notifier Provider
+final otherUserProfileNotifierProvider = StateNotifierProvider.autoDispose<
+    OtherUserProfileNotifier, OtherUserProfileState>(
+  (ref) {
+    final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
+    return OtherUserProfileNotifier(getUserByIdUseCase);
+  },
+);

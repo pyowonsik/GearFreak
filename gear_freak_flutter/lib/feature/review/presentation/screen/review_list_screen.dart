@@ -6,6 +6,7 @@ import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
+import 'package:go_router/go_router.dart';
 
 /// 후기 관리 화면
 /// Presentation Layer: UI
@@ -403,22 +404,29 @@ class _ReviewItemWidget extends StatelessWidget {
           // 프로필 및 평점
           Row(
             children: [
-              // 프로필 이미지
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: const Color(0xFFF3F4F6),
-                backgroundImage: review.reviewerProfileImageUrl != null
-                    ? CachedNetworkImageProvider(
-                        review.reviewerProfileImageUrl!,
-                      )
-                    : null,
-                child: review.reviewerProfileImageUrl == null
-                    ? const Icon(
-                        Icons.person,
-                        size: 24,
-                        color: Color(0xFF9CA3AF),
-                      )
-                    : null,
+              // 프로필 이미지 (클릭 가능)
+              GestureDetector(
+                onTap: () {
+                  // 리뷰 작성자 프로필 화면으로 이동
+                  final reviewerId = review.reviewerId;
+                  context.push('/profile/user/$reviewerId');
+                },
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: const Color(0xFFF3F4F6),
+                  backgroundImage: review.reviewerProfileImageUrl != null
+                      ? CachedNetworkImageProvider(
+                          review.reviewerProfileImageUrl!,
+                        )
+                      : null,
+                  child: review.reviewerProfileImageUrl == null
+                      ? const Icon(
+                          Icons.person,
+                          size: 24,
+                          color: Color(0xFF9CA3AF),
+                        )
+                      : null,
+                ),
               ),
               const SizedBox(width: 12),
 
