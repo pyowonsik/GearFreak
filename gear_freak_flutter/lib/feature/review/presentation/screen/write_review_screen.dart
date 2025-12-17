@@ -41,7 +41,7 @@ class WriteReviewScreen extends ConsumerStatefulWidget {
 
 class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
   final TextEditingController _contentController = TextEditingController();
-  double _rating = 0.0;
+  int _rating = 0;
   bool _isSubmitting = false;
 
   @override
@@ -80,7 +80,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
                 productId: widget.productId,
                 chatRoomId: widget.chatRoomId,
                 revieweeId: widget.revieweeId,
-                rating: _rating.toInt(),
+                rating: _rating,
                 content: _contentController.text.isEmpty
                     ? null
                     : _contentController.text,
@@ -89,7 +89,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
                 productId: widget.productId,
                 chatRoomId: widget.chatRoomId,
                 revieweeId: widget.revieweeId,
-                rating: _rating.toInt(),
+                rating: _rating,
                 content: _contentController.text.isEmpty
                     ? null
                     : _contentController.text,
@@ -173,10 +173,10 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
               const SizedBox(height: 16),
               Center(
                 child: StarRatingWidget(
-                  rating: _rating,
+                  rating: _rating.toDouble(),
                   onRatingChanged: (newRating) {
                     setState(() {
-                      _rating = newRating;
+                      _rating = newRating.toInt();
                     });
                   },
                   starSize: 48,
@@ -185,7 +185,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  _rating == 0 ? '평점을 선택해주세요' : '${_rating.toInt()}점',
+                  _rating == 0 ? '평점을 선택해주세요' : '$_rating점',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

@@ -285,8 +285,8 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
       ),
     );
 
-    bool buyerReviewExists = false;
-    bool sellerReviewExists = false;
+    var buyerReviewExists = false;
+    var sellerReviewExists = false;
 
     buyerReviewResult.fold(
       (failure) {

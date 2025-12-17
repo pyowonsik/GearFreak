@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_state.dart';
+import 'package:go_router/go_router.dart';
 
 /// 구매자 선택 모달
 /// Presentation Layer: UI
@@ -15,11 +15,11 @@ class BuyerSelectionModal extends ConsumerStatefulWidget {
   /// [onBuyerSelected]는 구매자 선택 시 호출되는 콜백입니다.
   /// [onCancel]는 선택하지 않기 클릭 시 호출되는 콜백입니다.
   const BuyerSelectionModal({
-    super.key,
     required this.productId,
     required this.productName,
     required this.onBuyerSelected,
     required this.onCancel,
+    super.key,
   });
 
   /// 상품 ID
@@ -201,7 +201,7 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
               BuyerSelectionLoading() =>
                 const Center(
                   child: Padding(
-                    padding: EdgeInsets.all(32.0),
+                    padding: EdgeInsets.all(32),
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
                         Color(0xFF2563EB),
@@ -211,7 +211,7 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                 ),
               BuyerSelectionError(:final message) => Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(32.0),
+                    padding: const EdgeInsets.all(32),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -257,7 +257,7 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
               BuyerSelectionLoaded(:final buyers) => buyers.isEmpty
                   ? const Center(
                       child: Padding(
-                        padding: EdgeInsets.all(32.0),
+                        padding: EdgeInsets.all(32),
                         child: Text(
                           '구매자가 없습니다',
                           style: TextStyle(

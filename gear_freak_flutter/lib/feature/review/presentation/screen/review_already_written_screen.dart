@@ -25,8 +25,8 @@ class ReviewAlreadyWrittenScreen extends StatelessWidget {
         : '이미 해당 구매자에 대한 리뷰를 작성하셨습니다.';
 
     return Scaffold(
-      appBar: GbAppBar(
-        title: const Text('리뷰 작성'),
+      appBar: const GbAppBar(
+        title: Text('리뷰 작성'),
       ),
       body: Center(
         child: Padding(

@@ -24,7 +24,8 @@ class BuyerReviewListNotifier extends StateNotifier<ReviewListState> {
     result.fold(
       (failure) {
         debugPrint(
-            '❌ [BuyerReviewListNotifier] 구매자 후기 목록 로드 실패: ${failure.message}');
+          '❌ [BuyerReviewListNotifier] 구매자 후기 목록 로드 실패: ${failure.message}',
+        );
         state = ReviewListError(failure.message);
       },
       (response) {
@@ -55,14 +56,14 @@ class BuyerReviewListNotifier extends StateNotifier<ReviewListState> {
     final currentPagination = currentState.pagination;
 
     if (currentPagination.hasMore != true) {
-      debugPrint(
-          '⚠️ [ReceivedReviewListNotifier] loadMoreReviews: 더 이상 불러올 데이터가 없습니다.');
+      debugPrint('⚠️ [ReceivedReviewListNotifier] loadMoreReviews:'
+          ' 더 이상 불러올 데이터가 없습니다.');
       return;
     }
 
     if (state is ReviewListLoadingMore) {
-      debugPrint(
-          '⚠️ [ReceivedReviewListNotifier] loadMoreReviews: 이미 로딩 중입니다.');
+      debugPrint('⚠️ [ReceivedReviewListNotifier] loadMoreReviews:'
+          ' 이미 로딩 중입니다.');
       return;
     }
 
@@ -85,8 +86,8 @@ class BuyerReviewListNotifier extends StateNotifier<ReviewListState> {
 
     result.fold(
       (failure) {
-        debugPrint(
-            '❌ [BuyerReviewListNotifier] 다음 페이지 로드 실패: ${failure.message}');
+        debugPrint('❌ [BuyerReviewListNotifier] 다음 페이지 로드 실패:'
+            ' ${failure.message}');
         state = currentState;
       },
       (response) {
@@ -129,8 +130,8 @@ class SellerReviewListNotifier extends StateNotifier<ReviewListState> {
 
     result.fold(
       (failure) {
-        debugPrint(
-            '❌ [SellerReviewListNotifier] 판매자 후기 목록 로드 실패: ${failure.message}');
+        debugPrint('❌ [SellerReviewListNotifier] 판매자 후기 목록 로드 실패: '
+            '${failure.message}');
         state = ReviewListError(failure.message);
       },
       (response) {
@@ -161,18 +162,20 @@ class SellerReviewListNotifier extends StateNotifier<ReviewListState> {
     final currentPagination = currentState.pagination;
 
     if (currentPagination.hasMore != true) {
-      debugPrint(
-          '⚠️ [WrittenReviewListNotifier] loadMoreReviews: 더 이상 불러올 데이터가 없습니다.');
+      debugPrint('⚠️ [WrittenReviewListNotifier] loadMoreReviews:'
+          ' 더 이상 불러올 데이터가 없습니다.');
       return;
     }
 
     if (state is ReviewListLoadingMore) {
-      debugPrint('⚠️ [WrittenReviewListNotifier] loadMoreReviews: 이미 로딩 중입니다.');
+      debugPrint('⚠️ [WrittenReviewListNotifier] loadMoreReviews:'
+          ' 이미 로딩 중입니다.');
       return;
     }
 
     final nextPage = currentPagination.page + 1;
-    debugPrint('🔄 [WrittenReviewListNotifier] 다음 페이지 로드: page=$nextPage '
+    debugPrint('🔄 [WrittenReviewListNotifier] 다음 페이지 로드: '
+        'page=$nextPage '
         '(현재: ${currentPagination.page}, '
         '전체: ${currentPagination.totalCount})');
 
@@ -190,8 +193,8 @@ class SellerReviewListNotifier extends StateNotifier<ReviewListState> {
 
     result.fold(
       (failure) {
-        debugPrint(
-            '❌ [SellerReviewListNotifier] 다음 페이지 로드 실패: ${failure.message}');
+        debugPrint('❌ [SellerReviewListNotifier] 다음 페이지 로드 실패:'
+            ' ${failure.message}');
         state = currentState;
       },
       (response) {

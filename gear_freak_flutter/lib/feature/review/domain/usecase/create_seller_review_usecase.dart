@@ -64,7 +64,7 @@ class CreateSellerReviewUseCase
     } on Exception catch (e, stackTrace) {
       return Left(
         CreateTransactionReviewFailure(
-          '판매자 후기 작성에 실패했습니다: ${e.toString()}',
+          '판매자 후기 작성에 실패했습니다: $e',
           exception: e,
           stackTrace: stackTrace,
         ),
@@ -72,4 +72,3 @@ class CreateSellerReviewUseCase
     }
   }
 }
-

@@ -64,7 +64,7 @@ class CreateTransactionReviewUseCase
     } on Exception catch (e, stackTrace) {
       return Left(
         CreateTransactionReviewFailure(
-          '후기 작성에 실패했습니다: ${e.toString()}',
+          '후기 작성에 실패했습니다: $e',
           exception: e,
           stackTrace: stackTrace,
         ),

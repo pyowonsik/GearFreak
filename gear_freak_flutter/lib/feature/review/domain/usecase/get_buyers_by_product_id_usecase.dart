@@ -86,7 +86,7 @@ class GetBuyersByProductIdUseCase
                 // 중복 제거 (같은 구매자가 여러 채팅방에 있을 수 있음)
                 final existingBuyer = buyers.firstWhere(
                   (buyer) => buyer.userId == participant.userId,
-                  orElse: () => BuyerInfo(
+                  orElse: () => const BuyerInfo(
                     userId: -1,
                     chatRoomId: -1,
                   ),

@@ -39,7 +39,7 @@ class NotificationRemoteDataSource {
         pod.NotificationResponseDto(
           id: notificationId,
           notificationType: pod.NotificationType.review_received,
-          title: '사용자${notificationId}',
+          title: '사용자 $notificationId',
           body: '${'⭐' * rating} 거래 후기를 남겼습니다',
           data: {
             'type': 'review_received',
@@ -57,7 +57,7 @@ class NotificationRemoteDataSource {
     }
 
     // 읽지 않은 알림 개수 계산
-    final unreadCount = totalCount - (totalCount ~/ 3);
+    const unreadCount = totalCount - (totalCount ~/ 3);
 
     return pod.NotificationListResponseDto(
       notifications: notifications,
@@ -79,7 +79,8 @@ class NotificationRemoteDataSource {
     if (_useMockData) {
       // Mock 데이터 반환
       await Future<void>.delayed(
-          const Duration(milliseconds: 500)); // 네트워크 지연 시뮬레이션
+        const Duration(milliseconds: 500),
+      ); // 네트워크 지연 시뮬레이션
       return _generateMockNotifications(page: page, limit: limit);
     }
 

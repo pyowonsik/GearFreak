@@ -59,7 +59,7 @@ class NotificationItemWidget extends ConsumerWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: _getNotificationColor(notification.notificationType)
-                      .withOpacity(0.1),
+                      .withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -156,7 +156,8 @@ class NotificationItemWidget extends ConsumerWidget {
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 7) {
-      return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
+      return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.'
+          '${dateTime.day.toString().padLeft(2, '0')}';
     } else if (difference.inDays > 0) {
       return '${difference.inDays}일 전';
     } else if (difference.inHours > 0) {
@@ -248,11 +249,11 @@ class _ReviewActionTextState extends ConsumerState<_ReviewActionText> {
     }
 
     // 리뷰가 작성되지 않았으면 "후기 남기러가기 !" 텍스트 표시
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
+    return const Padding(
+      padding: EdgeInsets.only(top: 8),
       child: Text(
         '후기 남기러가기 !',
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           color: Color(0xFF2563EB), // 포인트 컬러
           fontWeight: FontWeight.w600,

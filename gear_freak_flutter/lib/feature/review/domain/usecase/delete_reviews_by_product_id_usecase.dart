@@ -36,7 +36,7 @@ class DeleteReviewsByProductIdUseCase
     } on Exception catch (e, stackTrace) {
       return Left(
         DeleteTransactionReviewFailure(
-          '상품 후기 삭제에 실패했습니다: ${e.toString()}',
+          '상품 후기 삭제에 실패했습니다: $e',
           exception: e,
           stackTrace: stackTrace,
         ),
@@ -44,4 +44,3 @@ class DeleteReviewsByProductIdUseCase
     }
   }
 }
-

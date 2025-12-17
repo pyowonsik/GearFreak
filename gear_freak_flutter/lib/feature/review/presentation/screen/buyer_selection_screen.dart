@@ -33,4 +33,3 @@ class _BuyerSelectionScreenState extends ConsumerState<BuyerSelectionScreen> {
     );
   }
 }
-

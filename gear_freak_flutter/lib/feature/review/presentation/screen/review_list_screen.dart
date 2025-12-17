@@ -113,9 +113,10 @@ class _BuyerReviewsTabState extends ConsumerState<_BuyerReviewsTab>
         getPagination: () {
           final state = ref.read(buyerReviewListNotifierProvider);
           if (state is ReviewListLoaded) {
-            debugPrint(
-                '📊 [BuyerReviews] Pagination: page=${state.pagination.page}, '
-                'hasMore=${state.pagination.hasMore}, totalCount=${state.pagination.totalCount}');
+            debugPrint('📊 [BuyerReviews] Pagination: '
+                'page=${state.pagination.page}, '
+                'hasMore=${state.pagination.hasMore}, '
+                'totalCount=${state.pagination.totalCount}');
             return state.pagination;
           }
           if (state is ReviewListLoadingMore) {
@@ -135,8 +136,8 @@ class _BuyerReviewsTabState extends ConsumerState<_BuyerReviewsTab>
         },
         screenName: 'BuyerReviewsTab',
       );
-      debugPrint(
-          '📋 [BuyerReviewsTab] scrollController 생성됨: $scrollController');
+      debugPrint('📋 [BuyerReviewsTab] '
+          'scrollController 생성됨: $scrollController');
     });
   }
 
@@ -244,14 +245,15 @@ class _SellerReviewsTabState extends ConsumerState<_SellerReviewsTab>
         getPagination: () {
           final state = ref.read(sellerReviewListNotifierProvider);
           if (state is ReviewListLoaded) {
-            debugPrint(
-                '📊 [SellerReviews] Pagination: page=${state.pagination.page}, '
-                'hasMore=${state.pagination.hasMore}, totalCount=${state.pagination.totalCount}');
+            debugPrint('📊 [SellerReviews] Pagination: '
+                'page=${state.pagination.page}, '
+                'hasMore=${state.pagination.hasMore}, '
+                'totalCount=${state.pagination.totalCount}');
             return state.pagination;
           }
           if (state is ReviewListLoadingMore) {
-            debugPrint(
-                '📊 [SellerReviews] LoadingMore: page=${state.pagination.page}, '
+            debugPrint('📊 [SellerReviews] LoadingMore: '
+                'page=${state.pagination.page}, '
                 'hasMore=${state.pagination.hasMore}');
             return state.pagination;
           }
@@ -266,8 +268,8 @@ class _SellerReviewsTabState extends ConsumerState<_SellerReviewsTab>
         },
         screenName: 'SellerReviewsTab',
       );
-      debugPrint(
-          '📋 [SellerReviewsTab] scrollController 생성됨: $scrollController');
+      debugPrint('📋 [SellerReviewsTab] '
+          'scrollController 생성됨: $scrollController');
     });
   }
 
@@ -407,7 +409,8 @@ class _ReviewItemWidget extends StatelessWidget {
                 backgroundColor: const Color(0xFFF3F4F6),
                 backgroundImage: review.reviewerProfileImageUrl != null
                     ? CachedNetworkImageProvider(
-                        review.reviewerProfileImageUrl!)
+                        review.reviewerProfileImageUrl!,
+                      )
                     : null,
                 child: review.reviewerProfileImageUrl == null
                     ? const Icon(

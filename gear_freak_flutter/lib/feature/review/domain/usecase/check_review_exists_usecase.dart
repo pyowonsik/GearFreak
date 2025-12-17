@@ -50,7 +50,7 @@ class CheckReviewExistsUseCase
     } on Exception catch (e, stackTrace) {
       return Left(
         CheckReviewExistsFailure(
-          '리뷰 존재 여부 확인에 실패했습니다: ${e.toString()}',
+          '리뷰 존재 여부 확인에 실패했습니다: $e',
           exception: e,
           stackTrace: stackTrace,
         ),

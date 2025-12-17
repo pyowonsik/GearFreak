@@ -48,7 +48,7 @@ class GetBuyerReviewsUseCase
     } on Exception catch (e, stackTrace) {
       return Left(
         GetBuyerReviewsFailure(
-          '구매자 후기 목록을 불러오는데 실패했습니다: ${e.toString()}',
+          '구매자 후기 목록을 불러오는데 실패했습니다: $e',
           exception: e,
           stackTrace: stackTrace,
         ),

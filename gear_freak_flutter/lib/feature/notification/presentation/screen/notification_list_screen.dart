@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
@@ -31,7 +33,9 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
     // 초기 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       debugPrint('🔄 [NotificationListScreen] 데이터 로드 시작');
-      ref.read(notificationListNotifierProvider.notifier).loadNotifications();
+      unawaited(
+        ref.read(notificationListNotifierProvider.notifier).loadNotifications(),
+      );
 
       // 페이지네이션 초기화
       initPaginationScroll(
@@ -44,14 +48,15 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
         getPagination: () {
           final state = ref.read(notificationListNotifierProvider);
           if (state is NotificationListLoaded) {
-            debugPrint(
-                '📊 [NotificationList] Pagination: page=${state.pagination.page}, '
-                'hasMore=${state.pagination.hasMore}, totalCount=${state.pagination.totalCount}');
+            debugPrint('📊 [NotificationList] Pagination: '
+                'page=${state.pagination.page}, '
+                'hasMore=${state.pagination.hasMore}, '
+                'totalCount=${state.pagination.totalCount}');
             return state.pagination;
           }
           if (state is NotificationListLoadingMore) {
-            debugPrint(
-                '📊 [NotificationList] LoadingMore: page=${state.pagination.page}, '
+            debugPrint('📊 [NotificationList] LoadingMore: '
+                'page=${state.pagination.page}, '
                 'hasMore=${state.pagination.hasMore}');
             return state.pagination;
           }
@@ -66,8 +71,8 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
         },
         screenName: 'NotificationListScreen',
       );
-      debugPrint(
-          '📋 [NotificationListScreen] scrollController 생성됨: $scrollController');
+      debugPrint('📋 [NotificationListScreen] '
+          'scrollController 생성됨: $scrollController');
     });
   }
 
@@ -150,9 +155,11 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
                     _handleNotificationTap(context, notification);
                   },
                   onNotificationDelete: (notificationId) {
-                    ref
-                        .read(notificationListNotifierProvider.notifier)
-                        .deleteNotification(notificationId);
+                    unawaited(
+                      ref
+                          .read(notificationListNotifierProvider.notifier)
+                          .deleteNotification(notificationId),
+                    );
                   },
                 ),
       },
@@ -214,11 +221,15 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
       // 하지만 알림 데이터만으로는 판매자/구매자 구분이 어려움
       // 따라서 양쪽 모두 확인해야 함
 
-      debugPrint(
-          '🔗 리뷰 작성 화면으로 이동: productId=$productId, reviewerId=$reviewerId, revieweeId=$revieweeId, chatRoomId=$chatRoomId, currentUserId=$currentUserId');
+      debugPrint('🔗 리뷰 작성 화면으로 이동: '
+          'productId=$productId, '
+          'reviewerId=$reviewerId, '
+          'revieweeId=$revieweeId, '
+          'chatRoomId=$chatRoomId, '
+          'currentUserId=$currentUserId');
 
       // 읽음 처리
-      ref
+      await ref
           .read(notificationListNotifierProvider.notifier)
           .markAsRead(notification.id);
 
@@ -261,11 +272,12 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
         // → 판매자가 구매자에게 리뷰 작성 (seller_to_buyer)
         // (구매자 리뷰는 상품 상태 변경 시에만 작성 가능하므로 알림으로는 작성 불가)
         final result = await context.push<bool>(
-            '/product/$productId/review/write?revieweeId=$revieweeId&chatRoomId=$chatRoomId&isSellerReview=true');
+          '/product/$productId/review/write?revieweeId=$revieweeId&chatRoomId=$chatRoomId&isSellerReview=true',
+        );
 
         // 리뷰 작성 완료 후 돌아온 경우 알림 목록 새로고침
         if ((result ?? false) && mounted) {
-          ref
+          await ref
               .read(notificationListNotifierProvider.notifier)
               .loadNotifications();
         }
@@ -294,9 +306,10 @@ class _NotificationListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-        '📱 [_NotificationListView] build, notifications: ${notifications.length}, '
-        'isLoadingMore: $isLoadingMore, scrollController: $scrollController');
+    debugPrint('📱 [_NotificationListView] build, notifications:'
+        ' ${notifications.length}, '
+        'isLoadingMore: $isLoadingMore, '
+        'scrollController: $scrollController');
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView.separated(

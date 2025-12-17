@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
@@ -52,7 +54,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
       // 읽지 않은 알림 개수 조회 - NotificationListNotifier를 통해 처리
-      ref.read(notificationListNotifierProvider.notifier).loadUnreadCount();
+      unawaited(
+        ref.read(notificationListNotifierProvider.notifier).loadUnreadCount(),
+      );
     });
   }
 
@@ -111,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   await context.push('/notifications');
                   // 알림 화면에서 돌아온 경우 읽지 않은 알림 개수 다시 조회
                   if (mounted) {
-                    ref
+                    await ref
                         .read(notificationListNotifierProvider.notifier)
                         .loadUnreadCount();
                   }

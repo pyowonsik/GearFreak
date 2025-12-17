@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,7 +47,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     _pageController = PageController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final id = int.parse(widget.productId);
-      ref.read(productDetailNotifierProvider.notifier).loadProductDetail(id);
+      unawaited(
+        ref.read(productDetailNotifierProvider.notifier).loadProductDetail(id),
+      );
     });
   }
 
@@ -611,9 +615,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               IconButton(
                 onPressed: () {
                   final id = int.parse(widget.productId);
-                  ref
-                      .read(productDetailNotifierProvider.notifier)
-                      .toggleFavorite(id);
+                  unawaited(
+                    ref
+                        .read(productDetailNotifierProvider.notifier)
+                        .toggleFavorite(id),
+                  );
                 },
                 icon: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,

@@ -59,4 +59,3 @@ class StarRatingWidget extends StatelessWidget {
     );
   }
 }
-
