@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/feature/review/domain/usecase/create_seller_review_usecase.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/create_transaction_review_usecase.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_state.dart';
 
@@ -9,11 +10,17 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
   /// ReviewNotifier 생성자
   ///
   /// [createTransactionReviewUseCase]는 거래 후기 작성 UseCase입니다.
-  ReviewNotifier(this.createTransactionReviewUseCase)
-      : super(const ReviewInitial());
+  /// [createSellerReviewUseCase]는 판매자 후기 작성 UseCase입니다.
+  ReviewNotifier(
+    this.createTransactionReviewUseCase,
+    this.createSellerReviewUseCase,
+  ) : super(const ReviewInitial());
 
-  /// 거래 후기 작성 UseCase
+  /// 거래 후기 작성 UseCase (구매자 후기: 판매자 → 구매자)
   final CreateTransactionReviewUseCase createTransactionReviewUseCase;
+
+  /// 판매자 후기 작성 UseCase (구매자 → 판매자)
+  final CreateSellerReviewUseCase createSellerReviewUseCase;
 
   /// 구매자 후기 작성 (판매자 → 구매자)
   ///
@@ -56,6 +63,53 @@ class ReviewNotifier extends StateNotifier<ReviewState> {
       );
     } catch (e, stackTrace) {
       debugPrint('❌ [ReviewNotifier] 구매자 후기 작성 예외 발생: $e');
+      debugPrint('Stack trace: $stackTrace');
+      _safeSetState(ReviewError('후기 작성에 실패했습니다: $e'));
+      return false;
+    }
+  }
+
+  /// 판매자 후기 작성 (구매자 → 판매자)
+  ///
+  /// [productId]는 상품 ID입니다.
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [revieweeId]는 리뷰 대상자 ID (판매자 ID)입니다.
+  /// [rating]는 평점 (1~5)입니다.
+  /// [content]는 후기 내용입니다 (선택사항).
+  Future<bool> createSellerReview({
+    required int productId,
+    required int chatRoomId,
+    required int revieweeId,
+    required int rating,
+    String? content,
+  }) async {
+    try {
+      _safeSetState(const ReviewLoading());
+
+      final result = await createSellerReviewUseCase(
+        CreateSellerReviewParams(
+          productId: productId,
+          chatRoomId: chatRoomId,
+          revieweeId: revieweeId,
+          rating: rating,
+          content: content,
+        ),
+      );
+
+      return result.fold(
+        (failure) {
+          debugPrint('❌ [ReviewNotifier] 판매자 후기 작성 실패: ${failure.message}');
+          _safeSetState(ReviewError(failure.message));
+          return false;
+        },
+        (review) {
+          debugPrint('✅ [ReviewNotifier] 판매자 후기 작성 성공: reviewId=${review.id}');
+          _safeSetState(ReviewSuccess(review));
+          return true;
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint('❌ [ReviewNotifier] 판매자 후기 작성 예외 발생: $e');
       debugPrint('Stack trace: $stackTrace');
       _safeSetState(ReviewError('후기 작성에 실패했습니다: $e'));
       return false;

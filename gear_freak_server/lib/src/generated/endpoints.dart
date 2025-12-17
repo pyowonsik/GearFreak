@@ -786,6 +786,24 @@ class Endpoints extends _i1.EndpointDispatch {
             params['reviewId'],
           ),
         ),
+        'createSellerReview': _i1.MethodConnector(
+          name: 'createSellerReview',
+          params: {
+            'request': _i1.ParameterDescription(
+              name: 'request',
+              type: _i1.getType<_i21.CreateTransactionReviewRequestDto>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['review'] as _i7.ReviewEndpoint).createSellerReview(
+            session,
+            params['request'],
+          ),
+        ),
         'deleteReviewsByProductId': _i1.MethodConnector(
           name: 'deleteReviewsByProductId',
           params: {

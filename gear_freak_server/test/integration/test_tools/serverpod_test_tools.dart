@@ -1273,6 +1273,35 @@ class _ReviewEndpoint {
     });
   }
 
+  _i3.Future<_i29.TransactionReviewResponseDto> createSellerReview(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i30.CreateTransactionReviewRequestDto request,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'review',
+        method: 'createSellerReview',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'createSellerReview',
+          parameters: _i1.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i29.TransactionReviewResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<int> deleteReviewsByProductId(
     _i1.TestSessionBuilder sessionBuilder,
     int productId,

@@ -283,7 +283,7 @@ class _BuyerSelectionModalState extends ConsumerState<BuyerSelectionModal> {
                             context.pop();
                             widget.onBuyerSelected();
                             context.push(
-                              '/product/${widget.productId}/review/write?buyerId=${buyer.userId}&chatRoomId=${buyer.chatRoomId}',
+                              '/product/${widget.productId}/review/write?revieweeId=${buyer.userId}&chatRoomId=${buyer.chatRoomId}',
                             );
                           },
                           borderRadius: BorderRadius.circular(8),

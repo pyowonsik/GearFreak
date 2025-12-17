@@ -114,7 +114,7 @@ class FcmService {
     }
   }
 
-  /// 알림 탭 처리 (채팅 화면으로 이동)
+  /// 알림 탭 처리 (채팅 화면 또는 리뷰 작성 화면으로 이동)
   void handleNotificationTap(RemoteMessage message) {
     final data = message.data;
 
@@ -135,6 +135,31 @@ class FcmService {
         });
       } else {
         debugPrint('⚠️ GoRouter가 설정되지 않아 채팅 화면으로 이동할 수 없습니다');
+      }
+    }
+    // 후기 받음 알림인 경우 (구매자가 판매자 리뷰 작성)
+    else if (data['type'] == 'review_received' &&
+        data['productId'] != null &&
+        data['reviewerId'] != null &&
+        data['chatRoomId'] != null) {
+      final productId = data['productId'];
+      final reviewerId = data['reviewerId']; // 판매자 ID (후기를 작성한 사람)
+      final chatRoomId = data['chatRoomId'];
+      final rating = data['rating'];
+
+      debugPrint(
+          '🔗 판매자 리뷰 작성 화면으로 이동: productId=$productId, sellerId=$reviewerId, chatRoomId=$chatRoomId, rating=$rating');
+
+      // 라우터가 설정되어 있으면 판매자 리뷰 작성 화면으로 이동
+      // 구매자(알림을 받은 사람)가 판매자(reviewerId)에 대한 리뷰를 작성
+      if (_router != null) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _router?.push(
+              '/product/$productId/review/write?revieweeId=$reviewerId&chatRoomId=$chatRoomId&isSellerReview=true');
+          debugPrint('✅ 판매자 리뷰 작성 화면으로 이동 완료');
+        });
+      } else {
+        debugPrint('⚠️ GoRouter가 설정되지 않아 리뷰 작성 화면으로 이동할 수 없습니다');
       }
     }
   }

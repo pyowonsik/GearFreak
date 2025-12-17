@@ -19,6 +19,13 @@ class ReviewRepositoryImpl implements ReviewRepository {
   }
 
   @override
+  Future<pod.TransactionReviewResponseDto> createSellerReview(
+    pod.CreateTransactionReviewRequestDto request,
+  ) async {
+    return await remoteDataSource.createSellerReview(request);
+  }
+
+  @override
   Future<pod.TransactionReviewListResponseDto> getBuyerReviews({
     int page = 1,
     int limit = 10,

@@ -6,29 +6,34 @@ import 'package:gear_freak_flutter/feature/review/presentation/provider/review_s
 import 'package:gear_freak_flutter/feature/review/presentation/widget/star_rating_widget.dart';
 import 'package:go_router/go_router.dart';
 
-/// 후기 작성 화면 (구매자 후기)
+/// 후기 작성 화면
 /// Presentation Layer: UI
 class WriteReviewScreen extends ConsumerStatefulWidget {
   /// WriteReviewScreen 생성자
   ///
   /// [productId]는 상품 ID입니다.
-  /// [buyerId]는 구매자 ID입니다.
+  /// [revieweeId]는 리뷰 대상자 ID입니다 (구매자 후기: buyerId, 판매자 후기: sellerId).
   /// [chatRoomId]는 채팅방 ID입니다.
+  /// [isSellerReview]는 판매자 후기 작성 여부입니다 (true: 구매자→판매자, false: 판매자→구매자).
   const WriteReviewScreen({
     required this.productId,
-    required this.buyerId,
+    required this.revieweeId,
     required this.chatRoomId,
+    this.isSellerReview = false,
     super.key,
   });
 
   /// 상품 ID
   final int productId;
 
-  /// 구매자 ID
-  final int buyerId;
+  /// 리뷰 대상자 ID
+  final int revieweeId;
 
   /// 채팅방 ID
   final int chatRoomId;
+
+  /// 판매자 후기 작성 여부 (true: 구매자→판매자, false: 판매자→구매자)
+  final bool isSellerReview;
 
   @override
   ConsumerState<WriteReviewScreen> createState() => _WriteReviewScreenState();
@@ -70,11 +75,20 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
     });
 
     try {
-      final success =
-          await ref.read(reviewNotifierProvider.notifier).createBuyerReview(
+      final success = widget.isSellerReview
+          ? await ref.read(reviewNotifierProvider.notifier).createSellerReview(
                 productId: widget.productId,
                 chatRoomId: widget.chatRoomId,
-                revieweeId: widget.buyerId,
+                revieweeId: widget.revieweeId,
+                rating: _rating.toInt(),
+                content: _contentController.text.isEmpty
+                    ? null
+                    : _contentController.text,
+              )
+          : await ref.read(reviewNotifierProvider.notifier).createBuyerReview(
+                productId: widget.productId,
+                chatRoomId: widget.chatRoomId,
+                revieweeId: widget.revieweeId,
                 rating: _rating.toInt(),
                 content: _contentController.text.isEmpty
                     ? null
@@ -113,9 +127,14 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.isSellerReview ? '판매자 후기 작성' : '구매자 후기 작성';
+    final guideText = widget.isSellerReview
+        ? '거래하신 판매자에 대한 솔직한 후기를 작성해주세요.'
+        : '거래하신 구매자에 대한 솔직한 후기를 작성해주세요.';
+
     return Scaffold(
-      appBar: const GbAppBar(
-        title: Text('구매자 후기 작성'),
+      appBar: GbAppBar(
+        title: Text(title),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -131,9 +150,9 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
                   color: const Color(0xFFF3F4F6),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  '거래하신 구매자에 대한 솔직한 후기를 작성해주세요.',
-                  style: TextStyle(
+                child: Text(
+                  guideText,
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF6B7280),
                   ),

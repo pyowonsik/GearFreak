@@ -85,12 +85,24 @@ final createTransactionReviewUseCaseProvider =
   return CreateTransactionReviewUseCase(repository);
 });
 
+/// 판매자 후기 작성 UseCase Provider
+final createSellerReviewUseCaseProvider =
+    Provider<CreateSellerReviewUseCase>((ref) {
+  final repository = ref.watch(reviewRepositoryProvider);
+  return CreateSellerReviewUseCase(repository);
+});
+
 /// 리뷰 작성 Notifier Provider
 final reviewNotifierProvider =
     StateNotifierProvider.autoDispose<ReviewNotifier, ReviewState>((ref) {
   final createTransactionReviewUseCase =
       ref.watch(createTransactionReviewUseCaseProvider);
-  return ReviewNotifier(createTransactionReviewUseCase);
+  final createSellerReviewUseCase =
+      ref.watch(createSellerReviewUseCaseProvider);
+  return ReviewNotifier(
+    createTransactionReviewUseCase,
+    createSellerReviewUseCase,
+  );
 });
 
 /// 상품 ID로 후기 삭제 UseCase Provider

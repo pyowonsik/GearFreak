@@ -157,12 +157,16 @@ abstract final class AppRoutes {
           name: 'write-review',
           builder: (context, state) {
             final productId = state.pathParameters['productId'] ?? '';
-            final buyerId = state.uri.queryParameters['buyerId'];
+            final revieweeId = state.uri.queryParameters['revieweeId'] ??
+                state.uri.queryParameters['buyerId'];
             final chatRoomId = state.uri.queryParameters['chatRoomId'];
+            final isSellerReview =
+                state.uri.queryParameters['isSellerReview'] == 'true';
             return WriteReviewScreen(
               productId: int.parse(productId),
-              buyerId: buyerId != null ? int.parse(buyerId) : 0,
+              revieweeId: revieweeId != null ? int.parse(revieweeId) : 0,
               chatRoomId: chatRoomId != null ? int.parse(chatRoomId) : 0,
+              isSellerReview: isSellerReview,
             );
           },
         ),

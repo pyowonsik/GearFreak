@@ -18,91 +18,19 @@ class ReviewListScreen extends ConsumerStatefulWidget {
 }
 
 class _ReviewListScreenState extends ConsumerState<ReviewListScreen>
-    with SingleTickerProviderStateMixin, PaginationScrollMixin {
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-
-    // 탭 변경 감지
-    _tabController.addListener(_onTabChanged);
-
-    // 초기 데이터 로드
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadInitialData();
-    });
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
-    disposePaginationScroll();
     super.dispose();
-  }
-
-  /// 탭 변경 핸들러
-  void _onTabChanged() {
-    if (!_tabController.indexIsChanging) {
-      _loadInitialData();
-    }
-  }
-
-  /// 초기 데이터 로드
-  void _loadInitialData() {
-    if (_tabController.index == 0) {
-      // 구매자 후기
-      ref.read(buyerReviewListNotifierProvider.notifier).loadReviews();
-      _initPaginationForBuyer();
-    } else {
-      // 판매자 후기
-      ref.read(sellerReviewListNotifierProvider.notifier).loadReviews();
-      _initPaginationForSeller();
-    }
-  }
-
-  /// 구매자 후기 페이지네이션 초기화
-  void _initPaginationForBuyer() {
-    initPaginationScroll(
-      onLoadMore: () {
-        ref.read(buyerReviewListNotifierProvider.notifier).loadMoreReviews();
-      },
-      getPagination: () {
-        final state = ref.read(buyerReviewListNotifierProvider);
-        if (state is ReviewListLoaded) {
-          return state.pagination;
-        }
-        return null;
-      },
-      isLoading: () {
-        final state = ref.read(buyerReviewListNotifierProvider);
-        return state is ReviewListLoadingMore;
-      },
-      screenName: 'BuyerReviewsTab',
-    );
-  }
-
-  /// 판매자 후기 페이지네이션 초기화
-  void _initPaginationForSeller() {
-    initPaginationScroll(
-      onLoadMore: () {
-        ref.read(sellerReviewListNotifierProvider.notifier).loadMoreReviews();
-      },
-      getPagination: () {
-        final state = ref.read(sellerReviewListNotifierProvider);
-        if (state is ReviewListLoaded) {
-          return state.pagination;
-        }
-        return null;
-      },
-      isLoading: () {
-        final state = ref.read(sellerReviewListNotifierProvider);
-        return state is ReviewListLoadingMore;
-      },
-      screenName: 'SellerReviewsTab',
-    );
   }
 
   @override
@@ -142,12 +70,76 @@ class _ReviewListScreenState extends ConsumerState<ReviewListScreen>
 }
 
 /// 구매자 후기 탭
-class _BuyerReviewsTab extends ConsumerWidget {
+class _BuyerReviewsTab extends ConsumerStatefulWidget {
   const _BuyerReviewsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_BuyerReviewsTab> createState() => _BuyerReviewsTabState();
+}
+
+class _BuyerReviewsTabState extends ConsumerState<_BuyerReviewsTab>
+    with AutomaticKeepAliveClientMixin, PaginationScrollMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('🔄 [BuyerReviewsTab] initState 호출');
+
+    // 초기 데이터 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('🔄 [BuyerReviewsTab] 데이터 로드 시작');
+      ref.read(buyerReviewListNotifierProvider.notifier).loadReviews();
+
+      // 페이지네이션 초기화
+      initPaginationScroll(
+        onLoadMore: () {
+          debugPrint('🔥 [BuyerReviews] onLoadMore 호출됨!');
+          ref.read(buyerReviewListNotifierProvider.notifier).loadMoreReviews();
+        },
+        getPagination: () {
+          final state = ref.read(buyerReviewListNotifierProvider);
+          if (state is ReviewListLoaded) {
+            debugPrint(
+                '📊 [BuyerReviews] Pagination: page=${state.pagination.page}, '
+                'hasMore=${state.pagination.hasMore}, totalCount=${state.pagination.totalCount}');
+            return state.pagination;
+          }
+          if (state is ReviewListLoadingMore) {
+            debugPrint(
+                '📊 [BuyerReviews] LoadingMore: page=${state.pagination.page}, '
+                'hasMore=${state.pagination.hasMore}');
+            return state.pagination;
+          }
+          debugPrint('⚠️ [BuyerReviews] Pagination is null, state: $state');
+          return null;
+        },
+        isLoading: () {
+          final state = ref.read(buyerReviewListNotifierProvider);
+          final loading = state is ReviewListLoadingMore;
+          debugPrint('🔄 [BuyerReviews] isLoading: $loading');
+          return loading;
+        },
+        screenName: 'BuyerReviewsTab',
+      );
+      debugPrint(
+          '📋 [BuyerReviewsTab] scrollController 생성됨: $scrollController');
+    });
+  }
+
+  @override
+  void dispose() {
+    disposePaginationScroll();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin 필수
     final state = ref.watch(buyerReviewListNotifierProvider);
+    debugPrint('🎨 [BuyerReviewsTab] build, state: ${state.runtimeType}, '
+        'scrollController: $scrollController');
 
     return switch (state) {
       ReviewListInitial() || ReviewListLoading() => const GbLoadingView(),
@@ -160,42 +152,125 @@ class _BuyerReviewsTab extends ConsumerWidget {
       ReviewListLoaded(:final reviews) ||
       ReviewListLoadingMore(:final reviews) =>
         reviews.isEmpty
-            ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.rate_review_outlined,
-                      size: 80,
-                      color: Color(0xFFE5E7EB),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      '구매자 후기가 없습니다',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF9CA3AF),
-                        fontWeight: FontWeight.w500,
+            ? RefreshIndicator(
+                onRefresh: () async {
+                  await ref
+                      .read(buyerReviewListNotifierProvider.notifier)
+                      .loadReviews();
+                },
+                child: const SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: 400,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.rate_review_outlined,
+                            size: 80,
+                            color: Color(0xFFE5E7EB),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            '구매자 후기가 없습니다',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF9CA3AF),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               )
             : _ReviewListView(
                 reviews: reviews,
                 isLoadingMore: state is ReviewListLoadingMore,
+                scrollController: scrollController,
+                onRefresh: () async {
+                  await ref
+                      .read(buyerReviewListNotifierProvider.notifier)
+                      .loadReviews();
+                },
               ),
     };
   }
 }
 
 /// 판매자 후기 탭
-class _SellerReviewsTab extends ConsumerWidget {
+class _SellerReviewsTab extends ConsumerStatefulWidget {
   const _SellerReviewsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_SellerReviewsTab> createState() => _SellerReviewsTabState();
+}
+
+class _SellerReviewsTabState extends ConsumerState<_SellerReviewsTab>
+    with AutomaticKeepAliveClientMixin, PaginationScrollMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('🔄 [SellerReviewsTab] initState 호출');
+
+    // 초기 데이터 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('🔄 [SellerReviewsTab] 데이터 로드 시작');
+      ref.read(sellerReviewListNotifierProvider.notifier).loadReviews();
+
+      // 페이지네이션 초기화
+      initPaginationScroll(
+        onLoadMore: () {
+          debugPrint('🔥 [SellerReviews] onLoadMore 호출됨!');
+          ref.read(sellerReviewListNotifierProvider.notifier).loadMoreReviews();
+        },
+        getPagination: () {
+          final state = ref.read(sellerReviewListNotifierProvider);
+          if (state is ReviewListLoaded) {
+            debugPrint(
+                '📊 [SellerReviews] Pagination: page=${state.pagination.page}, '
+                'hasMore=${state.pagination.hasMore}, totalCount=${state.pagination.totalCount}');
+            return state.pagination;
+          }
+          if (state is ReviewListLoadingMore) {
+            debugPrint(
+                '📊 [SellerReviews] LoadingMore: page=${state.pagination.page}, '
+                'hasMore=${state.pagination.hasMore}');
+            return state.pagination;
+          }
+          debugPrint('⚠️ [SellerReviews] Pagination is null, state: $state');
+          return null;
+        },
+        isLoading: () {
+          final state = ref.read(sellerReviewListNotifierProvider);
+          final loading = state is ReviewListLoadingMore;
+          debugPrint('🔄 [SellerReviews] isLoading: $loading');
+          return loading;
+        },
+        screenName: 'SellerReviewsTab',
+      );
+      debugPrint(
+          '📋 [SellerReviewsTab] scrollController 생성됨: $scrollController');
+    });
+  }
+
+  @override
+  void dispose() {
+    disposePaginationScroll();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin 필수
     final state = ref.watch(sellerReviewListNotifierProvider);
+    debugPrint('🎨 [SellerReviewsTab] build, state: ${state.runtimeType}, '
+        'scrollController: $scrollController');
 
     return switch (state) {
       ReviewListInitial() || ReviewListLoading() => const GbLoadingView(),
@@ -208,30 +283,49 @@ class _SellerReviewsTab extends ConsumerWidget {
       ReviewListLoaded(:final reviews) ||
       ReviewListLoadingMore(:final reviews) =>
         reviews.isEmpty
-            ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.edit_note_outlined,
-                      size: 80,
-                      color: Color(0xFFE5E7EB),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      '판매자 후기가 없습니다',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF9CA3AF),
-                        fontWeight: FontWeight.w500,
+            ? RefreshIndicator(
+                onRefresh: () async {
+                  await ref
+                      .read(sellerReviewListNotifierProvider.notifier)
+                      .loadReviews();
+                },
+                child: const SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: 400,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.edit_note_outlined,
+                            size: 80,
+                            color: Color(0xFFE5E7EB),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            '판매자 후기가 없습니다',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF9CA3AF),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               )
             : _ReviewListView(
                 reviews: reviews,
                 isLoadingMore: state is ReviewListLoadingMore,
+                scrollController: scrollController,
+                onRefresh: () async {
+                  await ref
+                      .read(sellerReviewListNotifierProvider.notifier)
+                      .loadReviews();
+                },
               ),
     };
   }
@@ -242,41 +336,52 @@ class _ReviewListView extends StatelessWidget {
   const _ReviewListView({
     required this.reviews,
     required this.isLoadingMore,
+    required this.onRefresh,
+    this.scrollController,
   });
 
   final List<pod.TransactionReviewResponseDto> reviews;
   final bool isLoadingMore;
+  final Future<void> Function() onRefresh;
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: reviews.length + (isLoadingMore ? 1 : 0),
-      separatorBuilder: (context, index) {
-        if (index == reviews.length - 1 && isLoadingMore) {
-          return const SizedBox.shrink();
-        }
-        return const Divider(
-          height: 1,
-          thickness: 8,
-          color: Color(0xFFF3F4F6),
-        );
-      },
-      itemBuilder: (context, index) {
-        if (index == reviews.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
-              ),
-            ),
+    debugPrint('📱 [_ReviewListView] build, reviews: ${reviews.length}, '
+        'isLoadingMore: $isLoadingMore, scrollController: $scrollController');
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView.separated(
+        controller: scrollController,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: reviews.length + (isLoadingMore ? 1 : 0),
+        separatorBuilder: (context, index) {
+          if (index == reviews.length - 1 && isLoadingMore) {
+            return const SizedBox.shrink();
+          }
+          return const Divider(
+            height: 1,
+            thickness: 8,
+            color: Color(0xFFF3F4F6),
           );
-        }
+        },
+        itemBuilder: (context, index) {
+          if (index == reviews.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                ),
+              ),
+            );
+          }
 
-        final review = reviews[index];
-        return _ReviewItemWidget(review: review);
-      },
+          final review = reviews[index];
+          return _ReviewItemWidget(review: review);
+        },
+      ),
     );
   }
 }

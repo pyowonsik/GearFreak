@@ -485,6 +485,19 @@ class EndpointReview extends _i1.EndpointRef {
         {'reviewId': reviewId},
       );
 
+  /// 판매자에 대한 후기 작성 (구매자 → 판매자)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [request]는 후기 작성 요청 정보입니다.
+  /// 반환: 생성된 후기 응답 DTO
+  _i2.Future<_i28.TransactionReviewResponseDto> createSellerReview(
+          _i29.CreateTransactionReviewRequestDto request) =>
+      caller.callServerEndpoint<_i28.TransactionReviewResponseDto>(
+        'review',
+        'createSellerReview',
+        {'request': request},
+      );
+
   /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
   ///
   /// [session]은 Serverpod 세션입니다.
