@@ -23,10 +23,25 @@ class OtherUserProfileLoaded extends OtherUserProfileState {
   /// OtherUserProfileLoaded 생성자
   const OtherUserProfileLoaded({
     required this.user,
+    this.stats,
   });
 
   /// 사용자 정보
   final pod.User user;
+
+  /// 상품 통계 정보 (선택)
+  final pod.ProductStatsDto? stats;
+
+  /// copyWith 메서드
+  OtherUserProfileLoaded copyWith({
+    pod.User? user,
+    pod.ProductStatsDto? stats,
+  }) {
+    return OtherUserProfileLoaded(
+      user: user ?? this.user,
+      stats: stats ?? this.stats,
+    );
+  }
 }
 
 /// 에러 상태

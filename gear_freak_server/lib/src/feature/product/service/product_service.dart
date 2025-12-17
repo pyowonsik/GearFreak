@@ -506,7 +506,7 @@ class ProductService {
     return _buildPaginationResponse(products, totalCount, pagination);
   }
 
-  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
+  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
   Future<ProductStatsDto> getProductStats(
     Session session,
     int userId,
@@ -534,10 +534,17 @@ class ProductService {
       where: (f) => f.userId.equals(userId),
     );
 
+    // 후기 개수 (해당 사용자가 받은 모든 후기 - 구매자 후기 + 판매자 후기)
+    final reviewCount = await TransactionReview.db.count(
+      session,
+      where: (review) => review.revieweeId.equals(userId),
+    );
+
     return ProductStatsDto(
       sellingCount: sellingCount,
       soldCount: soldCount,
       favoriteCount: favoriteCount,
+      reviewCount: reviewCount,
     );
   }
 

@@ -116,4 +116,14 @@ class ProductRemoteDataSource {
       throw Exception('상품 통계를 불러오는데 실패했습니다: $e');
     }
   }
+
+  /// 다른 사용자의 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
+  /// [userId]는 조회할 사용자의 ID입니다.
+  Future<pod.ProductStatsDto> getProductStatsByUserId(int userId) async {
+    try {
+      return await _client.product.getProductStatsByUserId(userId);
+    } catch (e) {
+      throw Exception('상품 통계를 불러오는데 실패했습니다: $e');
+    }
+  }
 }

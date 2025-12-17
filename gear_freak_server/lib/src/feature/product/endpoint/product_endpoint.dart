@@ -98,9 +98,19 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
     );
   }
 
-  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
+  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
+  /// 현재 로그인한 사용자의 통계를 조회합니다.
   Future<ProductStatsDto> getProductStats(Session session) async {
     final user = await UserService.getMe(session);
     return await productService.getProductStats(session, user.id!);
+  }
+
+  /// 다른 사용자의 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
+  /// [userId]는 조회할 사용자의 ID입니다.
+  Future<ProductStatsDto> getProductStatsByUserId(
+    Session session,
+    int userId,
+  ) async {
+    return await productService.getProductStats(session, userId);
   }
 }

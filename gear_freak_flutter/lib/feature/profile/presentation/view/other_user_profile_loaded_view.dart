@@ -7,13 +7,18 @@ class OtherUserProfileLoadedView extends StatelessWidget {
   /// OtherUserProfileLoadedView 생성자
   ///
   /// [user]는 다른 사용자 정보입니다.
+  /// [stats]는 상품 통계 정보입니다 (선택).
   const OtherUserProfileLoadedView({
     required this.user,
+    this.stats,
     super.key,
   });
 
   /// 다른 사용자 정보
   final pod.User user;
+
+  /// 상품 통계 정보 (선택)
+  final pod.ProductStatsDto? stats;
 
   @override
   Widget build(BuildContext context) {
@@ -29,20 +34,20 @@ class OtherUserProfileLoadedView extends StatelessWidget {
             background: OtherUserProfileHeaderWidget(user: user),
           ),
         ),
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: Column(
             children: [
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               OtherUserProfileStatsSectionWidget(
-                sellingCount: 12,
-                soldCount: 45,
-                reviewCount: 38,
+                sellingCount: stats?.sellingCount ?? 0,
+                soldCount: stats?.soldCount ?? 0,
+                reviewCount: stats?.reviewCount ?? 0,
               ),
-              SizedBox(height: 24),
-              OtherUserProfileProductsSectionWidget(),
-              SizedBox(height: 24),
-              OtherUserProfileReviewSectionWidget(),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
+              const OtherUserProfileProductsSectionWidget(),
+              const SizedBox(height: 24),
+              const OtherUserProfileReviewSectionWidget(),
+              const SizedBox(height: 24),
             ],
           ),
         ),

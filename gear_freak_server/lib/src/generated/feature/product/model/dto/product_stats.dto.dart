@@ -18,12 +18,14 @@ abstract class ProductStatsDto
     required this.sellingCount,
     required this.soldCount,
     required this.favoriteCount,
+    required this.reviewCount,
   });
 
   factory ProductStatsDto({
     required int sellingCount,
     required int soldCount,
     required int favoriteCount,
+    required int reviewCount,
   }) = _ProductStatsDtoImpl;
 
   factory ProductStatsDto.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -31,6 +33,7 @@ abstract class ProductStatsDto
       sellingCount: jsonSerialization['sellingCount'] as int,
       soldCount: jsonSerialization['soldCount'] as int,
       favoriteCount: jsonSerialization['favoriteCount'] as int,
+      reviewCount: jsonSerialization['reviewCount'] as int,
     );
   }
 
@@ -43,6 +46,9 @@ abstract class ProductStatsDto
   /// 관심목록 상품 개수
   int favoriteCount;
 
+  /// 후기 개수
+  int reviewCount;
+
   /// Returns a shallow copy of this [ProductStatsDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -50,6 +56,7 @@ abstract class ProductStatsDto
     int? sellingCount,
     int? soldCount,
     int? favoriteCount,
+    int? reviewCount,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -57,6 +64,7 @@ abstract class ProductStatsDto
       'sellingCount': sellingCount,
       'soldCount': soldCount,
       'favoriteCount': favoriteCount,
+      'reviewCount': reviewCount,
     };
   }
 
@@ -66,6 +74,7 @@ abstract class ProductStatsDto
       'sellingCount': sellingCount,
       'soldCount': soldCount,
       'favoriteCount': favoriteCount,
+      'reviewCount': reviewCount,
     };
   }
 
@@ -80,10 +89,12 @@ class _ProductStatsDtoImpl extends ProductStatsDto {
     required int sellingCount,
     required int soldCount,
     required int favoriteCount,
+    required int reviewCount,
   }) : super._(
           sellingCount: sellingCount,
           soldCount: soldCount,
           favoriteCount: favoriteCount,
+          reviewCount: reviewCount,
         );
 
   /// Returns a shallow copy of this [ProductStatsDto]
@@ -94,11 +105,13 @@ class _ProductStatsDtoImpl extends ProductStatsDto {
     int? sellingCount,
     int? soldCount,
     int? favoriteCount,
+    int? reviewCount,
   }) {
     return ProductStatsDto(
       sellingCount: sellingCount ?? this.sellingCount,
       soldCount: soldCount ?? this.soldCount,
       favoriteCount: favoriteCount ?? this.favoriteCount,
+      reviewCount: reviewCount ?? this.reviewCount,
     );
   }
 }

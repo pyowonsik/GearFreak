@@ -37,6 +37,7 @@ product:
   - getMyFavoriteProducts:
   - updateProductStatus:
   - getProductStats:
+  - getProductStatsByUserId:
 review:
   - createTransactionReview:
   - getBuyerReviews:

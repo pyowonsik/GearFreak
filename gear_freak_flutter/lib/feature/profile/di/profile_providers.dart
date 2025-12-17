@@ -63,6 +63,11 @@ final otherUserProfileNotifierProvider = StateNotifierProvider.autoDispose<
     OtherUserProfileNotifier, OtherUserProfileState>(
   (ref) {
     final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
-    return OtherUserProfileNotifier(getUserByIdUseCase);
+    final getProductStatsByUserIdUseCase =
+        ref.watch(getProductStatsByUserIdUseCaseProvider);
+    return OtherUserProfileNotifier(
+      getUserByIdUseCase,
+      getProductStatsByUserIdUseCase,
+    );
   },
 );

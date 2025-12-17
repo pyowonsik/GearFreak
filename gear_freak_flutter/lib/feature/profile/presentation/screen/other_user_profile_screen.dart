@@ -33,9 +33,11 @@ class _OtherUserProfileScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userId = int.tryParse(widget.userId);
       if (userId != null) {
-        ref
-            .read(otherUserProfileNotifierProvider.notifier)
-            .loadUserProfile(userId);
+        final notifier = ref.read(otherUserProfileNotifierProvider.notifier);
+        // 프로필 로드 후 통계도 로드
+        notifier.loadUserProfile(userId).then((_) {
+          notifier.loadProductStats(userId);
+        });
       }
     });
   }
@@ -61,8 +63,10 @@ class _OtherUserProfileScreenState
               }
             },
           ),
-        OtherUserProfileLoaded(:final user) => OtherUserProfileLoadedView(
+        OtherUserProfileLoaded(:final user, :final stats) =>
+          OtherUserProfileLoadedView(
             user: user,
+            stats: stats,
           ),
       },
     );

@@ -61,4 +61,3 @@ class OtherUserProfileStatsSectionWidget extends StatelessWidget {
     );
   }
 }
-

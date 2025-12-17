@@ -121,4 +121,3 @@ class OtherUserProfileProductsSectionWidget extends StatelessWidget {
     );
   }
 }
-

@@ -124,4 +124,3 @@ class OtherUserProfileHeaderWidget extends StatelessWidget {
     );
   }
 }
-

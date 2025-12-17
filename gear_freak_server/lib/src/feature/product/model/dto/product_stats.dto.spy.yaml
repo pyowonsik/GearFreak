@@ -8,3 +8,5 @@ fields:
   soldCount: int
   ### 관심목록 상품 개수
   favoriteCount: int
+  ### 후기 개수
+  reviewCount: int

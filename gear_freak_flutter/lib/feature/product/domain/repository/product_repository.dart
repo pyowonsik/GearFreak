@@ -43,4 +43,8 @@ abstract class ProductRepository {
 
   /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
   Future<pod.ProductStatsDto> getProductStats();
+
+  /// 다른 사용자의 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
+  /// [userId]는 조회할 사용자의 ID입니다.
+  Future<pod.ProductStatsDto> getProductStatsByUserId(int userId);
 }

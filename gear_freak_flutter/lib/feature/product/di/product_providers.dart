@@ -10,6 +10,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_favorit
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
@@ -105,6 +106,13 @@ final updateProductStatusUseCaseProvider =
 final getProductStatsUseCaseProvider = Provider<GetProductStatsUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
   return GetProductStatsUseCase(repository);
+});
+
+/// Get Product Stats By User Id UseCase Provider
+final getProductStatsByUserIdUseCaseProvider =
+    Provider<GetProductStatsByUserIdUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return GetProductStatsByUserIdUseCase(repository);
 });
 
 /// 삭제된 상품 ID 이벤트 Provider (단일 소스)
