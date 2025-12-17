@@ -4,6 +4,7 @@ import 'package:gear_freak_flutter/feature/auth/presentation/screen/signup_scree
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_screen.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_selection_screen.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_screen.dart';
+import 'package:gear_freak_flutter/feature/notification/presentation/screen/notification_list_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_screen.dart';
@@ -169,6 +170,13 @@ abstract final class AppRoutes {
               isSellerReview: isSellerReview,
             );
           },
+        ),
+
+        // 알림 리스트 화면
+        GoRoute(
+          path: '/notifications',
+          name: 'notification-list',
+          builder: (context, state) => const NotificationListScreen(),
         ),
       ];
 }

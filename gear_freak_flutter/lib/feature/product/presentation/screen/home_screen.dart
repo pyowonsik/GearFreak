@@ -7,6 +7,7 @@ import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/view/view.dart';
+import 'package:go_router/go_router.dart';
 
 /// 홈 화면
 class HomeScreen extends ConsumerStatefulWidget {
@@ -95,7 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
                 onPressed: () {
-                  // TODO: 알림 화면으로 이동
+                  context.push('/notifications');
                 },
               ),
               Positioned(
