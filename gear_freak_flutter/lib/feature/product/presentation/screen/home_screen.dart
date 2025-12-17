@@ -4,6 +4,8 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
+import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/view/view.dart';
@@ -49,6 +51,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     // 초기 상품 목록 로드 (전체)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
+      // 읽지 않은 알림 개수 조회 - NotificationListNotifier를 통해 처리
+      ref.read(notificationListNotifierProvider.notifier).loadUnreadCount();
     });
   }
 
@@ -81,6 +85,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final productState = ref.watch(productNotifierProvider);
+    final notificationState = ref.watch(notificationListNotifierProvider);
+    // 읽지 않은 알림 개수 추출
+    final unreadCount = switch (notificationState) {
+      NotificationListLoaded(:final unreadCount) => unreadCount,
+      NotificationListLoadingMore(:final unreadCount) => unreadCount,
+      _ => 0,
+    };
 
     return Scaffold(
       appBar: GbAppBar(
@@ -95,22 +106,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             children: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {
-                  context.push('/notifications');
+                onPressed: () async {
+                  // 알림 화면으로 이동하고 결과 대기
+                  await context.push('/notifications');
+                  // 알림 화면에서 돌아온 경우 읽지 않은 알림 개수 다시 조회
+                  if (mounted) {
+                    ref
+                        .read(notificationListNotifierProvider.notifier)
+                        .loadUnreadCount();
+                  }
                 },
               ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(4),
+              // 읽지 않은 알림이 있을 때만 빨간 점 표시
+              if (unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ],

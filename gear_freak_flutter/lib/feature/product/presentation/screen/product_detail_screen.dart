@@ -359,10 +359,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       CircleAvatar(
                         radius: 20,
                         backgroundColor: const Color(0xFFF3F4F6),
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.grey.shade500,
-                        ),
+                        backgroundImage: (sellerData?.profileImageUrl != null &&
+                                sellerData!.profileImageUrl!.isNotEmpty)
+                            ? CachedNetworkImageProvider(
+                                sellerData.profileImageUrl!,
+                              )
+                            : (productData.seller?.profileImageUrl != null &&
+                                    productData
+                                        .seller!.profileImageUrl!.isNotEmpty)
+                                ? CachedNetworkImageProvider(
+                                    productData.seller!.profileImageUrl!,
+                                  )
+                                : null,
+                        child: (sellerData?.profileImageUrl == null ||
+                                    sellerData!.profileImageUrl!.isEmpty) &&
+                                (productData.seller?.profileImageUrl == null ||
+                                    productData
+                                        .seller!.profileImageUrl!.isEmpty)
+                            ? Icon(
+                                Icons.person,
+                                color: Colors.grey.shade500,
+                              )
+                            : null,
                       ),
                       const SizedBox(width: 12),
                       Column(

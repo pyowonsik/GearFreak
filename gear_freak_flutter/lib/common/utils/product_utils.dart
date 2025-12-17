@@ -8,5 +8,5 @@ String getProductLocation(pod.Product product) {
     product.baseAddress,
     product.detailAddress,
   ].where((e) => e != null && e.isNotEmpty).join(' ');
-  return location.isNotEmpty ? location : '주소 없음';
+  return location.isNotEmpty ? location : '';
 }

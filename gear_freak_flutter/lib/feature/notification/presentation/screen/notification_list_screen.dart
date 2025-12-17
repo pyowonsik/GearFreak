@@ -260,8 +260,15 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
         // 판매자 리뷰가 없고 구매자 리뷰도 없는 경우
         // → 판매자가 구매자에게 리뷰 작성 (seller_to_buyer)
         // (구매자 리뷰는 상품 상태 변경 시에만 작성 가능하므로 알림으로는 작성 불가)
-        context.push(
+        final result = await context.push<bool>(
             '/product/$productId/review/write?revieweeId=$revieweeId&chatRoomId=$chatRoomId&isSellerReview=true');
+
+        // 리뷰 작성 완료 후 돌아온 경우 알림 목록 새로고침
+        if ((result ?? false) && mounted) {
+          ref
+              .read(notificationListNotifierProvider.notifier)
+              .loadNotifications();
+        }
       }
     }
   }

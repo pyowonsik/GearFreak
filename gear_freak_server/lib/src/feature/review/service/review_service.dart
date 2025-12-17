@@ -86,6 +86,7 @@ class ReviewService {
         rating: request.rating,
         productId: request.productId,
         chatRoomId: request.chatRoomId,
+        content: request.content,
       ).catchError((error) {
         developer.log(
           '⚠️ 후기 FCM 알림 전송 실패 (무시): $error',
@@ -194,6 +195,7 @@ class ReviewService {
         rating: request.rating,
         productId: request.productId,
         chatRoomId: request.chatRoomId,
+        content: request.content,
       ).catchError((error) {
         developer.log(
           '⚠️ 후기 FCM 알림 전송 실패 (무시): $error',
@@ -489,6 +491,7 @@ class ReviewService {
     required int rating,
     required int productId,
     required int chatRoomId,
+    String? content,
   }) async {
     // Session이 닫힌 후에도 실행될 수 있으므로 안전한 로깅 헬퍼
     void safeLog(String message, {LogLevel level = LogLevel.info}) {
@@ -514,9 +517,19 @@ class ReviewService {
       }
 
       // 2. 알림 제목 및 본문 생성
-      final title = reviewerNickname ?? '알 수 없음';
-      final starEmoji = '⭐' * rating;
-      final body = '$starEmoji 거래 후기를 남겼습니다';
+      final title = '거래후기';
+      final reviewerName = reviewerNickname ?? '알 수 없음';
+
+      // 리뷰 내용 처리 (16자 이상이면 자르고 "..." 추가)
+      String reviewContent = content?.trim() ?? '';
+      if (reviewContent.length > 16) {
+        reviewContent = '${reviewContent.substring(0, 16)}...';
+      }
+
+      // 리뷰 내용이 있으면 따옴표로 감싸고, 없으면 빈 문자열
+      final contentText = reviewContent.isNotEmpty ? '"$reviewContent" ' : '';
+
+      final body = '$reviewerName님이 $contentText거래 후기를 남겨주셨습니다 !';
 
       // 3. 추가 데이터 설정 (딥링크를 위해 productId, chatRoomId 포함)
       final data = {

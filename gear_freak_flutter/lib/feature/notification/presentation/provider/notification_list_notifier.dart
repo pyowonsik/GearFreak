@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/notification/domain/usecase/delete_notification_usecase.dart';
 import 'package:gear_freak_flutter/feature/notification/domain/usecase/get_notifications_usecase.dart';
+import 'package:gear_freak_flutter/feature/notification/domain/usecase/get_unread_count_usecase.dart';
 import 'package:gear_freak_flutter/feature/notification/domain/usecase/mark_as_read_usecase.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/check_review_exists_usecase.dart';
@@ -15,6 +16,7 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
     this.markAsReadUseCase,
     this.deleteNotificationUseCase,
     this.checkReviewExistsUseCase,
+    this.getUnreadCountUseCase,
   ) : super(const NotificationListInitial());
 
   /// 알림 목록 조회 UseCase
@@ -28,6 +30,9 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
 
   /// 리뷰 존재 여부 확인 UseCase
   final CheckReviewExistsUseCase checkReviewExistsUseCase;
+
+  /// 읽지 않은 알림 개수 조회 UseCase
+  final GetUnreadCountUseCase getUnreadCountUseCase;
 
   /// 알림 목록 로드
   Future<void> loadNotifications({int page = 1, int limit = 20}) async {
@@ -304,5 +309,33 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
     );
 
     return (buyerReviewExists, sellerReviewExists);
+  }
+
+  /// 읽지 않은 알림 개수만 조회 (알림 목록을 로드하지 않음)
+  Future<void> loadUnreadCount() async {
+    final result = await getUnreadCountUseCase(null);
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [NotificationListNotifier] 읽지 않은 알림 개수 조회 실패:'
+            ' ${failure.message}');
+      },
+      (count) {
+        debugPrint('✅ [NotificationListNotifier] 읽지 않은 알림 개수 조회 성공: $count');
+        // 현재 상태가 로드된 상태인 경우 unreadCount만 업데이트
+        final currentState = state;
+        if (currentState is NotificationListLoaded) {
+          state = currentState.copyWith(unreadCount: count);
+        } else if (currentState is NotificationListLoadingMore) {
+          state = NotificationListLoadingMore(
+            notifications: currentState.notifications,
+            pagination: currentState.pagination,
+            unreadCount: count,
+          );
+        }
+        // 초기 상태나 로딩 상태인 경우에는 상태를 변경하지 않음
+        // (알림 목록을 로드할 때 unreadCount가 함께 업데이트됨)
+      },
+    );
   }
 }

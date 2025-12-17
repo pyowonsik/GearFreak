@@ -102,7 +102,8 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
         // 스낵바 표시 후 약간의 딜레이를 주고 화면 닫기
         await Future<void>.delayed(const Duration(milliseconds: 300));
         if (!mounted) return;
-        context.pop();
+        // 리뷰 작성 완료를 알리기 위해 true 반환
+        context.pop(true);
       } else {
         // ReviewNotifier의 상태를 확인하기 전에 mounted 체크
         if (!mounted) return;
