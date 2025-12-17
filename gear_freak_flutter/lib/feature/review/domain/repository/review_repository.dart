@@ -29,4 +29,11 @@ abstract class ReviewRepository {
 
   /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
   Future<int> deleteReviewsByProductId(int productId);
+
+  /// 리뷰 존재 여부 확인
+  Future<bool> checkReviewExists({
+    required int productId,
+    required int chatRoomId,
+    required pod.ReviewType reviewType,
+  });
 }

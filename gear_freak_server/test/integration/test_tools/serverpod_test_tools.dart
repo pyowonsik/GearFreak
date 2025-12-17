@@ -72,8 +72,10 @@ import 'package:gear_freak_server/src/generated/feature/review/model/dto/create_
     as _i31;
 import 'package:gear_freak_server/src/generated/feature/review/model/dto/transaction_review_list_response.dto.dart'
     as _i32;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/review/model/review_type.dart'
     as _i33;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i34;
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -1437,6 +1439,41 @@ class _ReviewEndpoint {
       }
     });
   }
+
+  _i3.Future<bool> checkReviewExists(
+    _i1.TestSessionBuilder sessionBuilder,
+    int productId,
+    int chatRoomId,
+    _i33.ReviewType reviewType,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'review',
+        method: 'checkReviewExists',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'checkReviewExists',
+          parameters: _i1.testObjectToJson({
+            'productId': productId,
+            'chatRoomId': chatRoomId,
+            'reviewType': reviewType,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _FcmEndpoint {
@@ -1606,7 +1643,7 @@ class _UserEndpoint {
 
   _i3.Future<_i6.User> updateUserProfile(
     _i1.TestSessionBuilder sessionBuilder,
-    _i33.UpdateUserProfileRequestDto request,
+    _i34.UpdateUserProfileRequestDto request,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =

@@ -69,10 +69,12 @@ import 'package:gear_freak_client/src/protocol/feature/review/model/dto/create_t
     as _i30;
 import 'package:gear_freak_client/src/protocol/feature/review/model/dto/transaction_review_list_response.dto.dart'
     as _i31;
-import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/review/model/review_type.dart'
     as _i32;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i33;
-import 'protocol.dart' as _i34;
+import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i33;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i34;
+import 'protocol.dart' as _i35;
 
 /// S3 엔드포인트 (공통 사용)
 /// {@category Endpoint}
@@ -561,6 +563,28 @@ class EndpointReview extends _i1.EndpointRef {
         'deleteReviewsByProductId',
         {'productId': productId},
       );
+
+  /// 리뷰 존재 여부 확인
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [productId]는 상품 ID입니다.
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [reviewType]는 리뷰 타입입니다.
+  /// 반환: 리뷰가 존재하면 true, 없으면 false
+  _i2.Future<bool> checkReviewExists(
+    int productId,
+    int chatRoomId,
+    _i32.ReviewType reviewType,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'review',
+        'checkReviewExists',
+        {
+          'productId': productId,
+          'chatRoomId': chatRoomId,
+          'reviewType': reviewType,
+        },
+      );
 }
 
 /// FCM 엔드포인트
@@ -633,7 +657,7 @@ class EndpointUser extends _i1.EndpointRef {
 
   /// 사용자 프로필 수정
   _i2.Future<_i5.User> updateUserProfile(
-          _i32.UpdateUserProfileRequestDto request) =>
+          _i33.UpdateUserProfileRequestDto request) =>
       caller.callServerEndpoint<_i5.User>(
         'user',
         'updateUserProfile',
@@ -643,10 +667,10 @@ class EndpointUser extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i33.Caller(client);
+    auth = _i34.Caller(client);
   }
 
-  late final _i33.Caller auth;
+  late final _i34.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -665,7 +689,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i34.Protocol(),
+          _i35.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

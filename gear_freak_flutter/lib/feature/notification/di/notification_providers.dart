@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/notification/domain/repository/notifi
 import 'package:gear_freak_flutter/feature/notification/domain/usecase/usecases.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_notifier.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
+import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 
 /// 알림 원격 데이터 소스 Provider
 final notificationRemoteDataSourceProvider =
@@ -59,10 +60,13 @@ final notificationListNotifierProvider = StateNotifierProvider.autoDispose<
     final markAsReadUseCase = ref.watch(markAsReadUseCaseProvider);
     final deleteNotificationUseCase =
         ref.watch(deleteNotificationUseCaseProvider);
+    final checkReviewExistsUseCase =
+        ref.watch(checkReviewExistsUseCaseProvider);
     return NotificationListNotifier(
       getNotificationsUseCase,
       markAsReadUseCase,
       deleteNotificationUseCase,
+      checkReviewExistsUseCase,
     );
   },
 );

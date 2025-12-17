@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/widget/notification_item_widget.dart';
+import 'package:go_router/go_router.dart';
 
 /// 알림 리스트 화면
 /// Presentation Layer: UI
@@ -158,10 +160,10 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
   }
 
   /// 알림 탭 처리 (딥링크 네비게이션)
-  void _handleNotificationTap(
+  Future<void> _handleNotificationTap(
     BuildContext context,
     pod.NotificationResponseDto notification,
-  ) {
+  ) async {
     final data = notification.data;
     if (data == null || data.isEmpty) {
       return;
@@ -172,21 +174,95 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
         data['productId'] != null &&
         data['reviewerId'] != null &&
         data['chatRoomId'] != null) {
-      final productId = data['productId'];
-      final reviewerId = data['reviewerId'];
-      final chatRoomId = data['chatRoomId'];
+      final productId = int.tryParse(data['productId'].toString());
+      final reviewerId = int.tryParse(data['reviewerId'].toString());
+      final chatRoomId = int.tryParse(data['chatRoomId'].toString());
+
+      if (productId == null || reviewerId == null || chatRoomId == null) {
+        return;
+      }
+
+      // 현재 사용자 ID 가져오기
+      final authState = ref.read(authNotifierProvider);
+      final currentUserId =
+          authState is AuthAuthenticated ? authState.user.id : null;
+
+      if (currentUserId == null) {
+        debugPrint('⚠️ 현재 사용자 ID를 가져올 수 없습니다.');
+        return;
+      }
+
+      // 알림을 받은 사람(현재 사용자)이 리뷰를 작성해야 함
+      // reviewerId는 리뷰를 작성한 사람(알림을 보낸 사람)
+      // 현재 사용자는 reviewerId에게 리뷰를 작성해야 함
+      final revieweeId = reviewerId; // 리뷰를 작성할 대상
+
+      // 리뷰 타입 결정: 현재 사용자가 판매자인지 구매자인지 확인
+      // 알림 데이터의 revieweeId는 알림을 받은 사람(현재 사용자)
+      // notification.userId == currentUserId (알림을 받은 사람)
+      // reviewerId는 리뷰를 작성한 사람 (현재 사용자가 리뷰를 작성할 대상)
+
+      // 판매자가 구매자에게 리뷰 작성 (seller_to_buyer) → 구매자가 알림 받음
+      // → 구매자가 판매자에게 리뷰 작성 (buyer_to_seller)
+      // 구매자가 판매자에게 리뷰 작성 (buyer_to_seller) → 판매자가 알림 받음
+      // → 판매자가 구매자에게 리뷰 작성 (seller_to_buyer)
+
+      // 알림을 받은 사람이 작성할 리뷰 타입 결정
+      // notification.userId는 알림을 받은 사람 = 현재 사용자
+      // reviewerId는 리뷰를 작성한 사람 = 현재 사용자가 리뷰를 작성할 대상
+      // 현재 사용자가 작성할 리뷰 타입은 알림을 받은 사람의 역할에 따라 결정됨
+      // 하지만 알림 데이터만으로는 판매자/구매자 구분이 어려움
+      // 따라서 양쪽 모두 확인해야 함
 
       debugPrint(
-          '🔗 판매자 리뷰 작성 화면으로 이동: productId=$productId, reviewerId=$reviewerId, chatRoomId=$chatRoomId');
+          '🔗 리뷰 작성 화면으로 이동: productId=$productId, reviewerId=$reviewerId, revieweeId=$revieweeId, chatRoomId=$chatRoomId, currentUserId=$currentUserId');
 
       // 읽음 처리
       ref
           .read(notificationListNotifierProvider.notifier)
           .markAsRead(notification.id);
 
-      // 리뷰 작성 화면으로 이동
-      context.push(
-          '/product/$productId/review/write?revieweeId=$reviewerId&chatRoomId=$chatRoomId&isSellerReview=true');
+      // 리뷰 존재 여부 확인 (양쪽 모두 확인) - Notifier를 통해 처리
+      final (buyerReviewExists, sellerReviewExists) = await ref
+          .read(notificationListNotifierProvider.notifier)
+          .checkReviewExists(
+            productId: productId,
+            chatRoomId: chatRoomId,
+          );
+
+      if (!mounted) return;
+
+      // 알림 탭 시 리뷰 작성 규칙:
+      // 1. 구매자 리뷰(buyer_to_seller)는 상품 상태 변경 시에만 작성 가능
+      // 2. 알림 탭 시에는 판매자 리뷰(seller_to_buyer)만 작성 가능
+      //
+      // 시나리오:
+      // - 판매자가 구매자에게 리뷰 작성 (seller_to_buyer) → 구매자가 알림 받음
+      //   → 구매자는 판매자에게 리뷰를 작성해야 하지만, 알림으로는 작성 불가
+      //   → "이미 작성한 화면"으로 이동 (구매자 리뷰는 상품 상태 변경 시에만 작성 가능)
+      // - 구매자가 판매자에게 리뷰 작성 (buyer_to_seller) → 판매자가 알림 받음
+      //   → 판매자는 구매자에게 리뷰 작성 가능 (seller_to_buyer)
+      //   → 판매자 리뷰가 이미 작성되어 있으면 "이미 작성한 화면"으로 이동
+
+      if (sellerReviewExists) {
+        // 판매자 리뷰가 이미 작성되어 있음
+        // → 판매자가 구매자에게 리뷰를 작성했다는 의미
+        // → 구매자가 알림을 받았으므로, 구매자는 "판매자가 나에게 남긴 리뷰"를 봐야 함
+        // → 리뷰 목록 화면의 "판매자 후기" 탭으로 이동 (인덱스 1)
+        context.push('/profile/reviews?tabIndex=1');
+      } else if (buyerReviewExists && !sellerReviewExists) {
+        // 구매자 리뷰는 작성됨, 판매자 리뷰는 아직 안 됨
+        // → 구매자가 판매자에게 리뷰 작성 (buyer_to_seller) → 판매자가 알림 받음
+        // → 판매자는 "구매자가 나에게 남긴 리뷰"를 봐야 함
+        // → 리뷰 목록 화면의 "구매자 후기" 탭으로 이동 (인덱스 0)
+        context.push('/profile/reviews?tabIndex=0');
+      } else {
+        // 판매자 리뷰가 없고 구매자 리뷰도 없는 경우
+        // → 판매자가 구매자에게 리뷰 작성 (seller_to_buyer)
+        // (구매자 리뷰는 상품 상태 변경 시에만 작성 가능하므로 알림으로는 작성 불가)
+        context.push(
+            '/product/$productId/review/write?revieweeId=$revieweeId&chatRoomId=$chatRoomId&isSellerReview=true');
+      }
     }
   }
 }

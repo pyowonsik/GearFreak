@@ -111,3 +111,10 @@ final deleteReviewsByProductIdUseCaseProvider =
   final repository = ref.watch(reviewRepositoryProvider);
   return DeleteReviewsByProductIdUseCase(repository);
 });
+
+/// 리뷰 존재 여부 확인 UseCase Provider
+final checkReviewExistsUseCaseProvider =
+    Provider<CheckReviewExistsUseCase>((ref) {
+  final repository = ref.watch(reviewRepositoryProvider);
+  return CheckReviewExistsUseCase(repository);
+});

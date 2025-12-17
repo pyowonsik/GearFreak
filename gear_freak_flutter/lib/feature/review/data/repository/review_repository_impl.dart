@@ -51,4 +51,17 @@ class ReviewRepositoryImpl implements ReviewRepository {
   Future<int> deleteReviewsByProductId(int productId) async {
     return remoteDataSource.deleteReviewsByProductId(productId);
   }
+
+  @override
+  Future<bool> checkReviewExists({
+    required int productId,
+    required int chatRoomId,
+    required pod.ReviewType reviewType,
+  }) async {
+    return remoteDataSource.checkReviewExists(
+      productId: productId,
+      chatRoomId: chatRoomId,
+      reviewType: reviewType,
+    );
+  }
 }

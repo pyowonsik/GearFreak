@@ -59,3 +59,13 @@ class DeleteTransactionReviewFailure extends ReviewFailure {
     super.stackTrace,
   });
 }
+
+/// 리뷰 존재 여부 확인 실패
+class CheckReviewExistsFailure extends ReviewFailure {
+  /// CheckReviewExistsFailure 생성자
+  const CheckReviewExistsFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+}

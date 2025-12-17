@@ -393,7 +393,7 @@ class ProductService {
     // 일반적인 경우 (판매완료 제외 불필요)
     final totalCount = await _getTotalCount(session, filterParams);
     final products = await _getSortedProducts(
-            session, filterParams, sortBy, pagination.limit, offset);
+        session, filterParams, sortBy, pagination.limit, offset);
 
     return _buildPaginationResponse(products, totalCount, pagination);
   }
@@ -461,7 +461,7 @@ class ProductService {
       where: (p) => p.sellerId.equals(userId),
       orderBy: (p) => p.createdAt,
       orderDescending: true,
-        limit: pagination.limit,
+      limit: pagination.limit,
       offset: offset,
     );
 

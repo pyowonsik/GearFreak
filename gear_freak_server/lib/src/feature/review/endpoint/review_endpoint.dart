@@ -122,4 +122,32 @@ class ReviewEndpoint extends Endpoint {
       userId: user.id!,
     );
   }
+
+  /// 리뷰 존재 여부 확인
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [productId]는 상품 ID입니다.
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [reviewType]는 리뷰 타입입니다.
+  /// 반환: 리뷰가 존재하면 true, 없으면 false
+  Future<bool> checkReviewExists(
+    Session session,
+    int productId,
+    int chatRoomId,
+    ReviewType reviewType,
+  ) async {
+    // 인증 확인 및 User 테이블의 실제 ID 가져오기
+    final user = await UserService.getMe(session);
+    if (user.id == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    return await ReviewService.checkReviewExists(
+      session: session,
+      productId: productId,
+      chatRoomId: chatRoomId,
+      reviewerId: user.id!,
+      reviewType: reviewType,
+    );
+  }
 }

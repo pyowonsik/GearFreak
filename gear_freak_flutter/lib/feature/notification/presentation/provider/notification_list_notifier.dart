@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/notification/domain/usecase/delete_no
 import 'package:gear_freak_flutter/feature/notification/domain/usecase/get_notifications_usecase.dart';
 import 'package:gear_freak_flutter/feature/notification/domain/usecase/mark_as_read_usecase.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
+import 'package:gear_freak_flutter/feature/review/domain/usecase/check_review_exists_usecase.dart';
 
 /// 알림 목록 Notifier
 class NotificationListNotifier extends StateNotifier<NotificationListState> {
@@ -13,6 +14,7 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
     this.getNotificationsUseCase,
     this.markAsReadUseCase,
     this.deleteNotificationUseCase,
+    this.checkReviewExistsUseCase,
   ) : super(const NotificationListInitial());
 
   /// 알림 목록 조회 UseCase
@@ -23,6 +25,9 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
 
   /// 알림 삭제 UseCase
   final DeleteNotificationUseCase deleteNotificationUseCase;
+
+  /// 리뷰 존재 여부 확인 UseCase
+  final CheckReviewExistsUseCase checkReviewExistsUseCase;
 
   /// 알림 목록 로드
   Future<void> loadNotifications({int page = 1, int limit = 20}) async {
@@ -249,5 +254,55 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
         }
       },
     );
+  }
+
+  /// 리뷰 존재 여부 확인 (양쪽 모두 확인)
+  /// 반환: (구매자 리뷰 존재 여부, 판매자 리뷰 존재 여부)
+  Future<(bool buyerReviewExists, bool sellerReviewExists)> checkReviewExists({
+    required int productId,
+    required int chatRoomId,
+  }) async {
+    // 구매자 리뷰 확인 (buyer_to_seller: 구매자가 판매자에게)
+    final buyerReviewResult = await checkReviewExistsUseCase(
+      CheckReviewExistsParams(
+        productId: productId,
+        chatRoomId: chatRoomId,
+        reviewType: pod.ReviewType.buyer_to_seller,
+      ),
+    );
+
+    // 판매자 리뷰 확인 (seller_to_buyer: 판매자가 구매자에게)
+    final sellerReviewResult = await checkReviewExistsUseCase(
+      CheckReviewExistsParams(
+        productId: productId,
+        chatRoomId: chatRoomId,
+        reviewType: pod.ReviewType.seller_to_buyer,
+      ),
+    );
+
+    bool buyerReviewExists = false;
+    bool sellerReviewExists = false;
+
+    buyerReviewResult.fold(
+      (failure) {
+        debugPrint('❌ [NotificationListNotifier] 구매자 리뷰 존재 여부 확인 실패:'
+            ' ${failure.message}');
+      },
+      (exists) {
+        buyerReviewExists = exists;
+      },
+    );
+
+    sellerReviewResult.fold(
+      (failure) {
+        debugPrint('❌ [NotificationListNotifier] 판매자 리뷰 존재 여부 확인 실패:'
+            ' ${failure.message}');
+      },
+      (exists) {
+        sellerReviewExists = exists;
+      },
+    );
+
+    return (buyerReviewExists, sellerReviewExists);
   }
 }

@@ -43,9 +43,11 @@ import 'package:gear_freak_server/src/generated/feature/product/model/dto/update
     as _i21;
 import 'package:gear_freak_server/src/generated/feature/review/model/dto/create_transaction_review_request.dto.dart'
     as _i22;
-import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/review/model/review_type.dart'
     as _i23;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i24;
+import 'package:gear_freak_server/src/generated/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i24;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i25;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -890,6 +892,36 @@ class Endpoints extends _i1.EndpointDispatch {
             params['productId'],
           ),
         ),
+        'checkReviewExists': _i1.MethodConnector(
+          name: 'checkReviewExists',
+          params: {
+            'productId': _i1.ParameterDescription(
+              name: 'productId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'chatRoomId': _i1.ParameterDescription(
+              name: 'chatRoomId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'reviewType': _i1.ParameterDescription(
+              name: 'reviewType',
+              type: _i1.getType<_i23.ReviewType>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['review'] as _i8.ReviewEndpoint).checkReviewExists(
+            session,
+            params['productId'],
+            params['chatRoomId'],
+            params['reviewType'],
+          ),
+        ),
       },
     );
     connectors['fcm'] = _i1.EndpointConnector(
@@ -985,7 +1017,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'request': _i1.ParameterDescription(
               name: 'request',
-              type: _i1.getType<_i23.UpdateUserProfileRequestDto>(),
+              type: _i1.getType<_i24.UpdateUserProfileRequestDto>(),
               nullable: false,
             )
           },
@@ -1000,6 +1032,6 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth'] = _i24.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i25.Endpoints()..initializeEndpoints(server);
   }
 }

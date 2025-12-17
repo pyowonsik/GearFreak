@@ -11,7 +11,15 @@ import 'package:gear_freak_flutter/feature/review/presentation/provider/review_l
 /// Presentation Layer: UI
 class ReviewListScreen extends ConsumerStatefulWidget {
   /// ReviewListScreen 생성자
-  const ReviewListScreen({super.key});
+  ///
+  /// [initialTabIndex]는 초기 탭 인덱스입니다 (0: 구매자 후기, 1: 판매자 후기).
+  const ReviewListScreen({
+    this.initialTabIndex = 0,
+    super.key,
+  });
+
+  /// 초기 탭 인덱스 (0: 구매자 후기, 1: 판매자 후기)
+  final int initialTabIndex;
 
   @override
   ConsumerState<ReviewListScreen> createState() => _ReviewListScreenState();
@@ -24,7 +32,11 @@ class _ReviewListScreenState extends ConsumerState<ReviewListScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex.clamp(0, 1),
+    );
   }
 
   @override

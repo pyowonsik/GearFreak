@@ -11,6 +11,7 @@ import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_center_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/screen/review_already_written_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/review_list_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/write_review_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -149,7 +150,12 @@ abstract final class AppRoutes {
         GoRoute(
           path: '/profile/reviews',
           name: 'profile-reviews',
-          builder: (context, state) => const ReviewListScreen(),
+          builder: (context, state) {
+            final tabIndex = state.uri.queryParameters['tabIndex'];
+            final initialTabIndex =
+                tabIndex != null ? int.tryParse(tabIndex)?.clamp(0, 1) ?? 0 : 0;
+            return ReviewListScreen(initialTabIndex: initialTabIndex);
+          },
         ),
 
         // 후기 작성 화면
@@ -177,6 +183,17 @@ abstract final class AppRoutes {
           path: '/notifications',
           name: 'notification-list',
           builder: (context, state) => const NotificationListScreen(),
+        ),
+
+        // 이미 작성한 리뷰 화면
+        GoRoute(
+          path: '/review/already-written',
+          name: 'review-already-written',
+          builder: (context, state) {
+            final reviewType =
+                state.uri.queryParameters['reviewType'] ?? 'seller';
+            return ReviewAlreadyWrittenScreen(reviewType: reviewType);
+          },
         ),
       ];
 }

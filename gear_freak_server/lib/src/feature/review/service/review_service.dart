@@ -435,6 +435,43 @@ class ReviewService {
     }
   }
 
+  /// 리뷰 존재 여부 확인
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [productId]는 상품 ID입니다.
+  /// [chatRoomId]는 채팅방 ID입니다.
+  /// [reviewerId]는 리뷰 작성자 ID입니다.
+  /// [reviewType]는 리뷰 타입입니다.
+  /// 반환: 리뷰가 존재하면 true, 없으면 false
+  static Future<bool> checkReviewExists({
+    required Session session,
+    required int productId,
+    required int chatRoomId,
+    required int reviewerId,
+    required ReviewType reviewType,
+  }) async {
+    try {
+      final existingReview = await TransactionReview.db.findFirstRow(
+        session,
+        where: (review) =>
+            review.productId.equals(productId) &
+            review.chatRoomId.equals(chatRoomId) &
+            review.reviewerId.equals(reviewerId) &
+            review.reviewType.equals(reviewType),
+      );
+
+      return existingReview != null;
+    } catch (e, stackTrace) {
+      session.log(
+        '❌ 리뷰 존재 여부 확인 실패: $e',
+        exception: e,
+        stackTrace: stackTrace,
+        level: LogLevel.error,
+      );
+      rethrow;
+    }
+  }
+
   /// 후기 작성 시 FCM 알림 전송 (내부 헬퍼 메서드)
   ///
   /// [session]은 Serverpod 세션입니다.

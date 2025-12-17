@@ -168,4 +168,21 @@ class ReviewRemoteDataSource {
       throw Exception('상품 후기 삭제에 실패했습니다: $e');
     }
   }
+
+  /// 리뷰 존재 여부 확인
+  Future<bool> checkReviewExists({
+    required int productId,
+    required int chatRoomId,
+    required pod.ReviewType reviewType,
+  }) async {
+    try {
+      return await _client.review.checkReviewExists(
+        productId,
+        chatRoomId,
+        reviewType,
+      );
+    } catch (e) {
+      throw Exception('리뷰 존재 여부 확인에 실패했습니다: $e');
+    }
+  }
 }
