@@ -4,6 +4,7 @@ import 'package:gear_freak_flutter/common/presentation/component/component.dart'
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_loading_button.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_logo_section.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/component/social_login_button.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/widget/signup_link_widget.dart';
 import 'package:go_router/go_router.dart';
@@ -155,7 +156,83 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         );
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+
+                    // 구분선
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey.shade300,
+                            thickness: 1,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            '또는',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            color: Colors.grey.shade300,
+                            thickness: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 소셜 로그인 버튼들
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final authState = ref.watch(authNotifierProvider);
+                        final isLoading = authState is AuthLoading;
+
+                        return Column(
+                          children: [
+                            // 구글 로그인
+                            SocialLoginButton(
+                              type: SocialLoginType.google,
+                              isLoading: isLoading,
+                              onPressed: () {
+                                // TODO: 구글 로그인 구현
+                                debugPrint('구글 로그인 클릭');
+                              },
+                            ),
+                            const SizedBox(height: 12),
+
+                            // 카카오 로그인
+                            SocialLoginButton(
+                              type: SocialLoginType.kakao,
+                              isLoading: isLoading,
+                              onPressed: () {
+                                // TODO: 카카오 로그인 구현
+                                debugPrint('카카오 로그인 클릭');
+                              },
+                            ),
+                            const SizedBox(height: 12),
+
+                            // 애플 로그인 (iOS만 표시)
+                            if (Theme.of(context).platform ==
+                                TargetPlatform.iOS)
+                              SocialLoginButton(
+                                type: SocialLoginType.apple,
+                                isLoading: isLoading,
+                                onPressed: () {
+                                  // TODO: 애플 로그인 구현
+                                  debugPrint('애플 로그인 클릭');
+                                },
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
 
                     // 회원가입 링크
                     const SignupLinkWidget(),

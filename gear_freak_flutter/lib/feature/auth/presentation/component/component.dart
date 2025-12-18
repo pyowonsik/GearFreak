@@ -5,3 +5,4 @@ library;
 
 export 'auth_loading_button.dart';
 export 'auth_logo_section.dart';
+export 'social_login_button.dart';
