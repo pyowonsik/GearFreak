@@ -706,22 +706,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     // "판매완료"로 변경하는 경우 구매자 선택 모달 표시
     if (newStatus == pod.ProductStatus.sold && mounted) {
-      BuyerSelectionModal.show(
-        context,
-        productId: productData.id!,
-        productName: productData.title,
-        onBuyerSelected: () async {
-          // 구매자 선택 시 상태 변경
-          await ref
-              .read(productDetailNotifierProvider.notifier)
-              .updateProductStatus(productData.id!, newStatus);
-        },
-        onCancel: () async {
-          // 선택하지 않기 클릭 시 상태 변경
-          await ref
-              .read(productDetailNotifierProvider.notifier)
-              .updateProductStatus(productData.id!, newStatus);
-        },
+      unawaited(
+        BuyerSelectionModal.show(
+          context,
+          productId: productData.id!,
+          productName: productData.title,
+          onBuyerSelected: () async {
+            // 구매자 선택 시 상태 변경
+            await ref
+                .read(productDetailNotifierProvider.notifier)
+                .updateProductStatus(productData.id!, newStatus);
+          },
+          onCancel: () async {
+            // 선택하지 않기 클릭 시 상태 변경
+            await ref
+                .read(productDetailNotifierProvider.notifier)
+                .updateProductStatus(productData.id!, newStatus);
+          },
+        ),
       );
     } else {
       // 판매완료에서 판매중/예약중으로 변경하는 경우 후기 삭제 경고

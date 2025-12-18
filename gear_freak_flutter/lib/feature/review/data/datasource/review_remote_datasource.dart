@@ -204,7 +204,7 @@ class ReviewRemoteDataSource {
       final allReviews = <pod.TransactionReviewResponseDto>[];
 
       for (var i = 0; i < totalMockReviews; i++) {
-        final reviewType = i % 2 == 0
+        final reviewType = 0 == i % 2
             ? pod.ReviewType.buyer_to_seller
             : pod.ReviewType.seller_to_buyer;
 

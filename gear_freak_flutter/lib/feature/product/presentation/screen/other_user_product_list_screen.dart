@@ -37,7 +37,9 @@ class _OtherUserProductListScreenState
       final userId = int.tryParse(widget.userId);
       if (userId != null) {
         debugPrint('🔄 [OtherUserProductListScreen] 데이터 로드 시작: userId=$userId');
-        ref.read(otherUserProductListNotifierProvider(userId).notifier).loadProducts();
+        ref
+            .read(otherUserProductListNotifierProvider(userId).notifier)
+            .loadProducts();
 
         // 페이지네이션 초기화
         initPaginationScroll(
@@ -48,7 +50,8 @@ class _OtherUserProductListScreenState
                 .loadMoreProducts();
           },
           getPagination: () {
-            final state = ref.read(otherUserProductListNotifierProvider(userId));
+            final state =
+                ref.read(otherUserProductListNotifierProvider(userId));
             if (state is ProductPaginatedLoaded) {
               debugPrint('📊 [OtherUserProductListScreen] Pagination: '
                   'page=${state.pagination.page}, '
@@ -57,17 +60,19 @@ class _OtherUserProductListScreenState
               return state.pagination;
             }
             if (state is ProductPaginatedLoadingMore) {
-              debugPrint(
-                  '📊 [OtherUserProductListScreen] LoadingMore: page=${state.pagination.page}, '
+              debugPrint('📊 [OtherUserProductListScreen] '
+                  'LoadingMore:'
+                  'page=${state.pagination.page}, '
                   'hasMore=${state.pagination.hasMore}');
               return state.pagination;
             }
-            debugPrint(
-                '⚠️ [OtherUserProductListScreen] Pagination is null, state: $state');
+            debugPrint('⚠️ [OtherUserProductListScreen] Pagination is null,'
+                ' state: $state');
             return null;
           },
           isLoading: () {
-            final state = ref.read(otherUserProductListNotifierProvider(userId));
+            final state =
+                ref.read(otherUserProductListNotifierProvider(userId));
             final loading = state is ProductPaginatedLoadingMore;
             debugPrint('🔄 [OtherUserProductListScreen] isLoading: $loading');
             return loading;
@@ -118,18 +123,17 @@ class _OtherUserProductListScreenState
         ProductPaginatedLoaded(:final products, :final pagination) ||
         ProductPaginatedLoadingMore(:final products, :final pagination) =>
           ProfileProductListView(
-              products: products,
-              pagination: pagination,
-              scrollController: scrollController ?? ScrollController(),
-              isLoadingMore: state is ProductPaginatedLoadingMore,
-              onRefresh: () async {
-                await ref
-                    .read(otherUserProductListNotifierProvider(userId).notifier)
-                    .loadProducts();
-              },
-            ),
+            products: products,
+            pagination: pagination,
+            scrollController: scrollController ?? ScrollController(),
+            isLoadingMore: state is ProductPaginatedLoadingMore,
+            onRefresh: () async {
+              await ref
+                  .read(otherUserProductListNotifierProvider(userId).notifier)
+                  .loadProducts();
+            },
+          ),
       },
     );
   }
 }
-

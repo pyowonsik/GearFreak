@@ -120,4 +120,3 @@ class OtherUserReviewListNotifier extends StateNotifier<ReviewListState> {
     );
   }
 }
-

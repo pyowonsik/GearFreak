@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
 import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/domain.dart';
 
@@ -59,4 +58,3 @@ class GetProductsByUserIdUseCase
     }
   }
 }
-

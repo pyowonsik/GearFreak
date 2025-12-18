@@ -54,8 +54,11 @@ class OtherUserProfileReviewSectionWidget extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.star,
-                          size: 24, color: Color(0xFFFFB800)),
+                      const Icon(
+                        Icons.star,
+                        size: 24,
+                        color: Color(0xFFFFB800),
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         averageRating != null

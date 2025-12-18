@@ -61,13 +61,13 @@ class _OtherUserReviewListScreenState
               return state.pagination;
             }
             if (state is ReviewListLoadingMore) {
-              debugPrint(
-                  '📊 [OtherUserReviewListScreen] LoadingMore: page=${state.pagination.page}, '
+              debugPrint('📊 [OtherUserReviewListScreen]'
+                  ' LoadingMore: page=${state.pagination.page}, '
                   'hasMore=${state.pagination.hasMore}');
               return state.pagination;
             }
-            debugPrint(
-                '⚠️ [OtherUserReviewListScreen] Pagination is null, state: $state');
+            debugPrint('⚠️ [OtherUserReviewListScreen]'
+                ' Pagination is null, state: $state');
             return null;
           },
           isLoading: () {
@@ -125,8 +125,9 @@ class _OtherUserReviewListScreenState
               ? RefreshIndicator(
                   onRefresh: () async {
                     await ref
-                        .read(otherUserReviewListNotifierProvider(userId)
-                            .notifier)
+                        .read(
+                          otherUserReviewListNotifierProvider(userId).notifier,
+                        )
                         .loadReviews();
                   },
                   child: const SingleChildScrollView(
@@ -151,8 +152,9 @@ class _OtherUserReviewListScreenState
                   scrollController: scrollController,
                   onRefresh: () async {
                     await ref
-                        .read(otherUserReviewListNotifierProvider(userId)
-                            .notifier)
+                        .read(
+                          otherUserReviewListNotifierProvider(userId).notifier,
+                        )
                         .loadReviews();
                   },
                 ),

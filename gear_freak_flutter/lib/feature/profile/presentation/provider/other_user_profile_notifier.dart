@@ -95,7 +95,6 @@ class OtherUserProfileNotifier extends StateNotifier<OtherUserProfileState> {
     final result = await getAllReviewsByUserIdUseCase(
       GetAllReviewsByUserIdParams(
         userId: userId,
-        page: 1,
         limit: 3, // 최대 3개만 조회
       ),
     );
@@ -123,7 +122,8 @@ class OtherUserProfileNotifier extends StateNotifier<OtherUserProfileState> {
           );
         }
         debugPrint('✅ [OtherUserProfileNotifier] State 업데이트 완료:'
-            ' reviews=${reviews.length}개, averageRating=${response.averageRating}');
+            ' reviews=${reviews.length}개,'
+            ' averageRating=${response.averageRating}');
       },
     );
   }

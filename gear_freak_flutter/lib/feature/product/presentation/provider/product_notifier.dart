@@ -199,16 +199,16 @@ class ProductNotifier extends StateNotifier<ProductState> {
     );
 
     // 프로필 타입에 따라 적절한 UseCase 사용
-    final result = currentState.profileType == 'myProducts' ||
+    final result = await (currentState.profileType == 'myProducts' ||
             currentState.profileType == 'mySoldProducts'
         ? (getMyProductsUseCase != null
-            ? await getMyProductsUseCase!(pagination)
-            : await getPaginatedProductsUseCase(pagination))
+            ? getMyProductsUseCase!(pagination)
+            : getPaginatedProductsUseCase(pagination))
         : currentState.profileType == 'myFavorite'
             ? (getMyFavoriteProductsUseCase != null
-                ? await getMyFavoriteProductsUseCase!(pagination)
-                : await getPaginatedProductsUseCase(pagination))
-            : await getPaginatedProductsUseCase(pagination);
+                ? getMyFavoriteProductsUseCase!(pagination)
+                : getPaginatedProductsUseCase(pagination))
+            : getPaginatedProductsUseCase(pagination));
 
     result.fold(
       (failure) {
