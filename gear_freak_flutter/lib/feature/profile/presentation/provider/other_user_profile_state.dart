@@ -24,6 +24,8 @@ class OtherUserProfileLoaded extends OtherUserProfileState {
   const OtherUserProfileLoaded({
     required this.user,
     this.stats,
+    this.reviews,
+    this.averageRating,
   });
 
   /// 사용자 정보
@@ -32,14 +34,28 @@ class OtherUserProfileLoaded extends OtherUserProfileState {
   /// 상품 통계 정보 (선택)
   final pod.ProductStatsDto? stats;
 
+  /// 후기 목록 (선택, 최대 3개)
+  final List<pod.TransactionReviewResponseDto>? reviews;
+
+  /// 평균 평점 (선택)
+  final double? averageRating;
+
   /// copyWith 메서드
   OtherUserProfileLoaded copyWith({
     pod.User? user,
     pod.ProductStatsDto? stats,
+    List<pod.TransactionReviewResponseDto>? reviews,
+    double? averageRating,
+    bool clearReviews = false,
   }) {
+    // reviews 처리: clearReviews가 true면 null, 아니면 전달된 값 사용 (null이면 기존 값 유지)
+    final updatedReviews = clearReviews ? null : (reviews ?? this.reviews);
+
     return OtherUserProfileLoaded(
       user: user ?? this.user,
       stats: stats ?? this.stats,
+      reviews: updatedReviews,
+      averageRating: averageRating ?? this.averageRating,
     );
   }
 }

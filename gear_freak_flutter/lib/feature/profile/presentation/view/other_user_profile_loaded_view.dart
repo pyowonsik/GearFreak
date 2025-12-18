@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
+import 'package:go_router/go_router.dart';
 
 /// 다른 사용자 프로필이 로드된 상태의 View
 class OtherUserProfileLoadedView extends StatelessWidget {
@@ -8,9 +9,13 @@ class OtherUserProfileLoadedView extends StatelessWidget {
   ///
   /// [user]는 다른 사용자 정보입니다.
   /// [stats]는 상품 통계 정보입니다 (선택).
+  /// [reviews]는 후기 목록입니다 (선택, 최대 3개).
+  /// [averageRating]는 평균 평점입니다 (선택).
   const OtherUserProfileLoadedView({
     required this.user,
     this.stats,
+    this.reviews,
+    this.averageRating,
     super.key,
   });
 
@@ -19,6 +24,12 @@ class OtherUserProfileLoadedView extends StatelessWidget {
 
   /// 상품 통계 정보 (선택)
   final pod.ProductStatsDto? stats;
+
+  /// 후기 목록 (선택, 최대 3개)
+  final List<pod.TransactionReviewResponseDto>? reviews;
+
+  /// 평균 평점 (선택)
+  final double? averageRating;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +57,17 @@ class OtherUserProfileLoadedView extends StatelessWidget {
               const SizedBox(height: 24),
               const OtherUserProfileProductsSectionWidget(),
               const SizedBox(height: 24),
-              const OtherUserProfileReviewSectionWidget(),
+              OtherUserProfileReviewSectionWidget(
+                reviews: reviews ?? [],
+                averageRating: averageRating,
+                reviewCount: stats?.reviewCount,
+                onViewAllTap: () {
+                  final userId = user.id;
+                  if (userId != null) {
+                    context.push('/profile/user/$userId/reviews');
+                  }
+                },
+              ),
               const SizedBox(height: 24),
             ],
           ),

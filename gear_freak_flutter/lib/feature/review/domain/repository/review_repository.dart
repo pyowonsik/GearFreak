@@ -36,4 +36,11 @@ abstract class ReviewRepository {
     required int chatRoomId,
     required pod.ReviewType reviewType,
   });
+
+  /// 다른 사용자의 모든 후기 조회 (구매자 후기 + 판매자 후기, 평균 평점 포함)
+  Future<pod.TransactionReviewListResponseDto> getAllReviewsByUserId({
+    required int userId,
+    int page = 1,
+    int limit = 10,
+  });
 }

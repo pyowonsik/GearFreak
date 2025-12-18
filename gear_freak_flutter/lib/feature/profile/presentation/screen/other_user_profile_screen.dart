@@ -34,9 +34,11 @@ class _OtherUserProfileScreenState
       final userId = int.tryParse(widget.userId);
       if (userId != null) {
         final notifier = ref.read(otherUserProfileNotifierProvider.notifier);
-        // 프로필 로드 후 통계도 로드
+        // 프로필 로드 후 통계와 후기도 로드
         notifier.loadUserProfile(userId).then((_) {
-          notifier.loadProductStats(userId);
+          notifier
+            ..loadProductStats(userId)
+            ..loadReviews(userId);
         });
       }
     });
@@ -63,10 +65,17 @@ class _OtherUserProfileScreenState
               }
             },
           ),
-        OtherUserProfileLoaded(:final user, :final stats) =>
+        OtherUserProfileLoaded(
+          :final user,
+          :final stats,
+          :final reviews,
+          :final averageRating
+        ) =>
           OtherUserProfileLoadedView(
             user: user,
             stats: stats,
+            reviews: reviews,
+            averageRating: averageRating,
           ),
       },
     );

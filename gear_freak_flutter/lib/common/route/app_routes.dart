@@ -12,6 +12,7 @@ import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/other_user_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/screen/other_user_review_list_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/review_already_written_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/review_list_screen.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/screen/write_review_screen.dart';
@@ -156,6 +157,16 @@ abstract final class AppRoutes {
             final initialTabIndex =
                 tabIndex != null ? int.tryParse(tabIndex)?.clamp(0, 1) ?? 0 : 0;
             return ReviewListScreen(initialTabIndex: initialTabIndex);
+          },
+        ),
+
+        // 다른 사용자의 모든 후기 목록 화면
+        GoRoute(
+          path: '/profile/user/:userId/reviews',
+          name: 'other-user-reviews',
+          builder: (context, state) {
+            final userId = state.pathParameters['userId'] ?? '';
+            return OtherUserReviewListScreen(userId: userId);
           },
         ),
 

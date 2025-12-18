@@ -64,4 +64,17 @@ class ReviewRepositoryImpl implements ReviewRepository {
       reviewType: reviewType,
     );
   }
+
+  @override
+  Future<pod.TransactionReviewListResponseDto> getAllReviewsByUserId({
+    required int userId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return remoteDataSource.getAllReviewsByUserId(
+      userId: userId,
+      page: page,
+      limit: limit,
+    );
+  }
 }

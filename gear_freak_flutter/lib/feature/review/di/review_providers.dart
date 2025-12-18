@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/review/data/data.dart';
 import 'package:gear_freak_flutter/feature/review/domain/domain.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_notifier.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_state.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/provider/other_user_review_list_notifier.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_notifier.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_notifier.dart';
@@ -118,3 +119,23 @@ final checkReviewExistsUseCaseProvider =
   final repository = ref.watch(reviewRepositoryProvider);
   return CheckReviewExistsUseCase(repository);
 });
+
+/// 다른 사용자의 모든 후기 조회 UseCase Provider
+final getAllReviewsByUserIdUseCaseProvider =
+    Provider<GetAllReviewsByUserIdUseCase>((ref) {
+  final repository = ref.watch(reviewRepositoryProvider);
+  return GetAllReviewsByUserIdUseCase(repository);
+});
+
+/// 다른 사용자의 모든 후기 목록 Notifier Provider
+final otherUserReviewListNotifierProvider = StateNotifierProvider.autoDispose
+    .family<OtherUserReviewListNotifier, ReviewListState, int>(
+  (ref, userId) {
+    final getAllReviewsByUserIdUseCase =
+        ref.watch(getAllReviewsByUserIdUseCaseProvider);
+    return OtherUserReviewListNotifier(
+      getAllReviewsByUserIdUseCase,
+      userId,
+    );
+  },
+);

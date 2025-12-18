@@ -11,6 +11,7 @@ import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_u
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_state.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_notifier.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
+import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 
 /// Profile Remote DataSource Provider
 final profileRemoteDataSourceProvider =
@@ -65,9 +66,12 @@ final otherUserProfileNotifierProvider = StateNotifierProvider.autoDispose<
     final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
     final getProductStatsByUserIdUseCase =
         ref.watch(getProductStatsByUserIdUseCaseProvider);
+    final getAllReviewsByUserIdUseCase =
+        ref.watch(getAllReviewsByUserIdUseCaseProvider);
     return OtherUserProfileNotifier(
       getUserByIdUseCase,
       getProductStatsByUserIdUseCase,
+      getAllReviewsByUserIdUseCase,
     );
   },
 );
