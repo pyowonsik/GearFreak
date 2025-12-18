@@ -395,28 +395,38 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               : null,
                         ),
                         const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              sellerData?.nickname ??
-                                  productData.seller?.nickname ??
-                                  '판매자',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF1F2937),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              getProductLocation(productData),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF9CA3AF),
-                              ),
-                            ),
-                          ],
+                        Builder(
+                          builder: (context) {
+                            final location = getProductLocation(productData);
+                            final hasLocation = location.isNotEmpty;
+                            return Column(
+                              crossAxisAlignment: hasLocation
+                                  ? CrossAxisAlignment.start
+                                  : CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  sellerData?.nickname ??
+                                      productData.seller?.nickname ??
+                                      '판매자',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF1F2937),
+                                  ),
+                                ),
+                                if (hasLocation) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    location,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF9CA3AF),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),

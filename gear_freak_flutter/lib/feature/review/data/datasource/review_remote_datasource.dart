@@ -11,7 +11,7 @@ class ReviewRemoteDataSource {
   pod.Client get _client => PodService.instance.client;
 
   /// 🧪 Mock 데이터 사용 여부 (테스트용)
-  static const bool _useMockData = true;
+  static const bool _useMockData = false;
 
   /// 🧪 Mock 데이터 생성
   List<pod.TransactionReviewResponseDto> _generateMockReviews({
