@@ -113,4 +113,16 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
   ) async {
     return await productService.getProductStats(session, userId);
   }
+
+  /// 다른 사용자의 상품 목록 조회 (페이지네이션)
+  /// [userId]는 조회할 사용자의 ID입니다.
+  /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
+  /// [pagination.status]가 ProductStatus.selling이면 판매중인 상품만 반환합니다 (selling + reserved 포함).
+  Future<PaginatedProductsResponseDto> getProductsByUserId(
+    Session session,
+    int userId,
+    PaginationDto pagination,
+  ) async {
+    return await productService.getMyProducts(session, userId, pagination);
+  }
 }

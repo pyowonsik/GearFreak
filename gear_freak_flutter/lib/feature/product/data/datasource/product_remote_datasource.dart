@@ -126,4 +126,19 @@ class ProductRemoteDataSource {
       throw Exception('상품 통계를 불러오는데 실패했습니다: $e');
     }
   }
+
+  /// 다른 사용자의 상품 목록 조회 (페이지네이션)
+  /// [userId]는 조회할 사용자의 ID입니다.
+  /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
+  /// [pagination.status]가 ProductStatus.selling이면 판매중인 상품만 반환합니다 (selling + reserved 포함).
+  Future<pod.PaginatedProductsResponseDto> getProductsByUserId(
+    int userId,
+    pod.PaginationDto pagination,
+  ) async {
+    try {
+      return await _client.product.getProductsByUserId(userId, pagination);
+    } catch (e) {
+      throw Exception('다른 사용자의 상품 목록을 불러오는데 실패했습니다: $e');
+    }
+  }
 }

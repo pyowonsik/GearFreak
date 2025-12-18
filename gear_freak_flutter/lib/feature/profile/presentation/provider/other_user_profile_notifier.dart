@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_by_user_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_products_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_state.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/get_all_reviews_by_user_id_usecase.dart';
@@ -12,6 +14,7 @@ class OtherUserProfileNotifier extends StateNotifier<OtherUserProfileState> {
     this.getUserByIdUseCase,
     this.getProductStatsByUserIdUseCase,
     this.getAllReviewsByUserIdUseCase,
+    this.getProductsByUserIdUseCase,
   ) : super(const OtherUserProfileInitial());
 
   /// 사용자 ID로 사용자 정보 조회 UseCase
@@ -22,6 +25,9 @@ class OtherUserProfileNotifier extends StateNotifier<OtherUserProfileState> {
 
   /// 다른 사용자의 모든 후기 조회 UseCase
   final GetAllReviewsByUserIdUseCase getAllReviewsByUserIdUseCase;
+
+  /// 다른 사용자의 상품 목록 조회 UseCase
+  final GetProductsByUserIdUseCase getProductsByUserIdUseCase;
 
   /// 사용자 프로필 로드
   Future<void> loadUserProfile(int userId) async {
@@ -118,6 +124,51 @@ class OtherUserProfileNotifier extends StateNotifier<OtherUserProfileState> {
         }
         debugPrint('✅ [OtherUserProfileNotifier] State 업데이트 완료:'
             ' reviews=${reviews.length}개, averageRating=${response.averageRating}');
+      },
+    );
+  }
+
+  /// 상품 목록 로드 (최대 5개)
+  Future<void> loadProducts(int userId) async {
+    if (state is! OtherUserProfileLoaded) {
+      debugPrint('⚠️ [OtherUserProfileNotifier] 프로필이 로드되지 않아 상품 목록을'
+          ' 불러올 수 없습니다.');
+      return;
+    }
+
+    debugPrint('🔄 [OtherUserProfileNotifier] 상품 목록 로드 시작: userId=$userId');
+
+    final result = await getProductsByUserIdUseCase(
+      GetProductsByUserIdParams(
+        userId: userId,
+        pagination: pod.PaginationDto(
+          page: 1,
+          limit: 5, // 최대 5개만 조회
+          status: pod.ProductStatus.selling, // 판매중인 상품만 (selling + reserved 포함)
+        ),
+      ),
+    );
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ [OtherUserProfileNotifier] 상품 목록 로드 실패:'
+            ' ${failure.message}');
+        // 상품 목록 로드 실패해도 프로필은 유지
+      },
+      (response) {
+        debugPrint('✅ [OtherUserProfileNotifier] 상품 목록 로드 성공:'
+            ' products=${response.products.length}개');
+        // 최대 5개만 저장
+        final products = response.products.take(5).toList();
+        debugPrint('📦 [OtherUserProfileNotifier] 저장할 상품: ${products.length}개');
+
+        // 최신 state를 읽어서 업데이트 (copyWith가 기존 값들을 자동으로 유지)
+        final latestState = state;
+        if (latestState is OtherUserProfileLoaded) {
+          state = latestState.copyWith(products: products);
+        }
+        debugPrint('✅ [OtherUserProfileNotifier] State 업데이트 완료:'
+            ' products=${products.length}개');
       },
     );
   }

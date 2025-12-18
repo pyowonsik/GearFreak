@@ -29,16 +29,8 @@ class ProductSortHeaderComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Text(
-          '전체 $totalCount개',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1F2937),
-          ),
-        ),
         PopupMenuButton<String>(
           initialValue: ProductSortUtils.getStringFromSortBy(sortBy),
           onSelected: (value) {

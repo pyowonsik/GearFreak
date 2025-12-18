@@ -1304,6 +1304,39 @@ class _ProductEndpoint {
       }
     });
   }
+
+  _i3.Future<_i27.PaginatedProductsResponseDto> getProductsByUserId(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId,
+    _i11.PaginationDto pagination,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'product',
+        method: 'getProductsByUserId',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'product',
+          methodName: 'getProductsByUserId',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'pagination': pagination,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i27.PaginatedProductsResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _ReviewEndpoint {

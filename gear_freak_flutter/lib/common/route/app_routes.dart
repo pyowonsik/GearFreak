@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_scree
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_selection_screen.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_screen.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/screen/notification_list_screen.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/screen/other_user_product_list_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_screen.dart';
@@ -167,6 +168,16 @@ abstract final class AppRoutes {
           builder: (context, state) {
             final userId = state.pathParameters['userId'] ?? '';
             return OtherUserReviewListScreen(userId: userId);
+          },
+        ),
+
+        // 다른 사용자의 상품 목록 화면
+        GoRoute(
+          path: '/profile/user/:userId/products',
+          name: 'other-user-products',
+          builder: (context, state) {
+            final userId = state.pathParameters['userId'] ?? '';
+            return OtherUserProductListScreen(userId: userId);
           },
         ),
 

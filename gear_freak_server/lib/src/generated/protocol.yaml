@@ -38,6 +38,7 @@ product:
   - updateProductStatus:
   - getProductStats:
   - getProductStatsByUserId:
+  - getProductsByUserId:
 review:
   - createTransactionReview:
   - getBuyerReviews:

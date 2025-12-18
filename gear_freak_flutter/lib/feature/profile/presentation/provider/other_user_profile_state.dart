@@ -26,6 +26,7 @@ class OtherUserProfileLoaded extends OtherUserProfileState {
     this.stats,
     this.reviews,
     this.averageRating,
+    this.products,
   });
 
   /// 사용자 정보
@@ -40,22 +41,31 @@ class OtherUserProfileLoaded extends OtherUserProfileState {
   /// 평균 평점 (선택)
   final double? averageRating;
 
+  /// 상품 목록 (선택, 최대 5개)
+  final List<pod.Product>? products;
+
   /// copyWith 메서드
   OtherUserProfileLoaded copyWith({
     pod.User? user,
     pod.ProductStatsDto? stats,
     List<pod.TransactionReviewResponseDto>? reviews,
     double? averageRating,
+    List<pod.Product>? products,
     bool clearReviews = false,
+    bool clearProducts = false,
   }) {
     // reviews 처리: clearReviews가 true면 null, 아니면 전달된 값 사용 (null이면 기존 값 유지)
     final updatedReviews = clearReviews ? null : (reviews ?? this.reviews);
+
+    // products 처리: clearProducts가 true면 null, 아니면 전달된 값 사용 (null이면 기존 값 유지)
+    final updatedProducts = clearProducts ? null : (products ?? this.products);
 
     return OtherUserProfileLoaded(
       user: user ?? this.user,
       stats: stats ?? this.stats,
       reviews: updatedReviews,
       averageRating: averageRating ?? this.averageRating,
+      products: updatedProducts,
     );
   }
 }

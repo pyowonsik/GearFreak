@@ -11,11 +11,13 @@ class OtherUserProfileLoadedView extends StatelessWidget {
   /// [stats]는 상품 통계 정보입니다 (선택).
   /// [reviews]는 후기 목록입니다 (선택, 최대 3개).
   /// [averageRating]는 평균 평점입니다 (선택).
+  /// [products]는 상품 목록입니다 (선택, 최대 5개).
   const OtherUserProfileLoadedView({
     required this.user,
     this.stats,
     this.reviews,
     this.averageRating,
+    this.products,
     super.key,
   });
 
@@ -31,9 +33,13 @@ class OtherUserProfileLoadedView extends StatelessWidget {
   /// 평균 평점 (선택)
   final double? averageRating;
 
+  /// 상품 목록 (선택, 최대 5개)
+  final List<pod.Product>? products;
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverAppBar(
           expandedHeight: 300,
@@ -55,7 +61,15 @@ class OtherUserProfileLoadedView extends StatelessWidget {
                 reviewCount: stats?.reviewCount ?? 0,
               ),
               const SizedBox(height: 24),
-              const OtherUserProfileProductsSectionWidget(),
+              OtherUserProfileProductsSectionWidget(
+                products: products ?? [],
+                onViewAllTap: () {
+                  final userId = user.id;
+                  if (userId != null) {
+                    context.push('/profile/user/$userId/products');
+                  }
+                },
+              ),
               const SizedBox(height: 24),
               OtherUserProfileReviewSectionWidget(
                 reviews: reviews ?? [],

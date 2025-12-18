@@ -12,12 +12,14 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/get_products_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/provider/other_user_product_list_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_notifier.dart';
@@ -115,6 +117,13 @@ final getProductStatsByUserIdUseCaseProvider =
   return GetProductStatsByUserIdUseCase(repository);
 });
 
+/// Get Products By User Id UseCase Provider
+final getProductsByUserIdUseCaseProvider =
+    Provider<GetProductsByUserIdUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return GetProductsByUserIdUseCase(repository);
+});
+
 /// 삭제된 상품 ID 이벤트 Provider (단일 소스)
 /// 상품 삭제 시 이 Provider에 productId를 설정하면
 /// 모든 목록 Provider가 자동으로 해당 상품을 제거합니다.
@@ -207,3 +216,16 @@ final profileProductNotifierProvider = StateNotifierProvider.autoDispose
     getMyFavoriteProductsUseCase: getMyFavoriteProductsUseCase,
   );
 });
+
+/// 다른 사용자의 상품 목록 Notifier Provider
+final otherUserProductListNotifierProvider = StateNotifierProvider.autoDispose
+    .family<OtherUserProductListNotifier, ProductState, int>(
+  (ref, userId) {
+    final getProductsByUserIdUseCase =
+        ref.watch(getProductsByUserIdUseCaseProvider);
+    return OtherUserProductListNotifier(
+      getProductsByUserIdUseCase,
+      userId,
+    );
+  },
+);

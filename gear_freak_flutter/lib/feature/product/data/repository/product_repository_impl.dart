@@ -79,4 +79,12 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<pod.ProductStatsDto> getProductStatsByUserId(int userId) async {
     return remoteDataSource.getProductStatsByUserId(userId);
   }
+
+  @override
+  Future<pod.PaginatedProductsResponseDto> getProductsByUserId(
+    int userId,
+    pod.PaginationDto pagination,
+  ) async {
+    return remoteDataSource.getProductsByUserId(userId, pagination);
+  }
 }

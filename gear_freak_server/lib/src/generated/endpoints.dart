@@ -801,6 +801,30 @@ class Endpoints extends _i1.EndpointDispatch {
             params['userId'],
           ),
         ),
+        'getProductsByUserId': _i1.MethodConnector(
+          name: 'getProductsByUserId',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'pagination': _i1.ParameterDescription(
+              name: 'pagination',
+              type: _i1.getType<_i13.PaginationDto>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['product'] as _i7.ProductEndpoint).getProductsByUserId(
+            session,
+            params['userId'],
+            params['pagination'],
+          ),
+        ),
       },
     );
     connectors['review'] = _i1.EndpointConnector(

@@ -143,3 +143,16 @@ class GetProductStatsFailure extends ProductFailure {
   @override
   String toString() => 'GetProductStatsFailure: $message';
 }
+
+/// 다른 사용자의 상품 목록 조회 실패
+class GetProductsByUserIdFailure extends ProductFailure {
+  /// GetProductsByUserIdFailure 생성자
+  const GetProductsByUserIdFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'GetProductsByUserIdFailure: $message';
+}
