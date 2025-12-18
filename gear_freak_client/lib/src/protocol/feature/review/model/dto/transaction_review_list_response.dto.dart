@@ -20,11 +20,13 @@ abstract class TransactionReviewListResponseDto
   TransactionReviewListResponseDto._({
     required this.reviews,
     required this.pagination,
+    this.averageRating,
   });
 
   factory TransactionReviewListResponseDto({
     required List<_i2.TransactionReviewResponseDto> reviews,
     required _i3.PaginationDto pagination,
+    double? averageRating,
   }) = _TransactionReviewListResponseDtoImpl;
 
   factory TransactionReviewListResponseDto.fromJson(
@@ -36,6 +38,7 @@ abstract class TransactionReviewListResponseDto
           .toList(),
       pagination: _i3.PaginationDto.fromJson(
           (jsonSerialization['pagination'] as Map<String, dynamic>)),
+      averageRating: (jsonSerialization['averageRating'] as num?)?.toDouble(),
     );
   }
 
@@ -45,18 +48,23 @@ abstract class TransactionReviewListResponseDto
   /// 페이지네이션 정보
   _i3.PaginationDto pagination;
 
+  /// 평균 평점 (선택)
+  double? averageRating;
+
   /// Returns a shallow copy of this [TransactionReviewListResponseDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   TransactionReviewListResponseDto copyWith({
     List<_i2.TransactionReviewResponseDto>? reviews,
     _i3.PaginationDto? pagination,
+    double? averageRating,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       'reviews': reviews.toJson(valueToJson: (v) => v.toJson()),
       'pagination': pagination.toJson(),
+      if (averageRating != null) 'averageRating': averageRating,
     };
   }
 
@@ -66,14 +74,18 @@ abstract class TransactionReviewListResponseDto
   }
 }
 
+class _Undefined {}
+
 class _TransactionReviewListResponseDtoImpl
     extends TransactionReviewListResponseDto {
   _TransactionReviewListResponseDtoImpl({
     required List<_i2.TransactionReviewResponseDto> reviews,
     required _i3.PaginationDto pagination,
+    double? averageRating,
   }) : super._(
           reviews: reviews,
           pagination: pagination,
+          averageRating: averageRating,
         );
 
   /// Returns a shallow copy of this [TransactionReviewListResponseDto]
@@ -83,10 +95,13 @@ class _TransactionReviewListResponseDtoImpl
   TransactionReviewListResponseDto copyWith({
     List<_i2.TransactionReviewResponseDto>? reviews,
     _i3.PaginationDto? pagination,
+    Object? averageRating = _Undefined,
   }) {
     return TransactionReviewListResponseDto(
       reviews: reviews ?? this.reviews.map((e0) => e0.copyWith()).toList(),
       pagination: pagination ?? this.pagination.copyWith(),
+      averageRating:
+          averageRating is double? ? averageRating : this.averageRating,
     );
   }
 }

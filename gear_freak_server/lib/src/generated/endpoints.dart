@@ -941,6 +941,36 @@ class Endpoints extends _i1.EndpointDispatch {
             params['reviewType'],
           ),
         ),
+        'getAllReviewsByUserId': _i1.MethodConnector(
+          name: 'getAllReviewsByUserId',
+          params: {
+            'userId': _i1.ParameterDescription(
+              name: 'userId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'page': _i1.ParameterDescription(
+              name: 'page',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'limit': _i1.ParameterDescription(
+              name: 'limit',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['review'] as _i8.ReviewEndpoint).getAllReviewsByUserId(
+            session,
+            params['userId'],
+            page: params['page'],
+            limit: params['limit'],
+          ),
+        ),
       },
     );
     connectors['fcm'] = _i1.EndpointConnector(

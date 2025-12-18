@@ -150,4 +150,25 @@ class ReviewEndpoint extends Endpoint {
       reviewType: reviewType,
     );
   }
+
+  /// 다른 사용자의 모든 후기 조회 (구매자 후기 + 판매자 후기, 평균 평점 포함)
+  ///
+  /// [session]은 Serverpod 세션입니다.
+  /// [userId]는 조회할 사용자의 ID입니다.
+  /// [page]는 페이지 번호입니다 (기본값: 1).
+  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
+  /// 반환: 후기 목록 응답 DTO (평균 평점 포함)
+  Future<TransactionReviewListResponseDto> getAllReviewsByUserId(
+    Session session,
+    int userId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return await ReviewService.getAllReviewsByUserId(
+      session: session,
+      userId: userId,
+      page: page,
+      limit: limit,
+    );
+  }
 }

@@ -6,4 +6,6 @@ fields:
   reviews: List<TransactionReviewResponseDto>
   ### 페이지네이션 정보
   pagination: PaginationDto
+  ### 평균 평점 (선택)
+  averageRating: double?
 

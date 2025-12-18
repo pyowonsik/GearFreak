@@ -45,6 +45,7 @@ review:
   - createSellerReview:
   - deleteReviewsByProductId:
   - checkReviewExists:
+  - getAllReviewsByUserId:
 fcm:
   - registerFcmToken:
   - deleteFcmToken:

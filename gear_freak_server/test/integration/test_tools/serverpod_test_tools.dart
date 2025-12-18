@@ -1503,6 +1503,41 @@ class _ReviewEndpoint {
       }
     });
   }
+
+  _i3.Future<_i32.TransactionReviewListResponseDto> getAllReviewsByUserId(
+    _i1.TestSessionBuilder sessionBuilder,
+    int userId, {
+    required int page,
+    required int limit,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'review',
+        method: 'getAllReviewsByUserId',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'review',
+          methodName: 'getAllReviewsByUserId',
+          parameters: _i1.testObjectToJson({
+            'userId': userId,
+            'page': page,
+            'limit': limit,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i32.TransactionReviewListResponseDto>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _FcmEndpoint {
