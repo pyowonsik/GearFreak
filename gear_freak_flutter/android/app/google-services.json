@@ -12,7 +12,16 @@
           "package_name": "com.pyowonsik.gearFreakFlutter"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "569455422928-o0pv4718v9ck4q62gchf649pam13he8r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pyowonsik.gearFreakFlutter",
+            "certificate_hash": "2F859B40B7BD19AA8DA12D2027D2D0DF5BF2BE1F"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCkYDpE1zptoJ78t4AEfvi9XxMm3WOQp_w"

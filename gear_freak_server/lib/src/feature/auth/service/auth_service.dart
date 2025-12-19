@@ -1,6 +1,7 @@
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
+import 'package:uuid/uuid.dart';
 
 /// 인증 서비스
 /// 회원가입, 로그인 등 인증 관련 비즈니스 로직을 처리합니다.
@@ -57,5 +58,54 @@ class AuthService {
     final savedUser = await User.db.insertRow(session, user);
 
     return savedUser;
+  }
+
+  /// 구글 로그인 후 User 조회 또는 생성
+  /// Serverpod Auth의 google.authenticate()가 UserInfo를 생성한 후 호출됩니다.
+  /// 이미 User가 존재하면 조회하고, 없으면 생성합니다.
+  static Future<User> getOrCreateUserAfterGoogleLogin(Session session) async {
+    // 1. 현재 인증된 사용자 정보 가져오기
+    final authenticationInfo = await session.authenticated;
+
+    if (authenticationInfo == null) {
+      throw Exception('인증이 필요합니다.');
+    }
+
+    // 2. UserInfo 조회
+    final userInfo = await UserInfo.db.findById(
+      session,
+      authenticationInfo.userId,
+    );
+
+    if (userInfo == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    // 3. User 테이블에서 사용자 정보 조회 (userInfoId로 조회)
+    final existingUser = await User.db.findFirstRow(
+      session,
+      where: (u) => u.userInfoId.equals(userInfo.id!),
+    );
+
+    // 4. User가 이미 존재하면 반환
+    if (existingUser != null) {
+      return existingUser.copyWith(userInfo: userInfo);
+    }
+
+    // 5. User가 없으면 생성 (구글 로그인 최초 시)
+    // 구글 로그인 회원가입 시 닉네임은 무조건 "장비충#UUID" 형식으로 생성
+    // ⭐ UUID 사용 - 중복 걱정 없음
+    const uuid = Uuid();
+    final shortId = uuid.v4().substring(0, 9); // 9자리만 사용
+    final nickname = '장비충#$shortId';
+
+    final newUser = User(
+      userInfoId: userInfo.id!,
+      userInfo: userInfo,
+      nickname: nickname,
+      createdAt: DateTime.now().toUtc(),
+    );
+
+    return await User.db.insertRow(session, newUser);
   }
 }

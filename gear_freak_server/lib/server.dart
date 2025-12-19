@@ -31,6 +31,9 @@ void run(List<String> args) async {
   // 인증 설정
   auth.AuthConfig.set(
     auth.AuthConfig(
+      // Firebase 서비스 계정 키 JSON 파일 경로
+      // Firebase ID 토큰 검증에 사용됩니다.
+      firebaseServiceAccountKeyJson: 'config/fcm-service-account.json',
       // 이메일로 가입할 때 비밀번호의 최소 길이
       minPasswordLength: 8,
       // 사용자가 사용자 이름을 볼 수 있는지 여부

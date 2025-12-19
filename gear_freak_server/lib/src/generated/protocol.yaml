@@ -3,6 +3,7 @@ s3:
   - deleteS3File:
 auth:
   - signupWithoutEmailVerification:
+  - getOrCreateUserAfterGoogleLogin:
 chat:
   - createOrGetChatRoom:
   - getChatRoomById:

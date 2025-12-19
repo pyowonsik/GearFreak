@@ -190,7 +190,17 @@ class Endpoints extends _i1.EndpointDispatch {
             email: params['email'],
             password: params['password'],
           ),
-        )
+        ),
+        'getOrCreateUserAfterGoogleLogin': _i1.MethodConnector(
+          name: 'getOrCreateUserAfterGoogleLogin',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint)
+                  .getOrCreateUserAfterGoogleLogin(session),
+        ),
       },
     );
     connectors['chat'] = _i1.EndpointConnector(
