@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/service/pod_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 
 /// 인증 원격 데이터 소스
@@ -174,6 +175,68 @@ class AuthRemoteDataSource {
       return user;
     } catch (e) {
       debugPrint('❌ 구글 로그인 실패: $e');
+      rethrow;
+    }
+  }
+
+  /// 카카오 로그인 API 호출
+  Future<pod.User> loginWithKakao() async {
+    try {
+      debugPrint('🟡 카카오 로그인 시작...');
+
+      // 1. 카카오 SDK로 로그인
+      // 카카오톡이 설치되어 있으면 카카오톡으로, 없으면 카카오계정으로 로그인
+      kakao.OAuthToken token;
+      try {
+        token = await kakao.UserApi.instance.loginWithKakaoTalk();
+        debugPrint('🟡 카카오톡으로 로그인 성공');
+      } catch (error) {
+        // 카카오톡 로그인 실패 시 카카오계정으로 로그인 시도
+        try {
+          token = await kakao.UserApi.instance.loginWithKakaoAccount();
+          debugPrint('🟡 카카오계정으로 로그인 성공');
+        } catch (e) {
+          throw Exception('카카오 로그인이 취소되었습니다.');
+        }
+      }
+
+      if (token.accessToken == null) {
+        throw Exception('카카오 Access Token을 가져올 수 없습니다.');
+      }
+
+      debugPrint('🟡 카카오 Access Token 획득 성공');
+
+      // 2. Serverpod 카카오 인증
+      debugPrint('🟡 Serverpod 카카오 인증 시작...');
+      final authenticate = await _client.auth.authenticateWithKakao(
+        token.accessToken!,
+      );
+
+      debugPrint('🟡 Serverpod 인증 결과:');
+      debugPrint('   - Success: ${authenticate.success}');
+      debugPrint('   - Fail Reason: ${authenticate.failReason}');
+
+      if (!authenticate.success || authenticate.userInfo == null) {
+        throw Exception(
+          '카카오 로그인 실패: ${authenticate.failReason ?? '알 수 없는 오류'}',
+        );
+      }
+
+      // 3. 세션 등록
+      await _sessionManager.registerSignedInUser(
+        authenticate.userInfo!,
+        authenticate.keyId!,
+        authenticate.key!,
+      );
+
+      // 4. User 테이블에 사용자 생성 또는 조회
+      final user = await _client.auth.getOrCreateUserAfterKakaoLogin();
+
+      debugPrint('✅ 카카오 로그인 성공: user=${user.id}');
+
+      return user;
+    } catch (e) {
+      debugPrint('❌ 카카오 로그인 실패: $e');
       rethrow;
     }
   }

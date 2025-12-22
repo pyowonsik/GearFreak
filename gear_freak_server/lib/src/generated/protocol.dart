@@ -18,61 +18,63 @@ import 'common/s3/model/dto/generate_presigned_upload_url_request.dto.dart'
     as _i5;
 import 'common/s3/model/dto/generate_presigned_upload_url_response.dto.dart'
     as _i6;
-import 'feature/chat/model/chat_message.dart' as _i7;
-import 'feature/chat/model/chat_participant.dart' as _i8;
-import 'feature/chat/model/chat_room.dart' as _i9;
-import 'feature/chat/model/dto/chat_message_response.dto.dart' as _i10;
-import 'feature/chat/model/dto/chat_participant_info.dto.dart' as _i11;
-import 'feature/chat/model/dto/create_chat_room_request.dto.dart' as _i12;
-import 'feature/chat/model/dto/create_chat_room_response.dto.dart' as _i13;
-import 'feature/chat/model/dto/get_chat_messages_request.dto.dart' as _i14;
-import 'feature/chat/model/dto/join_chat_room_request.dto.dart' as _i15;
-import 'feature/chat/model/dto/join_chat_room_response.dto.dart' as _i16;
-import 'feature/chat/model/dto/leave_chat_room_request.dto.dart' as _i17;
-import 'feature/chat/model/dto/leave_chat_room_response.dto.dart' as _i18;
-import 'common/model/pagination_dto.dart' as _i19;
-import 'feature/chat/model/dto/paginated_chat_rooms_response.dto.dart' as _i20;
-import 'feature/chat/model/dto/send_message_request.dto.dart' as _i21;
+import 'feature/auth/model/dto/kakao_auth_response.dto.dart' as _i7;
+import 'feature/chat/model/chat_message.dart' as _i8;
+import 'feature/chat/model/chat_participant.dart' as _i9;
+import 'feature/chat/model/chat_room.dart' as _i10;
+import 'feature/chat/model/dto/chat_message_response.dto.dart' as _i11;
+import 'feature/chat/model/dto/chat_participant_info.dto.dart' as _i12;
+import 'feature/chat/model/dto/create_chat_room_request.dto.dart' as _i13;
+import 'feature/chat/model/dto/create_chat_room_response.dto.dart' as _i14;
+import 'feature/chat/model/dto/get_chat_messages_request.dto.dart' as _i15;
+import 'feature/chat/model/dto/join_chat_room_request.dto.dart' as _i16;
+import 'feature/chat/model/dto/join_chat_room_response.dto.dart' as _i17;
+import 'feature/chat/model/dto/leave_chat_room_request.dto.dart' as _i18;
+import 'feature/chat/model/dto/leave_chat_room_response.dto.dart' as _i19;
+import 'common/model/pagination_dto.dart' as _i20;
+import 'feature/chat/model/dto/paginated_chat_rooms_response.dto.dart' as _i21;
+import 'feature/chat/model/dto/send_message_request.dto.dart' as _i22;
 import 'feature/chat/model/dto/update_chat_room_notification_request.dto.dart'
-    as _i22;
-import 'feature/chat/model/enum/chat_room_type.dart' as _i23;
-import 'feature/chat/model/enum/message_type.dart' as _i24;
+    as _i23;
+import 'feature/chat/model/enum/chat_room_type.dart' as _i24;
+import 'feature/chat/model/enum/message_type.dart' as _i25;
 import 'feature/notification/model/dto/notification_list_response.dto.dart'
-    as _i25;
-import 'feature/notification/model/dto/notification_response.dto.dart' as _i26;
-import 'feature/notification/model/notification.dart' as _i27;
-import 'feature/notification/model/notification_type.dart' as _i28;
-import 'feature/product/model/dto/create_product_request.dto.dart' as _i29;
-import 'feature/product/model/dto/paginated_products_response.dto.dart' as _i30;
-import 'feature/product/model/dto/product_stats.dto.dart' as _i31;
-import 'feature/product/model/dto/update_product_request.dto.dart' as _i32;
-import 'greeting.dart' as _i33;
-import 'feature/product/model/favorite.dart' as _i34;
-import 'feature/product/model/product.dart' as _i35;
-import 'feature/product/model/product_category.dart' as _i36;
-import 'feature/product/model/product_condition.dart' as _i37;
-import 'feature/product/model/product_sort_by.dart' as _i38;
-import 'feature/product/model/product_status.dart' as _i39;
-import 'feature/product/model/trade_method.dart' as _i40;
+    as _i26;
+import 'feature/notification/model/dto/notification_response.dto.dart' as _i27;
+import 'feature/notification/model/notification.dart' as _i28;
+import 'feature/notification/model/notification_type.dart' as _i29;
+import 'feature/product/model/dto/create_product_request.dto.dart' as _i30;
+import 'feature/product/model/dto/paginated_products_response.dto.dart' as _i31;
+import 'feature/product/model/dto/product_stats.dto.dart' as _i32;
+import 'feature/product/model/dto/update_product_request.dto.dart' as _i33;
+import 'greeting.dart' as _i34;
+import 'feature/product/model/favorite.dart' as _i35;
+import 'feature/product/model/product.dart' as _i36;
+import 'feature/product/model/product_category.dart' as _i37;
+import 'feature/product/model/product_condition.dart' as _i38;
+import 'feature/product/model/product_sort_by.dart' as _i39;
+import 'feature/product/model/product_status.dart' as _i40;
+import 'feature/product/model/trade_method.dart' as _i41;
 import 'feature/review/model/dto/create_transaction_review_request.dto.dart'
-    as _i41;
-import 'feature/review/model/dto/transaction_review_list_response.dto.dart'
     as _i42;
-import 'feature/review/model/dto/transaction_review_response.dto.dart' as _i43;
-import 'feature/review/model/review_type.dart' as _i44;
-import 'feature/review/model/transaction_review.dart' as _i45;
-import 'feature/user/model/dto/update_user_profile_request.dto.dart' as _i46;
-import 'feature/user/model/fcm_token.dart' as _i47;
-import 'feature/user/model/user.dart' as _i48;
+import 'feature/review/model/dto/transaction_review_list_response.dto.dart'
+    as _i43;
+import 'feature/review/model/dto/transaction_review_response.dto.dart' as _i44;
+import 'feature/review/model/review_type.dart' as _i45;
+import 'feature/review/model/transaction_review.dart' as _i46;
+import 'feature/user/model/dto/update_user_profile_request.dto.dart' as _i47;
+import 'feature/user/model/fcm_token.dart' as _i48;
+import 'feature/user/model/user.dart' as _i49;
 import 'feature/product/model/dto/update_product_status_request.dto.dart'
-    as _i49;
-import 'package:gear_freak_server/src/generated/feature/chat/model/chat_room.dart'
     as _i50;
-import 'package:gear_freak_server/src/generated/feature/chat/model/dto/chat_participant_info.dto.dart'
+import 'package:gear_freak_server/src/generated/feature/chat/model/chat_room.dart'
     as _i51;
+import 'package:gear_freak_server/src/generated/feature/chat/model/dto/chat_participant_info.dto.dart'
+    as _i52;
 export 'common/model/pagination_dto.dart';
 export 'common/s3/model/dto/generate_presigned_upload_url_request.dto.dart';
 export 'common/s3/model/dto/generate_presigned_upload_url_response.dto.dart';
+export 'feature/auth/model/dto/kakao_auth_response.dto.dart';
 export 'feature/chat/model/chat_message.dart';
 export 'feature/chat/model/chat_participant.dart';
 export 'feature/chat/model/chat_room.dart';
@@ -1403,134 +1405,137 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i6.GeneratePresignedUploadUrlResponseDto) {
       return _i6.GeneratePresignedUploadUrlResponseDto.fromJson(data) as T;
     }
-    if (t == _i7.ChatMessage) {
-      return _i7.ChatMessage.fromJson(data) as T;
+    if (t == _i7.KakaoAuthResponseDto) {
+      return _i7.KakaoAuthResponseDto.fromJson(data) as T;
     }
-    if (t == _i8.ChatParticipant) {
-      return _i8.ChatParticipant.fromJson(data) as T;
+    if (t == _i8.ChatMessage) {
+      return _i8.ChatMessage.fromJson(data) as T;
     }
-    if (t == _i9.ChatRoom) {
-      return _i9.ChatRoom.fromJson(data) as T;
+    if (t == _i9.ChatParticipant) {
+      return _i9.ChatParticipant.fromJson(data) as T;
     }
-    if (t == _i10.ChatMessageResponseDto) {
-      return _i10.ChatMessageResponseDto.fromJson(data) as T;
+    if (t == _i10.ChatRoom) {
+      return _i10.ChatRoom.fromJson(data) as T;
     }
-    if (t == _i11.ChatParticipantInfoDto) {
-      return _i11.ChatParticipantInfoDto.fromJson(data) as T;
+    if (t == _i11.ChatMessageResponseDto) {
+      return _i11.ChatMessageResponseDto.fromJson(data) as T;
     }
-    if (t == _i12.CreateChatRoomRequestDto) {
-      return _i12.CreateChatRoomRequestDto.fromJson(data) as T;
+    if (t == _i12.ChatParticipantInfoDto) {
+      return _i12.ChatParticipantInfoDto.fromJson(data) as T;
     }
-    if (t == _i13.CreateChatRoomResponseDto) {
-      return _i13.CreateChatRoomResponseDto.fromJson(data) as T;
+    if (t == _i13.CreateChatRoomRequestDto) {
+      return _i13.CreateChatRoomRequestDto.fromJson(data) as T;
     }
-    if (t == _i14.GetChatMessagesRequestDto) {
-      return _i14.GetChatMessagesRequestDto.fromJson(data) as T;
+    if (t == _i14.CreateChatRoomResponseDto) {
+      return _i14.CreateChatRoomResponseDto.fromJson(data) as T;
     }
-    if (t == _i15.JoinChatRoomRequestDto) {
-      return _i15.JoinChatRoomRequestDto.fromJson(data) as T;
+    if (t == _i15.GetChatMessagesRequestDto) {
+      return _i15.GetChatMessagesRequestDto.fromJson(data) as T;
     }
-    if (t == _i16.JoinChatRoomResponseDto) {
-      return _i16.JoinChatRoomResponseDto.fromJson(data) as T;
+    if (t == _i16.JoinChatRoomRequestDto) {
+      return _i16.JoinChatRoomRequestDto.fromJson(data) as T;
     }
-    if (t == _i17.LeaveChatRoomRequestDto) {
-      return _i17.LeaveChatRoomRequestDto.fromJson(data) as T;
+    if (t == _i17.JoinChatRoomResponseDto) {
+      return _i17.JoinChatRoomResponseDto.fromJson(data) as T;
     }
-    if (t == _i18.LeaveChatRoomResponseDto) {
-      return _i18.LeaveChatRoomResponseDto.fromJson(data) as T;
+    if (t == _i18.LeaveChatRoomRequestDto) {
+      return _i18.LeaveChatRoomRequestDto.fromJson(data) as T;
     }
-    if (t == _i19.PaginationDto) {
-      return _i19.PaginationDto.fromJson(data) as T;
+    if (t == _i19.LeaveChatRoomResponseDto) {
+      return _i19.LeaveChatRoomResponseDto.fromJson(data) as T;
     }
-    if (t == _i20.PaginatedChatRoomsResponseDto) {
-      return _i20.PaginatedChatRoomsResponseDto.fromJson(data) as T;
+    if (t == _i20.PaginationDto) {
+      return _i20.PaginationDto.fromJson(data) as T;
     }
-    if (t == _i21.SendMessageRequestDto) {
-      return _i21.SendMessageRequestDto.fromJson(data) as T;
+    if (t == _i21.PaginatedChatRoomsResponseDto) {
+      return _i21.PaginatedChatRoomsResponseDto.fromJson(data) as T;
     }
-    if (t == _i22.UpdateChatRoomNotificationRequestDto) {
-      return _i22.UpdateChatRoomNotificationRequestDto.fromJson(data) as T;
+    if (t == _i22.SendMessageRequestDto) {
+      return _i22.SendMessageRequestDto.fromJson(data) as T;
     }
-    if (t == _i23.ChatRoomType) {
-      return _i23.ChatRoomType.fromJson(data) as T;
+    if (t == _i23.UpdateChatRoomNotificationRequestDto) {
+      return _i23.UpdateChatRoomNotificationRequestDto.fromJson(data) as T;
     }
-    if (t == _i24.MessageType) {
-      return _i24.MessageType.fromJson(data) as T;
+    if (t == _i24.ChatRoomType) {
+      return _i24.ChatRoomType.fromJson(data) as T;
     }
-    if (t == _i25.NotificationListResponseDto) {
-      return _i25.NotificationListResponseDto.fromJson(data) as T;
+    if (t == _i25.MessageType) {
+      return _i25.MessageType.fromJson(data) as T;
     }
-    if (t == _i26.NotificationResponseDto) {
-      return _i26.NotificationResponseDto.fromJson(data) as T;
+    if (t == _i26.NotificationListResponseDto) {
+      return _i26.NotificationListResponseDto.fromJson(data) as T;
     }
-    if (t == _i27.Notification) {
-      return _i27.Notification.fromJson(data) as T;
+    if (t == _i27.NotificationResponseDto) {
+      return _i27.NotificationResponseDto.fromJson(data) as T;
     }
-    if (t == _i28.NotificationType) {
-      return _i28.NotificationType.fromJson(data) as T;
+    if (t == _i28.Notification) {
+      return _i28.Notification.fromJson(data) as T;
     }
-    if (t == _i29.CreateProductRequestDto) {
-      return _i29.CreateProductRequestDto.fromJson(data) as T;
+    if (t == _i29.NotificationType) {
+      return _i29.NotificationType.fromJson(data) as T;
     }
-    if (t == _i30.PaginatedProductsResponseDto) {
-      return _i30.PaginatedProductsResponseDto.fromJson(data) as T;
+    if (t == _i30.CreateProductRequestDto) {
+      return _i30.CreateProductRequestDto.fromJson(data) as T;
     }
-    if (t == _i31.ProductStatsDto) {
-      return _i31.ProductStatsDto.fromJson(data) as T;
+    if (t == _i31.PaginatedProductsResponseDto) {
+      return _i31.PaginatedProductsResponseDto.fromJson(data) as T;
     }
-    if (t == _i32.UpdateProductRequestDto) {
-      return _i32.UpdateProductRequestDto.fromJson(data) as T;
+    if (t == _i32.ProductStatsDto) {
+      return _i32.ProductStatsDto.fromJson(data) as T;
     }
-    if (t == _i33.Greeting) {
-      return _i33.Greeting.fromJson(data) as T;
+    if (t == _i33.UpdateProductRequestDto) {
+      return _i33.UpdateProductRequestDto.fromJson(data) as T;
     }
-    if (t == _i34.Favorite) {
-      return _i34.Favorite.fromJson(data) as T;
+    if (t == _i34.Greeting) {
+      return _i34.Greeting.fromJson(data) as T;
     }
-    if (t == _i35.Product) {
-      return _i35.Product.fromJson(data) as T;
+    if (t == _i35.Favorite) {
+      return _i35.Favorite.fromJson(data) as T;
     }
-    if (t == _i36.ProductCategory) {
-      return _i36.ProductCategory.fromJson(data) as T;
+    if (t == _i36.Product) {
+      return _i36.Product.fromJson(data) as T;
     }
-    if (t == _i37.ProductCondition) {
-      return _i37.ProductCondition.fromJson(data) as T;
+    if (t == _i37.ProductCategory) {
+      return _i37.ProductCategory.fromJson(data) as T;
     }
-    if (t == _i38.ProductSortBy) {
-      return _i38.ProductSortBy.fromJson(data) as T;
+    if (t == _i38.ProductCondition) {
+      return _i38.ProductCondition.fromJson(data) as T;
     }
-    if (t == _i39.ProductStatus) {
-      return _i39.ProductStatus.fromJson(data) as T;
+    if (t == _i39.ProductSortBy) {
+      return _i39.ProductSortBy.fromJson(data) as T;
     }
-    if (t == _i40.TradeMethod) {
-      return _i40.TradeMethod.fromJson(data) as T;
+    if (t == _i40.ProductStatus) {
+      return _i40.ProductStatus.fromJson(data) as T;
     }
-    if (t == _i41.CreateTransactionReviewRequestDto) {
-      return _i41.CreateTransactionReviewRequestDto.fromJson(data) as T;
+    if (t == _i41.TradeMethod) {
+      return _i41.TradeMethod.fromJson(data) as T;
     }
-    if (t == _i42.TransactionReviewListResponseDto) {
-      return _i42.TransactionReviewListResponseDto.fromJson(data) as T;
+    if (t == _i42.CreateTransactionReviewRequestDto) {
+      return _i42.CreateTransactionReviewRequestDto.fromJson(data) as T;
     }
-    if (t == _i43.TransactionReviewResponseDto) {
-      return _i43.TransactionReviewResponseDto.fromJson(data) as T;
+    if (t == _i43.TransactionReviewListResponseDto) {
+      return _i43.TransactionReviewListResponseDto.fromJson(data) as T;
     }
-    if (t == _i44.ReviewType) {
-      return _i44.ReviewType.fromJson(data) as T;
+    if (t == _i44.TransactionReviewResponseDto) {
+      return _i44.TransactionReviewResponseDto.fromJson(data) as T;
     }
-    if (t == _i45.TransactionReview) {
-      return _i45.TransactionReview.fromJson(data) as T;
+    if (t == _i45.ReviewType) {
+      return _i45.ReviewType.fromJson(data) as T;
     }
-    if (t == _i46.UpdateUserProfileRequestDto) {
-      return _i46.UpdateUserProfileRequestDto.fromJson(data) as T;
+    if (t == _i46.TransactionReview) {
+      return _i46.TransactionReview.fromJson(data) as T;
     }
-    if (t == _i47.FcmToken) {
-      return _i47.FcmToken.fromJson(data) as T;
+    if (t == _i47.UpdateUserProfileRequestDto) {
+      return _i47.UpdateUserProfileRequestDto.fromJson(data) as T;
     }
-    if (t == _i48.User) {
-      return _i48.User.fromJson(data) as T;
+    if (t == _i48.FcmToken) {
+      return _i48.FcmToken.fromJson(data) as T;
     }
-    if (t == _i49.UpdateProductStatusRequestDto) {
-      return _i49.UpdateProductStatusRequestDto.fromJson(data) as T;
+    if (t == _i49.User) {
+      return _i49.User.fromJson(data) as T;
+    }
+    if (t == _i50.UpdateProductStatusRequestDto) {
+      return _i50.UpdateProductStatusRequestDto.fromJson(data) as T;
     }
     if (t == _i1.getType<_i4.PaginatedChatMessagesResponseDto?>()) {
       return (data != null
@@ -1547,182 +1552,191 @@ class Protocol extends _i1.SerializationManagerServer {
           ? _i6.GeneratePresignedUploadUrlResponseDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i7.ChatMessage?>()) {
-      return (data != null ? _i7.ChatMessage.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i8.ChatParticipant?>()) {
-      return (data != null ? _i8.ChatParticipant.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i9.ChatRoom?>()) {
-      return (data != null ? _i9.ChatRoom.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i10.ChatMessageResponseDto?>()) {
-      return (data != null ? _i10.ChatMessageResponseDto.fromJson(data) : null)
+    if (t == _i1.getType<_i7.KakaoAuthResponseDto?>()) {
+      return (data != null ? _i7.KakaoAuthResponseDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i11.ChatParticipantInfoDto?>()) {
-      return (data != null ? _i11.ChatParticipantInfoDto.fromJson(data) : null)
+    if (t == _i1.getType<_i8.ChatMessage?>()) {
+      return (data != null ? _i8.ChatMessage.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.ChatParticipant?>()) {
+      return (data != null ? _i9.ChatParticipant.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i10.ChatRoom?>()) {
+      return (data != null ? _i10.ChatRoom.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i11.ChatMessageResponseDto?>()) {
+      return (data != null ? _i11.ChatMessageResponseDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i12.CreateChatRoomRequestDto?>()) {
-      return (data != null
-          ? _i12.CreateChatRoomRequestDto.fromJson(data)
-          : null) as T;
-    }
-    if (t == _i1.getType<_i13.CreateChatRoomResponseDto?>()) {
-      return (data != null
-          ? _i13.CreateChatRoomResponseDto.fromJson(data)
-          : null) as T;
-    }
-    if (t == _i1.getType<_i14.GetChatMessagesRequestDto?>()) {
-      return (data != null
-          ? _i14.GetChatMessagesRequestDto.fromJson(data)
-          : null) as T;
-    }
-    if (t == _i1.getType<_i15.JoinChatRoomRequestDto?>()) {
-      return (data != null ? _i15.JoinChatRoomRequestDto.fromJson(data) : null)
+    if (t == _i1.getType<_i12.ChatParticipantInfoDto?>()) {
+      return (data != null ? _i12.ChatParticipantInfoDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i16.JoinChatRoomResponseDto?>()) {
-      return (data != null ? _i16.JoinChatRoomResponseDto.fromJson(data) : null)
+    if (t == _i1.getType<_i13.CreateChatRoomRequestDto?>()) {
+      return (data != null
+          ? _i13.CreateChatRoomRequestDto.fromJson(data)
+          : null) as T;
+    }
+    if (t == _i1.getType<_i14.CreateChatRoomResponseDto?>()) {
+      return (data != null
+          ? _i14.CreateChatRoomResponseDto.fromJson(data)
+          : null) as T;
+    }
+    if (t == _i1.getType<_i15.GetChatMessagesRequestDto?>()) {
+      return (data != null
+          ? _i15.GetChatMessagesRequestDto.fromJson(data)
+          : null) as T;
+    }
+    if (t == _i1.getType<_i16.JoinChatRoomRequestDto?>()) {
+      return (data != null ? _i16.JoinChatRoomRequestDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i17.LeaveChatRoomRequestDto?>()) {
-      return (data != null ? _i17.LeaveChatRoomRequestDto.fromJson(data) : null)
+    if (t == _i1.getType<_i17.JoinChatRoomResponseDto?>()) {
+      return (data != null ? _i17.JoinChatRoomResponseDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i18.LeaveChatRoomResponseDto?>()) {
-      return (data != null
-          ? _i18.LeaveChatRoomResponseDto.fromJson(data)
-          : null) as T;
-    }
-    if (t == _i1.getType<_i19.PaginationDto?>()) {
-      return (data != null ? _i19.PaginationDto.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i20.PaginatedChatRoomsResponseDto?>()) {
-      return (data != null
-          ? _i20.PaginatedChatRoomsResponseDto.fromJson(data)
-          : null) as T;
-    }
-    if (t == _i1.getType<_i21.SendMessageRequestDto?>()) {
-      return (data != null ? _i21.SendMessageRequestDto.fromJson(data) : null)
+    if (t == _i1.getType<_i18.LeaveChatRoomRequestDto?>()) {
+      return (data != null ? _i18.LeaveChatRoomRequestDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i22.UpdateChatRoomNotificationRequestDto?>()) {
+    if (t == _i1.getType<_i19.LeaveChatRoomResponseDto?>()) {
       return (data != null
-          ? _i22.UpdateChatRoomNotificationRequestDto.fromJson(data)
+          ? _i19.LeaveChatRoomResponseDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i23.ChatRoomType?>()) {
-      return (data != null ? _i23.ChatRoomType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i20.PaginationDto?>()) {
+      return (data != null ? _i20.PaginationDto.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i24.MessageType?>()) {
-      return (data != null ? _i24.MessageType.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i25.NotificationListResponseDto?>()) {
+    if (t == _i1.getType<_i21.PaginatedChatRoomsResponseDto?>()) {
       return (data != null
-          ? _i25.NotificationListResponseDto.fromJson(data)
+          ? _i21.PaginatedChatRoomsResponseDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i26.NotificationResponseDto?>()) {
-      return (data != null ? _i26.NotificationResponseDto.fromJson(data) : null)
+    if (t == _i1.getType<_i22.SendMessageRequestDto?>()) {
+      return (data != null ? _i22.SendMessageRequestDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i27.Notification?>()) {
-      return (data != null ? _i27.Notification.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i23.UpdateChatRoomNotificationRequestDto?>()) {
+      return (data != null
+          ? _i23.UpdateChatRoomNotificationRequestDto.fromJson(data)
+          : null) as T;
     }
-    if (t == _i1.getType<_i28.NotificationType?>()) {
-      return (data != null ? _i28.NotificationType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i24.ChatRoomType?>()) {
+      return (data != null ? _i24.ChatRoomType.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i29.CreateProductRequestDto?>()) {
-      return (data != null ? _i29.CreateProductRequestDto.fromJson(data) : null)
+    if (t == _i1.getType<_i25.MessageType?>()) {
+      return (data != null ? _i25.MessageType.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i26.NotificationListResponseDto?>()) {
+      return (data != null
+          ? _i26.NotificationListResponseDto.fromJson(data)
+          : null) as T;
+    }
+    if (t == _i1.getType<_i27.NotificationResponseDto?>()) {
+      return (data != null ? _i27.NotificationResponseDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i30.PaginatedProductsResponseDto?>()) {
-      return (data != null
-          ? _i30.PaginatedProductsResponseDto.fromJson(data)
-          : null) as T;
+    if (t == _i1.getType<_i28.Notification?>()) {
+      return (data != null ? _i28.Notification.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i31.ProductStatsDto?>()) {
-      return (data != null ? _i31.ProductStatsDto.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i29.NotificationType?>()) {
+      return (data != null ? _i29.NotificationType.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i32.UpdateProductRequestDto?>()) {
-      return (data != null ? _i32.UpdateProductRequestDto.fromJson(data) : null)
+    if (t == _i1.getType<_i30.CreateProductRequestDto?>()) {
+      return (data != null ? _i30.CreateProductRequestDto.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i33.Greeting?>()) {
-      return (data != null ? _i33.Greeting.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i34.Favorite?>()) {
-      return (data != null ? _i34.Favorite.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i35.Product?>()) {
-      return (data != null ? _i35.Product.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i36.ProductCategory?>()) {
-      return (data != null ? _i36.ProductCategory.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i37.ProductCondition?>()) {
-      return (data != null ? _i37.ProductCondition.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i38.ProductSortBy?>()) {
-      return (data != null ? _i38.ProductSortBy.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i39.ProductStatus?>()) {
-      return (data != null ? _i39.ProductStatus.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i40.TradeMethod?>()) {
-      return (data != null ? _i40.TradeMethod.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i41.CreateTransactionReviewRequestDto?>()) {
+    if (t == _i1.getType<_i31.PaginatedProductsResponseDto?>()) {
       return (data != null
-          ? _i41.CreateTransactionReviewRequestDto.fromJson(data)
+          ? _i31.PaginatedProductsResponseDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i42.TransactionReviewListResponseDto?>()) {
+    if (t == _i1.getType<_i32.ProductStatsDto?>()) {
+      return (data != null ? _i32.ProductStatsDto.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i33.UpdateProductRequestDto?>()) {
+      return (data != null ? _i33.UpdateProductRequestDto.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i34.Greeting?>()) {
+      return (data != null ? _i34.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i35.Favorite?>()) {
+      return (data != null ? _i35.Favorite.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i36.Product?>()) {
+      return (data != null ? _i36.Product.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i37.ProductCategory?>()) {
+      return (data != null ? _i37.ProductCategory.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i38.ProductCondition?>()) {
+      return (data != null ? _i38.ProductCondition.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i39.ProductSortBy?>()) {
+      return (data != null ? _i39.ProductSortBy.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i40.ProductStatus?>()) {
+      return (data != null ? _i40.ProductStatus.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i41.TradeMethod?>()) {
+      return (data != null ? _i41.TradeMethod.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i42.CreateTransactionReviewRequestDto?>()) {
       return (data != null
-          ? _i42.TransactionReviewListResponseDto.fromJson(data)
+          ? _i42.CreateTransactionReviewRequestDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i43.TransactionReviewResponseDto?>()) {
+    if (t == _i1.getType<_i43.TransactionReviewListResponseDto?>()) {
       return (data != null
-          ? _i43.TransactionReviewResponseDto.fromJson(data)
+          ? _i43.TransactionReviewListResponseDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i44.ReviewType?>()) {
-      return (data != null ? _i44.ReviewType.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i45.TransactionReview?>()) {
-      return (data != null ? _i45.TransactionReview.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i46.UpdateUserProfileRequestDto?>()) {
+    if (t == _i1.getType<_i44.TransactionReviewResponseDto?>()) {
       return (data != null
-          ? _i46.UpdateUserProfileRequestDto.fromJson(data)
+          ? _i44.TransactionReviewResponseDto.fromJson(data)
           : null) as T;
     }
-    if (t == _i1.getType<_i47.FcmToken?>()) {
-      return (data != null ? _i47.FcmToken.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i45.ReviewType?>()) {
+      return (data != null ? _i45.ReviewType.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i48.User?>()) {
-      return (data != null ? _i48.User.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i46.TransactionReview?>()) {
+      return (data != null ? _i46.TransactionReview.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i49.UpdateProductStatusRequestDto?>()) {
+    if (t == _i1.getType<_i47.UpdateUserProfileRequestDto?>()) {
       return (data != null
-          ? _i49.UpdateProductStatusRequestDto.fromJson(data)
+          ? _i47.UpdateUserProfileRequestDto.fromJson(data)
           : null) as T;
     }
-    if (t == List<_i10.ChatMessageResponseDto>) {
+    if (t == _i1.getType<_i48.FcmToken?>()) {
+      return (data != null ? _i48.FcmToken.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i49.User?>()) {
+      return (data != null ? _i49.User.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i50.UpdateProductStatusRequestDto?>()) {
+      return (data != null
+          ? _i50.UpdateProductStatusRequestDto.fromJson(data)
+          : null) as T;
+    }
+    if (t == List<_i11.ChatMessageResponseDto>) {
       return (data as List)
-          .map((e) => deserialize<_i10.ChatMessageResponseDto>(e))
+          .map((e) => deserialize<_i11.ChatMessageResponseDto>(e))
           .toList() as T;
     }
-    if (t == List<_i9.ChatRoom>) {
-      return (data as List).map((e) => deserialize<_i9.ChatRoom>(e)).toList()
+    if (t == _i1.getType<List<String>?>()) {
+      return (data != null
+          ? (data as List).map((e) => deserialize<String>(e)).toList()
+          : null) as T;
+    }
+    if (t == List<_i10.ChatRoom>) {
+      return (data as List).map((e) => deserialize<_i10.ChatRoom>(e)).toList()
           as T;
     }
-    if (t == List<_i26.NotificationResponseDto>) {
+    if (t == List<_i27.NotificationResponseDto>) {
       return (data as List)
-          .map((e) => deserialize<_i26.NotificationResponseDto>(e))
+          .map((e) => deserialize<_i27.NotificationResponseDto>(e))
           .toList() as T;
     }
     if (t == _i1.getType<Map<String, String>?>()) {
@@ -1736,8 +1750,8 @@ class Protocol extends _i1.SerializationManagerServer {
           ? (data as List).map((e) => deserialize<String>(e)).toList()
           : null) as T;
     }
-    if (t == List<_i35.Product>) {
-      return (data as List).map((e) => deserialize<_i35.Product>(e)).toList()
+    if (t == List<_i36.Product>) {
+      return (data as List).map((e) => deserialize<_i36.Product>(e)).toList()
           as T;
     }
     if (t == _i1.getType<List<String>?>()) {
@@ -1750,19 +1764,19 @@ class Protocol extends _i1.SerializationManagerServer {
           ? (data as List).map((e) => deserialize<String>(e)).toList()
           : null) as T;
     }
-    if (t == List<_i43.TransactionReviewResponseDto>) {
+    if (t == List<_i44.TransactionReviewResponseDto>) {
       return (data as List)
-          .map((e) => deserialize<_i43.TransactionReviewResponseDto>(e))
+          .map((e) => deserialize<_i44.TransactionReviewResponseDto>(e))
           .toList() as T;
     }
-    if (t == _i1.getType<List<_i50.ChatRoom>?>()) {
+    if (t == _i1.getType<List<_i51.ChatRoom>?>()) {
       return (data != null
-          ? (data as List).map((e) => deserialize<_i50.ChatRoom>(e)).toList()
+          ? (data as List).map((e) => deserialize<_i51.ChatRoom>(e)).toList()
           : null) as T;
     }
-    if (t == List<_i51.ChatParticipantInfoDto>) {
+    if (t == List<_i52.ChatParticipantInfoDto>) {
       return (data as List)
-          .map((e) => deserialize<_i51.ChatParticipantInfoDto>(e))
+          .map((e) => deserialize<_i52.ChatParticipantInfoDto>(e))
           .toList() as T;
     }
     if (t == List<String>) {
@@ -1790,133 +1804,136 @@ class Protocol extends _i1.SerializationManagerServer {
     if (data is _i6.GeneratePresignedUploadUrlResponseDto) {
       return 'GeneratePresignedUploadUrlResponseDto';
     }
-    if (data is _i7.ChatMessage) {
+    if (data is _i7.KakaoAuthResponseDto) {
+      return 'KakaoAuthResponseDto';
+    }
+    if (data is _i8.ChatMessage) {
       return 'ChatMessage';
     }
-    if (data is _i8.ChatParticipant) {
+    if (data is _i9.ChatParticipant) {
       return 'ChatParticipant';
     }
-    if (data is _i9.ChatRoom) {
+    if (data is _i10.ChatRoom) {
       return 'ChatRoom';
     }
-    if (data is _i10.ChatMessageResponseDto) {
+    if (data is _i11.ChatMessageResponseDto) {
       return 'ChatMessageResponseDto';
     }
-    if (data is _i11.ChatParticipantInfoDto) {
+    if (data is _i12.ChatParticipantInfoDto) {
       return 'ChatParticipantInfoDto';
     }
-    if (data is _i12.CreateChatRoomRequestDto) {
+    if (data is _i13.CreateChatRoomRequestDto) {
       return 'CreateChatRoomRequestDto';
     }
-    if (data is _i13.CreateChatRoomResponseDto) {
+    if (data is _i14.CreateChatRoomResponseDto) {
       return 'CreateChatRoomResponseDto';
     }
-    if (data is _i14.GetChatMessagesRequestDto) {
+    if (data is _i15.GetChatMessagesRequestDto) {
       return 'GetChatMessagesRequestDto';
     }
-    if (data is _i15.JoinChatRoomRequestDto) {
+    if (data is _i16.JoinChatRoomRequestDto) {
       return 'JoinChatRoomRequestDto';
     }
-    if (data is _i16.JoinChatRoomResponseDto) {
+    if (data is _i17.JoinChatRoomResponseDto) {
       return 'JoinChatRoomResponseDto';
     }
-    if (data is _i17.LeaveChatRoomRequestDto) {
+    if (data is _i18.LeaveChatRoomRequestDto) {
       return 'LeaveChatRoomRequestDto';
     }
-    if (data is _i18.LeaveChatRoomResponseDto) {
+    if (data is _i19.LeaveChatRoomResponseDto) {
       return 'LeaveChatRoomResponseDto';
     }
-    if (data is _i19.PaginationDto) {
+    if (data is _i20.PaginationDto) {
       return 'PaginationDto';
     }
-    if (data is _i20.PaginatedChatRoomsResponseDto) {
+    if (data is _i21.PaginatedChatRoomsResponseDto) {
       return 'PaginatedChatRoomsResponseDto';
     }
-    if (data is _i21.SendMessageRequestDto) {
+    if (data is _i22.SendMessageRequestDto) {
       return 'SendMessageRequestDto';
     }
-    if (data is _i22.UpdateChatRoomNotificationRequestDto) {
+    if (data is _i23.UpdateChatRoomNotificationRequestDto) {
       return 'UpdateChatRoomNotificationRequestDto';
     }
-    if (data is _i23.ChatRoomType) {
+    if (data is _i24.ChatRoomType) {
       return 'ChatRoomType';
     }
-    if (data is _i24.MessageType) {
+    if (data is _i25.MessageType) {
       return 'MessageType';
     }
-    if (data is _i25.NotificationListResponseDto) {
+    if (data is _i26.NotificationListResponseDto) {
       return 'NotificationListResponseDto';
     }
-    if (data is _i26.NotificationResponseDto) {
+    if (data is _i27.NotificationResponseDto) {
       return 'NotificationResponseDto';
     }
-    if (data is _i27.Notification) {
+    if (data is _i28.Notification) {
       return 'Notification';
     }
-    if (data is _i28.NotificationType) {
+    if (data is _i29.NotificationType) {
       return 'NotificationType';
     }
-    if (data is _i29.CreateProductRequestDto) {
+    if (data is _i30.CreateProductRequestDto) {
       return 'CreateProductRequestDto';
     }
-    if (data is _i30.PaginatedProductsResponseDto) {
+    if (data is _i31.PaginatedProductsResponseDto) {
       return 'PaginatedProductsResponseDto';
     }
-    if (data is _i31.ProductStatsDto) {
+    if (data is _i32.ProductStatsDto) {
       return 'ProductStatsDto';
     }
-    if (data is _i32.UpdateProductRequestDto) {
+    if (data is _i33.UpdateProductRequestDto) {
       return 'UpdateProductRequestDto';
     }
-    if (data is _i33.Greeting) {
+    if (data is _i34.Greeting) {
       return 'Greeting';
     }
-    if (data is _i34.Favorite) {
+    if (data is _i35.Favorite) {
       return 'Favorite';
     }
-    if (data is _i35.Product) {
+    if (data is _i36.Product) {
       return 'Product';
     }
-    if (data is _i36.ProductCategory) {
+    if (data is _i37.ProductCategory) {
       return 'ProductCategory';
     }
-    if (data is _i37.ProductCondition) {
+    if (data is _i38.ProductCondition) {
       return 'ProductCondition';
     }
-    if (data is _i38.ProductSortBy) {
+    if (data is _i39.ProductSortBy) {
       return 'ProductSortBy';
     }
-    if (data is _i39.ProductStatus) {
+    if (data is _i40.ProductStatus) {
       return 'ProductStatus';
     }
-    if (data is _i40.TradeMethod) {
+    if (data is _i41.TradeMethod) {
       return 'TradeMethod';
     }
-    if (data is _i41.CreateTransactionReviewRequestDto) {
+    if (data is _i42.CreateTransactionReviewRequestDto) {
       return 'CreateTransactionReviewRequestDto';
     }
-    if (data is _i42.TransactionReviewListResponseDto) {
+    if (data is _i43.TransactionReviewListResponseDto) {
       return 'TransactionReviewListResponseDto';
     }
-    if (data is _i43.TransactionReviewResponseDto) {
+    if (data is _i44.TransactionReviewResponseDto) {
       return 'TransactionReviewResponseDto';
     }
-    if (data is _i44.ReviewType) {
+    if (data is _i45.ReviewType) {
       return 'ReviewType';
     }
-    if (data is _i45.TransactionReview) {
+    if (data is _i46.TransactionReview) {
       return 'TransactionReview';
     }
-    if (data is _i46.UpdateUserProfileRequestDto) {
+    if (data is _i47.UpdateUserProfileRequestDto) {
       return 'UpdateUserProfileRequestDto';
     }
-    if (data is _i47.FcmToken) {
+    if (data is _i48.FcmToken) {
       return 'FcmToken';
     }
-    if (data is _i48.User) {
+    if (data is _i49.User) {
       return 'User';
     }
-    if (data is _i49.UpdateProductStatusRequestDto) {
+    if (data is _i50.UpdateProductStatusRequestDto) {
       return 'UpdateProductStatusRequestDto';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1947,135 +1964,138 @@ class Protocol extends _i1.SerializationManagerServer {
       return deserialize<_i6.GeneratePresignedUploadUrlResponseDto>(
           data['data']);
     }
+    if (dataClassName == 'KakaoAuthResponseDto') {
+      return deserialize<_i7.KakaoAuthResponseDto>(data['data']);
+    }
     if (dataClassName == 'ChatMessage') {
-      return deserialize<_i7.ChatMessage>(data['data']);
+      return deserialize<_i8.ChatMessage>(data['data']);
     }
     if (dataClassName == 'ChatParticipant') {
-      return deserialize<_i8.ChatParticipant>(data['data']);
+      return deserialize<_i9.ChatParticipant>(data['data']);
     }
     if (dataClassName == 'ChatRoom') {
-      return deserialize<_i9.ChatRoom>(data['data']);
+      return deserialize<_i10.ChatRoom>(data['data']);
     }
     if (dataClassName == 'ChatMessageResponseDto') {
-      return deserialize<_i10.ChatMessageResponseDto>(data['data']);
+      return deserialize<_i11.ChatMessageResponseDto>(data['data']);
     }
     if (dataClassName == 'ChatParticipantInfoDto') {
-      return deserialize<_i11.ChatParticipantInfoDto>(data['data']);
+      return deserialize<_i12.ChatParticipantInfoDto>(data['data']);
     }
     if (dataClassName == 'CreateChatRoomRequestDto') {
-      return deserialize<_i12.CreateChatRoomRequestDto>(data['data']);
+      return deserialize<_i13.CreateChatRoomRequestDto>(data['data']);
     }
     if (dataClassName == 'CreateChatRoomResponseDto') {
-      return deserialize<_i13.CreateChatRoomResponseDto>(data['data']);
+      return deserialize<_i14.CreateChatRoomResponseDto>(data['data']);
     }
     if (dataClassName == 'GetChatMessagesRequestDto') {
-      return deserialize<_i14.GetChatMessagesRequestDto>(data['data']);
+      return deserialize<_i15.GetChatMessagesRequestDto>(data['data']);
     }
     if (dataClassName == 'JoinChatRoomRequestDto') {
-      return deserialize<_i15.JoinChatRoomRequestDto>(data['data']);
+      return deserialize<_i16.JoinChatRoomRequestDto>(data['data']);
     }
     if (dataClassName == 'JoinChatRoomResponseDto') {
-      return deserialize<_i16.JoinChatRoomResponseDto>(data['data']);
+      return deserialize<_i17.JoinChatRoomResponseDto>(data['data']);
     }
     if (dataClassName == 'LeaveChatRoomRequestDto') {
-      return deserialize<_i17.LeaveChatRoomRequestDto>(data['data']);
+      return deserialize<_i18.LeaveChatRoomRequestDto>(data['data']);
     }
     if (dataClassName == 'LeaveChatRoomResponseDto') {
-      return deserialize<_i18.LeaveChatRoomResponseDto>(data['data']);
+      return deserialize<_i19.LeaveChatRoomResponseDto>(data['data']);
     }
     if (dataClassName == 'PaginationDto') {
-      return deserialize<_i19.PaginationDto>(data['data']);
+      return deserialize<_i20.PaginationDto>(data['data']);
     }
     if (dataClassName == 'PaginatedChatRoomsResponseDto') {
-      return deserialize<_i20.PaginatedChatRoomsResponseDto>(data['data']);
+      return deserialize<_i21.PaginatedChatRoomsResponseDto>(data['data']);
     }
     if (dataClassName == 'SendMessageRequestDto') {
-      return deserialize<_i21.SendMessageRequestDto>(data['data']);
+      return deserialize<_i22.SendMessageRequestDto>(data['data']);
     }
     if (dataClassName == 'UpdateChatRoomNotificationRequestDto') {
-      return deserialize<_i22.UpdateChatRoomNotificationRequestDto>(
+      return deserialize<_i23.UpdateChatRoomNotificationRequestDto>(
           data['data']);
     }
     if (dataClassName == 'ChatRoomType') {
-      return deserialize<_i23.ChatRoomType>(data['data']);
+      return deserialize<_i24.ChatRoomType>(data['data']);
     }
     if (dataClassName == 'MessageType') {
-      return deserialize<_i24.MessageType>(data['data']);
+      return deserialize<_i25.MessageType>(data['data']);
     }
     if (dataClassName == 'NotificationListResponseDto') {
-      return deserialize<_i25.NotificationListResponseDto>(data['data']);
+      return deserialize<_i26.NotificationListResponseDto>(data['data']);
     }
     if (dataClassName == 'NotificationResponseDto') {
-      return deserialize<_i26.NotificationResponseDto>(data['data']);
+      return deserialize<_i27.NotificationResponseDto>(data['data']);
     }
     if (dataClassName == 'Notification') {
-      return deserialize<_i27.Notification>(data['data']);
+      return deserialize<_i28.Notification>(data['data']);
     }
     if (dataClassName == 'NotificationType') {
-      return deserialize<_i28.NotificationType>(data['data']);
+      return deserialize<_i29.NotificationType>(data['data']);
     }
     if (dataClassName == 'CreateProductRequestDto') {
-      return deserialize<_i29.CreateProductRequestDto>(data['data']);
+      return deserialize<_i30.CreateProductRequestDto>(data['data']);
     }
     if (dataClassName == 'PaginatedProductsResponseDto') {
-      return deserialize<_i30.PaginatedProductsResponseDto>(data['data']);
+      return deserialize<_i31.PaginatedProductsResponseDto>(data['data']);
     }
     if (dataClassName == 'ProductStatsDto') {
-      return deserialize<_i31.ProductStatsDto>(data['data']);
+      return deserialize<_i32.ProductStatsDto>(data['data']);
     }
     if (dataClassName == 'UpdateProductRequestDto') {
-      return deserialize<_i32.UpdateProductRequestDto>(data['data']);
+      return deserialize<_i33.UpdateProductRequestDto>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i33.Greeting>(data['data']);
+      return deserialize<_i34.Greeting>(data['data']);
     }
     if (dataClassName == 'Favorite') {
-      return deserialize<_i34.Favorite>(data['data']);
+      return deserialize<_i35.Favorite>(data['data']);
     }
     if (dataClassName == 'Product') {
-      return deserialize<_i35.Product>(data['data']);
+      return deserialize<_i36.Product>(data['data']);
     }
     if (dataClassName == 'ProductCategory') {
-      return deserialize<_i36.ProductCategory>(data['data']);
+      return deserialize<_i37.ProductCategory>(data['data']);
     }
     if (dataClassName == 'ProductCondition') {
-      return deserialize<_i37.ProductCondition>(data['data']);
+      return deserialize<_i38.ProductCondition>(data['data']);
     }
     if (dataClassName == 'ProductSortBy') {
-      return deserialize<_i38.ProductSortBy>(data['data']);
+      return deserialize<_i39.ProductSortBy>(data['data']);
     }
     if (dataClassName == 'ProductStatus') {
-      return deserialize<_i39.ProductStatus>(data['data']);
+      return deserialize<_i40.ProductStatus>(data['data']);
     }
     if (dataClassName == 'TradeMethod') {
-      return deserialize<_i40.TradeMethod>(data['data']);
+      return deserialize<_i41.TradeMethod>(data['data']);
     }
     if (dataClassName == 'CreateTransactionReviewRequestDto') {
-      return deserialize<_i41.CreateTransactionReviewRequestDto>(data['data']);
+      return deserialize<_i42.CreateTransactionReviewRequestDto>(data['data']);
     }
     if (dataClassName == 'TransactionReviewListResponseDto') {
-      return deserialize<_i42.TransactionReviewListResponseDto>(data['data']);
+      return deserialize<_i43.TransactionReviewListResponseDto>(data['data']);
     }
     if (dataClassName == 'TransactionReviewResponseDto') {
-      return deserialize<_i43.TransactionReviewResponseDto>(data['data']);
+      return deserialize<_i44.TransactionReviewResponseDto>(data['data']);
     }
     if (dataClassName == 'ReviewType') {
-      return deserialize<_i44.ReviewType>(data['data']);
+      return deserialize<_i45.ReviewType>(data['data']);
     }
     if (dataClassName == 'TransactionReview') {
-      return deserialize<_i45.TransactionReview>(data['data']);
+      return deserialize<_i46.TransactionReview>(data['data']);
     }
     if (dataClassName == 'UpdateUserProfileRequestDto') {
-      return deserialize<_i46.UpdateUserProfileRequestDto>(data['data']);
+      return deserialize<_i47.UpdateUserProfileRequestDto>(data['data']);
     }
     if (dataClassName == 'FcmToken') {
-      return deserialize<_i47.FcmToken>(data['data']);
+      return deserialize<_i48.FcmToken>(data['data']);
     }
     if (dataClassName == 'User') {
-      return deserialize<_i48.User>(data['data']);
+      return deserialize<_i49.User>(data['data']);
     }
     if (dataClassName == 'UpdateProductStatusRequestDto') {
-      return deserialize<_i49.UpdateProductStatusRequestDto>(data['data']);
+      return deserialize<_i50.UpdateProductStatusRequestDto>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -2103,24 +2123,24 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i7.ChatMessage:
-        return _i7.ChatMessage.t;
-      case _i8.ChatParticipant:
-        return _i8.ChatParticipant.t;
-      case _i9.ChatRoom:
-        return _i9.ChatRoom.t;
-      case _i27.Notification:
-        return _i27.Notification.t;
-      case _i34.Favorite:
-        return _i34.Favorite.t;
-      case _i35.Product:
-        return _i35.Product.t;
-      case _i45.TransactionReview:
-        return _i45.TransactionReview.t;
-      case _i47.FcmToken:
-        return _i47.FcmToken.t;
-      case _i48.User:
-        return _i48.User.t;
+      case _i8.ChatMessage:
+        return _i8.ChatMessage.t;
+      case _i9.ChatParticipant:
+        return _i9.ChatParticipant.t;
+      case _i10.ChatRoom:
+        return _i10.ChatRoom.t;
+      case _i28.Notification:
+        return _i28.Notification.t;
+      case _i35.Favorite:
+        return _i35.Favorite.t;
+      case _i36.Product:
+        return _i36.Product.t;
+      case _i46.TransactionReview:
+        return _i46.TransactionReview.t;
+      case _i48.FcmToken:
+        return _i48.FcmToken.t;
+      case _i49.User:
+        return _i49.User.t;
     }
     return null;
   }

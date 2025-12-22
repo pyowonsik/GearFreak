@@ -201,6 +201,34 @@ class Endpoints extends _i1.EndpointDispatch {
               (endpoints['auth'] as _i3.AuthEndpoint)
                   .getOrCreateUserAfterGoogleLogin(session),
         ),
+        'authenticateWithKakao': _i1.MethodConnector(
+          name: 'authenticateWithKakao',
+          params: {
+            'accessToken': _i1.ParameterDescription(
+              name: 'accessToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).authenticateWithKakao(
+            session,
+            params['accessToken'],
+          ),
+        ),
+        'getOrCreateUserAfterKakaoLogin': _i1.MethodConnector(
+          name: 'getOrCreateUserAfterKakaoLogin',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint)
+                  .getOrCreateUserAfterKakaoLogin(session),
+        ),
       },
     );
     connectors['chat'] = _i1.EndpointConnector(

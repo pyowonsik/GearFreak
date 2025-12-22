@@ -115,6 +115,12 @@ class DeepLinkService {
       debugPrint('   - path: ${uri.path}');
       debugPrint('   - query: ${uri.query}');
 
+      // 카카오 OAuth 딥링크는 카카오 SDK가 자체적으로 처리하므로 무시
+      if (uri.scheme.startsWith('kakao') && uri.host == 'oauth') {
+        debugPrint('✅ 카카오 OAuth 딥링크는 카카오 SDK가 처리합니다. 무시합니다.');
+        return;
+      }
+
       // URL에서 경로 추출
       String routePath;
 

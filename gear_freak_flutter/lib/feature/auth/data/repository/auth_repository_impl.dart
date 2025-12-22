@@ -70,4 +70,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<pod.User> loginWithGoogle() async {
     return remoteDataSource.loginWithGoogle();
   }
+
+  @override
+  Future<pod.User> loginWithKakao() async {
+    return remoteDataSource.loginWithKakao();
+  }
 }

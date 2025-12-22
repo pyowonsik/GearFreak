@@ -3,6 +3,7 @@ import 'package:gear_freak_flutter/common/service/fcm_service.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_google_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_kakao_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 
@@ -13,11 +14,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// [getMeUseCase]는 현재 사용자 정보 조회 UseCase 인스턴스입니다.
   /// [loginUseCase]는 로그인 UseCase 인스턴스입니다.
   /// [loginWithGoogleUseCase]는 구글 로그인 UseCase 인스턴스입니다.
+  /// [loginWithKakaoUseCase]는 카카오 로그인 UseCase 인스턴스입니다.
   /// [signupUseCase]는 회원가입 UseCase 인스턴스입니다.
   AuthNotifier(
     this.getMeUseCase,
     this.loginUseCase,
     this.loginWithGoogleUseCase,
+    this.loginWithKakaoUseCase,
     this.signupUseCase,
   ) : super(const AuthInitial()) {
     // 앱 시작 시 세션 확인
@@ -32,6 +35,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 구글 로그인 UseCase 인스턴스
   final LoginWithGoogleUseCase loginWithGoogleUseCase;
+
+  /// 카카오 로그인 UseCase 인스턴스
+  final LoginWithKakaoUseCase loginWithKakaoUseCase;
 
   /// 회원가입 UseCase 인스턴스
   final SignupUseCase signupUseCase;
@@ -94,6 +100,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthLoading();
 
     final result = await loginWithGoogleUseCase(null);
+
+    await result.fold(
+      (failure) {
+        state = AuthError(failure.message);
+      },
+      (user) async {
+        state = AuthAuthenticated(user);
+        // FCM 토큰 등록
+        await FcmService.instance.initialize();
+      },
+    );
+  }
+
+  /// 카카오 로그인
+  Future<void> loginWithKakao() async {
+    state = const AuthLoading();
+
+    final result = await loginWithKakaoUseCase(null);
 
     await result.fold(
       (failure) {

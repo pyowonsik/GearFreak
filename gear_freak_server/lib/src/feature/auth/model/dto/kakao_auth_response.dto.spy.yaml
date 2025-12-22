@@ -1,0 +1,28 @@
+### 카카오 인증 응답
+class: KakaoAuthResponseDto
+
+fields:
+  ### 인증 성공 여부
+  success: bool
+  ### 사용자 정보 ID
+  userId: int?
+  ### 사용자 식별자
+  userIdentifier: String?
+  ### 사용자 이름
+  userName: String?
+  ### 이메일
+  email: String?
+  ### 전체 이름
+  fullName: String?
+  ### 권한 범위
+  scopeNames: List<String>?
+  ### 차단 여부
+  blocked: bool?
+  ### 생성 시각
+  created: DateTime?
+  ### 인증 키 ID
+  keyId: int?
+  ### 인증 키 (원본)
+  key: String?
+  ### 실패 사유
+  failReason: String?

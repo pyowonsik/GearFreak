@@ -23,4 +23,7 @@ abstract class AuthRepository {
 
   /// 구글 로그인
   Future<pod.User> loginWithGoogle();
+
+  /// 카카오 로그인
+  Future<pod.User> loginWithKakao();
 }

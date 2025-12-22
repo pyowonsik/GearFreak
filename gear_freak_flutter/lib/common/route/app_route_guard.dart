@@ -50,12 +50,23 @@ class AppRouteGuard {
     const homePath = '/main/home';
     final currentPath = goRouterState.matchedLocation;
 
+    // AuthNotifier의 현재 상태 확인
+    final authState = ref.read(authNotifierProvider);
+
+    // 정의되지 않은 경로(`/`) 처리 - 먼저 체크
+    if (currentPath == '/' || currentPath.isEmpty) {
+      return switch (authState) {
+        AuthInitial() => splashPath,
+        AuthLoading() => splashPath, // 로딩 중이어도 정의된 경로로 리디렉션
+        AuthUnauthenticated() => loginPath,
+        AuthError() => loginPath,
+        AuthAuthenticated() => homePath,
+      };
+    }
+
     final isLoginScreen = _checkLoginPage(currentPath);
     final isSplashScreen = currentPath == splashPath;
     final requiresAuth = _requiresAuthentication(currentPath);
-
-    // AuthNotifier의 현재 상태 확인
-    final authState = ref.read(authNotifierProvider);
 
     debugPrint('🛡️ AppRouteGuard 실행:');
     debugPrint('   - 현재 경로: $currentPath');
@@ -69,6 +80,7 @@ class AppRouteGuard {
       AuthInitial() => isSplashScreen ? null : splashPath,
 
       // 로딩 상태: 현재 위치 유지 (리디렉션 없음)
+      // 단, 정의되지 않은 경로(`/`)는 이미 위에서 처리됨
       AuthLoading() => null,
 
       // 미인증 상태: 선택적 리디렉션

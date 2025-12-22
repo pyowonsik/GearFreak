@@ -9,6 +9,7 @@ import 'package:gear_freak_flutter/common/service/deep_link_service.dart';
 import 'package:gear_freak_flutter/common/service/fcm_service.dart';
 import 'package:gear_freak_flutter/common/service/pod_service.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
+import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 
 /// 백그라운드 메시지 핸들러
 /// 앱이 백그라운드에서 열렸을 때 FCM이 이 함수를 호출함
@@ -38,6 +39,14 @@ Future<void> main() async {
 
   // .env 파일 로드
   await dotenv.load(fileName: '.env');
+
+  // 카카오 SDK 초기화
+  final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
+  if (kakaoNativeAppKey != null && kakaoNativeAppKey.isNotEmpty) {
+    KakaoSdk.init(
+      nativeAppKey: kakaoNativeAppKey,
+    );
+  }
 
   final baseUrl = dotenv.env['BASE_URL'];
 
