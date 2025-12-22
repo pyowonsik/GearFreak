@@ -20,4 +20,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+
+  /// 구글 로그인
+  Future<pod.User> loginWithGoogle();
 }

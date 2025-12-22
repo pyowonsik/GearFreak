@@ -28,8 +28,9 @@ dependencies:
   cupertino_icons: ^1.0.5
   dartz: ^0.10.1
   file_picker: ^8.0.1
-  firebase_core: ^2.24.2
-  firebase_messaging: ^14.7.9
+  firebase_auth: ^5.3.0
+  firebase_core: ^3.0.0
+  firebase_messaging: ^15.0.0
   flutter:
     sdk: flutter
   flutter_chat_types: ^3.6.2
@@ -40,6 +41,7 @@ dependencies:
   gear_freak_client:
     path: ../gear_freak_client
   go_router: ^15.1.2
+  google_sign_in: ^6.2.1
   http: ^1.1.0
   image_picker: ^1.1.2
   kpostal_plus: ^1.0.3

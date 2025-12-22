@@ -46,4 +46,16 @@ post_install do |installer|
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
     end
   end
+  
+  # GoogleUtilities 버전 충돌 해결
+  # google_sign_in과 Firebase의 의존성 충돌을 해결하기 위해
+  # GoogleUtilities를 최신 버전으로 통일
+  installer.pods_project.targets.each do |target|
+    if target.name == 'GoogleUtilities'
+      target.build_configurations.each do |config|
+        # GoogleUtilities 8.0 이상 사용 (google_sign_in 요구사항)
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      end
+    end
+  end
 end

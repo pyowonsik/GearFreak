@@ -4,6 +4,7 @@ import 'package:gear_freak_flutter/feature/auth/data/repository/auth_repository_
 import 'package:gear_freak_flutter/feature/auth/domain/repository/auth_repository.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_google_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_notifier.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
@@ -31,6 +32,12 @@ final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
   return LoginUseCase(repository);
 });
 
+/// Login With Google UseCase Provider
+final loginWithGoogleUseCaseProvider = Provider<LoginWithGoogleUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return LoginWithGoogleUseCase(repository);
+});
+
 /// Signup UseCase Provider
 final signupUseCaseProvider = Provider<SignupUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
@@ -42,7 +49,13 @@ final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final getMeUseCase = ref.watch(getMeUseCaseProvider);
   final loginUseCase = ref.watch(loginUseCaseProvider);
+  final loginWithGoogleUseCase = ref.watch(loginWithGoogleUseCaseProvider);
   final signupUseCase = ref.watch(signupUseCaseProvider);
 
-  return AuthNotifier(getMeUseCase, loginUseCase, signupUseCase);
+  return AuthNotifier(
+    getMeUseCase,
+    loginUseCase,
+    loginWithGoogleUseCase,
+    signupUseCase,
+  );
 });

@@ -65,4 +65,9 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
   }
+
+  @override
+  Future<pod.User> loginWithGoogle() async {
+    return remoteDataSource.loginWithGoogle();
+  }
 }

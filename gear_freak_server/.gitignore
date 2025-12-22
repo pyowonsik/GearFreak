@@ -15,5 +15,11 @@ config/passwords.yaml
 config/firebase_service_account_key.json
 config/fcm-service-account.json
 
+# APNs authentication key for FCM iOS push notifications
+config/AuthKey_*.p8
+
+# Google OAuth client secret for Serverpod Auth
+config/google_client_secret.json
+
 # Environment variables (direnv)
 .envrc

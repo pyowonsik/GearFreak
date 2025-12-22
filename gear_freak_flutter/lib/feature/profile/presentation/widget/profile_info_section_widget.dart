@@ -25,8 +25,9 @@ class ProfileInfoSectionWidget extends StatelessWidget {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.all(20),
-      child: Row(
+      child: Column(
         children: [
+          // 프로필 이미지
           ClipOval(
             child: Container(
               width: 80,
@@ -68,43 +69,90 @@ class ProfileInfoSectionWidget extends StatelessWidget {
                     ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.nickname ?? '',
+          const SizedBox(height: 16),
+          // 닉네임과 ID를 한 줄로 표시
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  _getNicknameWithoutId(user.nickname ?? ''),
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1F2937),
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  user.userInfo?.email ?? '',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            onPressed: onEditProfile,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
               ),
+              if (_hasId(user.nickname ?? ''))
+                Text(
+                  _getId(user.nickname ?? ''),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
+                  maxLines: 1,
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // 이메일
+          Text(
+            user.userInfo?.email ?? '',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
             ),
-            child: const Text('프로필 편집'),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          // 프로필 편집 버튼을 전체 너비로 배치
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onEditProfile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: const Text('프로필 편집'),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  /// 닉네임에서 ID 부분을 제거한 이름 반환
+  /// 예: "장비충#1234567890" -> "장비충"
+  String _getNicknameWithoutId(String nickname) {
+    final index = nickname.indexOf('#');
+    if (index == -1) {
+      return nickname;
+    }
+    return nickname.substring(0, index);
+  }
+
+  /// 닉네임에 ID가 있는지 확인
+  bool _hasId(String nickname) {
+    return nickname.contains('#');
+  }
+
+  /// 닉네임에서 ID 부분만 추출
+  /// 예: "장비충#1234567890" -> "#1234567890"
+  String _getId(String nickname) {
+    final index = nickname.indexOf('#');
+    if (index == -1) {
+      return '';
+    }
+    return nickname.substring(index);
   }
 }
