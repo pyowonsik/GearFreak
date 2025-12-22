@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/service/fcm_service.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_apple_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_google_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_kakao_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
@@ -15,12 +16,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// [loginUseCase]는 로그인 UseCase 인스턴스입니다.
   /// [loginWithGoogleUseCase]는 구글 로그인 UseCase 인스턴스입니다.
   /// [loginWithKakaoUseCase]는 카카오 로그인 UseCase 인스턴스입니다.
+  /// [loginWithAppleUseCase]는 애플 로그인 UseCase 인스턴스입니다.
   /// [signupUseCase]는 회원가입 UseCase 인스턴스입니다.
   AuthNotifier(
     this.getMeUseCase,
     this.loginUseCase,
     this.loginWithGoogleUseCase,
     this.loginWithKakaoUseCase,
+    this.loginWithAppleUseCase,
     this.signupUseCase,
   ) : super(const AuthInitial()) {
     // 앱 시작 시 세션 확인
@@ -38,6 +41,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 카카오 로그인 UseCase 인스턴스
   final LoginWithKakaoUseCase loginWithKakaoUseCase;
+
+  /// 애플 로그인 UseCase 인스턴스
+  final LoginWithAppleUseCase loginWithAppleUseCase;
 
   /// 회원가입 UseCase 인스턴스
   final SignupUseCase signupUseCase;
@@ -118,6 +124,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthLoading();
 
     final result = await loginWithKakaoUseCase(null);
+
+    await result.fold(
+      (failure) {
+        state = AuthError(failure.message);
+      },
+      (user) async {
+        state = AuthAuthenticated(user);
+        // FCM 토큰 등록
+        await FcmService.instance.initialize();
+      },
+    );
+  }
+
+  /// 애플 로그인
+  Future<void> loginWithApple() async {
+    state = const AuthLoading();
+
+    final result = await loginWithAppleUseCase(null);
 
     await result.fold(
       (failure) {

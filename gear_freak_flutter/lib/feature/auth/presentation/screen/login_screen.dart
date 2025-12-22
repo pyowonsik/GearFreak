@@ -287,9 +287,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               SocialLoginButton(
                                 type: SocialLoginType.apple,
                                 isLoading: isLoading,
-                                onPressed: () {
-                                  // TODO: 애플 로그인 구현
-                                  debugPrint('애플 로그인 클릭');
+                                onPressed: () async {
+                                  final authNotifier =
+                                      ref.read(authNotifierProvider.notifier);
+                                  await authNotifier.loginWithApple();
+
+                                  if (!mounted) return;
+
+                                  // 로그인 완료 후 상태 확인
+                                  final authState =
+                                      ref.read(authNotifierProvider);
+                                  switch (authState) {
+                                    case AuthAuthenticated():
+                                      // 로그인 성공 후 리다이렉트 처리
+                                      final redirectPath =
+                                          Uri.base.queryParameters['redirect'];
+                                      if (redirectPath != null &&
+                                          redirectPath.isNotEmpty) {
+                                        // 딥링크에서 온 경우 원래 경로로 이동
+                                        context.go(redirectPath);
+                                      } else {
+                                        // 일반 로그인인 경우 메인 화면으로 이동
+                                        context.go('/main/home');
+                                      }
+                                    case AuthError(:final message):
+                                      // 에러 메시지 표시
+                                      GbSnackBar.showError(
+                                        context,
+                                        '애플 로그인 실패: $message',
+                                      );
+                                    case AuthInitial():
+                                    case AuthLoading():
+                                    case AuthUnauthenticated():
+                                      // 예상치 못한 상태
+                                      break;
+                                  }
                                 },
                               ),
                           ],

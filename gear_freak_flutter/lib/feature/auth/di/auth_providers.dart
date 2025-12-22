@@ -4,6 +4,7 @@ import 'package:gear_freak_flutter/feature/auth/data/repository/auth_repository_
 import 'package:gear_freak_flutter/feature/auth/domain/repository/auth_repository.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_apple_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_google_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_kakao_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
@@ -45,6 +46,12 @@ final loginWithKakaoUseCaseProvider = Provider<LoginWithKakaoUseCase>((ref) {
   return LoginWithKakaoUseCase(repository);
 });
 
+/// Login With Apple UseCase Provider
+final loginWithAppleUseCaseProvider = Provider<LoginWithAppleUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return LoginWithAppleUseCase(repository);
+});
+
 /// Signup UseCase Provider
 final signupUseCaseProvider = Provider<SignupUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
@@ -58,6 +65,7 @@ final authNotifierProvider =
   final loginUseCase = ref.watch(loginUseCaseProvider);
   final loginWithGoogleUseCase = ref.watch(loginWithGoogleUseCaseProvider);
   final loginWithKakaoUseCase = ref.watch(loginWithKakaoUseCaseProvider);
+  final loginWithAppleUseCase = ref.watch(loginWithAppleUseCaseProvider);
   final signupUseCase = ref.watch(signupUseCaseProvider);
 
   return AuthNotifier(
@@ -65,6 +73,7 @@ final authNotifierProvider =
     loginUseCase,
     loginWithGoogleUseCase,
     loginWithKakaoUseCase,
+    loginWithAppleUseCase,
     signupUseCase,
   );
 });

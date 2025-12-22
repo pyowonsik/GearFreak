@@ -75,4 +75,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<pod.User> loginWithKakao() async {
     return remoteDataSource.loginWithKakao();
   }
+
+  @override
+  Future<pod.User> loginWithApple() async {
+    return remoteDataSource.loginWithApple();
+  }
 }

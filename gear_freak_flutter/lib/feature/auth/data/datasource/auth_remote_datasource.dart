@@ -6,6 +6,7 @@ import 'package:gear_freak_flutter/common/service/pod_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 /// 인증 원격 데이터 소스
 class AuthRemoteDataSource {
@@ -237,6 +238,82 @@ class AuthRemoteDataSource {
       return user;
     } catch (e) {
       debugPrint('❌ 카카오 로그인 실패: $e');
+      rethrow;
+    }
+  }
+
+  /// 애플 로그인 API 호출 (Firebase Auth 사용)
+  Future<pod.User> loginWithApple() async {
+    try {
+      debugPrint('🍎 애플 로그인 시작...');
+
+      // 1. Sign in with Apple으로 인증
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      debugPrint('🍎 애플 인증 정보:');
+      debugPrint('   - User ID: ${appleCredential.userIdentifier}');
+      debugPrint('   - Email: ${appleCredential.email}');
+      debugPrint('   - Given Name: ${appleCredential.givenName}');
+      debugPrint('   - Family Name: ${appleCredential.familyName}');
+
+      if (appleCredential.identityToken == null) {
+        throw Exception('애플 ID Token을 가져올 수 없습니다.');
+      }
+
+      // 2. Firebase Auth로 로그인
+      debugPrint('🍎 Firebase Auth로 로그인 중...');
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+      // Firebase ID 토큰 획득
+      final firebaseIdToken = await userCredential.user?.getIdToken();
+
+      if (firebaseIdToken == null) {
+        throw Exception('Firebase ID Token을 가져올 수 없습니다.');
+      }
+
+      debugPrint('🍎 Firebase ID Token 획득 성공');
+
+      // 3. Serverpod Firebase 인증
+      debugPrint('🍎 Serverpod Firebase 인증 시작...');
+      final authenticate =
+          await _client.modules.auth.firebase.authenticate(firebaseIdToken);
+
+      debugPrint('🍎 Serverpod 인증 결과:');
+      debugPrint('   - Success: ${authenticate.success}');
+      debugPrint('   - Fail Reason: ${authenticate.failReason}');
+
+      if (!authenticate.success || authenticate.userInfo == null) {
+        throw Exception(
+          '애플 로그인 실패: ${authenticate.failReason ?? '알 수 없는 오류'}',
+        );
+      }
+
+      // 4. 세션 등록
+      await _sessionManager.registerSignedInUser(
+        authenticate.userInfo!,
+        authenticate.keyId!,
+        authenticate.key!,
+      );
+
+      // 5. User 테이블에 사용자 생성 또는 조회
+      final user = await _client.auth.getOrCreateUserAfterAppleLogin();
+
+      debugPrint('✅ 애플 로그인 성공: user=${user.id}');
+
+      return user;
+    } catch (e) {
+      debugPrint('❌ 애플 로그인 실패: $e');
       rethrow;
     }
   }

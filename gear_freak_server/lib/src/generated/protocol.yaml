@@ -6,6 +6,7 @@ auth:
   - getOrCreateUserAfterGoogleLogin:
   - authenticateWithKakao:
   - getOrCreateUserAfterKakaoLogin:
+  - getOrCreateUserAfterAppleLogin:
 chat:
   - createOrGetChatRoom:
   - getChatRoomById:

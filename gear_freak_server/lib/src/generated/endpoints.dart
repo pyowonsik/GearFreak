@@ -229,6 +229,16 @@ class Endpoints extends _i1.EndpointDispatch {
               (endpoints['auth'] as _i3.AuthEndpoint)
                   .getOrCreateUserAfterKakaoLogin(session),
         ),
+        'getOrCreateUserAfterAppleLogin': _i1.MethodConnector(
+          name: 'getOrCreateUserAfterAppleLogin',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint)
+                  .getOrCreateUserAfterAppleLogin(session),
+        ),
       },
     );
     connectors['chat'] = _i1.EndpointConnector(
