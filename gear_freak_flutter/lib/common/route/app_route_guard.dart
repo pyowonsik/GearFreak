@@ -109,8 +109,10 @@ class AppRouteGuard {
 
       // 인증 상태: 리디렉션
       AuthAuthenticated() => switch (true) {
-          // 로그인/회원가입/스플래시 화면 접근 시 메인으로 리디렉션
-          _ when isLoginScreen || isSplashScreen => homePath,
+          // 로그인 화면 접근 시: redirect 쿼리 파라미터 확인
+          _ when isLoginScreen => _getRedirectPath(goRouterState, homePath),
+          // 스플래시 화면 접근 시: 메인으로 리디렉션
+          _ when isSplashScreen => homePath,
           // 모든 조건 충족 시 현재 경로 유지
           _ => null,
         },
@@ -137,5 +139,20 @@ class AppRouteGuard {
       return '/login?redirect=${Uri.encodeComponent(currentPath)}';
     }
     return '/login';
+  }
+
+  /// 리디렉션 경로 결정
+  ///
+  /// 로그인 성공 후 redirect 쿼리 파라미터가 있으면 해당 경로로,
+  /// 없으면 기본 경로(homePath)로 리디렉션합니다.
+  String _getRedirectPath(GoRouterState goRouterState, String defaultPath) {
+    final redirectParam = goRouterState.uri.queryParameters['redirect'];
+
+    if (redirectParam != null && redirectParam.isNotEmpty) {
+      // 딥링크에서 온 경우 원래 경로로 이동
+      return redirectParam;
+    }
+    // 일반 로그인인 경우 기본 경로로 이동
+    return defaultPath;
   }
 }

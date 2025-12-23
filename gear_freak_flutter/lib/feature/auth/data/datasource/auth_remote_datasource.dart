@@ -201,17 +201,12 @@ class AuthRemoteDataSource {
         }
       }
 
-      if (token.accessToken == null) {
-        throw Exception('카카오 Access Token을 가져올 수 없습니다.');
-      }
-
       debugPrint('🟡 카카오 Access Token 획득 성공');
 
       // 2. Serverpod 카카오 인증
       debugPrint('🟡 Serverpod 카카오 인증 시작...');
-      final authenticate = await _client.auth.authenticateWithKakao(
-        token.accessToken!,
-      );
+      final authenticate =
+          await _client.auth.authenticateWithKakao(token.accessToken);
 
       debugPrint('🟡 Serverpod 인증 결과:');
       debugPrint('   - Success: ${authenticate.success}');

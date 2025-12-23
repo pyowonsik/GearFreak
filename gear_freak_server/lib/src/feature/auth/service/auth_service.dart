@@ -10,6 +10,27 @@ import 'package:uuid/uuid.dart';
 class AuthService {
   // ==================== Public Methods (Endpoint에서 직접 호출) ====================
 
+  /// 이메일 회원가입 - 인증 코드 전송
+  ///
+  /// Serverpod Auth 모듈의 이메일 인증 플로우를 사용합니다.
+  /// 1) Emails.createAccountRequest()를 호출하여
+  ///    serverpod_email_create_request 테이블에 임시 계정을 저장하고
+  ///    AuthConfig.sendValidationEmail 콜백을 통해 인증 코드를 이메일로 전송합니다.
+  static Future<void> requestEmailVerification(
+    Session session, {
+    required String userName,
+    required String email,
+    required String password,
+  }) async {
+    // Serverpod Auth의 이메일 계정 생성 요청 API 사용
+    await Emails.createAccountRequest(
+      session,
+      userName,
+      email,
+      password,
+    );
+  }
+
   /// 개발용: 이메일 인증 없이 바로 회원가입
   static Future<User> signupWithoutEmailVerification(
     Session session, {

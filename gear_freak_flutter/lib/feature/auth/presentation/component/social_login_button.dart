@@ -48,7 +48,6 @@ class SocialLoginButton extends StatelessWidget {
           foregroundColor: config.textColor,
           side: BorderSide(
             color: config.borderColor,
-            width: 1,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -105,9 +104,9 @@ class SocialLoginButton extends StatelessWidget {
               return Container(
                 width: 24,
                 height: 24,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [
                       Color(0xFF4285F4), // Blue
                       Color(0xFF34A853), // Green
@@ -127,12 +126,12 @@ class SocialLoginButton extends StatelessWidget {
           ),
         );
       case SocialLoginType.apple:
-        return _SocialLoginConfig(
+        return const _SocialLoginConfig(
           text: 'Apple로 로그인',
           backgroundColor: Colors.black,
           textColor: Colors.white,
           borderColor: Colors.black,
-          icon: const Icon(
+          icon: Icon(
             Icons.apple,
             size: 24,
             color: Colors.white,

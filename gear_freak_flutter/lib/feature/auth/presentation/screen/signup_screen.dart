@@ -52,34 +52,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
-
     await authNotifier.signup(
       userName: _nameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
-
-    if (!mounted) return;
-
-    // 회원가입 완료 후 상태 확인
-    final authState = ref.read(authNotifierProvider);
-    switch (authState) {
-      case AuthAuthenticated():
-        // 회원가입 성공 후 메인 화면으로 이동
-        context.go('/main/home');
-      case AuthError(:final message):
-        // 에러 메시지 표시
-        GbSnackBar.showError(context, '회원가입 실패: $message');
-      case AuthInitial():
-      case AuthLoading():
-      case AuthUnauthenticated():
-        // 예상치 못한 상태 (이론적으로는 발생하지 않아야 함)
-        break;
-    }
+    // 상태 처리는 ref.listen()에서 자동으로 처리됨
   }
 
   @override
   Widget build(BuildContext context) {
+    // 상태 변경 감지: 에러만 처리 (성공은 가드에서 처리)
+    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      if (next is AuthError && mounted) {
+        GbSnackBar.showError(context, '회원가입 실패: ${next.message}');
+      }
+    });
+
     return GestureDetector(
       onTap: () {
         // 키보드 내리기

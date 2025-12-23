@@ -7,7 +7,6 @@ import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_logo
 import 'package:gear_freak_flutter/feature/auth/presentation/component/social_login_button.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/widget/signup_link_widget.dart';
-import 'package:go_router/go_router.dart';
 
 /// 로그인 화면
 class LoginScreen extends ConsumerStatefulWidget {
@@ -39,40 +38,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     final authNotifier = ref.read(authNotifierProvider.notifier);
-
     await authNotifier.login(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
-
-    if (!mounted) return;
-
-    // 로그인 완료 후 상태 확인
-    final authState = ref.read(authNotifierProvider);
-    switch (authState) {
-      case AuthAuthenticated():
-        // 로그인 성공 후 리다이렉트 처리
-        final redirectPath = Uri.base.queryParameters['redirect'];
-        if (redirectPath != null && redirectPath.isNotEmpty) {
-          // 딥링크에서 온 경우 원래 경로로 이동
-          context.go(redirectPath);
-        } else {
-          // 일반 로그인인 경우 메인 화면으로 이동
-          context.go('/main/home');
-        }
-      case AuthError(:final message):
-        // 에러 메시지 표시
-        GbSnackBar.showError(context, '로그인 실패: $message');
-      case AuthInitial():
-      case AuthLoading():
-      case AuthUnauthenticated():
-        // 예상치 못한 상태 (이론적으로는 발생하지 않아야 함)
-        break;
-    }
+    // 상태 처리는 ref.listen()에서 자동으로 처리됨
   }
 
   @override
   Widget build(BuildContext context) {
+    // 상태 변경 감지: 에러만 처리 (성공은 가드에서 처리)
+    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      if (next is AuthError && mounted) {
+        // 에러 메시지에 로그인 타입 구분이 필요하면 추가 가능
+        GbSnackBar.showError(context, '로그인 실패: ${next.message}');
+      }
+    });
+
     return GestureDetector(
       onTap: () {
         // 키보드 내리기
@@ -203,37 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 final authNotifier =
                                     ref.read(authNotifierProvider.notifier);
                                 await authNotifier.loginWithGoogle();
-
-                                if (!mounted) return;
-
-                                // 로그인 완료 후 상태 확인
-                                final authState =
-                                    ref.read(authNotifierProvider);
-                                switch (authState) {
-                                  case AuthAuthenticated():
-                                    // 로그인 성공 후 리다이렉트 처리
-                                    final redirectPath =
-                                        Uri.base.queryParameters['redirect'];
-                                    if (redirectPath != null &&
-                                        redirectPath.isNotEmpty) {
-                                      // 딥링크에서 온 경우 원래 경로로 이동
-                                      context.go(redirectPath);
-                                    } else {
-                                      // 일반 로그인인 경우 메인 화면으로 이동
-                                      context.go('/main/home');
-                                    }
-                                  case AuthError(:final message):
-                                    // 에러 메시지 표시
-                                    GbSnackBar.showError(
-                                      context,
-                                      '구글 로그인 실패: $message',
-                                    );
-                                  case AuthInitial():
-                                  case AuthLoading():
-                                  case AuthUnauthenticated():
-                                    // 예상치 못한 상태
-                                    break;
-                                }
+                                // 상태 처리는 ref.listen()에서 자동으로 처리됨
                               },
                             ),
                             const SizedBox(height: 12),
@@ -246,37 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 final authNotifier =
                                     ref.read(authNotifierProvider.notifier);
                                 await authNotifier.loginWithKakao();
-
-                                if (!mounted) return;
-
-                                // 로그인 완료 후 상태 확인
-                                final authState =
-                                    ref.read(authNotifierProvider);
-                                switch (authState) {
-                                  case AuthAuthenticated():
-                                    // 로그인 성공 후 리다이렉트 처리
-                                    final redirectPath =
-                                        Uri.base.queryParameters['redirect'];
-                                    if (redirectPath != null &&
-                                        redirectPath.isNotEmpty) {
-                                      // 딥링크에서 온 경우 원래 경로로 이동
-                                      context.go(redirectPath);
-                                    } else {
-                                      // 일반 로그인인 경우 메인 화면으로 이동
-                                      context.go('/main/home');
-                                    }
-                                  case AuthError(:final message):
-                                    // 에러 메시지 표시
-                                    GbSnackBar.showError(
-                                      context,
-                                      '카카오 로그인 실패: $message',
-                                    );
-                                  case AuthInitial():
-                                  case AuthLoading():
-                                  case AuthUnauthenticated():
-                                    // 예상치 못한 상태
-                                    break;
-                                }
+                                // 상태 처리는 ref.listen()에서 자동으로 처리됨
                               },
                             ),
                             const SizedBox(height: 12),
@@ -291,37 +213,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   final authNotifier =
                                       ref.read(authNotifierProvider.notifier);
                                   await authNotifier.loginWithApple();
-
-                                  if (!mounted) return;
-
-                                  // 로그인 완료 후 상태 확인
-                                  final authState =
-                                      ref.read(authNotifierProvider);
-                                  switch (authState) {
-                                    case AuthAuthenticated():
-                                      // 로그인 성공 후 리다이렉트 처리
-                                      final redirectPath =
-                                          Uri.base.queryParameters['redirect'];
-                                      if (redirectPath != null &&
-                                          redirectPath.isNotEmpty) {
-                                        // 딥링크에서 온 경우 원래 경로로 이동
-                                        context.go(redirectPath);
-                                      } else {
-                                        // 일반 로그인인 경우 메인 화면으로 이동
-                                        context.go('/main/home');
-                                      }
-                                    case AuthError(:final message):
-                                      // 에러 메시지 표시
-                                      GbSnackBar.showError(
-                                        context,
-                                        '애플 로그인 실패: $message',
-                                      );
-                                    case AuthInitial():
-                                    case AuthLoading():
-                                    case AuthUnauthenticated():
-                                      // 예상치 못한 상태
-                                      break;
-                                  }
+                                  // 상태 처리는 ref.listen()에서 자동으로 처리됨
                                 },
                               ),
                           ],
