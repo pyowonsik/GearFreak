@@ -72,5 +72,18 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>naversearchapp</string>
+		<string>naversearchthirdlogin</string>
+	</array>
+	<key>NidUrlScheme</key>
+	<string>gearfreak</string>
+	<key>NidClientID</key>
+	<string>RrTSsboWL0vLx538K3A7</string>
+	<key>NidClientSecret</key>
+	<string>vbwH31_Tfo</string>
+	<key>NidAppName</key>
+	<string>장비빨</string>
 </dict>
 </plist>

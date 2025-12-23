@@ -319,4 +319,142 @@ class AuthService {
 
     return await User.db.insertRow(session, newUser);
   }
+
+  /// 네이버 로그인 인증
+  /// 네이버 Access Token을 받아서 검증하고, UserInfo를 생성/조회한 후 인증 키를 발급합니다.
+  static Future<AuthenticationResponse> authenticateWithNaver(
+    Session session,
+    String accessToken,
+  ) async {
+    try {
+      // 1. 네이버 API로 토큰 검증 및 사용자 정보 조회
+      final naverUserInfo = await _verifyNaverToken(accessToken);
+
+      // 2. 네이버 ID로 기존 사용자 찾기
+      final userIdentifier = 'naver_${naverUserInfo['id']}';
+      var userInfo = await Users.findUserByIdentifier(
+        session,
+        userIdentifier,
+      );
+
+      // 3. 사용자가 없으면 생성
+      if (userInfo == null) {
+        final email = naverUserInfo['email'] as String?;
+        final nickname = naverUserInfo['nickname'] as String?;
+
+        userInfo = UserInfo(
+          userIdentifier: userIdentifier,
+          userName: nickname ?? '네이버사용자',
+          email: email ?? '',
+          fullName: nickname ?? '네이버사용자',
+          scopeNames: [],
+          blocked: false,
+          created: DateTime.now().toUtc(),
+        );
+
+        userInfo = await Users.createUser(
+          session,
+          userInfo,
+          'naver',
+        );
+      }
+
+      // 4. 인증 키 생성
+      final authToken = await UserAuthentication.signInUser(
+        session,
+        userInfo?.id ?? 0,
+        'naver',
+        scopes: {},
+      );
+
+      // 5. AuthenticationResponse 반환
+      return AuthenticationResponse(
+        success: true,
+        keyId: authToken.id,
+        key: authToken.key,
+        userInfo: userInfo,
+      );
+    } catch (e) {
+      return AuthenticationResponse(
+        success: false,
+        failReason: null,
+      );
+    }
+  }
+
+  /// 네이버 토큰 검증 및 사용자 정보 조회
+  static Future<Map<String, dynamic>> _verifyNaverToken(
+    String accessToken,
+  ) async {
+    // 1. 네이버 API로 사용자 정보 조회
+    final response = await http.get(
+      Uri.parse('https://openapi.naver.com/v1/nid/me'),
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          '네이버 토큰 검증 실패: ${response.statusCode} - ${response.body}');
+    }
+
+    final responseBody = json.decode(response.body) as Map<String, dynamic>;
+    final userInfo = responseBody['response'] as Map<String, dynamic>?;
+
+    if (userInfo == null || userInfo['id'] == null) {
+      throw Exception('네이버 사용자 정보를 가져올 수 없습니다.');
+    }
+
+    return userInfo;
+  }
+
+  /// 네이버 로그인 후 User 조회 또는 생성
+  /// authenticateWithNaver()가 UserInfo를 생성한 후 호출됩니다.
+  /// 이미 User가 존재하면 조회하고, 없으면 생성합니다.
+  static Future<User> getOrCreateUserAfterNaverLogin(Session session) async {
+    // 1. 현재 인증된 사용자 정보 가져오기
+    final authenticationInfo = await session.authenticated;
+
+    if (authenticationInfo == null) {
+      throw Exception('인증이 필요합니다.');
+    }
+
+    // 2. UserInfo 조회
+    final userInfo = await UserInfo.db.findById(
+      session,
+      authenticationInfo.userId,
+    );
+
+    if (userInfo == null) {
+      throw Exception('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    // 3. User 테이블에서 사용자 정보 조회 (userInfoId로 조회)
+    final existingUser = await User.db.findFirstRow(
+      session,
+      where: (u) => u.userInfoId.equals(userInfo.id!),
+    );
+
+    // 4. User가 이미 존재하면 반환
+    if (existingUser != null) {
+      return existingUser.copyWith(userInfo: userInfo);
+    }
+
+    // 5. User가 없으면 생성 (네이버 로그인 최초 시)
+    // 네이버 로그인 회원가입 시 닉네임은 무조건 "장비충#UUID" 형식으로 생성
+    // ⭐ UUID 사용 - 중복 걱정 없음
+    const uuid = Uuid();
+    final shortId = uuid.v4().substring(0, 9); // 9자리만 사용
+    final nickname = '장비충#$shortId';
+
+    final newUser = User(
+      userInfoId: userInfo.id!,
+      userInfo: userInfo,
+      nickname: nickname,
+      createdAt: DateTime.now().toUtc(),
+    );
+
+    return await User.db.insertRow(session, newUser);
+  }
 }

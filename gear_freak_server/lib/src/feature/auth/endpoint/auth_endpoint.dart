@@ -55,4 +55,20 @@ class AuthEndpoint extends Endpoint {
   Future<User> getOrCreateUserAfterAppleLogin(Session session) async {
     return await AuthService.getOrCreateUserAfterAppleLogin(session);
   }
+
+  /// 네이버 로그인 인증
+  /// 네이버 Access Token을 받아서 검증하고, UserInfo를 생성/조회한 후 인증 키를 발급합니다.
+  Future<AuthenticationResponse> authenticateWithNaver(
+    Session session,
+    String accessToken,
+  ) async {
+    return await AuthService.authenticateWithNaver(session, accessToken);
+  }
+
+  /// 네이버 로그인 후 User 조회 또는 생성
+  /// 클라이언트에서 authenticateWithNaver()를 호출한 후,
+  /// 이 메서드를 호출하여 User 테이블에 사용자를 조회하거나 생성합니다.
+  Future<User> getOrCreateUserAfterNaverLogin(Session session) async {
+    return await AuthService.getOrCreateUserAfterNaverLogin(session);
+  }
 }

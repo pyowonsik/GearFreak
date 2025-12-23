@@ -239,6 +239,34 @@ class Endpoints extends _i1.EndpointDispatch {
               (endpoints['auth'] as _i3.AuthEndpoint)
                   .getOrCreateUserAfterAppleLogin(session),
         ),
+        'authenticateWithNaver': _i1.MethodConnector(
+          name: 'authenticateWithNaver',
+          params: {
+            'accessToken': _i1.ParameterDescription(
+              name: 'accessToken',
+              type: _i1.getType<String>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint).authenticateWithNaver(
+            session,
+            params['accessToken'],
+          ),
+        ),
+        'getOrCreateUserAfterNaverLogin': _i1.MethodConnector(
+          name: 'getOrCreateUserAfterNaverLogin',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['auth'] as _i3.AuthEndpoint)
+                  .getOrCreateUserAfterNaverLogin(session),
+        ),
       },
     );
     connectors['chat'] = _i1.EndpointConnector(

@@ -77,6 +77,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<pod.User> loginWithNaver() async {
+    return remoteDataSource.loginWithNaver();
+  }
+
+  @override
   Future<pod.User> loginWithApple() async {
     return remoteDataSource.loginWithApple();
   }

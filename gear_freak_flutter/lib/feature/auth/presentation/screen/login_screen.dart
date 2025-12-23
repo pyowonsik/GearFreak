@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_loading_button.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/component/auth_logo_section.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/component/social_login_button.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/widget/signup_link_widget.dart';
 
 /// 로그인 화면
 class LoginScreen extends ConsumerStatefulWidget {
@@ -20,31 +16,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    final authNotifier = ref.read(authNotifierProvider.notifier);
-    await authNotifier.login(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
-    // 상태 처리는 ref.listen()에서 자동으로 처리됨
-  }
-
   @override
   Widget build(BuildContext context) {
     // 상태 변경 감지: 에러만 처리 (성공은 가드에서 처리)
@@ -55,180 +26,237 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     });
 
-    return GestureDetector(
-      onTap: () {
-        // 키보드 내리기
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // 로고
-                    const AuthLogoSection(),
-                    const SizedBox(height: 48),
+    final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState is AuthLoading;
 
-                    // 이메일 입력
-                    GbTextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      labelText: '이메일',
-                      hintText: 'example@email.com',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '이메일을 입력해주세요';
-                        }
-                        if (!value.contains('@')) {
-                          return '올바른 이메일 형식이 아닙니다';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 비밀번호 입력
-                    GbTextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      labelText: '비밀번호',
-                      hintText: '비밀번호를 입력하세요',
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '비밀번호를 입력해주세요';
-                        }
-                        if (value.length < 6) {
-                          return '비밀번호는 6자 이상이어야 합니다';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-
-                    // 로그인 버튼
-                    Consumer(
-                      builder: (context, ref, child) {
-                        final authState = ref.watch(authNotifierProvider);
-                        final isLoading = authState is AuthLoading;
-
-                        return AuthLoadingButton(
-                          text: '로그인',
-                          isLoading: isLoading,
-                          onPressed: _handleLogin,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 24),
-
-                    // 구분선
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            color: Colors.grey.shade300,
-                            thickness: 1,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            '또는',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            color: Colors.grey.shade300,
-                            thickness: 1,
-                          ),
-                        ),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFF2563EB).withValues(alpha: 0.05),
+              Colors.white,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              children: [
+                const Spacer(flex: 3),
+                Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF2563EB),
+                        Color(0xFF7C3AED),
                       ],
                     ),
-                    const SizedBox(height: 24),
-
-                    // 소셜 로그인 버튼들
-                    Consumer(
-                      builder: (context, ref, child) {
-                        final authState = ref.watch(authNotifierProvider);
-                        final isLoading = authState is AuthLoading;
-
-                        return Column(
-                          children: [
-                            // 구글 로그인
-                            SocialLoginButton(
-                              type: SocialLoginType.google,
-                              isLoading: isLoading,
-                              onPressed: () async {
-                                final authNotifier =
-                                    ref.read(authNotifierProvider.notifier);
-                                await authNotifier.loginWithGoogle();
-                                // 상태 처리는 ref.listen()에서 자동으로 처리됨
-                              },
-                            ),
-                            const SizedBox(height: 12),
-
-                            // 카카오 로그인
-                            SocialLoginButton(
-                              type: SocialLoginType.kakao,
-                              isLoading: isLoading,
-                              onPressed: () async {
-                                final authNotifier =
-                                    ref.read(authNotifierProvider.notifier);
-                                await authNotifier.loginWithKakao();
-                                // 상태 처리는 ref.listen()에서 자동으로 처리됨
-                              },
-                            ),
-                            const SizedBox(height: 12),
-
-                            // 애플 로그인 (iOS만 표시)
-                            if (Theme.of(context).platform ==
-                                TargetPlatform.iOS)
-                              SocialLoginButton(
-                                type: SocialLoginType.apple,
-                                isLoading: isLoading,
-                                onPressed: () async {
-                                  final authNotifier =
-                                      ref.read(authNotifierProvider.notifier);
-                                  await authNotifier.loginWithApple();
-                                  // 상태 처리는 ref.listen()에서 자동으로 처리됨
-                                },
-                              ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 24),
-
-                    // 회원가입 링크
-                    const SignupLinkWidget(),
-                  ],
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.shopping_bag,
+                    size: 80,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 32),
+                const Text(
+                  'FitMarket',
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                    letterSpacing: -1,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  '헬스 장비부터 보충제까지\n모든 것을 한곳에서',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Color(0xFF6B7280),
+                    height: 1.6,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(flex: 3),
+
+                // 카카오 로그인
+                _SocialLoginButton(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          final authNotifier =
+                              ref.read(authNotifierProvider.notifier);
+                          await authNotifier.loginWithKakao();
+                          // 라우팅은 AppRouteGuard에서 처리
+                        },
+                  icon: Icons.chat_bubble_rounded,
+                  label: '카카오로 3초만에 시작하기',
+                  backgroundColor: const Color(0xFFFFE812),
+                  textColor: const Color(0xFF1F2937),
+                ),
+                const SizedBox(height: 14),
+
+                // 네이버 로그인
+                _SocialLoginButton(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          final authNotifier =
+                              ref.read(authNotifierProvider.notifier);
+                          await authNotifier.loginWithNaver();
+                          // 라우팅은 AppRouteGuard에서 처리
+                        },
+                  icon: Icons.north, // 임시 아이콘, 나중에 교체 가능
+                  label: '네이버로 계속하기',
+                  backgroundColor: const Color(0xFF03C75A),
+                  textColor: Colors.white,
+                ),
+                const SizedBox(height: 14),
+
+                // 애플 로그인 (iOS만)
+                if (Theme.of(context).platform == TargetPlatform.iOS) ...[
+                  _SocialLoginButton(
+                    onTap: isLoading
+                        ? null
+                        : () async {
+                            final authNotifier =
+                                ref.read(authNotifierProvider.notifier);
+                            await authNotifier.loginWithApple();
+                          },
+                    icon: Icons.apple,
+                    label: 'Apple로 계속하기',
+                    backgroundColor: const Color(0xFF1F2937),
+                    textColor: Colors.white,
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                // 구글 로그인
+                _SocialLoginButton(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          final authNotifier =
+                              ref.read(authNotifierProvider.notifier);
+                          await authNotifier.loginWithGoogle();
+                        },
+                  icon: Icons.g_mobiledata,
+                  label: 'Google로 계속하기',
+                  backgroundColor: Colors.white,
+                  textColor: const Color(0xFF1F2937),
+                  hasBorder: true,
+                ),
+                const Spacer(flex: 2),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 32),
+                  child: Text.rich(
+                    TextSpan(
+                      text: '로그인 시 ',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF9CA3AF),
+                        height: 1.5,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: '서비스 약관',
+                          style: TextStyle(
+                            color: Color(0xFF6B7280),
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        TextSpan(text: ' 및 '),
+                        TextSpan(
+                          text: '개인정보 처리방침',
+                          style: TextStyle(
+                            color: Color(0xFF6B7280),
+                            decoration: TextDecoration.underline,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        TextSpan(text: '에\n동의하게 됩니다.'),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SocialLoginButton extends StatelessWidget {
+  const _SocialLoginButton({
+    required this.onTap,
+    required this.icon,
+    required this.label,
+    required this.backgroundColor,
+    required this.textColor,
+    this.hasBorder = false,
+  });
+
+  final VoidCallback? onTap;
+  final IconData icon;
+  final String label;
+  final Color backgroundColor;
+  final Color textColor;
+  final bool hasBorder;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 60,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          foregroundColor: textColor,
+          elevation: hasBorder ? 0 : 1,
+          shadowColor: Colors.black.withValues(alpha: 0.1),
+          side: hasBorder
+              ? const BorderSide(color: Color(0xFFD1D5DB), width: 2)
+              : null,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 26, color: textColor),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -187,6 +187,26 @@ class EndpointAuth extends _i1.EndpointRef {
         'getOrCreateUserAfterAppleLogin',
         {},
       );
+
+  /// 네이버 로그인 인증
+  /// 네이버 Access Token을 받아서 검증하고, UserInfo를 생성/조회한 후 인증 키를 발급합니다.
+  _i2.Future<_i6.AuthenticationResponse> authenticateWithNaver(
+          String accessToken) =>
+      caller.callServerEndpoint<_i6.AuthenticationResponse>(
+        'auth',
+        'authenticateWithNaver',
+        {'accessToken': accessToken},
+      );
+
+  /// 네이버 로그인 후 User 조회 또는 생성
+  /// 클라이언트에서 authenticateWithNaver()를 호출한 후,
+  /// 이 메서드를 호출하여 User 테이블에 사용자를 조회하거나 생성합니다.
+  _i2.Future<_i5.User> getOrCreateUserAfterNaverLogin() =>
+      caller.callServerEndpoint<_i5.User>(
+        'auth',
+        'getOrCreateUserAfterNaverLogin',
+        {},
+      );
 }
 
 /// 채팅 엔드포인트

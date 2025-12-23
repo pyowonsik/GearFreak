@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dar
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_apple_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_google_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_kakao_usecase.dart';
+import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_naver_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 
@@ -16,6 +17,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// [loginUseCase]는 로그인 UseCase 인스턴스입니다.
   /// [loginWithGoogleUseCase]는 구글 로그인 UseCase 인스턴스입니다.
   /// [loginWithKakaoUseCase]는 카카오 로그인 UseCase 인스턴스입니다.
+  /// [loginWithNaverUseCase]는 네이버 로그인 UseCase 인스턴스입니다.
   /// [loginWithAppleUseCase]는 애플 로그인 UseCase 인스턴스입니다.
   /// [signupUseCase]는 회원가입 UseCase 인스턴스입니다.
   AuthNotifier(
@@ -23,6 +25,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     this.loginUseCase,
     this.loginWithGoogleUseCase,
     this.loginWithKakaoUseCase,
+    this.loginWithNaverUseCase,
     this.loginWithAppleUseCase,
     this.signupUseCase,
   ) : super(const AuthInitial()) {
@@ -41,6 +44,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 카카오 로그인 UseCase 인스턴스
   final LoginWithKakaoUseCase loginWithKakaoUseCase;
+
+  /// 네이버 로그인 UseCase 인스턴스
+  final LoginWithNaverUseCase loginWithNaverUseCase;
 
   /// 애플 로그인 UseCase 인스턴스
   final LoginWithAppleUseCase loginWithAppleUseCase;
@@ -124,6 +130,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthLoading();
 
     final result = await loginWithKakaoUseCase(null);
+
+    await result.fold(
+      (failure) {
+        state = AuthError(failure.message);
+      },
+      (user) async {
+        state = AuthAuthenticated(user);
+        // FCM 토큰 등록
+        await FcmService.instance.initialize();
+      },
+    );
+  }
+
+  /// 네이버 로그인
+  Future<void> loginWithNaver() async {
+    state = const AuthLoading();
+
+    final result = await loginWithNaverUseCase(null);
 
     await result.fold(
       (failure) {

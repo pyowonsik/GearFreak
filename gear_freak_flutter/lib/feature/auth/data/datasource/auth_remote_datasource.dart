@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:flutter_naver_login/interface/types/naver_login_status.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/service/pod_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -233,6 +235,58 @@ class AuthRemoteDataSource {
       return user;
     } catch (e) {
       debugPrint('❌ 카카오 로그인 실패: $e');
+      rethrow;
+    }
+  }
+
+  /// 네이버 로그인 API 호출
+  Future<pod.User> loginWithNaver() async {
+    try {
+      debugPrint('🟢 네이버 로그인 시작...');
+
+      // 1. 네이버 SDK로 로그인
+      final result = await FlutterNaverLogin.logIn();
+
+      if (result.status != NaverLoginStatus.loggedIn) {
+        throw Exception('네이버 로그인이 취소되었습니다.');
+      }
+
+      debugPrint('🟢 네이버 로그인 성공');
+
+      // 2. Access Token 획득
+      final token = await FlutterNaverLogin.getCurrentAccessToken();
+      debugPrint('🟢 네이버 Access Token 획득 성공');
+
+      // 3. Serverpod 네이버 인증
+      debugPrint('🟢 Serverpod 네이버 인증 시작...');
+      final authenticate =
+          await _client.auth.authenticateWithNaver(token.accessToken);
+
+      debugPrint('🟢 Serverpod 인증 결과:');
+      debugPrint('   - Success: ${authenticate.success}');
+      debugPrint('   - Fail Reason: ${authenticate.failReason}');
+
+      if (!authenticate.success || authenticate.userInfo == null) {
+        throw Exception(
+          '네이버 로그인 실패: ${authenticate.failReason ?? '알 수 없는 오류'}',
+        );
+      }
+
+      // 4. 세션 등록
+      await _sessionManager.registerSignedInUser(
+        authenticate.userInfo!,
+        authenticate.keyId!,
+        authenticate.key!,
+      );
+
+      // 5. User 테이블에 사용자 생성 또는 조회
+      final user = await _client.auth.getOrCreateUserAfterNaverLogin();
+
+      debugPrint('✅ 네이버 로그인 성공: user=${user.id}');
+
+      return user;
+    } catch (e) {
+      debugPrint('❌ 네이버 로그인 실패: $e');
       rethrow;
     }
   }
