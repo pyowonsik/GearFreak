@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/increment_view_count_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
@@ -20,6 +23,7 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
   /// [getProductDetailUseCase]는 상품 상세 조회 UseCase 인스턴스입니다.
   /// [toggleFavoriteUseCase]는 찜 토글 UseCase 인스턴스입니다.
   /// [isFavoriteUseCase]는 찜 상태 조회 UseCase 인스턴스입니다.
+  /// [incrementViewCountUseCase]는 조회수 증가 UseCase 인스턴스입니다.
   /// [getUserByIdUseCase]는 사용자 ID로 사용자 정보 조회 UseCase 인스턴스입니다.
   /// [deleteProductUseCase]는 상품 삭제 UseCase 인스턴스입니다.
   /// [updateProductStatusUseCase]는 상품 상태 변경 UseCase 인스턴스입니다.
@@ -28,6 +32,7 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
     this.getProductDetailUseCase,
     this.toggleFavoriteUseCase,
     this.isFavoriteUseCase,
+    this.incrementViewCountUseCase,
     this.getUserByIdUseCase,
     this.deleteProductUseCase,
     this.updateProductStatusUseCase,
@@ -44,6 +49,9 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
 
   /// 찜 상태 조회 UseCase 인스턴스
   final IsFavoriteUseCase isFavoriteUseCase;
+
+  /// 조회수 증가 UseCase 인스턴스
+  final IncrementViewCountUseCase incrementViewCountUseCase;
 
   /// 사용자 ID로 사용자 정보 조회 UseCase 인스턴스
   final GetUserByIdUseCase getUserByIdUseCase;
@@ -105,6 +113,53 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
           seller: sellerData,
           isFavorite: isFavorite,
         );
+
+        // 조회수 증가 (비동기, 실패해도 상품 정보는 표시)
+        if (product.id != null) {
+          unawaited(incrementViewCount(product.id!));
+        }
+      },
+    );
+  }
+
+  /// 조회수 증가 (계정당 1회)
+  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  Future<bool> incrementViewCount(int productId) async {
+    final result = await incrementViewCountUseCase(productId);
+    return result.fold(
+      (failure) {
+        debugPrint('조회수 증가 실패: ${failure.message}');
+        return false;
+      },
+      (incremented) {
+        // 조회수가 증가한 경우 상품 정보 업데이트
+        if (incremented) {
+          final currentState = state;
+          if (currentState is ProductDetailLoaded) {
+            final productResult = getProductDetailUseCase(productId);
+            productResult.then((result) {
+              result.fold(
+                (failure) {
+                  debugPrint('상품 정보를 불러오는데 실패했습니다: ${failure.message}');
+                },
+                (updatedProduct) {
+                  final updatedState = state;
+                  if (updatedState is ProductDetailLoaded) {
+                    state = updatedState.copyWith(product: updatedProduct);
+                    // 조회수 증가 성공 시 이벤트 발행 (목록 Provider가 갱신)
+                    ref.read(updatedProductProvider.notifier).state =
+                        updatedProduct;
+                    // 이벤트 처리 후 초기화 (다음 업데이트를 위해)
+                    Future.microtask(() {
+                      ref.read(updatedProductProvider.notifier).state = null;
+                    });
+                  }
+                },
+              );
+            });
+          }
+        }
+        return incremented;
       },
     );
   }

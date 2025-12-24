@@ -13,6 +13,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_de
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_products_by_user_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/increment_view_count_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
@@ -64,6 +65,13 @@ final toggleFavoriteUseCaseProvider = Provider<ToggleFavoriteUseCase>((ref) {
 final isFavoriteUseCaseProvider = Provider<IsFavoriteUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
   return IsFavoriteUseCase(repository);
+});
+
+/// Increment View Count UseCase Provider
+final incrementViewCountUseCaseProvider =
+    Provider<IncrementViewCountUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return IncrementViewCountUseCase(repository);
 });
 
 /// Create Product UseCase Provider
@@ -154,6 +162,8 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
   final getProductDetailUseCase = ref.watch(getProductDetailUseCaseProvider);
   final toggleFavoriteUseCase = ref.watch(toggleFavoriteUseCaseProvider);
   final isFavoriteUseCase = ref.watch(isFavoriteUseCaseProvider);
+  final incrementViewCountUseCase =
+      ref.watch(incrementViewCountUseCaseProvider);
   final getUserByIdUseCase = ref.watch(getUserByIdUseCaseProvider);
   final deleteProductUseCase = ref.watch(deleteProductUseCaseProvider);
   final updateProductStatusUseCase =
@@ -163,6 +173,7 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
     getProductDetailUseCase,
     toggleFavoriteUseCase,
     isFavoriteUseCase,
+    incrementViewCountUseCase,
     getUserByIdUseCase,
     deleteProductUseCase,
     updateProductStatusUseCase,

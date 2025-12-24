@@ -56,6 +56,18 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
     return await productService.isFavorite(session, user.id!, productId);
   }
 
+  /// 조회수 증가 (계정당 1회)
+  /// 이미 조회한 경우에는 조회수를 증가시키지 않습니다.
+  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  Future<bool> incrementViewCount(Session session, int productId) async {
+    final user = await UserService.getMe(session);
+    return await productService.incrementViewCount(
+      session,
+      user.id!,
+      productId,
+    );
+  }
+
   /// 상품 삭제
   Future<void> deleteProduct(Session session, int productId) async {
     final user = await UserService.getMe(session);

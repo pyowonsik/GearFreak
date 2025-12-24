@@ -500,6 +500,16 @@ class EndpointProduct extends _i1.EndpointRef {
         {'productId': productId},
       );
 
+  /// 조회수 증가 (계정당 1회)
+  /// 이미 조회한 경우에는 조회수를 증가시키지 않습니다.
+  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  _i2.Future<bool> incrementViewCount(int productId) =>
+      caller.callServerEndpoint<bool>(
+        'product',
+        'incrementViewCount',
+        {'productId': productId},
+      );
+
   /// 상품 삭제
   _i2.Future<void> deleteProduct(int productId) =>
       caller.callServerEndpoint<void>(

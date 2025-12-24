@@ -156,3 +156,16 @@ class GetProductsByUserIdFailure extends ProductFailure {
   @override
   String toString() => 'GetProductsByUserIdFailure: $message';
 }
+
+/// 조회수 증가 실패
+class IncrementViewCountFailure extends ProductFailure {
+  /// IncrementViewCountFailure 생성자
+  const IncrementViewCountFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'IncrementViewCountFailure: $message';
+}

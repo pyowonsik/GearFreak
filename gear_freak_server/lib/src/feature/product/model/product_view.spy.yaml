@@ -1,0 +1,17 @@
+### 상품 조회 정보
+class: ProductView
+
+table: product_view
+
+fields:
+  ### 사용자 (User와의 관계)
+  user: User?, relation
+  ### 상품 (Product와의 관계)
+  product: Product?, relation
+  ### 조회일
+  viewedAt: DateTime?
+
+indexes:
+  product_view_user_product_unique_idx:
+    fields: userId, productId
+    unique: true

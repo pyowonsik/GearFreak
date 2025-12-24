@@ -38,6 +38,7 @@ product:
   - getPaginatedProducts:
   - toggleFavorite:
   - isFavorite:
+  - incrementViewCount:
   - deleteProduct:
   - getMyProducts:
   - getMyFavoriteProducts:

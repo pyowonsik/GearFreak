@@ -632,19 +632,23 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             children: [
               // 찜하기 버튼
               IconButton(
-                onPressed: () {
-                  final id = int.parse(widget.productId);
-                  unawaited(
-                    ref
-                        .read(productDetailNotifierProvider.notifier)
-                        .toggleFavorite(id),
-                  );
-                },
+                onPressed: _isMyProduct(productData)
+                    ? null
+                    : () {
+                        final id = int.parse(widget.productId);
+                        unawaited(
+                          ref
+                              .read(productDetailNotifierProvider.notifier)
+                              .toggleFavorite(id),
+                        );
+                      },
                 icon: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite
-                      ? const Color(0xFFEF4444)
-                      : const Color(0xFF6B7280),
+                  color: _isMyProduct(productData)
+                      ? const Color(0xFFD1D5DB) // 비활성화 색상
+                      : isFavorite
+                          ? const Color(0xFFEF4444)
+                          : const Color(0xFF6B7280),
                   size: 28,
                 ),
               ),

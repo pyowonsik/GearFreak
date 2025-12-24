@@ -366,6 +366,55 @@ class ProductService {
     return favorite != null;
   }
 
+  /// 조회수 증가 (계정당 1회)
+  /// 이미 조회한 경우에는 조회수를 증가시키지 않습니다.
+  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  Future<bool> incrementViewCount(
+    Session session,
+    int userId,
+    int productId,
+  ) async {
+    // 상품 존재 확인
+    final product = await Product.db.findById(session, productId);
+    if (product == null) {
+      throw Exception('Product not found');
+    }
+
+    // 본인 상품은 조회수 증가하지 않음
+    if (product.sellerId == userId) {
+      return false;
+    }
+
+    // 기존 조회 기록 확인
+    final existingView = await ProductView.db.findFirstRow(
+      session,
+      where: (v) => v.userId.equals(userId) & v.productId.equals(productId),
+    );
+
+    if (existingView != null) {
+      // 이미 조회한 경우 조회수 증가하지 않음
+      return false;
+    }
+
+    // 조회 기록 추가
+    final productView = ProductView(
+      userId: userId,
+      productId: productId,
+      viewedAt: DateTime.now().toUtc(),
+    );
+    await ProductView.db.insertRow(session, productView);
+
+    // viewCount 증가
+    final currentCount = product.viewCount ?? 0;
+    await Product.db.updateRow(
+      session,
+      product.copyWith(viewCount: currentCount + 1),
+      columns: (t) => [t.viewCount],
+    );
+
+    return true; // 조회수 증가됨
+  }
+
   /// 페이지네이션된 상품 목록 조회
   Future<PaginatedProductsResponseDto> getPaginatedProducts(
     Session session,

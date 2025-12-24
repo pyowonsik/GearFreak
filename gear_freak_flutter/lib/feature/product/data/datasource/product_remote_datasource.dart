@@ -48,6 +48,16 @@ class ProductRemoteDataSource {
     }
   }
 
+  /// 조회수 증가 (계정당 1회)
+  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  Future<bool> incrementViewCount(int productId) async {
+    try {
+      return await _client.product.incrementViewCount(productId);
+    } catch (e) {
+      throw Exception('조회수를 증가하는데 실패했습니다: $e');
+    }
+  }
+
   /// 상품 생성
   Future<pod.Product> createProduct(pod.CreateProductRequestDto request) async {
     try {

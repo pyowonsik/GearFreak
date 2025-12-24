@@ -17,6 +17,10 @@ abstract class ProductRepository {
   /// 찜 상태 조회
   Future<bool> isFavorite(int productId);
 
+  /// 조회수 증가 (계정당 1회)
+  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  Future<bool> incrementViewCount(int productId);
+
   /// 상품 생성
   Future<pod.Product> createProduct(pod.CreateProductRequestDto request);
 

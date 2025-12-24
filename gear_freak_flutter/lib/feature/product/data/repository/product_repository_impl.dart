@@ -35,6 +35,11 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<bool> incrementViewCount(int productId) async {
+    return remoteDataSource.incrementViewCount(productId);
+  }
+
+  @override
   Future<pod.Product> createProduct(pod.CreateProductRequestDto request) async {
     return remoteDataSource.createProduct(request);
   }

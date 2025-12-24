@@ -7,6 +7,7 @@ export 'get_product_detail_usecase.dart';
 export 'get_product_stats_by_user_id_usecase.dart';
 export 'get_product_stats_usecase.dart';
 export 'get_products_by_user_id_usecase.dart';
+export 'increment_view_count_usecase.dart';
 export 'is_favorite_usecase.dart';
 export 'toggle_favorite_usecase.dart';
 export 'update_product_status_usecase.dart';
