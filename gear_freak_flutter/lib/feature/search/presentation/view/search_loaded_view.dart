@@ -66,6 +66,7 @@ class SearchLoadedView extends ConsumerWidget {
       onRefresh: onRefresh,
       child: SingleChildScrollView(
         controller: scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

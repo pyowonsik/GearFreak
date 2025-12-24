@@ -302,6 +302,16 @@ class ProductService {
       await Favorite.db.deleteRow(session, favorite);
     }
 
+    // 4-1. 관련된 조회 데이터 삭제
+    final productViews = await ProductView.db.find(
+      session,
+      where: (v) => v.productId.equals(productId),
+    );
+
+    for (final productView in productViews) {
+      await ProductView.db.deleteRow(session, productView);
+    }
+
     // 5. 상품 삭제
     await Product.db.deleteRow(session, product);
   }
@@ -378,11 +388,6 @@ class ProductService {
     final product = await Product.db.findById(session, productId);
     if (product == null) {
       throw Exception('Product not found');
-    }
-
-    // 본인 상품은 조회수 증가하지 않음
-    if (product.sellerId == userId) {
-      return false;
     }
 
     // 기존 조회 기록 확인

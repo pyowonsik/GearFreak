@@ -43,6 +43,7 @@ class ProfileProductListView extends ConsumerWidget {
       onRefresh: onRefresh,
       child: SingleChildScrollView(
         controller: scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Container(
           color: Colors.white,
           padding: const EdgeInsets.all(16),

@@ -117,6 +117,14 @@ class ChatService {
         level: LogLevel.info,
       );
 
+      // 6-1. 상품의 chatCount 증가
+      final currentChatCount = product.chatCount ?? 0;
+      await Product.db.updateRow(
+        session,
+        product.copyWith(chatCount: currentChatCount + 1),
+        columns: (t) => [t.chatCount],
+      );
+
       // 7. 참여자 추가 (현재 사용자만 추가, 상대방은 메시지 전송 시 추가)
       final chatRoomId = createdChatRoom.id;
       if (chatRoomId == null) {
