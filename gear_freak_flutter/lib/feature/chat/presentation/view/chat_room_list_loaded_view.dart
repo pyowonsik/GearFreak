@@ -58,36 +58,13 @@ class ChatRoomListLoadedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // isLoadingMore이면 항상 마지막에 로딩 인디케이터 표시
-    // 아니면 hasMore일 때만 표시
-    final itemCount = isLoadingMore
-        ? chatRoomList.length + 1
-        : chatRoomList.length + ((pagination.hasMore ?? false) ? 1 : 0);
-
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView.builder(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: itemCount,
+        itemCount: chatRoomList.length,
         itemBuilder: (context, index) {
-          if (index == chatRoomList.length) {
-            // 마지막에 로딩 인디케이터 표시
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: isLoadingMore
-                    ? const CircularProgressIndicator()
-                    : const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                      ),
-              ),
-            );
-          }
           final chatRoom = chatRoomList[index];
           return itemBuilder != null
               ? itemBuilder!(context, chatRoom)

@@ -39,26 +39,11 @@ class PaginatedProductListView extends StatelessWidget {
       );
     }
 
-    // isLoadingMore이면 항상 마지막에 로딩 인디케이터 표시
-    // 아니면 hasMore일 때만 표시
-    final itemCount = isLoadingMore
-        ? products.length + 1
-        : products.length + ((pagination.hasMore ?? false) ? 1 : 0);
-
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: itemCount,
+      itemCount: products.length,
       itemBuilder: (context, index) {
-        if (index == products.length) {
-          // 마지막에 로딩 인디케이터 표시
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
         return ProductCardWidget(
           product: products[index],
         );

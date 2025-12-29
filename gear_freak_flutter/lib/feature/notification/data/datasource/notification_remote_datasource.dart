@@ -11,7 +11,7 @@ class NotificationRemoteDataSource {
   pod.Client get _client => PodService.instance.client;
 
   /// 🧪 Mock 데이터 사용 여부 (테스트용)
-  static const bool _useMockData = false;
+  static const bool _useMockData = true;
 
   /// 🧪 Mock 데이터 생성
   pod.NotificationListResponseDto _generateMockNotifications({

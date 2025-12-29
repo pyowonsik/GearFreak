@@ -143,20 +143,6 @@ class ChatMessageListWidget extends StatelessWidget {
             return const SizedBox.shrink();
           },
         ),
-        // 로딩 인디케이터
-        if (isLoadingMore)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.white.withValues(alpha: 0.8),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          ),
       ],
     );
   }

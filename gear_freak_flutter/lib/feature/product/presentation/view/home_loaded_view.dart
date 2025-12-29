@@ -107,24 +107,6 @@ class HomeLoadedView extends ConsumerWidget {
                             );
                           },
                         ),
-                        // 더 불러올 데이터가 있거나 로딩 중이면 로딩 인디케이터 표시
-                        if (isLoadingMore || (pagination.hasMore ?? false))
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: isLoadingMore ? 16 : 16,
-                            ),
-                            child: Center(
-                              child: isLoadingMore
-                                  ? const CircularProgressIndicator()
-                                  : const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                            ),
-                          ),
                       ],
                     ),
                 ],

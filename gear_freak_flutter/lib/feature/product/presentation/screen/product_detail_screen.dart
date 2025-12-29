@@ -282,387 +282,387 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 상품 이미지 (스와이프 가능)
-              Stack(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    height: 320,
-                    color: const Color(0xFFF3F4F6),
-                    child: (productData.imageUrls?.isNotEmpty ?? false)
-                        ? PageView.builder(
-                            controller: _pageController,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _currentPageIndex = index;
-                              });
-                            },
-                            itemCount: productData.imageUrls!.length,
-                            itemBuilder: (context, index) {
-                              return CachedNetworkImage(
-                                imageUrl: productData.imageUrls![index],
-                                fit: BoxFit.cover,
-                                fadeInDuration: Duration.zero,
-                                fadeOutDuration: Duration.zero,
-                                placeholderFadeInDuration: Duration.zero,
-                                memCacheWidth: 1200, // 화면 크기 고려 (약 1.5x)
-                                memCacheHeight: 960, // 화면 크기 고려 (약 1.5x)
-                                maxWidthDiskCache: 1200,
-                                maxHeightDiskCache: 960,
-                                useOldImageOnUrlChange: true,
-                                placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Color(0xFF9CA3AF),
-                                    ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 상품 이미지 (스와이프 가능)
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 320,
+                  color: const Color(0xFFF3F4F6),
+                  child: (productData.imageUrls?.isNotEmpty ?? false)
+                      ? PageView.builder(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentPageIndex = index;
+                            });
+                          },
+                          itemCount: productData.imageUrls!.length,
+                          itemBuilder: (context, index) {
+                            return CachedNetworkImage(
+                              imageUrl: productData.imageUrls![index],
+                              fit: BoxFit.cover,
+                              fadeInDuration: Duration.zero,
+                              fadeOutDuration: Duration.zero,
+                              placeholderFadeInDuration: Duration.zero,
+                              memCacheWidth: 1200, // 화면 크기 고려 (약 1.5x)
+                              memCacheHeight: 960, // 화면 크기 고려 (약 1.5x)
+                              maxWidthDiskCache: 1200,
+                              maxHeightDiskCache: 960,
+                              useOldImageOnUrlChange: true,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF9CA3AF),
                                   ),
                                 ),
-                                errorWidget: (context, url, error) =>
-                                    const Center(
-                                  child: Icon(
-                                    Icons.shopping_bag,
-                                    size: 120,
-                                    color: Color(0xFF9CA3AF),
-                                  ),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Center(
+                                child: Icon(
+                                  Icons.shopping_bag,
+                                  size: 120,
+                                  color: Color(0xFF9CA3AF),
                                 ),
-                              );
-                            },
-                          )
-                        : const Center(
-                            child: Icon(
-                              Icons.shopping_bag,
-                              size: 120,
-                              color: Color(0xFF9CA3AF),
-                            ),
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: Icon(
+                            Icons.shopping_bag,
+                            size: 120,
+                            color: Color(0xFF9CA3AF),
                           ),
-                  ),
-                  // 판매완료 또는 예약중 오버레이
-                  if (productData.status == pod.ProductStatus.sold ||
-                      productData.status == pod.ProductStatus.reserved)
-                    Positioned.fill(
-                      child: ColoredBox(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                productData.status == pod.ProductStatus.sold
-                                    ? Icons.check_circle_outline
-                                    : Icons.schedule_outlined,
-                                size: 64,
+                        ),
+                ),
+                // 판매완료 또는 예약중 오버레이
+                if (productData.status == pod.ProductStatus.sold ||
+                    productData.status == pod.ProductStatus.reserved)
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              productData.status == pod.ProductStatus.sold
+                                  ? Icons.check_circle_outline
+                                  : Icons.schedule_outlined,
+                              size: 64,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              productData.status == pod.ProductStatus.sold
+                                  ? '판매완료'
+                                  : '예약중',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                productData.status == pod.ProductStatus.sold
-                                    ? '판매완료'
-                                    : '예약중',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  // 이미지 인디케이터 (여러 이미지가 있을 때만 표시)
-                  if ((productData.imageUrls?.length ?? 0) > 1)
-                    Positioned(
-                      bottom: 16,
-                      left: 0,
-                      right: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          productData.imageUrls!.length,
-                          (index) => Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _currentPageIndex == index
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.5),
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                // 이미지 인디케이터 (여러 이미지가 있을 때만 표시)
+                if ((productData.imageUrls?.length ?? 0) > 1)
+                  Positioned(
+                    bottom: 16,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        productData.imageUrls!.length,
+                        (index) => Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentPageIndex == index
+                                ? Colors.white
+                                : Colors.white.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
                     ),
-                ],
-              ),
-              // 상품 정보
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 판매자 정보
-                    InkWell(
-                      onTap: () {
-                        // 판매자 프로필 화면으로 이동
-                        final sellerId = sellerData?.id ?? productData.sellerId;
-                        context.push('/profile/user/$sellerId');
-                      },
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: const Color(0xFFF3F4F6),
-                            backgroundImage: (sellerData?.profileImageUrl !=
-                                        null &&
-                                    sellerData!.profileImageUrl!.isNotEmpty)
-                                ? CachedNetworkImageProvider(
-                                    sellerData.profileImageUrl!,
-                                  )
+                  ),
+              ],
+            ),
+            // 상품 정보
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 판매자 정보
+                  InkWell(
+                    onTap: () {
+                      // 판매자 프로필 화면으로 이동
+                      final sellerId = sellerData?.id ?? productData.sellerId;
+                      context.push('/profile/user/$sellerId');
+                    },
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: const Color(0xFFF3F4F6),
+                          backgroundImage: (sellerData?.profileImageUrl !=
+                                      null &&
+                                  sellerData!.profileImageUrl!.isNotEmpty)
+                              ? CachedNetworkImageProvider(
+                                  sellerData.profileImageUrl!,
+                                )
                                 : (productData.seller?.profileImageUrl !=
                                             null &&
                                         productData.seller!.profileImageUrl!
                                             .isNotEmpty)
-                                    ? CachedNetworkImageProvider(
-                                        productData.seller!.profileImageUrl!,
-                                      )
-                                    : null,
-                            child: (sellerData?.profileImageUrl == null ||
-                                        sellerData!.profileImageUrl!.isEmpty) &&
-                                    (productData.seller?.profileImageUrl ==
-                                            null ||
-                                        productData
-                                            .seller!.profileImageUrl!.isEmpty)
-                                ? Icon(
-                                    Icons.person,
-                                    color: Colors.grey.shade500,
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 12),
-                          Builder(
-                            builder: (context) {
-                              final location = getProductLocation(productData);
-                              final hasLocation = location.isNotEmpty;
-                              return Column(
-                                crossAxisAlignment: hasLocation
-                                    ? CrossAxisAlignment.start
-                                    : CrossAxisAlignment.center,
-                                children: [
+                                  ? CachedNetworkImageProvider(
+                                      productData.seller!.profileImageUrl!,
+                                    )
+                                  : null,
+                          child: (sellerData?.profileImageUrl == null ||
+                                      sellerData!.profileImageUrl!.isEmpty) &&
+                                  (productData.seller?.profileImageUrl ==
+                                          null ||
+                                      productData
+                                          .seller!.profileImageUrl!.isEmpty)
+                              ? Icon(
+                                  Icons.person,
+                                  color: Colors.grey.shade500,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Builder(
+                          builder: (context) {
+                            final location = getProductLocation(productData);
+                            final hasLocation = location.isNotEmpty;
+                            return Column(
+                              crossAxisAlignment: hasLocation
+                                  ? CrossAxisAlignment.start
+                                  : CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  sellerData?.nickname ??
+                                      productData.seller?.nickname ??
+                                      '판매자',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF1F2937),
+                                  ),
+                                ),
+                                if (hasLocation) ...[
+                                  const SizedBox(height: 2),
                                   Text(
-                                    sellerData?.nickname ??
-                                        productData.seller?.nickname ??
-                                        '판매자',
+                                    location,
                                     style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF1F2937),
+                                      fontSize: 12,
+                                      color: Color(0xFF9CA3AF),
                                     ),
                                   ),
-                                  if (hasLocation) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      location,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Color(0xFF9CA3AF),
-                                      ),
-                                    ),
-                                  ],
                                 ],
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    const Divider(color: Color(0xFFE5E7EB)),
-                    const SizedBox(height: 20),
-                    // 상품명과 상태 (본인 상품인 경우)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                productData.title,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1F2937),
-                                ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Divider(color: Color(0xFFE5E7EB)),
+                  const SizedBox(height: 20),
+                  // 상품명과 상태 (본인 상품인 경우)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              productData.title,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1F2937),
                               ),
-                              const SizedBox(height: 8),
-                              // 카테고리 및 시간
-                              Row(
-                                children: [
-                                  Text(
+                            ),
+                            const SizedBox(height: 8),
+                            // 카테고리 및 시간
+                            Row(
+                              children: [
+                                Text(
                                     getProductCategoryLabel(
                                         productData.category),
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF6B7280),
-                                    ),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF6B7280),
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '·',
-                                    style: TextStyle(color: Color(0xFF9CA3AF)),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  '·',
+                                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
                                     formatRelativeTime(productData.updatedAt ??
                                         productData.createdAt),
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF6B7280),
-                                    ),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF6B7280),
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        if (_isMyProduct(productData))
-                          Padding(
-                            padding: const EdgeInsets.only(left: 16),
-                            child: ProductStatusDropdownWidget(
+                      ),
+                      if (_isMyProduct(productData))
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: ProductStatusDropdownWidget(
                               currentStatus: productData.status ??
                                   pod.ProductStatus.selling,
-                              onStatusChanged: (newStatus) {
-                                _handleStatusChange(productData, newStatus);
-                              },
+                            onStatusChanged: (newStatus) {
+                              _handleStatusChange(productData, newStatus);
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // 가격
+                  Text(
+                    '${formatPrice(productData.price)}원',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2563EB),
+                    ),
+                  ),
+                  // 상품 상태 및 거래 방법
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              size: 16,
+                              color: Colors.grey.shade600,
                             ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // 가격
-                    Text(
-                      '${formatPrice(productData.price)}원',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2563EB),
+                            const SizedBox(width: 4),
+                            Text(
+                              getProductConditionLabel(productData.condition),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    // 상품 상태 및 거래 방법
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
-                                size: 16,
-                                color: Colors.grey.shade600,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                getProductConditionLabel(productData.condition),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
                         ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.local_shipping_outlined,
-                                size: 16,
-                                color: Colors.grey.shade600,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                getTradeMethodLabel(productData.tradeMethod),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    const Divider(color: Color(0xFFE5E7EB)),
-                    const SizedBox(height: 24),
-                    // 상품 설명
-                    const Text(
-                      '상품 설명',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F2937),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_shipping_outlined,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              getTradeMethodLabel(productData.tradeMethod),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Divider(color: Color(0xFFE5E7EB)),
+                  const SizedBox(height: 24),
+                  // 상품 설명
+                  const Text(
+                    '상품 설명',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1F2937),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      productData.description,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF4B5563),
-                        height: 1.6,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    productData.description,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF4B5563),
+                      height: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Divider(color: Color(0xFFE5E7EB)),
+                  const SizedBox(height: 16),
+                  // 상품 정보
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ProductInfoItemWidget(
+                        icon: Icons.remove_red_eye_outlined,
+                        label: '조회 ${productData.viewCount ?? 0}',
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Divider(color: Color(0xFFE5E7EB)),
-                    const SizedBox(height: 16),
-                    // 상품 정보
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ProductInfoItemWidget(
-                          icon: Icons.remove_red_eye_outlined,
-                          label: '조회 ${productData.viewCount ?? 0}',
-                        ),
-                        ProductInfoItemWidget(
-                          icon: Icons.favorite_border,
-                          label: '찜 ${productData.favoriteCount ?? 0}',
-                        ),
-                        ProductInfoItemWidget(
-                          icon: Icons.chat_bubble_outline,
-                          label: '채팅 ${productData.chatCount ?? 0}',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                      ProductInfoItemWidget(
+                        icon: Icons.favorite_border,
+                        label: '찜 ${productData.favoriteCount ?? 0}',
+                      ),
+                      ProductInfoItemWidget(
+                        icon: Icons.chat_bubble_outline,
+                        label: '채팅 ${productData.chatCount ?? 0}',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                ],
               ),
-            ],
+            ),
+          ],
           ),
         ),
       ),

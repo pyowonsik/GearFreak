@@ -9,10 +9,172 @@ class ProductRemoteDataSource {
   /// Serverpod Client
   pod.Client get _client => PodService.instance.client;
 
+  /// 🧪 Mock 데이터 사용 여부 (테스트용)
+  static const bool _useMockData = true;
+
+  /// 🧪 Mock 상품 데이터 생성
+  List<pod.Product> _generateMockProducts({
+    required int totalCount,
+    int? sellerId,
+    pod.ProductCategory? category,
+    String? title,
+  }) {
+    final products = <pod.Product>[];
+    final now = DateTime.now();
+    final categories = [
+      pod.ProductCategory.equipment,
+      pod.ProductCategory.supplement,
+      pod.ProductCategory.clothing,
+      pod.ProductCategory.shoes,
+      pod.ProductCategory.etc,
+    ];
+    final conditions = [
+      pod.ProductCondition.brandNew,
+      pod.ProductCondition.usedExcellent,
+      pod.ProductCondition.usedGood,
+      pod.ProductCondition.usedFair,
+    ];
+    final tradeMethods = [
+      pod.TradeMethod.direct,
+      pod.TradeMethod.delivery,
+      pod.TradeMethod.both,
+    ];
+
+    final productNames = [
+      '벤치프레스 세트',
+      '덤벨 10kg',
+      '프로틴 2kg',
+      '크레아틴',
+      '운동화',
+      '조깅화',
+      '운동복 상의',
+      '운동복 하의',
+      '헬스장비 세트',
+      '보충제 패키지',
+      '바벨',
+      '원판 20kg',
+      '요가매트',
+      '아령 세트',
+      '풀업바',
+      '운동장갑',
+      '벨트',
+      '스트랩',
+      '보호대',
+      '기타 운동용품',
+    ];
+
+    for (var i = 0; i < totalCount; i++) {
+      final productId = i + 1;
+      final productName = productNames[i % productNames.length];
+      final productTitle = title != null && title.isNotEmpty
+          ? '$productName - $title'
+          : '$productName ${productId}';
+
+      products.add(
+        pod.Product(
+          id: productId,
+          sellerId: sellerId ?? 2,
+          title: productTitle,
+          category: category ?? categories[i % categories.length],
+          price: 10000 + (i % 49) * 10000, // 10,000 ~ 500,000
+          condition: conditions[i % conditions.length],
+          description: '상품 설명입니다. 상태가 좋고 깨끗하게 보관했습니다. $productTitle',
+          tradeMethod: tradeMethods[i % tradeMethods.length],
+          baseAddress: [
+            '서울특별시 강남구',
+            '서울특별시 서초구',
+            '서울특별시 송파구',
+            '서울특별시 마포구',
+            '서울특별시 용산구',
+          ][i % 5],
+          detailAddress: '${i % 100 + 1}동 ${i % 20 + 1}호',
+          imageUrls: [
+            'https://picsum.photos/seed/$productId/400',
+            'https://picsum.photos/seed/${productId + 100}/400',
+          ],
+          viewCount: i % 501,
+          favoriteCount: i % 51,
+          chatCount: i % 21,
+          createdAt: now.subtract(Duration(days: i % 30)),
+          updatedAt: now.subtract(Duration(days: i % 15)),
+          status: i % 10 == 0
+              ? pod.ProductStatus.reserved
+              : i % 10 == 1
+                  ? pod.ProductStatus.sold
+                  : pod.ProductStatus.selling,
+        ),
+      );
+    }
+
+    return products;
+  }
+
   /// 페이지네이션된 상품 목록 조회
   Future<pod.PaginatedProductsResponseDto> getPaginatedProducts(
     pod.PaginationDto pagination,
   ) async {
+    if (_useMockData) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+
+      const totalMockProducts = 200;
+      final allProducts = _generateMockProducts(
+        totalCount: totalMockProducts,
+        category: pagination.category,
+        title: pagination.title,
+      );
+
+      // 정렬 처리
+      var sortedProducts = List<pod.Product>.from(allProducts);
+      switch (pagination.sortBy) {
+        case pod.ProductSortBy.latest:
+          sortedProducts.sort((a, b) {
+            final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
+            final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
+            return bDate.compareTo(aDate);
+          });
+          break;
+        case pod.ProductSortBy.priceAsc:
+          sortedProducts.sort((a, b) => a.price.compareTo(b.price));
+          break;
+        case pod.ProductSortBy.priceDesc:
+          sortedProducts.sort((a, b) => b.price.compareTo(a.price));
+          break;
+        case pod.ProductSortBy.popular:
+          sortedProducts.sort((a, b) {
+            final aCount = a.favoriteCount ?? 0;
+            final bCount = b.favoriteCount ?? 0;
+            return bCount.compareTo(aCount);
+          });
+          break;
+        default:
+          break;
+      }
+
+      // 페이지네이션 처리
+      final offset = (pagination.page - 1) * pagination.limit;
+      final endIndex =
+          (offset + pagination.limit).clamp(0, sortedProducts.length);
+      final paginatedProducts = sortedProducts.sublist(
+        offset.clamp(0, sortedProducts.length),
+        endIndex,
+      );
+
+      final totalPages = (totalMockProducts / pagination.limit).ceil();
+      final hasMore = pagination.page < totalPages;
+
+      return pod.PaginatedProductsResponseDto(
+        products: paginatedProducts,
+        pagination: pod.PaginationDto(
+          page: pagination.page,
+          limit: pagination.limit,
+          totalCount: totalMockProducts,
+          hasMore: hasMore,
+          category: pagination.category,
+          sortBy: pagination.sortBy,
+        ),
+      );
+    }
+
     try {
       return await _client.product.getPaginatedProducts(pagination);
     } catch (e) {
@@ -22,6 +184,16 @@ class ProductRemoteDataSource {
 
   /// 상품 상세 조회
   Future<pod.Product> getProductDetail(int id) async {
+    if (_useMockData) {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      final mockProducts = _generateMockProducts(totalCount: 200);
+      final product = mockProducts.firstWhere(
+        (p) => p.id == id,
+        orElse: () => mockProducts.first,
+      );
+      return product;
+    }
+
     try {
       return await _client.product.getProduct(id);
     } catch (e) {
@@ -89,6 +261,45 @@ class ProductRemoteDataSource {
   Future<pod.PaginatedProductsResponseDto> getMyProducts(
     pod.PaginationDto pagination,
   ) async {
+    if (_useMockData) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      const totalMockProducts = 50;
+      final allProducts = _generateMockProducts(
+        totalCount: totalMockProducts,
+        sellerId: 2, // 현재 사용자 ID
+      );
+
+      // 정렬 처리
+      var sortedProducts = List<pod.Product>.from(allProducts);
+      sortedProducts.sort((a, b) {
+        final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
+        final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
+        return bDate.compareTo(aDate);
+      });
+
+      // 페이지네이션 처리
+      final offset = (pagination.page - 1) * pagination.limit;
+      final endIndex =
+          (offset + pagination.limit).clamp(0, sortedProducts.length);
+      final paginatedProducts = sortedProducts.sublist(
+        offset.clamp(0, sortedProducts.length),
+        endIndex,
+      );
+
+      final totalPages = (totalMockProducts / pagination.limit).ceil();
+      final hasMore = pagination.page < totalPages;
+
+      return pod.PaginatedProductsResponseDto(
+        products: paginatedProducts,
+        pagination: pod.PaginationDto(
+          page: pagination.page,
+          limit: pagination.limit,
+          totalCount: totalMockProducts,
+          hasMore: hasMore,
+        ),
+      );
+    }
+
     try {
       return await _client.product.getMyProducts(pagination);
     } catch (e) {
@@ -100,6 +311,36 @@ class ProductRemoteDataSource {
   Future<pod.PaginatedProductsResponseDto> getMyFavoriteProducts(
     pod.PaginationDto pagination,
   ) async {
+    if (_useMockData) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      const totalMockProducts = 30;
+      final allProducts = _generateMockProducts(
+        totalCount: totalMockProducts,
+        sellerId: 1, // 다른 판매자의 상품들
+      );
+
+      // 페이지네이션 처리
+      final offset = (pagination.page - 1) * pagination.limit;
+      final endIndex = (offset + pagination.limit).clamp(0, allProducts.length);
+      final paginatedProducts = allProducts.sublist(
+        offset.clamp(0, allProducts.length),
+        endIndex,
+      );
+
+      final totalPages = (totalMockProducts / pagination.limit).ceil();
+      final hasMore = pagination.page < totalPages;
+
+      return pod.PaginatedProductsResponseDto(
+        products: paginatedProducts,
+        pagination: pod.PaginationDto(
+          page: pagination.page,
+          limit: pagination.limit,
+          totalCount: totalMockProducts,
+          hasMore: hasMore,
+        ),
+      );
+    }
+
     try {
       return await _client.product.getMyFavoriteProducts(pagination);
     } catch (e) {
@@ -120,6 +361,16 @@ class ProductRemoteDataSource {
 
   /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수)
   Future<pod.ProductStatsDto> getProductStats() async {
+    if (_useMockData) {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      return pod.ProductStatsDto(
+        sellingCount: 35,
+        soldCount: 15,
+        favoriteCount: 30,
+        reviewCount: 0,
+      );
+    }
+
     try {
       return await _client.product.getProductStats();
     } catch (e) {
@@ -130,6 +381,16 @@ class ProductRemoteDataSource {
   /// 다른 사용자의 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
   /// [userId]는 조회할 사용자의 ID입니다.
   Future<pod.ProductStatsDto> getProductStatsByUserId(int userId) async {
+    if (_useMockData) {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      return pod.ProductStatsDto(
+        sellingCount: 25,
+        soldCount: 10,
+        favoriteCount: 20,
+        reviewCount: 15,
+      );
+    }
+
     try {
       return await _client.product.getProductStatsByUserId(userId);
     } catch (e) {
@@ -144,6 +405,36 @@ class ProductRemoteDataSource {
     int userId,
     pod.PaginationDto pagination,
   ) async {
+    if (_useMockData) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      const totalMockProducts = 40;
+      final allProducts = _generateMockProducts(
+        totalCount: totalMockProducts,
+        sellerId: userId,
+      );
+
+      // 페이지네이션 처리
+      final offset = (pagination.page - 1) * pagination.limit;
+      final endIndex = (offset + pagination.limit).clamp(0, allProducts.length);
+      final paginatedProducts = allProducts.sublist(
+        offset.clamp(0, allProducts.length),
+        endIndex,
+      );
+
+      final totalPages = (totalMockProducts / pagination.limit).ceil();
+      final hasMore = pagination.page < totalPages;
+
+      return pod.PaginatedProductsResponseDto(
+        products: paginatedProducts,
+        pagination: pod.PaginationDto(
+          page: pagination.page,
+          limit: pagination.limit,
+          totalCount: totalMockProducts,
+          hasMore: hasMore,
+        ),
+      );
+    }
+
     try {
       return await _client.product.getProductsByUserId(userId, pagination);
     } catch (e) {

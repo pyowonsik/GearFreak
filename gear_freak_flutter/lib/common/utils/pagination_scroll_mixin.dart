@@ -48,6 +48,8 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
   bool _reverse = false; // false: 하단 스크롤 감지, true: 상단 스크롤 감지
   bool _hasLoggedNoMoreData = false;
   Timer? _debounceTimer;
+  bool _isLoadingMore = false; // 로딩 중 플래그 (중복 로드 방지)
+  Timer? _loadingCheckTimer; // 로딩 완료 체크 타이머
 
   /// 페이지네이션 스크롤 초기화
   ///
@@ -87,21 +89,30 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
       return;
     }
 
+    // 이미 로딩 중이면 무시 (중복 로드 방지)
+    if (_isLoadingMore) {
+      return;
+    }
+
     var shouldLoadMore = false;
-    final threshold = position.maxScrollExtent - 300;
+    const threshold = 300.0; // 하단/상단에서 300px 전
 
     if (_reverse) {
       // 상단 스크롤 감지 (채팅용: reverse: true)
-      // 위로 스크롤하면 pixels가 maxScrollExtent에 가까워짐
-      // 상단 300px 이내에 도달하면 이전 메시지 로드
-      if (position.pixels >= threshold && position.maxScrollExtent > 0) {
+      // reverse: true인 ListView에서는 extentBefore가 상단까지의 거리를 의미
+      // 위로 스크롤하면 extentBefore가 작아짐
+      // 하지만 실제 동작을 보면 extentBefore가 하단까지의 거리일 수도 있음
+      // 따라서 pixels가 maxScrollExtent에 가까울 때 (상단에 가까울 때) 로드
+      // reverse: true에서는 pixels가 클수록 상단에 가까움
+      final distanceToTop = position.pixels;
+      if (distanceToTop >= position.maxScrollExtent - threshold &&
+          position.maxScrollExtent > 0) {
         shouldLoadMore = true;
       }
     } else {
       // 하단 스크롤 감지 (일반 리스트용: reverse: false)
-      // 아래로 스크롤하면 pixels가 maxScrollExtent에 가까워짐
-      // 하단 300px 이내에 도달하면 다음 페이지 로드
-      if (position.pixels >= threshold && position.pixels > 0) {
+      // extentAfter: 하단까지 남은 거리
+      if (position.extentAfter <= threshold && position.extentAfter > 0) {
         shouldLoadMore = true;
       }
     }
@@ -111,8 +122,8 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
       _debounceTimer?.cancel();
       debugPrint('🔥 디바운스 타이머 취소');
 
-      // 300ms 후에 실행 (디바운스)
-      _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      // 100ms 후에 실행 (디바운스)
+      _debounceTimer = Timer(const Duration(milliseconds: 100), () {
         debugPrint('🔥 디바운스 타이머 실행');
         final pagination = _getPagination?.call();
         final isLoading = _isLoading?.call() ?? false;
@@ -121,19 +132,28 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
         final hasMoreData = pagination?.hasMore ?? false;
 
         // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 실행
-        if (!isLoading && pagination != null && hasMoreData) {
-          _hasLoggedNoMoreData = false; // 데이터가 있으면 플래그 리셋
+        if (!isLoading &&
+            !_isLoadingMore &&
+            pagination != null &&
+            hasMoreData) {
+          _isLoadingMore = true; // 로딩 시작 플래그 설정
+          _hasLoggedNoMoreData = false;
 
           final screenName = _screenName ?? 'Screen';
           final scrollType = _reverse ? '상단' : '하단';
+          final position = _scrollController?.position;
           debugPrint('📜 [$screenName] $scrollType 스크롤 감지: '
-              'pixels=${position.pixels.toStringAsFixed(0)}, '
-              'maxScrollExtent=${position.maxScrollExtent.toStringAsFixed(0)}, '
-              'threshold=${threshold.toStringAsFixed(0)}');
+              'extentAfter=${position?.extentAfter.toStringAsFixed(0) ?? 'N/A'}, '
+              'extentBefore=${position?.extentBefore.toStringAsFixed(0) ?? 'N/A'}, '
+              'maxScrollExtent=${position?.maxScrollExtent.toStringAsFixed(0) ?? 'N/A'}');
           debugPrint('📦 [$screenName] 현재 페이지: ${pagination.page}, '
               '전체: ${pagination.totalCount}, hasMore: $hasMoreData');
 
           _onLoadMore?.call();
+
+          // 로딩 완료 후 플래그 리셋 (isLoading이 false가 될 때까지 대기)
+          // 주기적으로 체크하여 isLoading이 false가 되면 플래그 리셋
+          _checkAndResetLoadingFlag();
         } else if (pagination != null &&
             !hasMoreData &&
             !_hasLoggedNoMoreData) {
@@ -146,10 +166,30 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
+  /// 로딩 완료 체크 및 플래그 리셋
+  void _checkAndResetLoadingFlag() {
+    // 기존 타이머 취소
+    _loadingCheckTimer?.cancel();
+
+    // 200ms마다 체크하여 isLoading이 false가 되면 플래그 리셋
+    _loadingCheckTimer =
+        Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      final isLoading = _isLoading?.call() ?? false;
+      if (!isLoading) {
+        _isLoadingMore = false;
+        timer.cancel();
+        _loadingCheckTimer = null;
+        debugPrint('✅ 로딩 완료: 플래그 리셋');
+      }
+    });
+  }
+
   /// 스크롤 컨트롤러 정리
   void disposePaginationScroll() {
     _debounceTimer?.cancel();
     _debounceTimer = null;
+    _loadingCheckTimer?.cancel();
+    _loadingCheckTimer = null;
     _scrollController?.removeListener(_onScroll);
     _scrollController?.dispose();
     _scrollController = null;
@@ -159,5 +199,6 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
     _screenName = null;
     _reverse = false;
     _hasLoggedNoMoreData = false;
+    _isLoadingMore = false; // 플래그 리셋
   }
 }
