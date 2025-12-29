@@ -92,4 +92,9 @@ class ProductRepositoryImpl implements ProductRepository {
   ) async {
     return remoteDataSource.getProductsByUserId(userId, pagination);
   }
+
+  @override
+  Future<pod.Product> bumpProduct(int productId) async {
+    return remoteDataSource.bumpProduct(productId);
+  }
 }

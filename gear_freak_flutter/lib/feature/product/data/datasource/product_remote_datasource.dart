@@ -150,4 +150,13 @@ class ProductRemoteDataSource {
       throw Exception('다른 사용자의 상품 목록을 불러오는데 실패했습니다: $e');
     }
   }
+
+  /// 상품 상단으로 올리기 (updatedAt 갱신)
+  Future<pod.Product> bumpProduct(int productId) async {
+    try {
+      return await _client.product.bumpProduct(productId);
+    } catch (e) {
+      throw Exception('상품을 상단으로 올리는데 실패했습니다: $e');
+    }
+  }
 }

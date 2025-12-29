@@ -469,7 +469,12 @@ class ProductNotifier extends StateNotifier<ProductState> {
         '✏️ [ProductNotifier] 상품 수정: productId=${updatedProduct.id}',
       );
 
-      state = currentState.copyWith(products: updatedProducts);
+      // 최신순 정렬인 경우 updatedAt 기준으로 재정렬
+      final sortedProducts = _shouldResort(currentState.sortBy)
+          ? _resortByUpdatedAt(updatedProducts)
+          : updatedProducts;
+
+      state = currentState.copyWith(products: sortedProducts);
     }
   }
 
@@ -497,13 +502,35 @@ class ProductNotifier extends StateNotifier<ProductState> {
         '✏️ [ProductNotifier] 상품 수정 (로딩 중): productId=${updatedProduct.id}',
       );
 
+      // 최신순 정렬인 경우 updatedAt 기준으로 재정렬
+      final sortedProducts = _shouldResort(currentState.sortBy)
+          ? _resortByUpdatedAt(updatedProducts)
+          : updatedProducts;
+
       state = ProductPaginatedLoadingMore(
-        products: updatedProducts,
+        products: sortedProducts,
         pagination: currentState.pagination,
         category: currentState.category,
         sortBy: currentState.sortBy,
         profileType: currentState.profileType,
       );
     }
+  }
+
+  /// 재정렬이 필요한지 확인 (최신순 정렬인 경우)
+  bool _shouldResort(pod.ProductSortBy? sortBy) {
+    return sortBy == pod.ProductSortBy.latest || sortBy == null;
+  }
+
+  /// updatedAt 기준으로 내림차순 재정렬
+  List<pod.Product> _resortByUpdatedAt(List<pod.Product> products) {
+    final sorted = List<pod.Product>.from(products);
+    sorted.sort((a, b) {
+      // updatedAt이 있으면 updatedAt, 없으면 createdAt 사용
+      final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
+      final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
+      return bDate.compareTo(aDate); // 내림차순 (최신순)
+    });
+    return sorted;
   }
 }

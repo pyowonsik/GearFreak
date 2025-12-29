@@ -71,7 +71,7 @@ class ProductSortUtil {
       ProductSortBy sortBy) {
     switch (sortBy) {
       case ProductSortBy.latest:
-        return ((p) => p.createdAt, true);
+        return ((p) => p.updatedAt, true);
       case ProductSortBy.priceAsc:
         return ((p) => p.price, false);
       case ProductSortBy.priceDesc:

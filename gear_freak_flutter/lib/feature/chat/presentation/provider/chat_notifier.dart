@@ -16,6 +16,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/mark_chat_room_as
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/send_message_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/subscribe_chat_message_stream_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
+import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 
 /// 채팅 Notifier
@@ -121,7 +122,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
         final chatRoomId = response.chatRoomId!;
 
-        // 2. 채팅방 로드 및 진입 (공통 로직)
+        // 2. 새 채팅방이 생성된 경우 상품 정보 업데이트 (chatCount 반영)
+        if (response.isNewChatRoom ?? false) {
+          _updateProductAfterChatRoomCreated(productId);
+        }
+
+        // 3. 채팅방 로드 및 진입 (공통 로직)
         await _loadAndEnterChatRoom(chatRoomId);
       },
     );
@@ -285,6 +291,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
       (message) async {
         // 메시지 전송 성공 후 채팅방 정보 로드
         final chatRoomId = message.chatRoomId;
+
+        // 새 채팅방이 생성되었을 수 있으므로 상품 정보 업데이트 (chatCount 반영)
+        _updateProductAfterChatRoomCreated(productId);
 
         // 채팅방 정보 조회 및 진입 (이미 스트림 연결 포함)
         await enterChatRoomByChatRoomId(chatRoomId: chatRoomId);
@@ -540,6 +549,28 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }
 
   // ==================== Private Helper Methods ====================
+
+  /// 채팅방 생성 후 상품 정보 업데이트 (chatCount 반영)
+  void _updateProductAfterChatRoomCreated(int productId) {
+    // 상품 정보를 다시 조회하여 updatedProductProvider에 이벤트 발행
+    getProductDetailUseCase(productId).then((result) {
+      result.fold(
+        (failure) {
+          debugPrint('채팅방 생성 후 상품 정보 조회 실패: ${failure.message}');
+        },
+        (updatedProduct) {
+          debugPrint(
+              '채팅방 생성 후 상품 정보 업데이트: productId=$productId, chatCount=${updatedProduct.chatCount}');
+          // 상품 업데이트 이벤트 발행 (모든 목록 Provider가 자동으로 반응)
+          ref.read(updatedProductProvider.notifier).state = updatedProduct;
+          // 이벤트 처리 후 초기화 (다음 업데이트를 위해)
+          Future.microtask(() {
+            ref.read(updatedProductProvider.notifier).state = null;
+          });
+        },
+      );
+    });
+  }
 
   /// 메시지를 createdAt 기준으로 내림차순 정렬 (최신이 위)
   void _sortMessagesByCreatedAt(List<pod.ChatMessageResponseDto> messages) {

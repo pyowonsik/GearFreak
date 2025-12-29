@@ -36,6 +36,7 @@ class ChatService {
           chatRoomId: null,
           chatRoom: null,
           message: '상품을 찾을 수 없습니다.',
+          isNewChatRoom: false,
         );
       }
 
@@ -46,6 +47,7 @@ class ChatService {
           chatRoomId: null,
           chatRoom: null,
           message: '유효하지 않은 사용자 ID입니다.',
+          isNewChatRoom: false,
         );
       }
 
@@ -62,6 +64,7 @@ class ChatService {
             chatRoomId: null,
             chatRoom: null,
             message: '본인이 등록한 상품에는 채팅할 수 없습니다.',
+            isNewChatRoom: false,
           );
         }
       }
@@ -74,6 +77,7 @@ class ChatService {
           chatRoomId: null,
           chatRoom: null,
           message: '상대방 사용자를 찾을 수 없습니다.',
+          isNewChatRoom: false,
         );
       }
 
@@ -96,6 +100,7 @@ class ChatService {
           chatRoomId: existingChatRoom.id,
           chatRoom: existingChatRoom,
           message: '기존 채팅방을 찾았습니다.',
+          isNewChatRoom: false,
         );
       }
 
@@ -133,6 +138,7 @@ class ChatService {
           chatRoomId: null,
           chatRoom: null,
           message: '채팅방 생성에 실패했습니다.',
+          isNewChatRoom: false,
         );
       }
 
@@ -157,6 +163,7 @@ class ChatService {
         chatRoomId: updatedChatRoom?.id,
         chatRoom: updatedChatRoom,
         message: '채팅방이 성공적으로 생성되었습니다.',
+        isNewChatRoom: true,
       );
     } on Exception catch (e, stackTrace) {
       session.log(
@@ -170,6 +177,7 @@ class ChatService {
         chatRoomId: null,
         chatRoom: null,
         message: '채팅방 생성 중 오류가 발생했습니다: $e',
+        isNewChatRoom: false,
       );
     }
   }

@@ -10,4 +10,5 @@ fields:
   chatRoom: ChatRoom?
   ### 메시지 (성공/실패 메시지)
   message: String?
-
+  ### 새로 생성된 채팅방인지 여부
+  isNewChatRoom: bool?

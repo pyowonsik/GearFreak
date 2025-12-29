@@ -255,6 +255,37 @@ class ProductService {
     return result;
   }
 
+  /// 상품 상단으로 올리기 (updatedAt 갱신)
+  /// 상품의 updatedAt을 현재 시간으로 갱신하여 최신순 정렬에서 상단으로 올립니다.
+  Future<Product> bumpProduct(
+    Session session,
+    int productId,
+    int userId,
+  ) async {
+    // 1. 기존 상품 조회
+    final product = await Product.db.findById(session, productId);
+    if (product == null) {
+      throw Exception('Product not found');
+    }
+
+    // 2. 권한 확인 (판매자만 상단으로 올리기 가능)
+    if (product.sellerId != userId) {
+      throw Exception('Unauthorized: Only the seller can bump this product');
+    }
+
+    // 3. updatedAt을 현재 시간으로 갱신
+    final now = DateTime.now().toUtc();
+    final updatedProduct = product.copyWith(updatedAt: now);
+
+    await Product.db.updateRow(
+      session,
+      updatedProduct,
+      columns: (t) => [t.updatedAt],
+    );
+
+    return updatedProduct;
+  }
+
   /// 상품 삭제
   Future<void> deleteProduct(
     Session session,
@@ -453,7 +484,7 @@ class ProductService {
   }
 
   /// 내가 등록한 상품 목록 조회 (페이지네이션)
-  /// 등록일 기준 최근순으로 정렬됩니다.
+  /// 수정일 기준 최근순으로 정렬됩니다.
   /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
   /// [pagination.status]가 null이 아니면 해당 상태의 상품만 반환합니다.
   Future<PaginatedProductsResponseDto> getMyProducts(
@@ -469,7 +500,7 @@ class ProductService {
         final allProducts = await Product.db.find(
           session,
           where: (p) => p.sellerId.equals(userId),
-          orderBy: (p) => p.createdAt,
+          orderBy: (p) => p.updatedAt,
           orderDescending: true,
         );
 
@@ -494,7 +525,7 @@ class ProductService {
           session,
           where: (p) =>
               p.sellerId.equals(userId) & p.status.equals(pagination.status!),
-          orderBy: (p) => p.createdAt,
+          orderBy: (p) => p.updatedAt,
           orderDescending: true,
           limit: pagination.limit,
           offset: offset,
@@ -513,7 +544,7 @@ class ProductService {
     final products = await Product.db.find(
       session,
       where: (p) => p.sellerId.equals(userId),
-      orderBy: (p) => p.createdAt,
+      orderBy: (p) => p.updatedAt,
       orderDescending: true,
       limit: pagination.limit,
       offset: offset,
@@ -716,8 +747,9 @@ class ProductService {
     switch (sortBy) {
       case ProductSortBy.latest:
         sorted.sort((a, b) {
-          final aDate = a.createdAt ?? DateTime(1970);
-          final bDate = b.createdAt ?? DateTime(1970);
+          // updatedAt이 있으면 updatedAt, 없으면 createdAt 사용
+          final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
+          final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
           return bDate.compareTo(aDate); // 최신순 (내림차순)
         });
         break;

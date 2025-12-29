@@ -58,4 +58,7 @@ abstract class ProductRepository {
     int userId,
     pod.PaginationDto pagination,
   );
+
+  /// 상품 상단으로 올리기 (updatedAt 갱신)
+  Future<pod.Product> bumpProduct(int productId);
 }

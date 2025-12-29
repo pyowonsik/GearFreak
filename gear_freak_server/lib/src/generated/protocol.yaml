@@ -43,6 +43,7 @@ product:
   - getMyProducts:
   - getMyFavoriteProducts:
   - updateProductStatus:
+  - bumpProduct:
   - getProductStats:
   - getProductStatsByUserId:
   - getProductsByUserId:

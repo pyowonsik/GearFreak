@@ -169,3 +169,16 @@ class IncrementViewCountFailure extends ProductFailure {
   @override
   String toString() => 'IncrementViewCountFailure: $message';
 }
+
+/// 상품 상단으로 올리기 실패
+class BumpProductFailure extends ProductFailure {
+  /// BumpProductFailure 생성자
+  const BumpProductFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'BumpProductFailure: $message';
+}

@@ -20,6 +20,7 @@ abstract class CreateChatRoomResponseDto
     this.chatRoomId,
     this.chatRoom,
     this.message,
+    this.isNewChatRoom,
   });
 
   factory CreateChatRoomResponseDto({
@@ -27,6 +28,7 @@ abstract class CreateChatRoomResponseDto
     int? chatRoomId,
     _i2.ChatRoom? chatRoom,
     String? message,
+    bool? isNewChatRoom,
   }) = _CreateChatRoomResponseDtoImpl;
 
   factory CreateChatRoomResponseDto.fromJson(
@@ -39,6 +41,7 @@ abstract class CreateChatRoomResponseDto
           : _i2.ChatRoom.fromJson(
               (jsonSerialization['chatRoom'] as Map<String, dynamic>)),
       message: jsonSerialization['message'] as String?,
+      isNewChatRoom: jsonSerialization['isNewChatRoom'] as bool?,
     );
   }
 
@@ -54,6 +57,9 @@ abstract class CreateChatRoomResponseDto
   /// 메시지 (성공/실패 메시지)
   String? message;
 
+  /// 새로 생성된 채팅방인지 여부
+  bool? isNewChatRoom;
+
   /// Returns a shallow copy of this [CreateChatRoomResponseDto]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -62,6 +68,7 @@ abstract class CreateChatRoomResponseDto
     int? chatRoomId,
     _i2.ChatRoom? chatRoom,
     String? message,
+    bool? isNewChatRoom,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -70,6 +77,7 @@ abstract class CreateChatRoomResponseDto
       if (chatRoomId != null) 'chatRoomId': chatRoomId,
       if (chatRoom != null) 'chatRoom': chatRoom?.toJson(),
       if (message != null) 'message': message,
+      if (isNewChatRoom != null) 'isNewChatRoom': isNewChatRoom,
     };
   }
 
@@ -80,6 +88,7 @@ abstract class CreateChatRoomResponseDto
       if (chatRoomId != null) 'chatRoomId': chatRoomId,
       if (chatRoom != null) 'chatRoom': chatRoom?.toJsonForProtocol(),
       if (message != null) 'message': message,
+      if (isNewChatRoom != null) 'isNewChatRoom': isNewChatRoom,
     };
   }
 
@@ -97,11 +106,13 @@ class _CreateChatRoomResponseDtoImpl extends CreateChatRoomResponseDto {
     int? chatRoomId,
     _i2.ChatRoom? chatRoom,
     String? message,
+    bool? isNewChatRoom,
   }) : super._(
           success: success,
           chatRoomId: chatRoomId,
           chatRoom: chatRoom,
           message: message,
+          isNewChatRoom: isNewChatRoom,
         );
 
   /// Returns a shallow copy of this [CreateChatRoomResponseDto]
@@ -113,6 +124,7 @@ class _CreateChatRoomResponseDtoImpl extends CreateChatRoomResponseDto {
     Object? chatRoomId = _Undefined,
     Object? chatRoom = _Undefined,
     Object? message = _Undefined,
+    Object? isNewChatRoom = _Undefined,
   }) {
     return CreateChatRoomResponseDto(
       success: success ?? this.success,
@@ -120,6 +132,8 @@ class _CreateChatRoomResponseDtoImpl extends CreateChatRoomResponseDto {
       chatRoom:
           chatRoom is _i2.ChatRoom? ? chatRoom : this.chatRoom?.copyWith(),
       message: message is String? ? message : this.message,
+      isNewChatRoom:
+          isNewChatRoom is bool? ? isNewChatRoom : this.isNewChatRoom,
     );
   }
 }

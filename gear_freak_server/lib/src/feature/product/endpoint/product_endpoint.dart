@@ -110,6 +110,17 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
     );
   }
 
+  /// 상품 상단으로 올리기 (updatedAt 갱신)
+  /// 상품의 updatedAt을 현재 시간으로 갱신하여 최신순 정렬에서 상단으로 올립니다.
+  Future<Product> bumpProduct(Session session, int productId) async {
+    final user = await UserService.getMe(session);
+    return await productService.bumpProduct(
+      session,
+      productId,
+      user.id!,
+    );
+  }
+
   /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
   /// 현재 로그인한 사용자의 통계를 조회합니다.
   Future<ProductStatsDto> getProductStats(Session session) async {

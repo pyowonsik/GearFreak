@@ -545,6 +545,15 @@ class EndpointProduct extends _i1.EndpointRef {
         {'request': request},
       );
 
+  /// 상품 상단으로 올리기 (updatedAt 갱신)
+  /// 상품의 updatedAt을 현재 시간으로 갱신하여 최신순 정렬에서 상단으로 올립니다.
+  _i2.Future<_i24.Product> bumpProduct(int productId) =>
+      caller.callServerEndpoint<_i24.Product>(
+        'product',
+        'bumpProduct',
+        {'productId': productId},
+      );
+
   /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
   /// 현재 로그인한 사용자의 통계를 조회합니다.
   _i2.Future<_i29.ProductStatsDto> getProductStats() =>

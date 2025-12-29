@@ -77,6 +77,33 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
   }
 
+  /// 상단으로 올리기 처리
+  Future<void> _handleBump(pod.Product productData) async {
+    if (!mounted) return;
+
+    if (productData.id == null) {
+      if (!mounted) return;
+      GbSnackBar.showError(context, '상품 ID가 유효하지 않습니다');
+      return;
+    }
+
+    // 상단으로 올리기 API 호출
+    final bumpResult = await ref
+        .read(productDetailNotifierProvider.notifier)
+        .bumpProduct(productData.id!);
+
+    if (!mounted) return;
+
+    if (bumpResult) {
+      if (!mounted) return;
+      GbSnackBar.showSuccess(context, '상품이 상단으로 올라갔습니다');
+    } else {
+      // 실패
+      if (!mounted) return;
+      GbSnackBar.showError(context, '상품을 상단으로 올리는데 실패했습니다');
+    }
+  }
+
   /// 삭제 처리
   Future<void> _handleDelete(pod.Product productData) async {
     if (!mounted) return;
@@ -205,6 +232,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 switch (value) {
                   case 'edit':
                     _handleEdit(productData);
+                  case 'bump':
+                    _handleBump(productData);
                   case 'delete':
                     _handleDelete(productData);
                 }
@@ -217,6 +246,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       Icon(Icons.edit_outlined, size: 20),
                       SizedBox(width: 8),
                       Text('수정'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'bump',
+                  child: Row(
+                    children: [
+                      Icon(Icons.arrow_upward, size: 20),
+                      SizedBox(width: 8),
+                      Text('상단으로 올리기'),
                     ],
                   ),
                 ),
@@ -478,7 +517,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    formatRelativeTime(productData.createdAt),
+                                    formatRelativeTime(productData.updatedAt ??
+                                        productData.createdAt),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: Color(0xFF6B7280),

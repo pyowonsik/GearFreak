@@ -4,6 +4,7 @@ import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/product/data/datasource/product_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/product/data/repository/product_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/product/domain/repository/product_repository.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/bump_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_favorite_products_usecase.dart';
@@ -92,6 +93,12 @@ final deleteProductUseCaseProvider = Provider<DeleteProductUseCase>((ref) {
   return DeleteProductUseCase(repository);
 });
 
+/// Bump Product UseCase Provider
+final bumpProductUseCaseProvider = Provider<BumpProductUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return BumpProductUseCase(repository);
+});
+
 /// Get My Products UseCase Provider
 final getMyProductsUseCaseProvider = Provider<GetMyProductsUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
@@ -168,6 +175,7 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
   final deleteProductUseCase = ref.watch(deleteProductUseCaseProvider);
   final updateProductStatusUseCase =
       ref.watch(updateProductStatusUseCaseProvider);
+  final bumpProductUseCase = ref.watch(bumpProductUseCaseProvider);
   return ProductDetailNotifier(
     ref,
     getProductDetailUseCase,
@@ -177,6 +185,7 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
     getUserByIdUseCase,
     deleteProductUseCase,
     updateProductStatusUseCase,
+    bumpProductUseCase,
   );
 });
 
