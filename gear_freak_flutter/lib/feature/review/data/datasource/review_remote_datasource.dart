@@ -11,7 +11,7 @@ class ReviewRemoteDataSource {
   pod.Client get _client => PodService.instance.client;
 
   /// 🧪 Mock 데이터 사용 여부 (테스트용)
-  static const bool _useMockData = true;
+  static const bool _useMockData = false;
 
   /// 🧪 Mock 데이터 생성
   List<pod.TransactionReviewResponseDto> _generateMockReviews({
@@ -22,6 +22,32 @@ class ReviewRemoteDataSource {
     final now = DateTime.now();
 
     for (var i = 0; i < totalCount; i++) {
+      // 다양한 날짜 범위로 생성 (테스트용)
+      // 200개 데이터를 시간 단위, 일 단위, 주 단위, 개월 단위, 년 단위로 분산
+      Duration createdAtAgo;
+      if (i < 23) {
+        // 0-22: 1시간 전 ~ 23시간 전 (시간 단위)
+        createdAtAgo = Duration(hours: i + 1);
+      } else if (i < 29) {
+        // 23-28: 1일 전 ~ 6일 전 (일 단위)
+        createdAtAgo = Duration(days: i - 22);
+      } else if (i < 32) {
+        // 29-31: 1주일 전, 2주일 전, 3주일 전 (주 단위)
+        createdAtAgo = Duration(days: (i - 28) * 7);
+      } else if (i < 44) {
+        // 32-43: 1개월 전 ~ 12개월 전 (개월 단위)
+        final months = i - 31;
+        createdAtAgo = Duration(days: months * 30);
+      } else if (i < 54) {
+        // 44-53: 1년 전 ~ 10년 전 (년 단위, 1년, 2년 등 포함)
+        final years = i - 43;
+        createdAtAgo = Duration(days: years * 365);
+      } else {
+        // 54-199: 11년 전 ~ 156년 전 (더 긴 년 단위)
+        final years = 11 + (i - 53);
+        createdAtAgo = Duration(days: years * 365);
+      }
+
       reviews.add(
         pod.TransactionReviewResponseDto(
           id: i + 1,
@@ -41,10 +67,17 @@ class ReviewRemoteDataSource {
                   ? '배송이 빠르고 상품 상태가 좋았습니다.'
                   : null,
           reviewType: reviewType,
-          createdAt: now.subtract(Duration(days: i)),
+          createdAt: now.subtract(createdAtAgo),
         ),
       );
     }
+
+    // 최신순 정렬 (createdAt 기준 내림차순)
+    reviews.sort((a, b) {
+      final aDate = a.createdAt ?? DateTime(2000);
+      final bDate = b.createdAt ?? DateTime(2000);
+      return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
+    });
 
     return reviews;
   }
@@ -81,11 +114,18 @@ class ReviewRemoteDataSource {
     if (_useMockData) {
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
-      const totalMockReviews = 63; // 총 63개의 mock 데이터
+      const totalMockReviews = 200; // 총 200개의 mock 데이터
       final allReviews = _generateMockReviews(
         totalCount: totalMockReviews,
         reviewType: pod.ReviewType.seller_to_buyer,
       );
+
+      // 최신순 정렬 (createdAt 기준 내림차순)
+      allReviews.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime(2000);
+        final bDate = b.createdAt ?? DateTime(2000);
+        return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
+      });
 
       // 페이지네이션 처리
       final startIndex = (page - 1) * limit;
@@ -126,11 +166,18 @@ class ReviewRemoteDataSource {
     if (_useMockData) {
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
-      const totalMockReviews = 67; // 총 67개의 mock 데이터
+      const totalMockReviews = 200; // 총 200개의 mock 데이터
       final allReviews = _generateMockReviews(
         totalCount: totalMockReviews,
         reviewType: pod.ReviewType.buyer_to_seller,
       );
+
+      // 최신순 정렬 (createdAt 기준 내림차순)
+      allReviews.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime(2000);
+        final bDate = b.createdAt ?? DateTime(2000);
+        return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
+      });
 
       // 페이지네이션 처리
       final startIndex = (page - 1) * limit;
@@ -197,7 +244,7 @@ class ReviewRemoteDataSource {
     if (_useMockData) {
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
-      const totalMockReviews = 50; // 총 50개의 mock 데이터
+      const totalMockReviews = 200; // 총 200개의 mock 데이터
       final now = DateTime.now();
 
       // 구매자 후기와 판매자 후기를 섞어서 생성
@@ -207,6 +254,32 @@ class ReviewRemoteDataSource {
         final reviewType = 0 == i % 2
             ? pod.ReviewType.buyer_to_seller
             : pod.ReviewType.seller_to_buyer;
+
+        // 다양한 날짜 범위로 생성 (테스트용)
+        // 200개 데이터를 시간 단위, 일 단위, 주 단위, 개월 단위, 년 단위로 분산
+        Duration createdAtAgo;
+        if (i < 23) {
+          // 0-22: 1시간 전 ~ 23시간 전 (시간 단위)
+          createdAtAgo = Duration(hours: i + 1);
+        } else if (i < 29) {
+          // 23-28: 1일 전 ~ 6일 전 (일 단위)
+          createdAtAgo = Duration(days: i - 22);
+        } else if (i < 32) {
+          // 29-31: 1주일 전, 2주일 전, 3주일 전 (주 단위)
+          createdAtAgo = Duration(days: (i - 28) * 7);
+        } else if (i < 44) {
+          // 32-43: 1개월 전 ~ 12개월 전 (개월 단위)
+          final months = i - 31;
+          createdAtAgo = Duration(days: months * 30);
+        } else if (i < 54) {
+          // 44-53: 1년 전 ~ 10년 전 (년 단위, 1년, 2년 등 포함)
+          final years = i - 43;
+          createdAtAgo = Duration(days: years * 365);
+        } else {
+          // 54-199: 11년 전 ~ 156년 전 (더 긴 년 단위)
+          final years = 11 + (i - 53);
+          createdAtAgo = Duration(days: years * 365);
+        }
 
         allReviews.add(
           pod.TransactionReviewResponseDto(
@@ -227,12 +300,12 @@ class ReviewRemoteDataSource {
                     ? '배송이 빠르고 상품 상태가 좋았습니다.'
                     : null,
             reviewType: reviewType,
-            createdAt: now.subtract(Duration(days: i)),
+            createdAt: now.subtract(createdAtAgo),
           ),
         );
       }
 
-      // 날짜순으로 정렬 (최신순)
+      // 최신순 정렬 (createdAt 기준 내림차순)
       allReviews.sort((a, b) {
         final aDate = a.createdAt ?? DateTime(2000);
         final bDate = b.createdAt ?? DateTime(2000);

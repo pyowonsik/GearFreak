@@ -124,20 +124,43 @@ class ChatRoomUtil {
   /// 채팅방 시간 포맷팅
   ///
   /// [dateTime]는 포맷팅할 날짜/시간입니다.
+  /// 24시간 이내(오늘): 시간만 표기 (예: "오후 2:30")
+  /// 하루가 지나면: formatRelativeTime()과 같은 방식으로 표기
   static String formatChatRoomTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
-    if (difference.inDays > 7) {
-      return '${dateTime.month}/${dateTime.day}';
-    } else if (difference.inDays > 0) {
+    // 24시간 이내(오늘): 시간만 표기
+    if (difference.inHours < 24 && difference.inDays < 1) {
+      final hour = dateTime.hour;
+      final minute = dateTime.minute;
+      final period = hour >= 12 ? '오후' : '오전';
+      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      return '$period $displayHour:${minute.toString().padLeft(2, '0')}';
+    }
+
+    // 하루가 지나면: formatRelativeTime()과 같은 방식
+    // 일 단위 (1일 이상, 7일 미만)
+    if (difference.inDays < 7) {
       return '${difference.inDays}일 전';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}시간 전';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}분 전';
-    } else {
-      return '방금 전';
+    }
+    // 주 단위 (1주 이상, 4주 이하, 즉 28일 이하)
+    else if (difference.inDays <= 28) {
+      final weeks = (difference.inDays / 7).floor();
+      return '${weeks}주일 전';
+    }
+    // 개월 단위 (29일 이상, 365일 미만, 즉 약 1개월 이상)
+    else if (difference.inDays < 365) {
+      // 대략적인 개월 수 계산 (30일 기준)
+      final months = (difference.inDays / 30).floor();
+      // months가 0이 되는 경우 방지 (29일 이상이므로 최소 1개월)
+      final displayMonths = months.clamp(1, 12);
+      return '${displayMonths}개월 전';
+    }
+    // 년 단위 (1년 이상)
+    else {
+      final years = (difference.inDays / 365).floor();
+      return '${years}년 전';
     }
   }
 

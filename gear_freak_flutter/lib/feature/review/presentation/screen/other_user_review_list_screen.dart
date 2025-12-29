@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
+import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
@@ -212,12 +213,6 @@ class _ReviewItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = review.createdAt != null
-        ? '${review.createdAt!.year}.'
-            '${review.createdAt!.month.toString().padLeft(2, '0')}.'
-            '${review.createdAt!.day.toString().padLeft(2, '0')}'
-        : '';
-
     return Container(
       padding: const EdgeInsets.all(20),
       color: Colors.white,
@@ -280,9 +275,9 @@ class _ReviewItemWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              if (dateFormat.isNotEmpty)
+              if (review.createdAt != null)
                 Text(
-                  dateFormat,
+                  formatRelativeTime(review.createdAt),
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF9CA3AF),

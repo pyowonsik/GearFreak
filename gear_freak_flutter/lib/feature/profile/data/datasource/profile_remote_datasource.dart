@@ -9,7 +9,7 @@ class ProfileRemoteDataSource {
   pod.Client get _client => PodService.instance.client;
 
   /// 🧪 Mock 데이터 사용 여부 (테스트용)
-  static const bool _useMockData = true;
+  static const bool _useMockData = false;
 
   /// 🧪 Mock 사용자 데이터 생성
   pod.User _generateMockUser(int id) {
@@ -18,7 +18,8 @@ class ProfileRemoteDataSource {
       id: id,
       userInfoId: id,
       nickname: id == 1 ? '장비충#abc123' : '사용자$id',
-      profileImageUrl: id % 3 == 0 ? 'https://picsum.photos/seed/$id/200' : null,
+      profileImageUrl:
+          id % 3 == 0 ? 'https://picsum.photos/seed/$id/200' : null,
       createdAt: now.subtract(Duration(days: id * 10)),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
 
 /// 알림 아이템 위젯
@@ -110,7 +111,7 @@ class NotificationItemWidget extends ConsumerWidget {
                     // 시간
                     if (notification.createdAt != null)
                       Text(
-                        _formatDateTime(notification.createdAt!),
+                        formatRelativeTime(notification.createdAt),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF9CA3AF),
@@ -148,25 +149,6 @@ class NotificationItemWidget extends ConsumerWidget {
     return switch (type) {
       pod.NotificationType.review_received => const Color(0xFFFFB800),
     };
-  }
-
-  /// 날짜/시간 포맷팅
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 7) {
-      return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.'
-          '${dateTime.day.toString().padLeft(2, '0')}';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}일 전';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}시간 전';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}분 전';
-    } else {
-      return '방금 전';
-    }
   }
 }
 

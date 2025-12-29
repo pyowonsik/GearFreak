@@ -11,7 +11,7 @@ class NotificationRemoteDataSource {
   pod.Client get _client => PodService.instance.client;
 
   /// 🧪 Mock 데이터 사용 여부 (테스트용)
-  static const bool _useMockData = true;
+  static const bool _useMockData = false;
 
   /// 🧪 Mock 데이터 생성
   pod.NotificationListResponseDto _generateMockNotifications({
@@ -29,11 +29,37 @@ class NotificationRemoteDataSource {
     final endIndex =
         (offset + limit) > totalCount ? totalCount : offset + limit;
 
-    // 현재 페이지에 해당하는 알림 생성
+    // 현재 페이지에 해당하는 알림 생성 (다양한 날짜 범위로 분산)
     for (var i = offset; i < endIndex; i++) {
       final notificationId = i + 1;
       final isRead = i % 3 == 0; // 3개 중 1개는 읽음 처리
       final rating = (i % 5) + 1; // 1~5 별점
+
+      // 다양한 날짜 범위로 생성 (테스트용)
+      Duration createdAtAgo;
+      if (i < 24) {
+        // 0-23: 1시간 전 ~ 23시간 전 (시간 단위)
+        createdAtAgo = Duration(hours: i + 1);
+      } else if (i < 30) {
+        // 24-29: 1일 전 ~ 6일 전 (일 단위)
+        createdAtAgo = Duration(days: i - 23);
+      } else if (i < 33) {
+        // 30-32: 1주일 전, 2주일 전, 3주일 전 (주 단위)
+        createdAtAgo = Duration(days: (i - 29) * 7);
+      } else if (i < 45) {
+        // 33-44: 1개월 전 ~ 12개월 전 (개월 단위)
+        final months = i - 32;
+        createdAtAgo = Duration(days: months * 30);
+      } else {
+        // 45-49: 1년 전 ~ 5년 전 (년 단위)
+        final years = i - 44;
+        createdAtAgo = Duration(days: years * 365);
+      }
+
+      final createdAt = now.subtract(createdAtAgo);
+      final readAtAgo = createdAtAgo - Duration(hours: isRead ? 1 : 0);
+      final readAt =
+          isRead && readAtAgo.inHours >= 0 ? now.subtract(readAtAgo) : null;
 
       notifications.add(
         pod.NotificationResponseDto(
@@ -50,11 +76,18 @@ class NotificationRemoteDataSource {
             'rating': rating.toString(),
           },
           isRead: isRead,
-          readAt: isRead ? now.subtract(Duration(hours: i)) : null,
-          createdAt: now.subtract(Duration(hours: i)),
+          readAt: readAt,
+          createdAt: createdAt,
         ),
       );
     }
+
+    // 최신순 정렬 (createdAt 기준 내림차순)
+    notifications.sort((a, b) {
+      final aDate = a.createdAt ?? DateTime(2000);
+      final bDate = b.createdAt ?? DateTime(2000);
+      return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
+    });
 
     // 읽지 않은 알림 개수 계산
     const unreadCount = totalCount - (totalCount ~/ 3);

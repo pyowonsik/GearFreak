@@ -6,27 +6,41 @@ import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state
 
 /// 채팅 메시지 관련 유틸리티 함수
 class ChatUtil {
-  /// 채팅 메시지 시간 포맷팅
+  /// 채팅 메시지 시간 포맷팅 (시간만 표시)
   ///
   /// [dateTime]는 포맷팅할 날짜/시간입니다.
-  /// 오늘인 경우: "오후 2:30" 형식
-  /// 다른 날인 경우: "12/25 오후 2:30" 형식
+  /// 반환: "오후 2:30" 형식 (시간만)
   static String formatChatMessageTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final messageDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-
     final hour = dateTime.hour;
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = hour >= 12 ? '오후' : '오전';
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '$period $displayHour:$minute';
+  }
+
+  /// 채팅 메시지 날짜 구분선 포맷팅
+  ///
+  /// [dateTime]는 포맷팅할 날짜/시간입니다.
+  /// 오늘: "오늘"
+  /// 어제: "어제"
+  /// 올해: "1월 15일" 형식
+  /// 작년 이전: "2023년 1월 15일" 형식
+  static String formatChatMessageDateSeparator(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final messageDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
     if (messageDate == today) {
-      // 오늘인 경우: 오후 2:30 형식
-      return '$period $displayHour:$minute';
+      return '오늘';
+    } else if (messageDate == yesterday) {
+      return '어제';
+    } else if (dateTime.year == now.year) {
+      // 올해인 경우: "1월 15일"
+      return '${dateTime.month}월 ${dateTime.day}일';
     } else {
-      // 다른 날인 경우: 12/25 오후 2:30 형식
-      return '${dateTime.month}/${dateTime.day} $period $displayHour:$minute';
+      // 작년 이전: "2023년 1월 15일"
+      return '${dateTime.year}년 ${dateTime.month}월 ${dateTime.day}일';
     }
   }
 

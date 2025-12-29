@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/presentation/view/view.dart';
+import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
@@ -445,7 +446,7 @@ class _ReviewItemWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatDate(review.createdAt),
+                      formatRelativeTime(review.createdAt),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF9CA3AF),
@@ -486,28 +487,5 @@ class _ReviewItemWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      return '오늘';
-    } else if (difference.inDays == 1) {
-      return '어제';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}일 전';
-    } else if (difference.inDays < 30) {
-      final weeks = (difference.inDays / 7).floor();
-      return '$weeks주 전';
-    } else if (difference.inDays < 365) {
-      final months = (difference.inDays / 30).floor();
-      return '$months개월 전';
-    } else {
-      return '${date.year}.${date.month}.${date.day}';
-    }
   }
 }

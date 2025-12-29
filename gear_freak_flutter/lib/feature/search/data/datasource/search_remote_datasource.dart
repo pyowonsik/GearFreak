@@ -10,7 +10,7 @@ class SearchRemoteDataSource {
   pod.Client get _client => PodService.instance.client;
 
   /// 🧪 Mock 데이터 사용 여부 (테스트용)
-  static const bool _useMockData = true;
+  static const bool _useMockData = false;
 
   /// 상품 검색
   Future<pod.PaginatedProductsResponseDto> searchProducts({

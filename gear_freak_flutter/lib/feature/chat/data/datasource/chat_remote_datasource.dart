@@ -11,7 +11,7 @@ class ChatRemoteDataSource {
   pod.Client get _client => PodService.instance.client;
 
   /// 🧪 Mock 데이터 사용 여부 (테스트용)
-  static const bool _useMockData = true;
+  static const bool _useMockData = false;
 
   // ==================== Public Methods (Repository에서 호출) ====================
 
@@ -80,10 +80,37 @@ class ChatRemoteDataSource {
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
-    // 60개의 하드코딩된 채팅방 생성
+    // 60개의 다양한 날짜 범위를 가진 채팅방 생성 (테스트용)
+    // 시간 단위(1~23시간), 일 단위(1~6일), 주 단위(1~3주),
+    // 개월 단위(1~12개월), 년 단위(1년 이상) 포함
     final allChatRooms = List.generate(60, (index) {
       final now = DateTime.now();
-      final lastActivityAt = now.subtract(Duration(hours: index));
+      Duration lastActivityAgo;
+
+      if (index < 23) {
+        // 0-22: 1시간 전 ~ 23시간 전 (시간 단위 테스트 - 오늘 표시)
+        lastActivityAgo = Duration(hours: index + 1);
+      } else if (index < 29) {
+        // 23-28: 1일 전 ~ 6일 전 (일 단위 테스트)
+        lastActivityAgo = Duration(days: index - 22);
+      } else if (index < 32) {
+        // 29-31: 1주일 전, 2주일 전, 3주일 전 (주 단위 테스트)
+        lastActivityAgo = Duration(days: (index - 28) * 7);
+      } else if (index < 44) {
+        // 32-43: 1개월 전 ~ 12개월 전 (개월 단위 테스트)
+        final months = index - 31;
+        lastActivityAgo = Duration(days: months * 30); // 대략 30일 기준
+      } else {
+        // 44-59: 1년 전 ~ 16년 전 (년 단위 테스트, 1년, 2년 등 포함)
+        final years = index - 43;
+        lastActivityAgo = Duration(days: years * 365);
+      }
+
+      final lastActivityAt = now.subtract(lastActivityAgo);
+      // createdAt은 lastActivityAt보다 약간 더 오래되도록 설정
+      final createdAtAgo = lastActivityAgo + Duration(days: index % 7);
+      final createdAt = now.subtract(createdAtAgo);
+
       return pod.ChatRoom(
         id: index + 1,
         productId: productId ?? ((index % 10) + 1),
@@ -91,7 +118,7 @@ class ChatRemoteDataSource {
         chatRoomType: pod.ChatRoomType.direct,
         participantCount: 2,
         lastActivityAt: lastActivityAt,
-        createdAt: now.subtract(Duration(days: index)),
+        createdAt: createdAt,
         updatedAt: lastActivityAt,
       );
     });
@@ -136,6 +163,35 @@ class ChatRemoteDataSource {
     for (var i = 0; i < totalMockMessages; i++) {
       final messageId = totalMockMessages - i; // 최신 메시지가 먼저
       final isMine = i % 2 == 0;
+
+      // 다양한 날짜 범위로 메시지 생성 (테스트용)
+      // 시간 단위, 일 단위, 주 단위, 개월 단위, 년 단위 포함
+      Duration timeAgo;
+      if (i < 48) {
+        // 0-47: 오늘의 메시지들 (30분 간격, 24시간 범위)
+        timeAgo = Duration(minutes: i * 30);
+      } else if (i < 72) {
+        // 48-71: 1일 전 ~ 3일 전 (하루에 여러 메시지)
+        final daysAgo = (i - 48) ~/ 8 + 1; // 1일, 2일, 3일
+        final hoursInDay = (i - 48) % 8; // 하루 내 시간 (0~7시간)
+        timeAgo = Duration(days: daysAgo, hours: hoursInDay);
+      } else if (i < 100) {
+        // 72-99: 1주일 전 ~ 4주일 전
+        final weeksAgo = (i - 72) ~/ 7 + 1; // 1주, 2주, 3주, 4주
+        final daysInWeek = (i - 72) % 7; // 주 내 날짜 (0~6일)
+        timeAgo = Duration(days: weeksAgo * 7 + daysInWeek);
+      } else if (i < 200) {
+        // 100-199: 1개월 전 ~ 12개월 전
+        final monthsAgo = (i - 100) ~/ 10 + 1; // 1개월 ~ 10개월
+        final daysInMonth = (i - 100) % 10; // 월 내 날짜
+        timeAgo = Duration(days: monthsAgo * 30 + daysInMonth);
+      } else {
+        // 200-499: 1년 전 ~ 5년 전
+        final yearsAgo = (i - 200) ~/ 60 + 1; // 1년 ~ 5년
+        final daysInYear = (i - 200) % 60; // 년 내 날짜
+        timeAgo = Duration(days: yearsAgo * 365 + daysInYear);
+      }
+
       messages.add(
         pod.ChatMessageResponseDto(
           id: messageId,
@@ -143,8 +199,8 @@ class ChatRemoteDataSource {
           senderId: isMine ? 2 : 1,
           content: '메시지 내용 $messageId',
           messageType: pod.MessageType.text,
-          createdAt: now.subtract(Duration(minutes: i * 5)),
-          updatedAt: now.subtract(Duration(minutes: i * 5)),
+          createdAt: now.subtract(timeAgo),
+          updatedAt: now.subtract(timeAgo),
         ),
       );
     }

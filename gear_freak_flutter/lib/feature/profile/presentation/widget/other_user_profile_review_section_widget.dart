@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
+import 'package:gear_freak_flutter/common/utils/format_utils.dart';
 
 /// 다른 사용자 프로필 후기 섹션 위젯
 class OtherUserProfileReviewSectionWidget extends StatelessWidget {
@@ -120,12 +121,6 @@ class OtherUserProfileReviewSectionWidget extends StatelessWidget {
         else
           Column(
             children: reviews.map((review) {
-              final formattedDate = review.createdAt != null
-                  ? '${review.createdAt!.year}.'
-                      '${review.createdAt!.month.toString().padLeft(2, '0')}.'
-                      '${review.createdAt!.day.toString().padLeft(2, '0')}'
-                  : '';
-
               return Container(
                 margin: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
                 padding: const EdgeInsets.all(16),
@@ -185,9 +180,9 @@ class OtherUserProfileReviewSectionWidget extends StatelessWidget {
                             ],
                           ),
                         ),
-                        if (formattedDate.isNotEmpty)
+                        if (review.createdAt != null)
                           Text(
-                            formattedDate,
+                            formatRelativeTime(review.createdAt),
                             style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF9CA3AF),
