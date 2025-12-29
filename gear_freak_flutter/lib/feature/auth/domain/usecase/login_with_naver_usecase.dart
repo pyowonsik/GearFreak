@@ -31,4 +31,3 @@ class LoginWithNaverUseCase implements UseCase<pod.User, void, AuthRepository> {
     }
   }
 }
-

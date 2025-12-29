@@ -362,8 +362,8 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
     if (currentState is ProductDetailLoaded) {
       // 현재 화면의 상품과 같은 ID인 경우에만 업데이트
       if (currentState.product.id == updatedProduct.id) {
-        debugPrint(
-            '상품 상세 화면 업데이트: productId=${updatedProduct.id}, chatCount=${updatedProduct.chatCount}');
+        debugPrint('상품 상세 화면 업데이트: productId=${updatedProduct.id},'
+            ' chatCount=${updatedProduct.chatCount}');
         state = currentState.copyWith(product: updatedProduct);
       }
     }

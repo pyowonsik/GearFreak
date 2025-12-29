@@ -3,7 +3,6 @@ import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:http/http.dart' as http;
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
-import 'package:uuid/uuid.dart';
 
 /// 인증 서비스
 /// 회원가입, 로그인 등 인증 관련 비즈니스 로직을 처리합니다.

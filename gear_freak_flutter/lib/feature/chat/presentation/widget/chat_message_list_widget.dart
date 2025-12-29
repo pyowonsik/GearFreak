@@ -88,7 +88,8 @@ class ChatMessageListWidget extends StatelessWidget {
             final previousMessage = index > 0 ? messages[index - 1] : null;
             final previousDate = previousMessage?.createdAt != null
                 ? DateTime.fromMillisecondsSinceEpoch(
-                    previousMessage!.createdAt!)
+                    previousMessage!.createdAt!,
+                  )
                 : null;
 
             // 다음 메시지 정보 (reverse: true이므로 index + 1이 더 오래된 메시지)

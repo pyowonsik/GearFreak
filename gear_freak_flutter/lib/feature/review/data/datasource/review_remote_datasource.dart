@@ -118,14 +118,14 @@ class ReviewRemoteDataSource {
       final allReviews = _generateMockReviews(
         totalCount: totalMockReviews,
         reviewType: pod.ReviewType.seller_to_buyer,
-      );
+      )
 
-      // 최신순 정렬 (createdAt 기준 내림차순)
-      allReviews.sort((a, b) {
-        final aDate = a.createdAt ?? DateTime(2000);
-        final bDate = b.createdAt ?? DateTime(2000);
-        return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
-      });
+        // 최신순 정렬 (createdAt 기준 내림차순)
+        ..sort((a, b) {
+          final aDate = a.createdAt ?? DateTime(2000);
+          final bDate = b.createdAt ?? DateTime(2000);
+          return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
+        });
 
       // 페이지네이션 처리
       final startIndex = (page - 1) * limit;
@@ -170,14 +170,14 @@ class ReviewRemoteDataSource {
       final allReviews = _generateMockReviews(
         totalCount: totalMockReviews,
         reviewType: pod.ReviewType.buyer_to_seller,
-      );
+      )
 
-      // 최신순 정렬 (createdAt 기준 내림차순)
-      allReviews.sort((a, b) {
-        final aDate = a.createdAt ?? DateTime(2000);
-        final bDate = b.createdAt ?? DateTime(2000);
-        return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
-      });
+        // 최신순 정렬 (createdAt 기준 내림차순)
+        ..sort((a, b) {
+          final aDate = a.createdAt ?? DateTime(2000);
+          final bDate = b.createdAt ?? DateTime(2000);
+          return bDate.compareTo(aDate); // 내림차순 (최신이 먼저)
+        });
 
       // 페이지네이션 처리
       final startIndex = (page - 1) * limit;

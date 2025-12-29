@@ -83,7 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ).createShader(bounds),
                   child: const Text(
                     '장비빨',
-                  style: TextStyle(
+                    style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -112,12 +112,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     // Kakao logo
                     _CircleSocialButton(
-                  onTap: isLoading
-                      ? null
-                      : () async {
-                          final authNotifier =
-                              ref.read(authNotifierProvider.notifier);
-                          await authNotifier.loginWithKakao();
+                      onTap: isLoading
+                          ? null
+                          : () async {
+                              final authNotifier =
+                                  ref.read(authNotifierProvider.notifier);
+                              await authNotifier.loginWithKakao();
                             },
                       backgroundColor: const Color(0xFFFEE500),
                       child: Image.asset(
@@ -138,47 +138,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ref.read(authNotifierProvider.notifier);
                               await authNotifier.loginWithGoogle();
                             },
-                      backgroundColor: Colors.white,
                       child: Image.asset(
                         'assets/images/google_logo.png',
                         width: 32,
                         height: 32,
                         fit: BoxFit.contain,
                       ),
-                ),
+                    ),
                     const SizedBox(width: 24),
 
                     // Naver logo
                     _CircleSocialButton(
-                  onTap: isLoading
-                      ? null
-                      : () async {
-                          final authNotifier =
-                              ref.read(authNotifierProvider.notifier);
-                          await authNotifier.loginWithNaver();
-                          // 라우팅은 AppRouteGuard에서 처리
-                        },
-                  backgroundColor: const Color(0xFF03C75A),
+                      onTap: isLoading
+                          ? null
+                          : () async {
+                              final authNotifier =
+                                  ref.read(authNotifierProvider.notifier);
+                              await authNotifier.loginWithNaver();
+                              // 라우팅은 AppRouteGuard에서 처리
+                            },
+                      backgroundColor: const Color(0xFF03C75A),
                       child: Image.asset(
                         'assets/images/naver_logo.png',
                         width: 32,
                         height: 32,
                         fit: BoxFit.contain,
                       ),
-                ),
+                    ),
                     const SizedBox(width: 24),
 
                     // Apple logo (iOS만 노출)
                     if (Theme.of(context).platform == TargetPlatform.iOS)
                       _CircleSocialButton(
-                    onTap: isLoading
-                        ? null
-                        : () async {
-                            final authNotifier =
-                                ref.read(authNotifierProvider.notifier);
-                            await authNotifier.loginWithApple();
-                          },
-                        backgroundColor: Colors.white,
+                        onTap: isLoading
+                            ? null
+                            : () async {
+                                final authNotifier =
+                                    ref.read(authNotifierProvider.notifier);
+                                await authNotifier.loginWithApple();
+                              },
                         child: Image.asset(
                           'assets/images/apple_logo.png',
                           width: 32,
@@ -187,7 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                   ],
-                  ),
+                ),
                 const SizedBox(height: 32),
 
                 // 소셜 로그인 안내 문구

@@ -559,8 +559,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
           debugPrint('채팅방 생성 후 상품 정보 조회 실패: ${failure.message}');
         },
         (updatedProduct) {
-          debugPrint(
-              '채팅방 생성 후 상품 정보 업데이트: productId=$productId, chatCount=${updatedProduct.chatCount}');
+          debugPrint('채팅방 생성 후 상품 정보 업데이트: productId=$productId,'
+              ' chatCount=${updatedProduct.chatCount}');
           // 상품 업데이트 이벤트 발행 (모든 목록 Provider가 자동으로 반응)
           ref.read(updatedProductProvider.notifier).state = updatedProduct;
           // 이벤트 처리 후 초기화 (다음 업데이트를 위해)

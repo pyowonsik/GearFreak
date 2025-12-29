@@ -524,13 +524,13 @@ class ProductNotifier extends StateNotifier<ProductState> {
 
   /// updatedAt 기준으로 내림차순 재정렬
   List<pod.Product> _resortByUpdatedAt(List<pod.Product> products) {
-    final sorted = List<pod.Product>.from(products);
-    sorted.sort((a, b) {
-      // updatedAt이 있으면 updatedAt, 없으면 createdAt 사용
-      final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
-      final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
-      return bDate.compareTo(aDate); // 내림차순 (최신순)
-    });
+    final sorted = List<pod.Product>.from(products)
+      ..sort((a, b) {
+        // updatedAt이 있으면 updatedAt, 없으면 createdAt 사용
+        final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
+        final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
+        return bDate.compareTo(aDate); // 내림차순 (최신순)
+      });
     return sorted;
   }
 }

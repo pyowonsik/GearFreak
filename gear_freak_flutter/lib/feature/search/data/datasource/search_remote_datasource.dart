@@ -21,14 +21,14 @@ class SearchRemoteDataSource {
   }) async {
     if (_useMockData) {
       // ProductRemoteDataSource의 mock 데이터 재사용
-      final productDataSource = ProductRemoteDataSource();
+      const productDataSource = ProductRemoteDataSource();
       final pagination = pod.PaginationDto(
         page: page,
         limit: limit,
         title: query.trim().isNotEmpty ? query.trim() : null,
         sortBy: sortBy,
       );
-      return await productDataSource.getPaginatedProducts(pagination);
+      return productDataSource.getPaginatedProducts(pagination);
     }
 
     try {

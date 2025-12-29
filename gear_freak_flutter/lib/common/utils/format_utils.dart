@@ -36,7 +36,7 @@ String formatRelativeTime(DateTime? dateTime) {
   // 주 단위 (1주 이상, 4주 이하, 즉 28일 이하)
   else if (difference.inDays <= 28) {
     final weeks = (difference.inDays / 7).floor();
-    return '${weeks}주일 전';
+    return '$weeks주일 전';
   }
   // 개월 단위 (29일 이상, 365일 미만, 즉 약 1개월 이상)
   else if (difference.inDays < 365) {
@@ -44,11 +44,11 @@ String formatRelativeTime(DateTime? dateTime) {
     final months = (difference.inDays / 30).floor();
     // months가 0이 되는 경우 방지 (29일 이상이므로 최소 1개월)
     final displayMonths = months.clamp(1, 12);
-    return '${displayMonths}개월 전';
+    return '$displayMonths개월 전';
   }
   // 년 단위 (1년 이상)
   else {
     final years = (difference.inDays / 365).floor();
-    return '${years}년 전';
+    return '$years년 전';
   }
 }

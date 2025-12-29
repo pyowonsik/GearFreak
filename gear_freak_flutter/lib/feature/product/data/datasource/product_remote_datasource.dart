@@ -72,7 +72,7 @@ class ProductRemoteDataSource {
       Duration timeAgo;
       if (i == 0) {
         // 0: 방금 전 (30초 전)
-        timeAgo = Duration(seconds: 30);
+        timeAgo = const Duration(seconds: 30);
       } else if (i < 60) {
         // 1-59: 1분 전 ~ 59분 전 (분 단위 테스트)
         timeAgo = Duration(minutes: i);
@@ -106,7 +106,7 @@ class ProductRemoteDataSource {
       final productName = productNames[i % productNames.length];
       final productTitle = title != null && title.isNotEmpty
           ? '$productName - $title'
-          : '$productName ${productId}';
+          : '$productName $productId';
 
       final timeAgo = dateRanges[i];
       final createdAtDate = now.subtract(timeAgo);
@@ -115,7 +115,7 @@ class ProductRemoteDataSource {
       DateTime updatedAtDate;
       if (timeAgo.inDays == 0) {
         // 분/시간 단위인 경우: createdAt과 동일 또는 최대 몇 분 차이
-        final minutesOffset = (i % 10); // 0~9분 차이
+        final minutesOffset = i % 10; // 0~9분 차이
         updatedAtDate = createdAtDate.add(Duration(minutes: minutesOffset));
       } else if (timeAgo.inDays > 30) {
         // 30일 이상인 경우: 최대 30일 차이
@@ -143,10 +143,10 @@ class ProductRemoteDataSource {
         dateInfo = '${timeAgo.inDays ~/ 7}주일 전 생성';
       } else if (timeAgo.inDays < 365) {
         final months = timeAgo.inDays ~/ 30;
-        dateInfo = '${months}개월 전 생성';
+        dateInfo = '$months개월 전 생성';
       } else {
         final years = timeAgo.inDays ~/ 365;
-        dateInfo = '${years}년 전 생성';
+        dateInfo = '$years년 전 생성';
       }
 
       products.add(
@@ -204,30 +204,25 @@ class ProductRemoteDataSource {
       );
 
       // 정렬 처리
-      var sortedProducts = List<pod.Product>.from(allProducts);
+      final sortedProducts = List<pod.Product>.from(allProducts);
       switch (pagination.sortBy) {
         case pod.ProductSortBy.latest:
+        case null:
           sortedProducts.sort((a, b) {
             final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
             final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
             return bDate.compareTo(aDate);
           });
-          break;
         case pod.ProductSortBy.priceAsc:
           sortedProducts.sort((a, b) => a.price.compareTo(b.price));
-          break;
         case pod.ProductSortBy.priceDesc:
           sortedProducts.sort((a, b) => b.price.compareTo(a.price));
-          break;
         case pod.ProductSortBy.popular:
           sortedProducts.sort((a, b) {
             final aCount = a.favoriteCount ?? 0;
             final bCount = b.favoriteCount ?? 0;
             return bCount.compareTo(aCount);
           });
-          break;
-        default:
-          break;
       }
 
       // 페이지네이션 처리
@@ -350,12 +345,12 @@ class ProductRemoteDataSource {
       );
 
       // 정렬 처리
-      var sortedProducts = List<pod.Product>.from(allProducts);
-      sortedProducts.sort((a, b) {
-        final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
-        final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
-        return bDate.compareTo(aDate);
-      });
+      final sortedProducts = List<pod.Product>.from(allProducts)
+        ..sort((a, b) {
+          final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
+          final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
+          return bDate.compareTo(aDate);
+        });
 
       // 페이지네이션 처리
       final offset = (pagination.page - 1) * pagination.limit;

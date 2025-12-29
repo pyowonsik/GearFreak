@@ -143,9 +143,12 @@ mixin PaginationScrollMixin<T extends StatefulWidget> on State<T> {
           final scrollType = _reverse ? '상단' : '하단';
           final position = _scrollController?.position;
           debugPrint('📜 [$screenName] $scrollType 스크롤 감지: '
-              'extentAfter=${position?.extentAfter.toStringAsFixed(0) ?? 'N/A'}, '
-              'extentBefore=${position?.extentBefore.toStringAsFixed(0) ?? 'N/A'}, '
-              'maxScrollExtent=${position?.maxScrollExtent.toStringAsFixed(0) ?? 'N/A'}');
+              'extentAfter='
+              '${position?.extentAfter.toStringAsFixed(0) ?? 'N/A'}, '
+              'extentBefore='
+              '${position?.extentBefore.toStringAsFixed(0) ?? 'N/A'}, '
+              'maxScrollExtent='
+              '${position?.maxScrollExtent.toStringAsFixed(0) ?? 'N/A'}');
           debugPrint('📦 [$screenName] 현재 페이지: ${pagination.page}, '
               '전체: ${pagination.totalCount}, hasMore: $hasMoreData');
 

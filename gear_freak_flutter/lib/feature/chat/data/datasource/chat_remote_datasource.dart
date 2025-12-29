@@ -35,7 +35,6 @@ class ChatRemoteDataSource {
       return pod.ChatRoom(
         id: chatRoomId,
         productId: chatRoomId % 10 + 1,
-        title: null,
         chatRoomType: pod.ChatRoomType.direct,
         participantCount: 2,
         lastActivityAt: now.subtract(Duration(hours: chatRoomId)),
@@ -54,7 +53,9 @@ class ChatRemoteDataSource {
   }) async {
     if (_useMockData) {
       return _generateMockChatRooms(
-          pagination: pagination, productId: productId);
+        pagination: pagination,
+        productId: productId,
+      );
     }
 
     return _client.chat.getUserChatRoomsByProductId(productId, pagination);
@@ -114,7 +115,6 @@ class ChatRemoteDataSource {
       return pod.ChatRoom(
         id: index + 1,
         productId: productId ?? ((index % 10) + 1),
-        title: null, // 1:1 채팅방은 제목 없음
         chatRoomType: pod.ChatRoomType.direct,
         participantCount: 2,
         lastActivityAt: lastActivityAt,
@@ -162,7 +162,7 @@ class ChatRemoteDataSource {
 
     for (var i = 0; i < totalMockMessages; i++) {
       final messageId = totalMockMessages - i; // 최신 메시지가 먼저
-      final isMine = i % 2 == 0;
+      final isMine = i.isEven;
 
       // 다양한 날짜 범위로 메시지 생성 (테스트용)
       // 시간 단위, 일 단위, 주 단위, 개월 단위, 년 단위 포함
