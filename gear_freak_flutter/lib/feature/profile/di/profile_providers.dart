@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/data/datasource/profile_remote_datasource.dart';
@@ -12,6 +11,7 @@ import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_u
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_notifier.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/di/s3_providers.dart';
 
 /// Profile Remote DataSource Provider
 final profileRemoteDataSourceProvider =

@@ -4,11 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
-import 'package:gear_freak_flutter/common/utils/format_utils.dart';
-import 'package:gear_freak_flutter/common/utils/product_utils.dart';
-import 'package:gear_freak_flutter/common/utils/share_utils.dart';
+import 'package:gear_freak_flutter/core/util/format_utils.dart';
+import 'package:gear_freak_flutter/core/util/product_utils.dart';
+import 'package:gear_freak_flutter/core/util/share_utils.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
@@ -16,6 +14,7 @@ import 'package:gear_freak_flutter/feature/product/presentation/provider/product
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/widget/buyer_selection_modal.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 상품 상세 화면

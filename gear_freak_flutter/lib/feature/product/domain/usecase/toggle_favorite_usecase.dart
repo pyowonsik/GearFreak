@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/domain.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 찜 추가/제거 UseCase
 class ToggleFavoriteUseCase implements UseCase<bool, int, ProductRepository> {

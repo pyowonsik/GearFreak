@@ -1,5 +1,5 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/shared/service/pod_service.dart';
 
 /// 채팅 원격 데이터 소스
 /// Data Layer: Serverpod Client를 사용한 API 호출

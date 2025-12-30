@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
-import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/view/profile_product_list_view.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 다른 사용자의 상품 목록 화면
 class OtherUserProductListScreen extends ConsumerStatefulWidget {

@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
-import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/widget/notification_item_widget.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 알림 리스트 화면

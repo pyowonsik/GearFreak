@@ -19,8 +19,6 @@ class ProductReportModal extends StatefulWidget {
   final String productTitle;
 
   /// 신고 콜백
-  /// [reason] 신고 사유
-  /// [description] 상세 설명 (선택)
   final void Function(pod.ReportReason reason, String? description) onReport;
 
   /// 모달 표시

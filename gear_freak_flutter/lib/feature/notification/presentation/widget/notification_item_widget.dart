@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/utils/format_utils.dart';
+import 'package:gear_freak_flutter/core/util/format_utils.dart';
 import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
 
 /// 알림 아이템 위젯

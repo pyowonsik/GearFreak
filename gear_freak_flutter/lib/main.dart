@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/route/router_provider.dart';
-import 'package:gear_freak_flutter/common/service/deep_link_service.dart';
-import 'package:gear_freak_flutter/common/service/fcm_service.dart';
-import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/core/route/router_provider.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
+import 'package:gear_freak_flutter/shared/service/deep_link_service.dart';
+import 'package:gear_freak_flutter/shared/service/fcm_service.dart';
+import 'package:gear_freak_flutter/shared/service/pod_service.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 
 /// 백그라운드 메시지 핸들러

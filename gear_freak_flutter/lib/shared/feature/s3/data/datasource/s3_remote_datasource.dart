@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/shared/service/pod_service.dart';
 import 'package:http/http.dart' as http;
 
 /// S3 원격 데이터 소스

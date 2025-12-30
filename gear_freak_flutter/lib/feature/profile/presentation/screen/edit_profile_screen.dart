@@ -4,10 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 

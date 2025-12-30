@@ -1,4 +1,4 @@
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
 
 /// 프로필 실패 추상 클래스
 abstract class ProfileFailure extends Failure {

@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
 
 /// UseCase 인터페이스
 ///

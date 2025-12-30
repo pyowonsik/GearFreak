@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/common/presentation/widget/full_screen_image_viewer.dart';
-import 'package:gear_freak_flutter/common/presentation/widget/full_screen_video_viewer.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
+import 'package:gear_freak_flutter/shared/widget/full_screen_image_viewer.dart';
+import 'package:gear_freak_flutter/shared/widget/full_screen_video_viewer.dart';
 
 /// 채팅 이미지/동영상 메시지 위젯
 class ChatImageMessageWidget extends StatelessWidget {

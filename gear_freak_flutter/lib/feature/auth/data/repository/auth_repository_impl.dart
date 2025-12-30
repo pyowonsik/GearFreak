@@ -1,7 +1,7 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/service/pod_service.dart';
 import 'package:gear_freak_flutter/feature/auth/data/datasource/auth_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/repository/auth_repository.dart';
+import 'package:gear_freak_flutter/shared/service/pod_service.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 
 /// 인증 Repository 구현

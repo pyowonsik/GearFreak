@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/product/data/datasource/product_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/product/data/repository/product_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/product/domain/repository/product_repository.dart';
@@ -31,6 +30,7 @@ import 'package:gear_freak_flutter/feature/product/presentation/provider/product
 import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_notifier.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/di/s3_providers.dart';
 
 /// Product Remote DataSource Provider
 final productRemoteDataSourceProvider =

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_chat_room_image_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/create_or_get_chat_room_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/usecase/get_chat_messages_usecase.dart';
@@ -18,6 +17,7 @@ import 'package:gear_freak_flutter/feature/chat/domain/usecase/subscribe_chat_me
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/upload_chat_room_image_usecase.dart';
 
 /// 채팅 Notifier
 /// Presentation Layer: Riverpod 상태 관리

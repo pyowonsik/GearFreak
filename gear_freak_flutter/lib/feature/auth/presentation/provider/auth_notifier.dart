@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/service/fcm_service.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_apple_usecase.dart';
@@ -8,6 +7,7 @@ import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_kakao_
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_with_naver_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/signup_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
+import 'package:gear_freak_flutter/shared/service/fcm_service.dart';
 
 /// 인증 Notifier
 class AuthNotifier extends StateNotifier<AuthState> {

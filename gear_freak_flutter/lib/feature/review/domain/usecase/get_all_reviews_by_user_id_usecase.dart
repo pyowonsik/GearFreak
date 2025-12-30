@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/review/domain/failures/review_failure.dart';
 import 'package:gear_freak_flutter/feature/review/domain/repository/review_repository.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 다른 사용자의 모든 후기 조회 UseCase 파라미터
 class GetAllReviewsByUserIdParams {

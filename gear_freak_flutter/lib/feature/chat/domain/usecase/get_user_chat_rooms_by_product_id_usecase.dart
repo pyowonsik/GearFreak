@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/domain.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 사용자가 참여한 채팅방 목록 조회 UseCase (상품 ID 기준, 페이지네이션)
 class GetUserChatRoomsByProductIdUseCase

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/route/app_route_guard.dart';
-import 'package:gear_freak_flutter/common/route/app_routes.dart';
+import 'package:gear_freak_flutter/core/route/app_route_guard.dart';
+import 'package:gear_freak_flutter/core/route/app_routes.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:go_router/go_router.dart';
 

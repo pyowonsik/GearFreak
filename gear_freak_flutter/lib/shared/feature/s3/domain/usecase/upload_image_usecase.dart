@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
-import 'package:gear_freak_flutter/common/s3/domain/failures/s3_failure.dart';
-import 'package:gear_freak_flutter/common/s3/domain/repository/s3_repository.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/domain/failures/s3_failure.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/domain/repository/s3_repository.dart';
 
 /// 이미지 업로드 UseCase
 class UploadImageUseCase

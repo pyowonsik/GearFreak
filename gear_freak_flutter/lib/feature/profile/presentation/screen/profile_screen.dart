@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/view/view.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 프로필 화면

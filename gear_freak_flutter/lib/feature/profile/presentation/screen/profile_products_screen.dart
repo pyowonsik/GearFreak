@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
-import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/view/profile_product_list_view.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 프로필 상품 목록 화면 (내 상품 / 찜 목록 / 거래완료)
 class ProfileProductsScreen extends ConsumerStatefulWidget {

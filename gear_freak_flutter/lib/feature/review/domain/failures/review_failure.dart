@@ -1,4 +1,4 @@
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
 
 /// 리뷰 관련 실패
 sealed class ReviewFailure extends Failure {

@@ -1,4 +1,4 @@
-import 'package:gear_freak_flutter/common/route/app_route.dart';
+import 'package:gear_freak_flutter/core/route/app_route.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/login_screen.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/signup_screen.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_screen.dart';

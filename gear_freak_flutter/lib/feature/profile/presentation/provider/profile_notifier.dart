@@ -4,14 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/s3/domain/usecase/delete_image_usecase.dart';
-import 'package:gear_freak_flutter/common/s3/domain/usecase/upload_image_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/update_user_profile_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/delete_image_usecase.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/upload_image_usecase.dart';
 
 /// 프로필 Notifier
 class ProfileNotifier extends StateNotifier<ProfileState> {

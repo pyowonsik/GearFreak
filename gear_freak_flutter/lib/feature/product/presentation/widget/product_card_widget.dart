@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/utils/format_utils.dart';
-import 'package:gear_freak_flutter/common/utils/product_utils.dart';
+import 'package:gear_freak_flutter/core/util/format_utils.dart';
+import 'package:gear_freak_flutter/core/util/product_utils.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 import 'package:go_router/go_router.dart';
 
@@ -108,7 +108,9 @@ class ProductCardWidget extends StatelessWidget {
                     Text(
                       '${getProductCategoryLabel(product.category)} · '
                       '${getProductLocation(product)} · '
-                      '${formatRelativeTime(product.updatedAt ?? product.createdAt)}',
+                      '${formatRelativeTime(
+                        product.updatedAt ?? product.createdAt,
+                      )}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF9CA3AF),

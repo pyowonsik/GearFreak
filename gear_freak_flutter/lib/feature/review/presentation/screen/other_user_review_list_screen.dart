@@ -2,11 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
-import 'package:gear_freak_flutter/common/utils/format_utils.dart';
-import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/core/util/format_utils.dart';
+import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 다른 사용자의 모든 후기 목록 화면

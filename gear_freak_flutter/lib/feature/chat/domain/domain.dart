@@ -1,4 +1,4 @@
-export 'package:gear_freak_flutter/common/domain/failure/failure.dart';
+export 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
 export 'entity/chat_message.dart';
 export 'failures/failures.dart';
 export 'repository/chat_repository.dart';

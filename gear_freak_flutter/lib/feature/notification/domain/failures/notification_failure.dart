@@ -1,4 +1,4 @@
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
 
 /// 알림 목록 조회 실패
 class GetNotificationsFailure extends Failure {

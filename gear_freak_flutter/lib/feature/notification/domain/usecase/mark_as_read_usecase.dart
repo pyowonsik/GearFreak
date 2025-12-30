@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/notification/domain/failures/notification_failure.dart';
 import 'package:gear_freak_flutter/feature/notification/domain/repository/notification_repository.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 알림 읽음 처리 UseCase 파라미터
 class MarkAsReadParams {

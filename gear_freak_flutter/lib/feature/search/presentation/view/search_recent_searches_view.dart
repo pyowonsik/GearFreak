@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 최근 검색어 화면 View
 class SearchRecentSearchesView extends ConsumerWidget {

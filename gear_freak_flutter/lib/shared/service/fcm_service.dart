@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:gear_freak_flutter/common/service/pod_service.dart';
+import 'package:gear_freak_flutter/shared/service/pod_service.dart';
 import 'package:go_router/go_router.dart';
 
 /// FCM 서비스

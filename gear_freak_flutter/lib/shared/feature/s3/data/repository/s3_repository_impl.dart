@@ -1,6 +1,6 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/s3/data/datasource/s3_remote_datasource.dart';
-import 'package:gear_freak_flutter/common/s3/domain/repository/s3_repository.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/data/datasource/s3_remote_datasource.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/domain/repository/s3_repository.dart';
 
 /// S3 Repository 구현
 class S3RepositoryImpl implements S3Repository {

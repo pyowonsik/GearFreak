@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 이미 작성한 리뷰 화면

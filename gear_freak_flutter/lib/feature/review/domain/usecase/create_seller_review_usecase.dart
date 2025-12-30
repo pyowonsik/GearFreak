@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/review/domain/failures/review_failure.dart';
 import 'package:gear_freak_flutter/feature/review/domain/repository/review_repository.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 판매자 후기 작성 UseCase 파라미터
 class CreateSellerReviewParams {

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
-import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 채팅방 선택 화면
 class ChatRoomSelectionScreen extends ConsumerStatefulWidget {

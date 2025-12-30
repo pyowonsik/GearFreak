@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 페이지네이션된 상품 목록 View
 class PaginatedProductListView extends StatelessWidget {

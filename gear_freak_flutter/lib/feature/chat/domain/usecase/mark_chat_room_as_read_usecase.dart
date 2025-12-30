@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/domain.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 채팅방 읽음 처리 UseCase
 class MarkChatRoomAsReadUseCase

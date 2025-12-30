@@ -1,6 +1,6 @@
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/service/pod_service.dart';
 import 'package:gear_freak_flutter/feature/product/data/datasource/product_remote_datasource.dart';
+import 'package:gear_freak_flutter/shared/service/pod_service.dart';
 
 /// 검색 원격 데이터 소스
 class SearchRemoteDataSource {

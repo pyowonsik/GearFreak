@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/data/datasource/chat_remote_datasource.dart';
 import 'package:gear_freak_flutter/feature/chat/data/repository/chat_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/repository/chat_repository.dart';
@@ -11,6 +10,7 @@ import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_room_list_state.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
+import 'package:gear_freak_flutter/shared/feature/s3/di/s3_providers.dart';
 
 /// Chat Remote DataSource Provider
 final chatRemoteDataSourceProvider = Provider<ChatRemoteDataSource>((ref) {

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
@@ -10,6 +8,7 @@ import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state
 import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_room_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/view/chat_loaded_view.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 채팅 화면을 표시하는 위젯입니다.
 ///

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/component/component.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 홈 화면이 로드된 상태의 View
 class HomeLoadedView extends ConsumerWidget {

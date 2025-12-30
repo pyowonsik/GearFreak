@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 고객센터 화면
 class CustomerCenterScreen extends StatelessWidget {

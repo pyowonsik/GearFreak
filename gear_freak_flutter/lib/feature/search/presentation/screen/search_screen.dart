@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/component/component.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
-import 'package:gear_freak_flutter/common/utils/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 검색 화면
 class SearchScreen extends ConsumerStatefulWidget {
@@ -76,7 +75,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           FocusScope.of(context).unfocus();
         },
         child: Column(
-        children: [
+          children: [
             SearchTextFieldWidget(
               controller: _searchController,
               focusNode: _searchFocusNode,
@@ -95,13 +94,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                 _searchController.clear();
                 ref.read(searchNotifierProvider.notifier).clearSearch();
               },
-          ),
-          Expanded(
+            ),
+            Expanded(
               child: _showRecentSearches
                   ? _buildRecentSearchesScreen()
                   : _buildBody(searchState),
-          ),
-        ],
+            ),
+          ],
         ),
       ),
     );
@@ -141,7 +140,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       SearchError(:final message, :final query) => GbErrorView(
           message: '에러: $message',
           onRetry: () {
-                  if (query != null) {
+            if (query != null) {
               ref.read(searchNotifierProvider.notifier).searchProducts(query);
             }
           },

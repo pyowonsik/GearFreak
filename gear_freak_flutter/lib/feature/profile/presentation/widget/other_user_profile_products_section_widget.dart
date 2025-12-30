@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/utils/format_utils.dart';
+import 'package:gear_freak_flutter/core/util/format_utils.dart';
 import 'package:go_router/go_router.dart';
 
 /// 다른 사용자 프로필 상품 섹션 위젯

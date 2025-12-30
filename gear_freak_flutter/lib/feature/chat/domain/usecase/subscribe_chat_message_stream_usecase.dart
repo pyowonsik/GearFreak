@@ -1,7 +1,8 @@
 import 'dart:async';
+
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/domain/usecase/stream_usecase.dart';
 import 'package:gear_freak_flutter/feature/chat/domain/domain.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/stream_usecase.dart';
 
 /// 채팅 메시지 스트림 구독 UseCase
 /// 실시간 메시지를 받기 위한 스트림을 반환합니다.

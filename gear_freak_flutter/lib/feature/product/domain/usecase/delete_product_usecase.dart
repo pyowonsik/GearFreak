@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/domain.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 상품 삭제 UseCase
 class DeleteProductUseCase implements UseCase<void, int, ProductRepository> {

@@ -1,5 +1,48 @@
 # Gear Freak 프로젝트 Cursor Rules
 
+## 프로젝트 전체 구조 규칙
+
+### 디렉토리 구조
+
+```
+lib/
+├── main.dart
+├── core/                    # 전역 설정
+│   ├── route/              # 라우팅
+│   ├── util/               # 유틸리티
+│   ├── di/                 # 의존성 주입
+│   ├── constants/          # 상수
+│   └── theme/              # 테마
+│
+├── shared/                  # 공통 모듈
+│   ├── widget/             # 공통 위젯
+│   ├── service/            # 공통 서비스
+│   ├── domain/             # 공통 도메인
+│   └── feature/            # 공통 기능 (예: s3)
+│
+└── feature/                # Feature별 모듈
+    ├── auth/
+    │   ├── data/
+    │   ├── domain/
+    │   └── presentation/
+    │       ├── page/       # 라우팅 단위 (screen도 허용하지만 page 권장)
+    │       ├── view/       # 상태별 UI (LoadingView, DataView, ErrorView)
+    │       ├── widget/     # 재사용 가능한 위젯 (component와 widget 구분하지 않음)
+    │       ├── provider/   # Provider/Notifier (상태 관리)
+    │       └── util/       # 유틸리티 함수
+    │
+    ├── product/
+    └── ...
+```
+
+### 디렉토리 명명 규칙
+
+- **모든 디렉토리는 단수형을 사용합니다**
+  - ✅ `route/`, `util/`, `widget/`, `service/`, `domain/`, `feature/`, `page/`
+  - ❌ `routes/`, `utils/`, `widgets/`, `services/`, `domains/`, `features/`, `pages/`
+
+- **예외 사항**: `constants/` (일반적으로 복수형 사용)
+
 ## Presentation Layer 구조 규칙
 
 프로젝트의 Presentation Layer는 다음과 같은 구조를 따릅니다:
@@ -8,41 +51,40 @@
 
 ```
 presentation/
-├── screen/          # Screen (라우팅 단위)
+├── page/            # Page (라우팅 단위, screen도 허용)
 ├── view/            # View (상태별 UI: LoadingView, DataView, ErrorView)
-├── component/       # Component (재사용 가능한 위젯, 여러 feature에서 사용 가능)
-├── widget/          # Widget (특정 화면에서만 사용하는 작은 단위)
+├── widget/          # Widget (재사용 가능한 위젯, 특정 화면에서만 사용하는 작은 단위)
 ├── provider/        # Provider/Notifier (상태 관리)
-└── utils/           # Utils (유틸리티 함수)
+└── util/            # Util (유틸리티 함수)
 ```
 
 ### 구분 기준
 
-- **Screen**: 라우팅이 되는 화면 단위 (Route)
+- **Page**: 라우팅이 되는 화면 단위 (Route) - screen도 허용하지만 page를 권장
 - **View**: 네트워크 상태에 따른 인터페이스 (error, loading, data 상태별 UI)
-- **Component**: 재사용 가능한 독립적인 UI 컴포넌트 (여러 feature에서 사용 가능)
-- **Widget**: 특정 화면에서만 사용하는 작은 단위 위젯
+- **Widget**: 재사용 가능한 위젯 (특정 화면에서만 사용하는 작은 단위, component와 widget 구분하지 않음)
 
-### Common 폴더 구조
+### Shared 폴더 구조
 
 ```
-common/
-├── component/       # 공통 재사용 가능한 UI 컴포넌트
+shared/
+├── widget/          # 공통 재사용 가능한 UI 위젯
 │   ├── gb_dialog.dart
 │   ├── gb_snackbar.dart
-│   └── gb_text_form_field.dart
-├── view/            # 공통 상태별 UI
+│   ├── gb_text_form_field.dart
 │   ├── gb_error_view.dart
 │   ├── gb_empty_view.dart
 │   └── gb_loading_view.dart
-└── ...
+├── service/         # 공통 서비스
+├── domain/          # 공통 도메인
+└── feature/         # 공통 기능
 ```
 
 ### 예시
 
 ```dart
-// Screen: 라우팅 단위
-class ProductDetailScreen extends ConsumerStatefulWidget {
+// Page: 라우팅 단위
+class ProductDetailPage extends ConsumerStatefulWidget {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(productDetailNotifierProvider);
@@ -59,10 +101,8 @@ class ProductDetailLoadingView extends StatelessWidget { ... }
 class ProductDetailView extends StatelessWidget { ... }
 class ProductDetailErrorView extends StatelessWidget { ... }
 
-// Component: 재사용 가능한 위젯
+// Widget: 재사용 가능한 위젯 (component와 widget 구분하지 않음)
 class ProductCardWidget extends StatelessWidget { ... }
-
-// Widget: 특정 화면에서만 사용
 class ProductBasicInfoSectionWidget extends StatelessWidget { ... }
 ```
 
@@ -70,7 +110,7 @@ class ProductBasicInfoSectionWidget extends StatelessWidget { ... }
 
 - 프로젝트에서 사용하는 모든 다이얼로그는 `GbDialog`를 사용해야 합니다.
 - `AlertDialog`를 직접 사용하지 말고, `GbDialog.show()`를 사용하세요.
-- `GbDialog`는 `lib/common/component/gb_dialog.dart`에 위치합니다.
+- `GbDialog`는 `lib/shared/widget/gb_dialog.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -96,7 +136,7 @@ showDialog(
 
 - 프로젝트에서 사용하는 모든 스낵바는 `GbSnackBar`를 사용해야 합니다.
 - `ScaffoldMessenger.of(context).showSnackBar()`와 `SnackBar`를 직접 사용하지 말고, `GbSnackBar`의 static 메서드를 사용하세요.
-- `GbSnackBar`는 `lib/common/component/gb_snackbar.dart`에 위치합니다.
+- `GbSnackBar`는 `lib/shared/widget/gb_snackbar.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -141,7 +181,7 @@ ScaffoldMessenger.of(context).showSnackBar(
 
 - 프로젝트에서 사용하는 모든 에러 상태 표시는 `GbErrorView`를 사용해야 합니다.
 - 에러 아이콘, 메시지, "다시 시도" 버튼을 직접 구성하지 말고, `GbErrorView` 위젯을 사용하세요.
-- `GbErrorView`는 `lib/common/view/gb_error_view.dart`에 위치합니다.
+- `GbErrorView`는 `lib/shared/widget/gb_error_view.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -200,7 +240,7 @@ Center(
 
 - 프로젝트에서 사용하는 모든 TextFormField는 `GbTextFormField`를 사용해야 합니다.
 - `TextFormField`를 직접 사용하지 말고, `GbTextFormField` 위젯을 사용하세요.
-- `GbTextFormField`는 `lib/common/component/gb_text_form_field.dart`에 위치합니다.
+- `GbTextFormField`는 `lib/shared/widget/gb_text_form_field.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -289,7 +329,7 @@ TextFormField(
 
 - 프로젝트에서 사용하는 모든 빈 상태 표시는 `GbEmptyView`를 사용해야 합니다.
 - 빈 상태 아이콘, 메시지를 직접 구성하지 말고, `GbEmptyView` 위젯을 사용하세요.
-- `GbEmptyView`는 `lib/common/view/gb_empty_view.dart`에 위치합니다.
+- `GbEmptyView`는 `lib/shared/widget/gb_empty_view.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -339,7 +379,7 @@ Center(
 
 - 프로젝트에서 사용하는 모든 전체 화면 로딩 표시는 `GbLoadingView`를 사용해야 합니다.
 - `Center(child: CircularProgressIndicator())`를 직접 사용하지 말고, `GbLoadingView` 위젯을 사용하세요.
-- `GbLoadingView`는 `lib/common/view/gb_loading_view.dart`에 위치합니다.
+- `GbLoadingView`는 `lib/shared/widget/gb_loading_view.dart`에 위치합니다.
 
 ### 사용 예시
 
@@ -658,6 +698,12 @@ lib/feature/product/
 │   └── usecase/
 │       └── get_product_detail_usecase.dart # 비즈니스 로직
 └── presentation/
+    ├── page/
+    │   └── product_detail_page.dart        # 라우팅 단위
+    ├── view/
+    │   └── product_detail_loaded_view.dart # 상태별 UI
+    ├── widget/
+    │   └── product_card_widget.dart        # 재사용 위젯
     └── provider/
         └── product_detail_notifier.dart    # UseCase 사용
 ```
@@ -985,7 +1031,7 @@ if (products.isNotEmpty) {
 
 ### 🔧 구현 세부사항
 
-- `gear_freak_flutter/lib/feature/product/presentation/screen/product_list_screen.dart`
+- `gear_freak_flutter/lib/feature/product/presentation/page/product_list_page.dart`
 - 안전한 리스트 접근 패턴 적용
 
 ### ✅ 장점

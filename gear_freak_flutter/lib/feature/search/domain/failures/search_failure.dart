@@ -1,4 +1,4 @@
-import 'package:gear_freak_flutter/common/domain/failure/failure.dart';
+import 'package:gear_freak_flutter/shared/domain/failure/failure.dart';
 
 /// 검색 실패 추상 클래스
 abstract class SearchFailure extends Failure {

@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/domain/usecase/usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/domain.dart';
+import 'package:gear_freak_flutter/shared/domain/usecase/usecase.dart';
 
 /// 현재 사용자 정보 조회 UseCase
 class GetMeUseCase implements UseCase<pod.User?, void, AuthRepository> {

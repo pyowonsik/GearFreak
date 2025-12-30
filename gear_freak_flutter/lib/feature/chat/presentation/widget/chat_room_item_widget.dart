@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/common/presentation/component/gb_dialog.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_room_util.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/widget/product_avatar_widget.dart';
+import 'package:gear_freak_flutter/shared/widget/gb_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 /// 채팅방 아이템 위젯

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gear_freak_flutter/common/presentation/view/view.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_state.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/view/view.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 다른 사용자 프로필 화면
 class OtherUserProfileScreen extends ConsumerStatefulWidget {
