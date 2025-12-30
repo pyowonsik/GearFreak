@@ -13,10 +13,7 @@ import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/other_user_profile_screen.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/screen/other_user_review_list_screen.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/screen/review_already_written_screen.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/screen/review_list_screen.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/screen/write_review_screen.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
 
 /// 앱의 최상위 라우트 구조를 정의하는 클래스
@@ -157,7 +154,7 @@ abstract final class AppRoutes {
             final tabIndex = state.uri.queryParameters['tabIndex'];
             final initialTabIndex =
                 tabIndex != null ? int.tryParse(tabIndex)?.clamp(0, 1) ?? 0 : 0;
-            return ReviewListScreen(initialTabIndex: initialTabIndex);
+            return ReviewListPage(initialTabIndex: initialTabIndex);
           },
         ),
 
@@ -167,7 +164,7 @@ abstract final class AppRoutes {
           name: 'other-user-reviews',
           builder: (context, state) {
             final userId = state.pathParameters['userId'] ?? '';
-            return OtherUserReviewListScreen(userId: userId);
+            return OtherUserReviewListPage(userId: userId);
           },
         ),
 
@@ -192,7 +189,7 @@ abstract final class AppRoutes {
             final chatRoomId = state.uri.queryParameters['chatRoomId'];
             final isSellerReview =
                 state.uri.queryParameters['isSellerReview'] == 'true';
-            return WriteReviewScreen(
+            return WriteReviewPage(
               productId: int.parse(productId),
               revieweeId: revieweeId != null ? int.parse(revieweeId) : 0,
               chatRoomId: chatRoomId != null ? int.parse(chatRoomId) : 0,
@@ -215,7 +212,7 @@ abstract final class AppRoutes {
           builder: (context, state) {
             final reviewType =
                 state.uri.queryParameters['reviewType'] ?? 'seller';
-            return ReviewAlreadyWrittenScreen(reviewType: reviewType);
+            return ReviewAlreadyWrittenPage(reviewType: reviewType);
           },
         ),
 

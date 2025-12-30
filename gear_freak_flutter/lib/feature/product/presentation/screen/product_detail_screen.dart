@@ -13,7 +13,7 @@ import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/widget/buyer_selection_modal.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 

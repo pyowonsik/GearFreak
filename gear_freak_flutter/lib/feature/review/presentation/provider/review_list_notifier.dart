@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/get_buyer_reviews_usecase.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/get_seller_reviews_usecase.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 
 /// 리뷰 목록 Notifier (구매자 후기)
 class BuyerReviewListNotifier extends StateNotifier<ReviewListState> {

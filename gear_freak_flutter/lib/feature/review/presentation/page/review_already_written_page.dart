@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 
 /// 이미 작성한 리뷰 화면
 /// Presentation Layer: UI
-class ReviewAlreadyWrittenScreen extends StatelessWidget {
-  /// ReviewAlreadyWrittenScreen 생성자
+class ReviewAlreadyWrittenPage extends StatelessWidget {
+  /// ReviewAlreadyWrittenPage 생성자
   ///
   /// [reviewType]는 리뷰 타입입니다 ('seller' 또는 'buyer').
-  const ReviewAlreadyWrittenScreen({
+  const ReviewAlreadyWrittenPage({
     this.reviewType = 'seller',
     super.key,
   });

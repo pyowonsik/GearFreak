@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/view/search_recent_searches_view.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/presentation.dart';
 
 /// 최근 검색어 화면 위젯
 ///

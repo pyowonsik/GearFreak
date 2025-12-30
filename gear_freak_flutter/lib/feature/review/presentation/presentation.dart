@@ -1,3 +1,9 @@
-export 'provider/review_notifier.dart';
-export 'screen/buyer_selection_screen.dart';
-export 'screen/write_review_screen.dart';
+/// Gear Freak Review Feature Presentation Layer
+///
+/// Review feature의 모든 Presentation Layer 컴포넌트를 export합니다.
+library;
+
+export 'page/pages.dart';
+export 'provider/provider.dart';
+export 'view/view.dart';
+export 'widget/widget.dart';

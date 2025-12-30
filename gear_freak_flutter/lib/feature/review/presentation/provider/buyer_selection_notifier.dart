@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/get_buyers_by_product_id_usecase.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_state.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 
 /// 구매자 선택 Notifier
 /// Presentation Layer: Riverpod 상태 관리

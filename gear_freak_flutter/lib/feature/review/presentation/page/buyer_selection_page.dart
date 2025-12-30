@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 구매자 선택 화면
 /// Presentation Layer: UI
-class BuyerSelectionScreen extends ConsumerStatefulWidget {
-  /// BuyerSelectionScreen 생성자
+class BuyerSelectionPage extends ConsumerStatefulWidget {
+  /// BuyerSelectionPage 생성자
   ///
   /// [productId]는 상품 ID입니다.
-  const BuyerSelectionScreen({
+  const BuyerSelectionPage({
     required this.productId,
     super.key,
   });
@@ -16,11 +16,11 @@ class BuyerSelectionScreen extends ConsumerStatefulWidget {
   final int productId;
 
   @override
-  ConsumerState<BuyerSelectionScreen> createState() =>
-      _BuyerSelectionScreenState();
+  ConsumerState<BuyerSelectionPage> createState() =>
+      _BuyerSelectionPageState();
 }
 
-class _BuyerSelectionScreenState extends ConsumerState<BuyerSelectionScreen> {
+class _BuyerSelectionPageState extends ConsumerState<BuyerSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

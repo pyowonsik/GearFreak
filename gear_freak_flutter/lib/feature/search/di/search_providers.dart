@@ -3,8 +3,7 @@ import 'package:gear_freak_flutter/feature/search/data/datasource/search_remote_
 import 'package:gear_freak_flutter/feature/search/data/repository/search_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/search/domain/repository/search_repository.dart';
 import 'package:gear_freak_flutter/feature/search/domain/usecase/search_products_usecase.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/provider/search_notifier.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/presentation.dart';
 
 /// Search Remote DataSource Provider
 final searchRemoteDataSourceProvider = Provider<SearchRemoteDataSource>((ref) {

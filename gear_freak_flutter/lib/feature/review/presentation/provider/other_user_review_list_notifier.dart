@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/get_all_reviews_by_user_id_usecase.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 
 /// 다른 사용자의 모든 후기 목록 Notifier
 class OtherUserReviewListNotifier extends StateNotifier<ReviewListState> {

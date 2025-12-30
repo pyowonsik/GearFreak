@@ -52,10 +52,15 @@ lib/
 ```
 presentation/
 ├── page/            # Page (라우팅 단위, screen도 허용)
+│   └── pages.dart   # 모든 Page export (배럴 파일)
 ├── view/            # View (상태별 UI: LoadingView, DataView, ErrorView)
+│   └── view.dart    # 모든 View export (배럴 파일)
 ├── widget/          # Widget (재사용 가능한 위젯, 특정 화면에서만 사용하는 작은 단위)
+│   └── widget.dart  # 모든 Widget export (배럴 파일)
 ├── provider/        # Provider/Notifier (상태 관리)
-└── util/            # Util (유틸리티 함수)
+│   └── provider.dart # 모든 Provider와 State export (배럴 파일)
+├── util/            # Util (유틸리티 함수)
+└── presentation.dart # 모든 하위 배럴 파일 export (최상위 배럴 파일)
 ```
 
 ### 구분 기준
@@ -63,6 +68,69 @@ presentation/
 - **Page**: 라우팅이 되는 화면 단위 (Route) - screen도 허용하지만 page를 권장
 - **View**: 네트워크 상태에 따른 인터페이스 (error, loading, data 상태별 UI)
 - **Widget**: 재사용 가능한 위젯 (특정 화면에서만 사용하는 작은 단위, component와 widget 구분하지 않음)
+
+### 배럴 파일 (Barrel File) 패턴
+
+**모든 presentation 폴더는 배럴 파일을 적극 활용해야 합니다.**
+
+#### 1. 하위 배럴 파일 (각 디렉토리별)
+
+각 디렉토리(`page/`, `view/`, `widget/`, `provider/`)에는 해당 디렉토리의 모든 파일을 export하는 배럴 파일이 **필수**입니다:
+
+```dart
+// presentation/page/pages.dart
+export 'buyer_selection_page.dart';
+export 'review_list_page.dart';
+export 'write_review_page.dart';
+
+// presentation/view/view.dart
+export 'buyer_review_list_loaded_view.dart';
+export 'seller_review_list_loaded_view.dart';
+
+// presentation/widget/widget.dart
+export 'review_item_widget.dart';
+export 'review_list_view_widget.dart';
+
+// presentation/provider/provider.dart
+export 'review_notifier.dart';
+export 'review_state.dart';
+export 'review_list_notifier.dart';
+export 'review_list_state.dart';
+```
+
+#### 2. 최상위 배럴 파일 (presentation.dart)
+
+`presentation/presentation.dart` 파일은 모든 하위 배럴 파일을 export합니다:
+
+```dart
+/// Gear Freak [Feature Name] Feature Presentation Layer
+///
+/// [Feature Name] feature의 모든 Presentation Layer 컴포넌트를 export합니다.
+library;
+
+export 'page/pages.dart';
+export 'provider/provider.dart';
+export 'view/view.dart';
+export 'widget/widget.dart';
+```
+
+#### 3. Import 규칙
+
+**외부에서 feature의 presentation layer를 사용할 때:**
+- ✅ `import 'package:gear_freak_flutter/feature/[feature]/presentation/presentation.dart';`
+- ❌ 개별 파일 직접 import 금지 (`import '.../page/review_list_page.dart'` 등)
+
+**feature 내부에서 다른 presentation 컴포넌트를 사용할 때:**
+- ✅ `import 'package:gear_freak_flutter/feature/[feature]/presentation/presentation.dart';`
+- ✅ 필요시 하위 배럴 파일 직접 사용도 허용 (`import '.../widget/widget.dart'` 등)
+- ❌ 개별 파일 직접 import는 가능하면 피함 (일관성을 위해)
+
+#### 4. 배럴 파일 생성 가이드라인
+
+- **새 파일 추가 시**: 해당 디렉토리의 배럴 파일에 export 추가 필수
+- **파일 삭제 시**: 해당 디렉토리의 배럴 파일에서 export 제거 필수
+- **배럴 파일 네이밍**: `pages.dart`, `view.dart`, `widget.dart`, `provider.dart` (디렉토리명의 단수형)
+- **library 선언**: 각 배럴 파일은 `library;` 선언으로 시작 (문서화 포함 권장)
 
 ### Shared 폴더 구조
 

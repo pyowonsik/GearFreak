@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/create_seller_review_usecase.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/create_transaction_review_usecase.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_state.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 
 /// 리뷰 Notifier
 /// Presentation Layer: Riverpod 상태 관리

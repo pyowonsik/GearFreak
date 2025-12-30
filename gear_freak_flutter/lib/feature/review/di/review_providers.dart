@@ -3,13 +3,7 @@ import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/review/data/data.dart';
 import 'package:gear_freak_flutter/feature/review/domain/domain.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_notifier.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_state.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/other_user_review_list_notifier.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_notifier.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_list_state.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_notifier.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_state.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 
 /// 리뷰 원격 데이터 소스 Provider
 final reviewRemoteDataSourceProvider = Provider<ReviewRemoteDataSource>(

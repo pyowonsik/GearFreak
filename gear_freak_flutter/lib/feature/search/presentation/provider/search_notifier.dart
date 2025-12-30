@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/search/domain/domain.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/service/recent_search_service.dart';
 
 /// 검색 Notifier

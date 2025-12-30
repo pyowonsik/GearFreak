@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/search/di/search_providers.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/provider/search_state.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/view/view.dart';
-import 'package:gear_freak_flutter/feature/search/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/search/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 검색 화면

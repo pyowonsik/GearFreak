@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/buyer_selection_state.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
 
 /// 구매자 선택 모달

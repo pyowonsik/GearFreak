@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/provider/review_state.dart';
-import 'package:gear_freak_flutter/feature/review/presentation/widget/star_rating_widget.dart';
+import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 후기 작성 화면
 /// Presentation Layer: UI
-class WriteReviewScreen extends ConsumerStatefulWidget {
-  /// WriteReviewScreen 생성자
+class WriteReviewPage extends ConsumerStatefulWidget {
+  /// WriteReviewPage 생성자
   ///
   /// [productId]는 상품 ID입니다.
   /// [revieweeId]는 리뷰 대상자 ID입니다 (구매자 후기: buyerId, 판매자 후기: sellerId).
   /// [chatRoomId]는 채팅방 ID입니다.
   /// [isSellerReview]는 판매자 후기 작성 여부입니다 (true: 구매자→판매자, false: 판매자→구매자).
-  const WriteReviewScreen({
+  const WriteReviewPage({
     required this.productId,
     required this.revieweeId,
     required this.chatRoomId,
@@ -36,10 +35,10 @@ class WriteReviewScreen extends ConsumerStatefulWidget {
   final bool isSellerReview;
 
   @override
-  ConsumerState<WriteReviewScreen> createState() => _WriteReviewScreenState();
+  ConsumerState<WriteReviewPage> createState() => _WriteReviewPageState();
 }
 
-class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
+class _WriteReviewPageState extends ConsumerState<WriteReviewPage> {
   final TextEditingController _contentController = TextEditingController();
   int _rating = 0;
   bool _isSubmitting = false;
