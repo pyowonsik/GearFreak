@@ -483,19 +483,48 @@ Widget _buildProfileLoadedView(pod.User user) {  // ❌ 매번 새로운 인스�
 
 ### 예외 사항
 
-다음과 같은 경우는 허용됩니다:
+**Switch 문을 포함하는 헬퍼 메서드도 권장하지 않습니다.** body에서 직접 switch 문을 사용하는 것이 더 나은 패턴입니다.
 
-1. **Switch 문을 포함하는 헬퍼 메서드**: `_buildBody`처럼 switch 문 자체를 포함하는 경우
-   ```dart
-   Widget _buildBody(SearchState state) {
-     return switch (state) {  // switch 문을 포함하므로 허용
-       SearchInitial() => const SearchInitialView(),
-       SearchLoaded(...) => SearchLoadedView(...),
-     };
-   }
-   ```
+```dart
+// ✅ 올바른 사용 - body에서 직접 switch 사용 (권장)
+@override
+Widget build(BuildContext context) {
+  final state = ref.watch(someNotifierProvider);
+  
+  return Scaffold(
+    body: switch (state) {
+      Loading() => const GbLoadingView(),
+      Error(:final message) => GbErrorView(...),
+      Loaded(:final data) => LoadedView(data: data),
+    },
+  );
+}
 
-2. **작은 UI 조각 헬퍼**: `_buildFAQItem`, `_buildInfoItem`, `_buildDivider` 등 작은 UI 조각을 반환하는 경우
+// ❌ 권장하지 않음 - switch 문을 포함하는 헬퍼 메서드
+@override
+Widget build(BuildContext context) {
+  final state = ref.watch(someNotifierProvider);
+  
+  return Scaffold(
+    body: _buildBody(state),  // 헬퍼 메서드 사용
+  );
+}
+
+Widget _buildBody(SomeState state) {
+  return switch (state) {  // 허용되지만 권장하지 않음
+    Loading() => const GbLoadingView(),
+    Error(:final message) => GbErrorView(...),
+    Loaded(:final data) => LoadedView(data: data),
+  };
+}
+```
+
+**이유:**
+- 프로젝트 전반의 일관성 유지 (다른 화면들도 body에서 직접 switch 사용)
+- 코드 가독성 향상 (상태 분기를 바로 확인 가능)
+- 불필요한 메서드 호출 제거
+
+**작은 UI 조각 헬퍼**: `_buildFAQItem`, `_buildInfoItem`, `_buildDivider` 등 작은 UI 조각을 반환하는 경우
    - 단, 가능하면 StatelessWidget으로 분리하는 것을 권장 (더 나은 최적화)
    ```dart
    // ✅ 권장 - StatelessWidget으로 분리 (const 가능, 최적화 가능)
@@ -532,7 +561,9 @@ Widget _buildProfileLoadedView(pod.User user) {  // ❌ 매번 새로운 인스�
 - ✅ 같은 View를 사용하는 상태는 `||` 패턴으로 통합
 - ✅ 부모 클래스를 상속받는 하위 상태는 부모 클래스만 매칭
 - ✅ 위젯 클래스를 직접 사용 (const 생성자, key로 최적화 가능)
+- ✅ body에서 직접 switch 문 사용 (일관성, 가독성 향상)
 - ❌ `_build` 헬퍼 메서드 사용 금지 (StatelessWidget이어도 `_build`로 호출하면 최적화 불가)
+- ❌ switch 문을 포함하는 헬퍼 메서드도 권장하지 않음 (body에서 직접 switch 사용)
 - ❌ 불필요하게 모든 하위 상태 나열 금지
 - 💡 작은 UI 조각도 가능하면 StatelessWidget으로 분리 권장
 

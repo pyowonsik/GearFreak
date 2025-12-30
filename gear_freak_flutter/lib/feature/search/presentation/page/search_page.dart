@@ -9,17 +9,17 @@ import 'package:gear_freak_flutter/feature/search/presentation/widget/widget.dar
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 검색 화면
-class SearchScreen extends ConsumerStatefulWidget {
-  /// SearchScreen 생성자
+class SearchPage extends ConsumerStatefulWidget {
+  /// SearchPage 생성자
   ///
   /// [key]는 위젯의 키입니다.
-  const SearchScreen({super.key});
+  const SearchPage({super.key});
 
   @override
-  ConsumerState<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchScreenState extends ConsumerState<SearchScreen>
+class _SearchPageState extends ConsumerState<SearchPage>
     with PaginationScrollMixin {
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
@@ -49,7 +49,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         final searchState = ref.read(searchNotifierProvider);
         return searchState is SearchLoadingMore;
       },
-      screenName: 'SearchScreen',
+      screenName: 'SearchPage',
     );
   }
 
@@ -97,75 +97,57 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             ),
             Expanded(
               child: _showRecentSearches
-                  ? _buildRecentSearchesScreen()
-                  : _buildBody(searchState),
+                  ? SearchRecentSearchesScreenWidget(
+                      searchController: _searchController,
+                      searchFocusNode: _searchFocusNode,
+                    )
+                  : switch (searchState) {
+                      SearchInitial() => const SearchInitialView(),
+                      SearchLoading() => const GbLoadingView(),
+                      SearchError(:final message, :final query) => GbErrorView(
+                          message: '에러: $message',
+                          onRetry: () {
+                            if (query != null) {
+                              ref
+                                  .read(searchNotifierProvider.notifier)
+                                  .searchProducts(query);
+                            }
+                          },
+                        ),
+                      SearchLoaded(
+                        :final result,
+                        :final query,
+                        :final sortBy
+                      ) ||
+                      SearchLoadingMore(
+                        :final result,
+                        :final query,
+                        :final sortBy
+                      ) =>
+                        SearchLoadedView(
+                          key: const ValueKey('search_loaded'),
+                          products: result.products,
+                          pagination: result.pagination,
+                          query: query,
+                          sortBy: sortBy,
+                          scrollController: scrollController!,
+                          isLoadingMore: searchState is SearchLoadingMore,
+                          onSortChanged: (pod.ProductSortBy? newSortBy) async {
+                            await ref
+                                .read(searchNotifierProvider.notifier)
+                                .searchProducts(query, sortBy: newSortBy);
+                          },
+                          onRefresh: () async {
+                            await ref
+                                .read(searchNotifierProvider.notifier)
+                                .searchProducts(query, sortBy: sortBy);
+                          },
+                        ),
+                    },
             ),
           ],
         ),
       ),
     );
-  }
-
-  /// 최근 검색어 화면 위젯
-  Widget _buildRecentSearchesScreen() {
-    final searchState = ref.watch(searchNotifierProvider);
-
-    // SearchInitial 상태면 바로 사용, 아니면 FutureBuilder로 가져오기
-    final recentSearches =
-        searchState is SearchInitial ? searchState.recentSearches : null;
-
-    return SearchRecentSearchesView(
-      recentSearches: recentSearches,
-      onSearchTap: (query) {
-        // 검색어 입력
-        _searchController.text = query;
-        // 검색 실행
-        ref.read(searchNotifierProvider.notifier).searchProducts(query);
-        // 포커스 해제
-        _searchFocusNode.unfocus();
-      },
-      onClearAll: () {
-        ref.read(searchNotifierProvider.notifier).clearAllRecentSearches();
-      },
-      onDelete: (query) {
-        ref.read(searchNotifierProvider.notifier).deleteRecentSearch(query);
-      },
-    );
-  }
-
-  Widget _buildBody(SearchState state) {
-    return switch (state) {
-      SearchInitial() => const SearchInitialView(),
-      SearchLoading() => const GbLoadingView(),
-      SearchError(:final message, :final query) => GbErrorView(
-          message: '에러: $message',
-          onRetry: () {
-            if (query != null) {
-              ref.read(searchNotifierProvider.notifier).searchProducts(query);
-            }
-          },
-        ),
-      SearchLoaded(:final result, :final query, :final sortBy) ||
-      SearchLoadingMore(:final result, :final query, :final sortBy) =>
-        SearchLoadedView(
-          key: const ValueKey('search_loaded'),
-          products: result.products,
-          pagination: result.pagination,
-          query: query,
-          sortBy: sortBy,
-          scrollController: scrollController!,
-          isLoadingMore: state is SearchLoadingMore,
-          onSortChanged: (pod.ProductSortBy? newSortBy) async {
-            await ref
-                .read(searchNotifierProvider.notifier)
-                .searchProducts(query, sortBy: newSortBy);
-          },
-          onRefresh: () async {
-            await ref
-                .read(searchNotifierProvider.notifier)
-                .searchProducts(query, sortBy: sortBy);
-          },
-        ),
-    };
   }
 }
