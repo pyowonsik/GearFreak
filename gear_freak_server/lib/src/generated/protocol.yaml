@@ -24,6 +24,7 @@ chat:
   - generateChatRoomImageUploadUrl:
   - markChatRoomAsRead:
   - updateChatRoomNotification:
+  - getTotalUnreadChatCount:
 chatStream:
   - chatMessageStream:
 notification:

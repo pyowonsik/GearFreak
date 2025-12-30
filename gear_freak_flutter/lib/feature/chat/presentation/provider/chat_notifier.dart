@@ -544,6 +544,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
         Future.microtask(() {
           ref.read(chatRoomReadProvider.notifier).state = null;
         });
+        // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
+        // ignore: unused_result
+        ref.refresh(totalUnreadChatCountProvider);
       },
     );
   }

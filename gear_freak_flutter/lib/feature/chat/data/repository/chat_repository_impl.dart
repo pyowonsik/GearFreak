@@ -130,5 +130,10 @@ class ChatRepositoryImpl implements ChatRepository {
     return remoteDataSource.subscribeChatMessageStream(chatRoomId);
   }
 
+  @override
+  Future<int> getTotalUnreadChatCount() async {
+    return remoteDataSource.getTotalUnreadChatCount();
+  }
+
   // ==================== Private Helper Methods ====================
 }

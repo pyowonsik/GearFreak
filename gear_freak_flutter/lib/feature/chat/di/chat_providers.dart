@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/common/s3/di/s3_providers.dart';
@@ -109,6 +110,29 @@ final updateChatRoomNotificationUseCaseProvider =
     Provider<UpdateChatRoomNotificationUseCase>((ref) {
   final repository = ref.watch(chatRepositoryProvider);
   return UpdateChatRoomNotificationUseCase(repository);
+});
+
+/// Get Total Unread Chat Count UseCase Provider
+final getTotalUnreadChatCountUseCaseProvider =
+    Provider<GetTotalUnreadChatCountUseCase>((ref) {
+  final repository = ref.watch(chatRepositoryProvider);
+  return GetTotalUnreadChatCountUseCase(repository);
+});
+
+/// 전체 읽지 않은 채팅 개수 Provider
+/// BottomNavigationBar에서 사용하기 위한 FutureProvider
+final totalUnreadChatCountProvider =
+    FutureProvider.autoDispose<int>((ref) async {
+  final useCase = ref.watch(getTotalUnreadChatCountUseCaseProvider);
+  final result = await useCase(null);
+  return result.fold(
+    (failure) {
+      // 실패 시 0 반환
+      debugPrint('❌ 읽지 않은 채팅 개수 조회 실패: ${failure.message}');
+      return 0;
+    },
+    (count) => count,
+  );
 });
 
 /// Chat Room List Notifier Provider (채팅방 목록 화면용 - 전체 채팅방)

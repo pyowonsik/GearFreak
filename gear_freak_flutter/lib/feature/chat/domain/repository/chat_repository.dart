@@ -70,4 +70,8 @@ abstract class ChatRepository {
   /// [chatRoomId]는 채팅방 ID입니다.
   /// 반환: 실시간 메시지 스트림
   Stream<pod.ChatMessageResponseDto> subscribeChatMessageStream(int chatRoomId);
+
+  /// 전체 채팅방의 읽지 않은 메시지 총합 조회
+  /// 사용자가 참여 중인 모든 채팅방에서 읽지 않은 메시지 개수의 합을 반환합니다.
+  Future<int> getTotalUnreadChatCount();
 }

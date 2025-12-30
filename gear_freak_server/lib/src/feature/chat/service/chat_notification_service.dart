@@ -192,6 +192,46 @@ class ChatNotificationService {
     }
   }
 
+  /// 전체 채팅방의 읽지 않은 메시지 총합 조회
+  /// 사용자가 참여 중인 모든 채팅방에서 읽지 않은 메시지 개수의 합을 반환합니다.
+  Future<int> getTotalUnreadChatCount(
+    Session session,
+    int userId,
+  ) async {
+    try {
+      // 1. 사용자가 참여 중인 모든 채팅방 조회
+      final participants = await ChatParticipant.db.find(
+        session,
+        where: (p) => p.userId.equals(userId) & p.isActive.equals(true),
+      );
+
+      if (participants.isEmpty) {
+        return 0;
+      }
+
+      // 2. 각 채팅방별로 읽지 않은 메시지 개수 계산하여 합산
+      int totalUnreadCount = 0;
+      for (final participant in participants) {
+        final unreadCount = await getUnreadCount(
+          session,
+          userId,
+          participant.chatRoomId,
+        );
+        totalUnreadCount += unreadCount;
+      }
+
+      return totalUnreadCount;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '❌ 전체 읽지 않은 채팅 개수 조회 실패: $e',
+        exception: e,
+        stackTrace: stackTrace,
+        level: LogLevel.error,
+      );
+      return 0;
+    }
+  }
+
   /// FCM 알림 전송 (비동기)
   ///
   /// [chatRoomId]는 채팅방 ID입니다.
@@ -356,4 +396,3 @@ class ChatNotificationService {
     }
   }
 }
-

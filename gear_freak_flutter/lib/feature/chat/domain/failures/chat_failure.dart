@@ -126,3 +126,16 @@ class GetMyChatRoomsFailure extends ChatFailure {
   @override
   String toString() => 'GetMyChatRoomsFailure: $message';
 }
+
+/// 전체 읽지 않은 채팅 개수 조회 실패
+class GetTotalUnreadChatCountFailure extends ChatFailure {
+  /// GetTotalUnreadChatCountFailure 생성자
+  const GetTotalUnreadChatCountFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'GetTotalUnreadChatCountFailure: $message';
+}

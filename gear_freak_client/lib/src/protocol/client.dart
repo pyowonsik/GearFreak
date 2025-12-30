@@ -362,6 +362,14 @@ class EndpointChat extends _i1.EndpointRef {
         'updateChatRoomNotification',
         {'request': request},
       );
+
+  /// 전체 채팅방의 읽지 않은 메시지 총합 조회
+  /// 사용자가 참여 중인 모든 채팅방에서 읽지 않은 메시지 개수의 합을 반환합니다.
+  _i2.Future<int> getTotalUnreadChatCount() => caller.callServerEndpoint<int>(
+        'chat',
+        'getTotalUnreadChatCount',
+        {},
+      );
 }
 
 /// Redis 기반 실시간 채팅 스트림 관리 엔드포인트

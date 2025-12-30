@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:go_router/go_router.dart';
 
 /// 메인 화면 (탭 네비게이션)
 /// StatefulShellRoute의 builder에서 사용되는 페이지
-class AppRouterPage extends StatelessWidget {
+class AppRouterPage extends ConsumerWidget {
   /// AppRouterPage 생성자
   ///
   /// [navigationShell]는 네비게이션 쉘입니다.
@@ -16,7 +18,11 @@ class AppRouterPage extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 읽지 않은 채팅 개수 조회
+    final unreadChatCountAsync = ref.watch(totalUnreadChatCountProvider);
+    final unreadChatCount = unreadChatCountAsync.value ?? 0;
+
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
@@ -38,28 +44,40 @@ class AppRouterPage extends StatelessWidget {
               initialLocation: index == navigationShell.currentIndex,
             );
           },
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),
               label: '홈',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.search_outlined),
               activeIcon: Icon(Icons.search),
               label: '검색',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.add_circle_outline, size: 32),
               activeIcon: Icon(Icons.add_circle, size: 32),
               label: '등록',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              activeIcon: Icon(Icons.chat_bubble),
+              icon: Badge(
+                isLabelVisible: unreadChatCount > 0,
+                label: Text(
+                  unreadChatCount > 99 ? '99+' : '$unreadChatCount',
+                ),
+                child: const Icon(Icons.chat_bubble_outline),
+              ),
+              activeIcon: Badge(
+                isLabelVisible: unreadChatCount > 0,
+                label: Text(
+                  unreadChatCount > 99 ? '99+' : '$unreadChatCount',
+                ),
+                child: const Icon(Icons.chat_bubble),
+              ),
               label: '채팅',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               activeIcon: Icon(Icons.person),
               label: '내 정보',
