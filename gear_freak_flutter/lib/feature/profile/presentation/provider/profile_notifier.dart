@@ -9,7 +9,7 @@ import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/update_user_profile_usecase.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/delete_image_usecase.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/upload_image_usecase.dart';
 

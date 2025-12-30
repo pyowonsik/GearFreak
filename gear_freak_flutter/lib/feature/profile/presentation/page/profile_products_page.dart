@@ -8,12 +8,12 @@ import 'package:gear_freak_flutter/feature/product/presentation/view/profile_pro
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 프로필 상품 목록 화면 (내 상품 / 찜 목록 / 거래완료)
-class ProfileProductsScreen extends ConsumerStatefulWidget {
-  /// ProfileProductsScreen 생성자
+class ProfileProductsPage extends ConsumerStatefulWidget {
+  /// ProfileProductsPage 생성자
   ///
   /// [type]는 "myProducts" (내 상품), "mySoldProducts" (거래완료),
   /// 또는 "myFavorite" (찜 목록)입니다.
-  const ProfileProductsScreen({
+  const ProfileProductsPage({
     required this.type,
     super.key,
   });
@@ -22,11 +22,11 @@ class ProfileProductsScreen extends ConsumerStatefulWidget {
   final String type;
 
   @override
-  ConsumerState<ProfileProductsScreen> createState() =>
-      _ProfileProductsScreenState();
+  ConsumerState<ProfileProductsPage> createState() =>
+      _ProfileProductsPageState();
 }
 
-class _ProfileProductsScreenState extends ConsumerState<ProfileProductsScreen>
+class _ProfileProductsPageState extends ConsumerState<ProfileProductsPage>
     with PaginationScrollMixin {
   @override
   void initState() {
@@ -52,7 +52,7 @@ class _ProfileProductsScreenState extends ConsumerState<ProfileProductsScreen>
             ref.read(profileProductNotifierProvider(widget.type));
         return productState is ProductPaginatedLoadingMore;
       },
-      screenName: 'ProfileProductsScreen',
+      screenName: 'ProfileProductsPage',
     );
 
     // 데이터 로드

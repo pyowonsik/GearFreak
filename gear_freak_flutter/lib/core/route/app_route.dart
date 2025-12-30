@@ -3,7 +3,7 @@ import 'package:gear_freak_flutter/core/route/app_router_page.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_list_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/create_product_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/home_screen.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -116,7 +116,7 @@ abstract class AppRoute {
           GoRoute(
             path: '/main/profile',
             name: 'profile',
-            builder: (context, state) => const ProfileScreen(),
+            builder: (context, state) => const ProfilePage(),
           ),
         ],
       ),

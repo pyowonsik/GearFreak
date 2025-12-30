@@ -4,7 +4,7 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_products_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_state.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/get_all_reviews_by_user_id_usecase.dart';
 
 /// 다른 사용자 프로필 Notifier

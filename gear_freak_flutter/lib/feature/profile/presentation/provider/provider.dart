@@ -7,4 +7,3 @@ export 'other_user_profile_notifier.dart';
 export 'other_user_profile_state.dart';
 export 'profile_notifier.dart';
 export 'profile_state.dart';
-

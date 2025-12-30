@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_state.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/view/view.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 다른 사용자 프로필 화면
-class OtherUserProfileScreen extends ConsumerStatefulWidget {
-  /// OtherUserProfileScreen 생성자
+class OtherUserProfilePage extends ConsumerStatefulWidget {
+  /// OtherUserProfilePage 생성자
   ///
   /// [userId]는 다른 사용자의 아이디입니다.
-  const OtherUserProfileScreen({
+  const OtherUserProfilePage({
     /// userId
     required this.userId,
     super.key,
@@ -20,12 +19,11 @@ class OtherUserProfileScreen extends ConsumerStatefulWidget {
   final String userId;
 
   @override
-  ConsumerState<OtherUserProfileScreen> createState() =>
-      _OtherUserProfileScreenState();
+  ConsumerState<OtherUserProfilePage> createState() =>
+      _OtherUserProfilePageState();
 }
 
-class _OtherUserProfileScreenState
-    extends ConsumerState<OtherUserProfileScreen> {
+class _OtherUserProfilePageState extends ConsumerState<OtherUserProfilePage> {
   @override
   void initState() {
     super.initState();

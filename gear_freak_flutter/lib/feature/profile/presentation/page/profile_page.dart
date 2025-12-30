@@ -2,23 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/view/view.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 
 /// 프로필 화면
-class ProfileScreen extends ConsumerStatefulWidget {
-  /// ProfileScreen 생성자
+class ProfilePage extends ConsumerStatefulWidget {
+  /// ProfilePage 생성자
   ///
   /// [key]는 화면 키입니다.
-  const ProfileScreen({super.key});
+  const ProfilePage({super.key});
 
   @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 
 /// 프로필 화면이 로드된 상태의 View
 class ProfileLoadedView extends StatelessWidget {

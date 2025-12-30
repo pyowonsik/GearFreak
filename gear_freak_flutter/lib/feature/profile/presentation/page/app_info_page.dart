@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 앱 정보 화면
-class AppInfoScreen extends StatelessWidget {
-  /// AppInfoScreen 생성자
-  const AppInfoScreen({super.key});
+class AppInfoPage extends StatelessWidget {
+  /// AppInfoPage 생성자
+  const AppInfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -8,11 +8,7 @@ import 'package:gear_freak_flutter/feature/notification/presentation/screen/noti
 import 'package:gear_freak_flutter/feature/product/presentation/screen/other_user_product_list_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/screen/app_info_screen.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/screen/customer_center_screen.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/screen/edit_profile_screen.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/screen/other_user_profile_screen.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/screen/profile_products_screen.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -105,21 +101,21 @@ abstract final class AppRoutes {
         GoRoute(
           path: '/profile/edit',
           name: 'edit-profile',
-          builder: (context, state) => const EditProfileScreen(),
+          builder: (context, state) => const EditProfilePage(),
         ),
 
         // 앱 정보 화면
         GoRoute(
           path: '/profile/app-info',
           name: 'app-info',
-          builder: (context, state) => const AppInfoScreen(),
+          builder: (context, state) => const AppInfoPage(),
         ),
 
         // 고객센터 화면
         GoRoute(
           path: '/profile/customer-center',
           name: 'customer-center',
-          builder: (context, state) => const CustomerCenterScreen(),
+          builder: (context, state) => const CustomerCenterPage(),
         ),
 
         // 내 상품 관리 화면
@@ -127,7 +123,7 @@ abstract final class AppRoutes {
           path: '/profile/my-products',
           name: 'my-products',
           builder: (context, state) =>
-              const ProfileProductsScreen(type: 'myProducts'),
+              const ProfileProductsPage(type: 'myProducts'),
         ),
 
         // 거래완료 상품 화면
@@ -135,7 +131,7 @@ abstract final class AppRoutes {
           path: '/profile/sold-products',
           name: 'sold-products',
           builder: (context, state) =>
-              const ProfileProductsScreen(type: 'mySoldProducts'),
+              const ProfileProductsPage(type: 'mySoldProducts'),
         ),
 
         // 관심 목록 화면
@@ -143,7 +139,7 @@ abstract final class AppRoutes {
           path: '/profile/my-favorite',
           name: 'my-favorite',
           builder: (context, state) =>
-              const ProfileProductsScreen(type: 'myFavorite'),
+              const ProfileProductsPage(type: 'myFavorite'),
         ),
 
         // 후기 관리 화면
@@ -222,7 +218,7 @@ abstract final class AppRoutes {
           name: 'other-user-profile',
           builder: (context, state) {
             final userId = state.pathParameters['userId'] ?? '';
-            return OtherUserProfileScreen(userId: userId);
+            return OtherUserProfilePage(userId: userId);
           },
         ),
       ];

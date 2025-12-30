@@ -5,21 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/profile/di/profile_providers.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// 프로필 편집 화면
-class EditProfileScreen extends ConsumerStatefulWidget {
-  /// EditProfileScreen 생성자
-  const EditProfileScreen({super.key});
+class EditProfilePage extends ConsumerStatefulWidget {
+  /// EditProfilePage 생성자
+  const EditProfilePage({super.key});
 
   @override
-  ConsumerState<EditProfileScreen> createState() => _EditProfileScreenState();
+  ConsumerState<EditProfilePage> createState() => _EditProfilePageState();
 }
 
-class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
+class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nicknameController;
   bool _removedExistingImage = false;
@@ -194,6 +194,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
     }
 
+    // 업로드된 이미지 URL 계산 (ProfileLoaded인 경우)
+    String? uploadedImageUrl;
+    if (profileState is ProfileLoaded) {
+      if (profileState.uploadedFileKey != null) {
+        final s3BaseUrl = dotenv.env['S3_PUBLIC_BASE_URL']!;
+        uploadedImageUrl = '$s3BaseUrl/${profileState.uploadedFileKey}';
+      } else if (!_removedExistingImage &&
+          profileState.user.profileImageUrl != null &&
+          profileState.user.profileImageUrl!.isNotEmpty) {
+        uploadedImageUrl = profileState.user.profileImageUrl;
+      }
+    }
+
     return Scaffold(
       appBar: GbAppBar(
         title: const Text('프로필 편집'),
@@ -217,169 +230,151 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           ),
         ],
       ),
-      body: () {
-        switch (profileState) {
-          case ProfileInitial() || ProfileLoading():
-            return const GbLoadingView();
-          case ProfileError(:final message):
-            return GbErrorView(
-              message: message,
-              onRetry: () {
-                ref.read(profileNotifierProvider.notifier).loadProfile();
-              },
-              showBackButton: true,
-              onBack: () => context.pop(),
-            );
-          case ProfileLoaded(:final user, :final uploadedFileKey):
-            // 업로드된 이미지 URL이 있으면 표시
-            String? uploadedImageUrl;
-            if (uploadedFileKey != null) {
-              final s3BaseUrl = dotenv.env['S3_PUBLIC_BASE_URL']!;
-              uploadedImageUrl = '$s3BaseUrl/$uploadedFileKey';
-            } else if (!_removedExistingImage &&
-                user.profileImageUrl != null &&
-                user.profileImageUrl!.isNotEmpty) {
-              // 기존 프로필 이미지가 있고 제거되지 않았으면 표시
-              uploadedImageUrl = user.profileImageUrl;
-            }
-
-            return Form(
-              key: _formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 32),
-                    // 프로필 이미지
-                    Center(
-                      child: GestureDetector(
-                        onTap: isUploading ? null : _pickImage,
-                        child: Stack(
-                          children: [
-                            ClipOval(
-                              child: Container(
-                                width: 120,
-                                height: 120,
-                                color: const Color(0xFFF3F4F6),
-                                child: uploadedImageUrl != null
-                                    ? CachedNetworkImage(
-                                        imageUrl: uploadedImageUrl,
-                                        width: 120,
-                                        height: 120,
-                                        fit: BoxFit.cover,
-                                        fadeInDuration: Duration.zero,
-                                        fadeOutDuration: Duration.zero,
-                                        placeholderFadeInDuration:
-                                            Duration.zero,
-                                        memCacheWidth:
-                                            180, // 표시 크기보다 약간 크게 (120 * 1.5)
-                                        memCacheHeight: 180,
-                                        maxWidthDiskCache: 180,
-                                        maxHeightDiskCache: 180,
-                                        useOldImageOnUrlChange: true,
-                                        placeholder: (context, url) =>
-                                            const Center(
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                              Color(0xFF9CA3AF),
-                                            ),
+      body: switch (profileState) {
+        ProfileInitial() || ProfileLoading() => const GbLoadingView(),
+        ProfileError(:final message) => GbErrorView(
+            message: message,
+            onRetry: () {
+              ref.read(profileNotifierProvider.notifier).loadProfile();
+            },
+            showBackButton: true,
+            onBack: () => context.pop(),
+          ),
+        ProfileLoaded() => Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 32),
+                  // 프로필 이미지
+                  Center(
+                    child: GestureDetector(
+                      onTap: isUploading ? null : _pickImage,
+                      child: Stack(
+                        children: [
+                          ClipOval(
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              color: const Color(0xFFF3F4F6),
+                              child: uploadedImageUrl != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: uploadedImageUrl,
+                                      width: 120,
+                                      height: 120,
+                                      fit: BoxFit.cover,
+                                      fadeInDuration: Duration.zero,
+                                      fadeOutDuration: Duration.zero,
+                                      placeholderFadeInDuration: Duration.zero,
+                                      memCacheWidth:
+                                          180, // 표시 크기보다 약간 크게 (120 * 1.5)
+                                      memCacheHeight: 180,
+                                      maxWidthDiskCache: 180,
+                                      maxHeightDiskCache: 180,
+                                      useOldImageOnUrlChange: true,
+                                      placeholder: (context, url) =>
+                                          const Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            Color(0xFF9CA3AF),
                                           ),
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(
+                                        Icons.person,
+                                        size: 64,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    )
+                                  : isUploading
+                                      ? const Center(
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : Icon(
                                           Icons.person,
                                           size: 64,
                                           color: Colors.grey.shade500,
                                         ),
-                                      )
-                                    : isUploading
-                                        ? const Center(
-                                            child: CircularProgressIndicator(),
-                                          )
-                                        : Icon(
-                                            Icons.person,
-                                            size: 64,
-                                            color: Colors.grey.shade500,
-                                          ),
-                              ),
                             ),
-                            if (!isUploading)
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2563EB),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 3,
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.camera_alt,
+                          ),
+                          if (!isUploading)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2563EB),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
                                     color: Colors.white,
-                                    size: 20,
+                                    width: 3,
                                   ),
                                 ),
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    // 닉네임 입력
-                    Container(
-                      color: Colors.white,
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '닉네임',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF374151),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          GbTextFormField(
-                            controller: _nicknameController,
-                            hintText: '닉네임을 입력하세요',
-                            filled: true,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return '닉네임을 입력해주세요';
-                              }
-                              if (value.length < 2) {
-                                return '닉네임은 2글자 이상이어야 합니다';
-                              }
-                              if (value.length > 10) {
-                                return '닉네임은 10글자 이하여야 합니다';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '2-10자의 한글, 영문, 숫자를 사용할 수 있습니다',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 40),
+                  // 닉네임 입력
+                  Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '닉네임',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF374151),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        GbTextFormField(
+                          controller: _nicknameController,
+                          hintText: '닉네임을 입력하세요',
+                          filled: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return '닉네임을 입력해주세요';
+                            }
+                            if (value.length < 2) {
+                              return '닉네임은 2글자 이상이어야 합니다';
+                            }
+                            if (value.length > 10) {
+                              return '닉네임은 10글자 이하여야 합니다';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '2-10자의 한글, 영문, 숫자를 사용할 수 있습니다',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            );
-        }
-      }(),
+            ),
+          ),
+      },
     );
   }
 }

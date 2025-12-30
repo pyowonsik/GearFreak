@@ -6,10 +6,7 @@ import 'package:gear_freak_flutter/feature/profile/data/repository/profile_repos
 import 'package:gear_freak_flutter/feature/profile/domain/repository/profile_repository.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/update_user_profile_usecase.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_notifier.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/other_user_profile_state.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_notifier.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/provider/profile_state.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/di/s3_providers.dart';
 
