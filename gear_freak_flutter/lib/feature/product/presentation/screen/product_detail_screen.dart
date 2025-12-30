@@ -104,6 +104,54 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
   }
 
+  /// 신고하기 처리
+  Future<void> _handleReport(pod.Product productData) async {
+    if (productData.id == null) {
+      return;
+    }
+
+    // 1. 먼저 신고 내역 조회
+    final hasReported = await ref
+        .read(productDetailNotifierProvider.notifier)
+        .hasReportedProduct(productData.id!);
+
+    if (!mounted) return;
+
+    if (hasReported) {
+      // 이미 신고한 경우 바로 메시지 표시
+      GbSnackBar.showError(context, '이미 신고한 상품입니다.');
+      return;
+    }
+
+    // 2. 신고 내역이 없으면 모달 표시
+    await ProductReportModal.show(
+      context: context,
+      productId: productData.id!,
+      productTitle: productData.title,
+      onReport: (reason, description) async {
+        if (!mounted) return;
+
+        final reportResult = await ref
+            .read(productDetailNotifierProvider.notifier)
+            .reportProduct(productData.id!, reason, description);
+
+        if (!mounted) return;
+
+        if (reportResult) {
+          GbSnackBar.showSuccess(
+            context,
+            '신고가 접수되었습니다. 검토 후 처리하겠습니다.',
+          );
+        } else {
+          GbSnackBar.showError(
+            context,
+            '신고 접수에 실패했습니다. 다시 시도해주세요.',
+          );
+        }
+      },
+    );
+  }
+
   /// 삭제 처리
   Future<void> _handleDelete(pod.Product productData) async {
     if (!mounted) return;
@@ -225,52 +273,72 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               }
             },
           ),
-          if (_isMyProduct(productData))
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
-              onSelected: (value) {
-                switch (value) {
-                  case 'edit':
-                    _handleEdit(productData);
-                  case 'bump':
-                    _handleBump(productData);
-                  case 'delete':
-                    _handleDelete(productData);
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_outlined, size: 20),
-                      SizedBox(width: 8),
-                      Text('수정'),
-                    ],
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              switch (value) {
+                case 'edit':
+                  _handleEdit(productData);
+                case 'bump':
+                  _handleBump(productData);
+                case 'delete':
+                  _handleDelete(productData);
+                case 'report':
+                  _handleReport(productData);
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              if (_isMyProduct(productData)) {
+                // 본인 상품인 경우: 수정, 상단으로 올리기, 삭제
+                return <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, size: 20),
+                        SizedBox(width: 8),
+                        Text('수정'),
+                      ],
+                    ),
                   ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'bump',
-                  child: Row(
-                    children: [
-                      Icon(Icons.arrow_upward, size: 20),
-                      SizedBox(width: 8),
-                      Text('상단으로 올리기'),
-                    ],
+                  const PopupMenuItem<String>(
+                    value: 'bump',
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_upward, size: 20),
+                        SizedBox(width: 8),
+                        Text('상단으로 올리기'),
+                      ],
+                    ),
                   ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('삭제', style: TextStyle(color: Colors.red)),
-                    ],
+                  const PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('삭제', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ];
+              } else {
+                // 다른 사람 상품인 경우: 신고하기
+                return <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'report',
+                    child: Row(
+                      children: [
+                        Icon(Icons.flag_outlined, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('신고하기', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ];
+              }
+            },
+          ),
         ],
       ),
       body: RefreshIndicator(

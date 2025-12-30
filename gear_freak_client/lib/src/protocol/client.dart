@@ -64,17 +64,21 @@ import 'package:gear_freak_client/src/protocol/feature/product/model/dto/update_
     as _i28;
 import 'package:gear_freak_client/src/protocol/feature/product/model/dto/product_stats.dto.dart'
     as _i29;
-import 'package:gear_freak_client/src/protocol/feature/review/model/dto/transaction_review_response.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/product_report.dart'
     as _i30;
-import 'package:gear_freak_client/src/protocol/feature/review/model/dto/create_transaction_review_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/product/model/dto/create_product_report_request.dto.dart'
     as _i31;
-import 'package:gear_freak_client/src/protocol/feature/review/model/dto/transaction_review_list_response.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/review/model/dto/transaction_review_response.dto.dart'
     as _i32;
-import 'package:gear_freak_client/src/protocol/feature/review/model/review_type.dart'
+import 'package:gear_freak_client/src/protocol/feature/review/model/dto/create_transaction_review_request.dto.dart'
     as _i33;
-import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+import 'package:gear_freak_client/src/protocol/feature/review/model/dto/transaction_review_list_response.dto.dart'
     as _i34;
-import 'protocol.dart' as _i35;
+import 'package:gear_freak_client/src/protocol/feature/review/model/review_type.dart'
+    as _i35;
+import 'package:gear_freak_client/src/protocol/feature/user/model/dto/update_user_profile_request.dto.dart'
+    as _i36;
+import 'protocol.dart' as _i37;
 
 /// S3 엔드포인트 (공통 사용)
 /// {@category Endpoint}
@@ -588,6 +592,26 @@ class EndpointProduct extends _i1.EndpointRef {
           'pagination': pagination,
         },
       );
+
+  /// 상품 신고 여부 조회
+  /// 반환값: true = 이미 신고함, false = 신고 안 함
+  _i2.Future<bool> hasReportedProduct(int productId) =>
+      caller.callServerEndpoint<bool>(
+        'product',
+        'hasReportedProduct',
+        {'productId': productId},
+      );
+
+  /// 상품 신고하기
+  /// 중복 신고 체크: 같은 사용자가 같은 상품을 이미 신고한 경우 Exception 발생
+  /// 본인 상품 신고 불가
+  _i2.Future<_i30.ProductReport> createProductReport(
+          _i31.CreateProductReportRequestDto request) =>
+      caller.callServerEndpoint<_i30.ProductReport>(
+        'product',
+        'createProductReport',
+        {'request': request},
+      );
 }
 
 /// 리뷰 엔드포인트
@@ -603,9 +627,9 @@ class EndpointReview extends _i1.EndpointRef {
   /// [session]은 Serverpod 세션입니다.
   /// [request]는 후기 작성 요청 정보입니다.
   /// 반환: 생성된 후기 응답 DTO
-  _i2.Future<_i30.TransactionReviewResponseDto> createTransactionReview(
-          _i31.CreateTransactionReviewRequestDto request) =>
-      caller.callServerEndpoint<_i30.TransactionReviewResponseDto>(
+  _i2.Future<_i32.TransactionReviewResponseDto> createTransactionReview(
+          _i33.CreateTransactionReviewRequestDto request) =>
+      caller.callServerEndpoint<_i32.TransactionReviewResponseDto>(
         'review',
         'createTransactionReview',
         {'request': request},
@@ -618,11 +642,11 @@ class EndpointReview extends _i1.EndpointRef {
   /// [page]는 페이지 번호입니다 (기본값: 1).
   /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
   /// 반환: 후기 목록 응답 DTO
-  _i2.Future<_i32.TransactionReviewListResponseDto> getBuyerReviews({
+  _i2.Future<_i34.TransactionReviewListResponseDto> getBuyerReviews({
     required int page,
     required int limit,
   }) =>
-      caller.callServerEndpoint<_i32.TransactionReviewListResponseDto>(
+      caller.callServerEndpoint<_i34.TransactionReviewListResponseDto>(
         'review',
         'getBuyerReviews',
         {
@@ -638,11 +662,11 @@ class EndpointReview extends _i1.EndpointRef {
   /// [page]는 페이지 번호입니다 (기본값: 1).
   /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
   /// 반환: 후기 목록 응답 DTO
-  _i2.Future<_i32.TransactionReviewListResponseDto> getSellerReviews({
+  _i2.Future<_i34.TransactionReviewListResponseDto> getSellerReviews({
     required int page,
     required int limit,
   }) =>
-      caller.callServerEndpoint<_i32.TransactionReviewListResponseDto>(
+      caller.callServerEndpoint<_i34.TransactionReviewListResponseDto>(
         'review',
         'getSellerReviews',
         {
@@ -656,9 +680,9 @@ class EndpointReview extends _i1.EndpointRef {
   /// [session]은 Serverpod 세션입니다.
   /// [request]는 후기 작성 요청 정보입니다.
   /// 반환: 생성된 후기 응답 DTO
-  _i2.Future<_i30.TransactionReviewResponseDto> createSellerReview(
-          _i31.CreateTransactionReviewRequestDto request) =>
-      caller.callServerEndpoint<_i30.TransactionReviewResponseDto>(
+  _i2.Future<_i32.TransactionReviewResponseDto> createSellerReview(
+          _i33.CreateTransactionReviewRequestDto request) =>
+      caller.callServerEndpoint<_i32.TransactionReviewResponseDto>(
         'review',
         'createSellerReview',
         {'request': request},
@@ -686,7 +710,7 @@ class EndpointReview extends _i1.EndpointRef {
   _i2.Future<bool> checkReviewExists(
     int productId,
     int chatRoomId,
-    _i33.ReviewType reviewType,
+    _i35.ReviewType reviewType,
   ) =>
       caller.callServerEndpoint<bool>(
         'review',
@@ -705,12 +729,12 @@ class EndpointReview extends _i1.EndpointRef {
   /// [page]는 페이지 번호입니다 (기본값: 1).
   /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
   /// 반환: 후기 목록 응답 DTO (평균 평점 포함)
-  _i2.Future<_i32.TransactionReviewListResponseDto> getAllReviewsByUserId(
+  _i2.Future<_i34.TransactionReviewListResponseDto> getAllReviewsByUserId(
     int userId, {
     required int page,
     required int limit,
   }) =>
-      caller.callServerEndpoint<_i32.TransactionReviewListResponseDto>(
+      caller.callServerEndpoint<_i34.TransactionReviewListResponseDto>(
         'review',
         'getAllReviewsByUserId',
         {
@@ -791,7 +815,7 @@ class EndpointUser extends _i1.EndpointRef {
 
   /// 사용자 프로필 수정
   _i2.Future<_i5.User> updateUserProfile(
-          _i34.UpdateUserProfileRequestDto request) =>
+          _i36.UpdateUserProfileRequestDto request) =>
       caller.callServerEndpoint<_i5.User>(
         'user',
         'updateUserProfile',
@@ -823,7 +847,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i35.Protocol(),
+          _i37.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

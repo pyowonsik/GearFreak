@@ -1,0 +1,9 @@
+### 페이지네이션된 상품 신고 목록 응답 DTO
+class: PaginatedProductReportsResponseDto
+
+fields:
+  ### 신고 목록
+  reports: List<ProductReportResponseDto>
+  ### 페이지네이션 정보
+  pagination: PaginationDto
+

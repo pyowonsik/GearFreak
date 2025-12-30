@@ -420,3 +420,4 @@ class _MyScreenState extends ConsumerState<MyScreen> {
 ---
 
 **작성 완료**: 모든 위치 확인 완료, 더 이상 추가 없음 ✅
+

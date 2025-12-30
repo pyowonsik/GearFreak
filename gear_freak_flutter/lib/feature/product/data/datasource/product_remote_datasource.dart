@@ -207,7 +207,6 @@ class ProductRemoteDataSource {
       final sortedProducts = List<pod.Product>.from(allProducts);
       switch (pagination.sortBy) {
         case pod.ProductSortBy.latest:
-        case null:
           sortedProducts.sort((a, b) {
             final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
             final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
@@ -223,6 +222,7 @@ class ProductRemoteDataSource {
             final bCount = b.favoriteCount ?? 0;
             return bCount.compareTo(aCount);
           });
+        default:
       }
 
       // 페이지네이션 처리
@@ -523,6 +523,26 @@ class ProductRemoteDataSource {
       return await _client.product.bumpProduct(productId);
     } catch (e) {
       throw Exception('상품을 상단으로 올리는데 실패했습니다: $e');
+    }
+  }
+
+  /// 상품 신고 여부 조회
+  Future<bool> hasReportedProduct(int productId) async {
+    try {
+      return await _client.product.hasReportedProduct(productId);
+    } catch (e) {
+      throw Exception('신고 여부를 조회하는데 실패했습니다: $e');
+    }
+  }
+
+  /// 상품 신고하기
+  Future<pod.ProductReport> createProductReport(
+    pod.CreateProductReportRequestDto request,
+  ) async {
+    try {
+      return await _client.product.createProductReport(request);
+    } catch (e) {
+      throw Exception('상품 신고에 실패했습니다: $e');
     }
   }
 }

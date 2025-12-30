@@ -182,3 +182,29 @@ class BumpProductFailure extends ProductFailure {
   @override
   String toString() => 'BumpProductFailure: $message';
 }
+
+/// 상품 신고 실패
+class CreateProductReportFailure extends ProductFailure {
+  /// CreateProductReportFailure 생성자
+  const CreateProductReportFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'CreateProductReportFailure: $message';
+}
+
+/// 상품 신고 여부 조회 실패
+class HasReportedProductFailure extends ProductFailure {
+  /// HasReportedProductFailure 생성자
+  const HasReportedProductFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'HasReportedProductFailure: $message';
+}

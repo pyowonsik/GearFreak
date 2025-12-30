@@ -1,0 +1,11 @@
+### 상품 신고 생성 요청 DTO
+class: CreateProductReportRequestDto
+
+fields:
+  ### 신고 대상 상품 ID
+  productId: int
+  ### 신고 사유
+  reason: ReportReason
+  ### 신고 상세 내용 (선택적)
+  description: String?
+

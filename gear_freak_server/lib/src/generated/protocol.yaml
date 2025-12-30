@@ -47,6 +47,8 @@ product:
   - getProductStats:
   - getProductStatsByUserId:
   - getProductsByUserId:
+  - hasReportedProduct:
+  - createProductReport:
 review:
   - createTransactionReview:
   - getBuyerReviews:

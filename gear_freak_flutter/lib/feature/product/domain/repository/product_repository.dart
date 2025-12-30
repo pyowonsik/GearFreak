@@ -61,4 +61,12 @@ abstract class ProductRepository {
 
   /// 상품 상단으로 올리기 (updatedAt 갱신)
   Future<pod.Product> bumpProduct(int productId);
+
+  /// 상품 신고하기
+  Future<pod.ProductReport> createProductReport(
+    pod.CreateProductReportRequestDto request,
+  );
+
+  /// 상품 신고 여부 조회
+  Future<bool> hasReportedProduct(int productId);
 }

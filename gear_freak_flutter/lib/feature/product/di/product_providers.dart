@@ -5,6 +5,7 @@ import 'package:gear_freak_flutter/feature/product/data/datasource/product_remot
 import 'package:gear_freak_flutter/feature/product/data/repository/product_repository_impl.dart';
 import 'package:gear_freak_flutter/feature/product/domain/repository/product_repository.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/bump_product_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_report_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_favorite_products_usecase.dart';
@@ -14,6 +15,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_de
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_by_user_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_stats_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_products_by_user_id_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/has_reported_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/increment_view_count_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
@@ -99,6 +101,20 @@ final bumpProductUseCaseProvider = Provider<BumpProductUseCase>((ref) {
   return BumpProductUseCase(repository);
 });
 
+/// Create Product Report UseCase Provider
+final createProductReportUseCaseProvider =
+    Provider<CreateProductReportUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return CreateProductReportUseCase(repository);
+});
+
+/// Has Reported Product UseCase Provider
+final hasReportedProductUseCaseProvider =
+    Provider<HasReportedProductUseCase>((ref) {
+  final repository = ref.watch(productRepositoryProvider);
+  return HasReportedProductUseCase(repository);
+});
+
 /// Get My Products UseCase Provider
 final getMyProductsUseCaseProvider = Provider<GetMyProductsUseCase>((ref) {
   final repository = ref.watch(productRepositoryProvider);
@@ -176,6 +192,10 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
   final updateProductStatusUseCase =
       ref.watch(updateProductStatusUseCaseProvider);
   final bumpProductUseCase = ref.watch(bumpProductUseCaseProvider);
+  final createProductReportUseCase =
+      ref.watch(createProductReportUseCaseProvider);
+  final hasReportedProductUseCase =
+      ref.watch(hasReportedProductUseCaseProvider);
   return ProductDetailNotifier(
     ref,
     getProductDetailUseCase,
@@ -186,6 +206,8 @@ final productDetailNotifierProvider = StateNotifierProvider.autoDispose<
     deleteProductUseCase,
     updateProductStatusUseCase,
     bumpProductUseCase,
+    createProductReportUseCase,
+    hasReportedProductUseCase,
   );
 });
 

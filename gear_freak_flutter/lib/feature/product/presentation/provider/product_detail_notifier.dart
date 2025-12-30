@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/bump_product_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_report_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/delete_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
+import 'package:gear_freak_flutter/feature/product/domain/usecase/has_reported_product_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/increment_view_count_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
@@ -29,6 +31,8 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
   /// [deleteProductUseCase]는 상품 삭제 UseCase 인스턴스입니다.
   /// [updateProductStatusUseCase]는 상품 상태 변경 UseCase 인스턴스입니다.
   /// [bumpProductUseCase]는 상품 상단으로 올리기 UseCase 인스턴스입니다.
+  /// [createProductReportUseCase]는 상품 신고 UseCase 인스턴스입니다.
+  /// [hasReportedProductUseCase]는 상품 신고 여부 조회 UseCase 인스턴스입니다.
   ProductDetailNotifier(
     this.ref,
     this.getProductDetailUseCase,
@@ -39,6 +43,8 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
     this.deleteProductUseCase,
     this.updateProductStatusUseCase,
     this.bumpProductUseCase,
+    this.createProductReportUseCase,
+    this.hasReportedProductUseCase,
   ) : super(const ProductDetailInitial()) {
     // 상품 업데이트 이벤트 감지하여 자동으로 상품 정보 업데이트
     ref.listen<pod.Product?>(updatedProductProvider, (previous, next) {
@@ -74,6 +80,12 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
 
   /// 상품 상단으로 올리기 UseCase 인스턴스
   final BumpProductUseCase bumpProductUseCase;
+
+  /// 상품 신고 UseCase 인스턴스
+  final CreateProductReportUseCase createProductReportUseCase;
+
+  /// 상품 신고 여부 조회 UseCase 인스턴스
+  final HasReportedProductUseCase hasReportedProductUseCase;
 
   /// 상품 ID로 후기 삭제 UseCase 인스턴스
   DeleteReviewsByProductIdUseCase get _deleteReviewsByProductIdUseCase =>
@@ -347,6 +359,45 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
             ref.read(updatedProductProvider.notifier).state = null;
           });
         }
+        return true;
+      },
+    );
+  }
+
+  /// 상품 신고 여부 조회
+  Future<bool> hasReportedProduct(int productId) async {
+    final result = await hasReportedProductUseCase(productId);
+    return result.fold(
+      (failure) {
+        debugPrint('신고 여부 조회 실패: ${failure.message}');
+        return false; // 실패 시 false 반환
+      },
+      (hasReported) => hasReported,
+    );
+  }
+
+  /// 상품 신고하기
+  /// 반환값: true = 성공, false = 실패
+  Future<bool> reportProduct(
+    int productId,
+    pod.ReportReason reason,
+    String? description,
+  ) async {
+    final request = pod.CreateProductReportRequestDto(
+      productId: productId,
+      reason: reason,
+      description: description,
+    );
+
+    final result = await createProductReportUseCase(request);
+
+    return result.fold(
+      (failure) {
+        debugPrint('상품 신고 실패: ${failure.message}');
+        return false;
+      },
+      (_) {
+        debugPrint('상품 신고 성공: productId=$productId, reason=$reason');
         return true;
       },
     );

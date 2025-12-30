@@ -148,4 +148,33 @@ class ProductEndpoint extends Endpoint with AuthenticatedMixin {
   ) async {
     return await productService.getMyProducts(session, userId, pagination);
   }
+
+  /// 상품 신고 여부 조회
+  /// 반환값: true = 이미 신고함, false = 신고 안 함
+  Future<bool> hasReportedProduct(
+    Session session,
+    int productId,
+  ) async {
+    final user = await UserService.getMe(session);
+    return await productService.hasReportedProduct(
+      session,
+      user.id!,
+      productId,
+    );
+  }
+
+  /// 상품 신고하기
+  /// 중복 신고 체크: 같은 사용자가 같은 상품을 이미 신고한 경우 Exception 발생
+  /// 본인 상품 신고 불가
+  Future<ProductReport> createProductReport(
+    Session session,
+    CreateProductReportRequestDto request,
+  ) async {
+    final user = await UserService.getMe(session);
+    return await productService.createProductReport(
+      session,
+      user.id!,
+      request,
+    );
+  }
 }

@@ -1,5 +1,6 @@
 export 'bump_product_usecase.dart';
 export 'create_product_usecase.dart';
+export 'create_product_report_usecase.dart';
 export 'delete_product_usecase.dart';
 export 'get_my_favorite_products_usecase.dart';
 export 'get_my_products_usecase.dart';
@@ -8,6 +9,7 @@ export 'get_product_detail_usecase.dart';
 export 'get_product_stats_by_user_id_usecase.dart';
 export 'get_product_stats_usecase.dart';
 export 'get_products_by_user_id_usecase.dart';
+export 'has_reported_product_usecase.dart';
 export 'increment_view_count_usecase.dart';
 export 'is_favorite_usecase.dart';
 export 'toggle_favorite_usecase.dart';

@@ -1,0 +1,11 @@
+### 상품 신고 사유
+enum: ReportReason
+values:
+  - spam # 스팸/광고
+  - inappropriate # 부적절한 내용
+  - fake # 허위 정보
+  - prohibited # 금지된 품목
+  - duplicate # 중복 게시물
+  - other # 기타
+
+

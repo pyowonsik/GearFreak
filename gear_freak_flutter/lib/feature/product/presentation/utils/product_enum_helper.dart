@@ -142,3 +142,39 @@ bool isStatusMatching(
   // 다른 상태는 정확히 일치해야 함
   return actualStatus == expectedStatus;
 }
+
+/// ReportReason enum을 한국어로 변환
+String getReportReasonLabel(pod.ReportReason reason) {
+  switch (reason) {
+    case pod.ReportReason.spam:
+      return '스팸/도배';
+    case pod.ReportReason.inappropriate:
+      return '부적절한 내용';
+    case pod.ReportReason.fake:
+      return '허위/사기';
+    case pod.ReportReason.prohibited:
+      return '금지된 물품';
+    case pod.ReportReason.duplicate:
+      return '중복 게시물';
+    case pod.ReportReason.other:
+      return '기타';
+  }
+}
+
+/// ReportReason enum을 설명으로 변환
+String getReportReasonDescription(pod.ReportReason reason) {
+  switch (reason) {
+    case pod.ReportReason.spam:
+      return '같은 내용을 반복적으로 게시하는 경우';
+    case pod.ReportReason.inappropriate:
+      return '욕설, 비방, 성적인 내용 등 부적절한 게시물';
+    case pod.ReportReason.fake:
+      return '허위 정보, 사기 의심 게시물';
+    case pod.ReportReason.prohibited:
+      return '판매가 금지된 물품 (불법 약물, 위조품 등)';
+    case pod.ReportReason.duplicate:
+      return '동일한 상품을 여러 번 등록한 경우';
+    case pod.ReportReason.other:
+      return '기타 사유';
+  }
+}

@@ -1,0 +1,29 @@
+### 상품 신고 응답 DTO
+class: ProductReportResponseDto
+
+fields:
+  ### 신고 ID
+  id: int
+  ### 신고 대상 상품 ID
+  productId: int
+  ### 신고자 사용자 ID
+  reporterId: int
+  ### 신고자 닉네임
+  reporterNickname: String?
+  ### 신고 사유
+  reason: ReportReason
+  ### 신고 상세 내용
+  description: String?
+  ### 처리 상태
+  status: ReportStatus
+  ### 처리자 사용자 ID
+  processedBy: int?
+  ### 처리일시
+  processedAt: DateTime?
+  ### 처리 메모
+  processNote: String?
+  ### 생성일
+  createdAt: DateTime?
+  ### 수정일
+  updatedAt: DateTime?
+

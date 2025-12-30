@@ -97,4 +97,16 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<pod.Product> bumpProduct(int productId) async {
     return remoteDataSource.bumpProduct(productId);
   }
+
+  @override
+  Future<bool> hasReportedProduct(int productId) async {
+    return remoteDataSource.hasReportedProduct(productId);
+  }
+
+  @override
+  Future<pod.ProductReport> createProductReport(
+    pod.CreateProductReportRequestDto request,
+  ) async {
+    return remoteDataSource.createProductReport(request);
+  }
 }

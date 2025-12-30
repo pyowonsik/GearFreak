@@ -1,0 +1,37 @@
+### 상품 신고
+class: ProductReport
+table: product_report
+
+fields:
+  ### 신고 대상 상품 ID
+  productId: int, relation(parent=product, onDelete=Cascade)
+  ### 신고자 사용자 ID
+  reporterId: int, relation(parent=user)
+  ### 신고 사유
+  reason: ReportReason
+  ### 신고 상세 내용 (선택적)
+  description: String?
+  ### 처리 상태
+  status: ReportStatus
+  ### 처리자 사용자 ID (관리자, 선택적)
+  processedBy: int?, relation(parent=user)
+  ### 처리일시 (선택적)
+  processedAt: DateTime?
+  ### 처리 메모 (관리자 메모, 선택적)
+  processNote: String?
+  ### 생성일
+  createdAt: DateTime?
+  ### 수정일
+  updatedAt: DateTime?
+
+indexes:
+  unique_product_reporter_idx:
+    fields: productId, reporterId
+    unique: true
+  product_reports_idx:
+    fields: productId, createdAt
+  reporter_reports_idx:
+    fields: reporterId, createdAt
+  status_idx:
+    fields: status, createdAt
+

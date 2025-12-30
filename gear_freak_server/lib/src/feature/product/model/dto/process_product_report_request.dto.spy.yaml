@@ -1,0 +1,11 @@
+### 상품 신고 처리 요청 DTO (관리자용)
+class: ProcessProductReportRequestDto
+
+fields:
+  ### 신고 ID
+  reportId: int
+  ### 처리 상태
+  status: ReportStatus
+  ### 처리 메모 (선택적)
+  processNote: String?
+
