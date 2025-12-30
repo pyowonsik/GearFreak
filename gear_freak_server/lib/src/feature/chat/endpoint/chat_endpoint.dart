@@ -1,13 +1,18 @@
 import 'package:gear_freak_server/src/common/authenticated_mixin.dart';
 import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
-import 'package:gear_freak_server/src/feature/chat/service/chat_service.dart';
+import 'package:gear_freak_server/src/feature/chat/service/chat_message_service.dart';
+import 'package:gear_freak_server/src/feature/chat/service/chat_notification_service.dart';
+import 'package:gear_freak_server/src/feature/chat/service/chat_room_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
 import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// 채팅 엔드포인트
 class ChatEndpoint extends Endpoint with AuthenticatedMixin {
-  final ChatService chatService = ChatService();
+  final ChatRoomService chatRoomService = ChatRoomService();
+  final ChatMessageService chatMessageService = ChatMessageService();
+  final ChatNotificationService chatNotificationService =
+      ChatNotificationService();
 
   // ==================== Public Methods (Endpoint에서 직접 호출) ====================
 
@@ -18,7 +23,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     CreateChatRoomRequestDto request,
   ) async {
     final user = await UserService.getMe(session);
-    return await chatService.createOrGetChatRoom(
+    return await chatRoomService.createOrGetChatRoom(
       session,
       user.id!,
       request,
@@ -32,7 +37,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     int chatRoomId,
   ) async {
     final user = await UserService.getMe(session);
-    return await chatService.getChatRoomById(
+    return await chatRoomService.getChatRoomById(
       session,
       chatRoomId,
       userId: user.id,
@@ -44,7 +49,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     Session session,
     int productId,
   ) async {
-    return await chatService.getChatRoomsByProductId(session, productId);
+    return await chatRoomService.getChatRoomsByProductId(session, productId);
   }
 
   /// 사용자가 참여한 채팅방 목록 조회 (상품 ID 기준, 페이지네이션)
@@ -54,7 +59,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     PaginationDto pagination,
   ) async {
     final user = await UserService.getMe(session);
-    return await chatService.getUserChatRoomsByProductId(
+    return await chatRoomService.getUserChatRoomsByProductId(
       session,
       user.id!,
       productId,
@@ -68,7 +73,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     PaginationDto pagination,
   ) async {
     final user = await UserService.getMe(session);
-    return await chatService.getMyChatRooms(
+    return await chatRoomService.getMyChatRooms(
       session,
       user.id!,
       pagination,
@@ -81,7 +86,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     JoinChatRoomRequestDto request,
   ) async {
     final user = await UserService.getMe(session);
-    return await chatService.joinChatRoom(
+    return await chatRoomService.joinChatRoom(
       session,
       user.id!,
       request,
@@ -94,7 +99,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     LeaveChatRoomRequestDto request,
   ) async {
     final user = await UserService.getMe(session);
-    return await chatService.leaveChatRoom(
+    return await chatRoomService.leaveChatRoom(
       session,
       user.id!,
       request,
@@ -106,7 +111,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     Session session,
     int chatRoomId,
   ) async {
-    return await chatService.getChatParticipants(session, chatRoomId);
+    return await chatRoomService.getChatParticipants(session, chatRoomId);
   }
 
   /// 메시지 전송
@@ -115,7 +120,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     SendMessageRequestDto request,
   ) async {
     final user = await UserService.getMe(session);
-    return await chatService.sendMessage(
+    return await chatMessageService.sendMessage(
       session,
       user.id!,
       request,
@@ -127,7 +132,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     Session session,
     GetChatMessagesRequestDto request,
   ) async {
-    return await chatService.getChatMessagesPaginated(session, request);
+    return await chatMessageService.getChatMessagesPaginated(session, request);
   }
 
   /// 채팅방의 마지막 메시지 조회
@@ -135,7 +140,10 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     Session session,
     int chatRoomId,
   ) async {
-    return await chatService.getLastMessageByChatRoomId(session, chatRoomId);
+    return await chatMessageService.getLastMessageByChatRoomId(
+      session,
+      chatRoomId,
+    );
   }
 
   /// 채팅방 이미지 업로드를 위한 Presigned URL 생성
@@ -179,7 +187,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     int chatRoomId,
   ) async {
     final user = await UserService.getMe(session);
-    await chatService.markChatRoomAsRead(
+    await chatNotificationService.markChatRoomAsRead(
       session,
       user.id!,
       chatRoomId,
@@ -193,7 +201,7 @@ class ChatEndpoint extends Endpoint with AuthenticatedMixin {
     UpdateChatRoomNotificationRequestDto request,
   ) async {
     final user = await UserService.getMe(session);
-    await chatService.updateChatRoomNotification(
+    await chatNotificationService.updateChatRoomNotification(
       session,
       user.id!,
       request.chatRoomId,

@@ -1,4 +1,5 @@
 import 'package:gear_freak_server/src/generated/protocol.dart';
+import 'package:gear_freak_server/src/feature/review/service/review_list_service.dart';
 import 'package:gear_freak_server/src/feature/review/service/review_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -45,7 +46,7 @@ class ReviewEndpoint extends Endpoint {
       throw Exception('사용자 정보를 찾을 수 없습니다.');
     }
 
-    return await ReviewService.getBuyerReviews(
+    return await ReviewListService.getBuyerReviews(
       session: session,
       userId: user.id!,
       page: page,
@@ -71,7 +72,7 @@ class ReviewEndpoint extends Endpoint {
       throw Exception('사용자 정보를 찾을 수 없습니다.');
     }
 
-    return await ReviewService.getSellerReviews(
+    return await ReviewListService.getSellerReviews(
       session: session,
       userId: user.id!,
       page: page,
@@ -164,7 +165,7 @@ class ReviewEndpoint extends Endpoint {
     int page = 1,
     int limit = 10,
   }) async {
-    return await ReviewService.getAllReviewsByUserId(
+    return await ReviewListService.getAllReviewsByUserId(
       session: session,
       userId: userId,
       page: page,
