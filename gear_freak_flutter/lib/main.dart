@@ -85,6 +85,24 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   AppLifecycleListener? _lifecycleListener;
+  DateTime? _lastUnreadCountRefreshTime;
+
+  /// 읽지 않은 채팅 개수 갱신 (중복 호출 방지)
+  void _refreshUnreadCount() {
+    if (!mounted) return;
+
+    final now = DateTime.now();
+    // 1초 이내 중복 호출 방지
+    if (_lastUnreadCountRefreshTime != null &&
+        now.difference(_lastUnreadCountRefreshTime!) <
+            const Duration(seconds: 1)) {
+      debugPrint('⏭️ 읽지 않은 채팅 개수 갱신 스킵 (중복 호출 방지)');
+      return;
+    }
+    _lastUnreadCountRefreshTime = now;
+    // ignore: unused_result
+    ref.refresh(totalUnreadChatCountProvider);
+  }
 
   @override
   void initState() {
@@ -103,8 +121,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           FcmService.instance.setOnMessageReceived((chatRoomId) {
             // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
             // 채팅방 목록 탭을 열지 않았어도 항상 갱신됨
-            // ignore: unused_result
-            ref.refresh(totalUnreadChatCountProvider);
+            _refreshUnreadCount();
           });
           // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
           _handleInitialMessage();
@@ -118,8 +135,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       onStateChange: (AppLifecycleState state) {
         // 백그라운드에서 포그라운드로 돌아올 때 읽지 않은 채팅 개수 갱신
         if (state == AppLifecycleState.resumed) {
-          // ignore: unused_result
-          ref.refresh(totalUnreadChatCountProvider);
+          _refreshUnreadCount();
         }
       },
     );

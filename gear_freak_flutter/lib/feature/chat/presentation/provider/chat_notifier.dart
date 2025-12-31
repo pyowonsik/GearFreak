@@ -92,6 +92,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// 메시지 스트림 구독
   StreamSubscription<pod.ChatMessageResponseDto>? _messageStreamSubscription;
 
+  /// 스트림 재연결 타이머
+  Timer? _reconnectTimer;
+
   // ==================== Public Methods (UseCase 호출) ====================
 
   /// 채팅방 생성 또는 조회 및 진입
@@ -500,6 +503,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
                   : [...currentState.messages, sentMessage];
               _sortMessagesByCreatedAt(updatedMessages);
 
+              // 새 메시지 이벤트 발행 (채팅방 목록 Notifier가 자동으로 반응)
+              // 스트림이 지연되거나 문제가 있어도 채팅방 목록이 즉시 업데이트됨
+              ref.read(newChatMessageProvider.notifier).state = sentMessage;
+              // 이벤트 처리 후 초기화 (다음 메시지를 위해)
+              // ignore: unawaited_futures
+              Future.microtask(() {
+                ref.read(newChatMessageProvider.notifier).state = null;
+              });
+
               state = ChatLoaded(
                 chatRoom: currentState.chatRoom,
                 participants: currentState.participants,
@@ -701,8 +713,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   /// 메시지 스트림 연결
   void _connectMessageStream(int chatRoomId) {
-    // 기존 스트림 해제
+    // 기존 스트림 및 재연결 타이머 해제
     _messageStreamSubscription?.cancel();
+    _reconnectTimer?.cancel();
+
+    debugPrint('🔌 스트림 연결 시도: chatRoomId=$chatRoomId');
 
     // 새 스트림 구독
     final stream = subscribeChatMessageStreamUseCase(
@@ -795,8 +810,23 @@ class ChatNotifier extends StateNotifier<ChatState> {
             break;
         }
       },
-      onError: (error) {
+      onError: (Object error) {
+        debugPrint('❌ 스트림 에러 발생: $error');
+
         // 에러 처리
+        final currentState = state;
+        if (currentState is ChatLoaded) {
+          state = currentState.copyWith(isStreamConnected: false);
+
+          // 3초 후 재연결 시도
+          _reconnectTimer = Timer(const Duration(seconds: 3), () {
+            debugPrint('🔄 스트림 재연결 시도 중...');
+            _connectMessageStream(chatRoomId);
+          });
+        }
+      },
+      onDone: () {
+        debugPrint('✅ 스트림 정상 종료');
         final currentState = state;
         if (currentState is ChatLoaded) {
           state = currentState.copyWith(isStreamConnected: false);
@@ -808,6 +838,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   @override
   void dispose() {
     _messageStreamSubscription?.cancel();
+    _reconnectTimer?.cancel();
     super.dispose();
   }
 }

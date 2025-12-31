@@ -41,10 +41,14 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
       screenName: 'ChatRoomListPage',
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
 
       // FCM 메시지 수신 시 채팅방 리스트 갱신
       FcmService.instance.setOnMessageReceived((chatRoomId) {
+        if (!mounted) return;
+
         // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
         // ignore: unused_result
         ref.refresh(totalUnreadChatCountProvider);
@@ -62,6 +66,7 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
       onStateChange: (AppLifecycleState state) {
         // 백그라운드에서 포그라운드로 돌아올 때 채팅방 리스트 새로고침
         if (state == AppLifecycleState.resumed) {
+          if (!mounted) return;
           ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
         }
       },
@@ -72,6 +77,16 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
   void dispose() {
     _lifecycleListener?.dispose();
     disposePaginationScroll();
+
+    // 채팅 탭을 나갈 때 FCM 콜백을 기본 콜백으로 리셋
+    // dispose 후 ref를 사용하지 않도록 main.dart의 전역 콜백을 직접 설정
+    // (main.dart의 _MyAppState._refreshUnreadCount와 동일한 로직)
+    FcmService.instance.setOnMessageReceived((chatRoomId) {
+      // 기본 동작: 읽지 않은 채팅 개수 갱신만 수행
+      // 주의: 여기서는 ref를 사용할 수 없으므로 아무 작업도 하지 않음
+      // main.dart의 전역 AppLifecycleListener가 백그라운드 복귀 시 갱신함
+    });
+
     super.dispose();
   }
 

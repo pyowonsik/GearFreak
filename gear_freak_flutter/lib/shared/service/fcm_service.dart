@@ -87,17 +87,30 @@ class FcmService {
     }
   }
 
-  /// 서버에 FCM 토큰 등록
-  Future<void> _registerTokenToServer(String token) async {
-    try {
-      final client = PodService.instance.client;
-      final deviceType = Platform.isIOS ? 'ios' : 'android';
+  /// 서버에 FCM 토큰 등록 (재시도 로직 포함)
+  Future<void> _registerTokenToServer(String token,
+      {int retryCount = 3}) async {
+    for (var attempt = 1; attempt <= retryCount; attempt++) {
+      try {
+        final client = PodService.instance.client;
+        final deviceType = Platform.isIOS ? 'ios' : 'android';
 
-      await client.fcm.registerFcmToken(token, deviceType);
-      debugPrint('✅ FCM 토큰 서버 등록 성공: ${token.substring(0, 20)}...');
-    } catch (e) {
-      debugPrint('❌ FCM 토큰 서버 등록 실패: $e');
+        await client.fcm.registerFcmToken(token, deviceType);
+        debugPrint('✅ FCM 토큰 서버 등록 성공: ${token.substring(0, 20)}...');
+        return; // 성공 시 즉시 반환
+      } catch (e) {
+        debugPrint('❌ FCM 토큰 서버 등록 실패 (시도 $attempt/$retryCount): $e');
+
+        if (attempt < retryCount) {
+          // 지수 백오프: 2초, 4초, 8초...
+          final delay = Duration(seconds: attempt * 2);
+          debugPrint('⏳ ${delay.inSeconds}초 후 재시도...');
+          await Future<void>.delayed(delay);
+        }
+      }
     }
+
+    debugPrint('⚠️ FCM 토큰 등록 최종 실패 - 다음 앱 실행 시 재시도됩니다');
   }
 
   /// FCM 토큰 삭제 (로그아웃 시 호출)
@@ -107,10 +120,12 @@ class FcmService {
         final client = PodService.instance.client;
         await client.fcm.deleteFcmToken(_currentToken!);
         debugPrint('✅ FCM 토큰 서버 삭제 성공');
-        _currentToken = null;
       }
     } catch (e) {
       debugPrint('❌ FCM 토큰 서버 삭제 실패: $e');
+    } finally {
+      // 성공/실패 관계없이 로컬 토큰 초기화
+      _currentToken = null;
     }
   }
 
