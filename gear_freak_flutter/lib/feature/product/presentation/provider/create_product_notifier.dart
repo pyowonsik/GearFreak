@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/domain/usecase/create_product_usecase.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/provider/create_product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/delete_image_usecase.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/upload_image_usecase.dart';
 

@@ -13,7 +13,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/increment_view
 import 'package:gear_freak_flutter/feature/product/domain/usecase/is_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/toggle_favorite_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_status_usecase.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/provider/product_detail_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/profile/domain/usecase/get_user_by_id_usecase.dart';
 import 'package:gear_freak_flutter/feature/review/di/review_providers.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/delete_reviews_by_product_id_usecase.dart';

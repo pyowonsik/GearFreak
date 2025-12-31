@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
 
 /// 채팅방 목록이 로드된 상태의 View
 class ChatRoomListLoadedView extends StatelessWidget {
@@ -68,28 +68,18 @@ class ChatRoomListLoadedView extends StatelessWidget {
           final chatRoom = chatRoomList[index];
           return itemBuilder != null
               ? itemBuilder!(context, chatRoom)
-              : _buildChatRoomItem(chatRoom);
+              : ChatRoomItemWidget(
+                  chatRoom: chatRoom,
+                  participants: chatRoom.id != null
+                      ? participantsMap[chatRoom.id!]
+                      : null,
+                  lastMessage: chatRoom.id != null
+                      ? lastMessagesMap[chatRoom.id!]
+                      : null,
+                  productImageUrl: productImagesMap[chatRoom.productId],
+                );
         },
       ),
-    );
-  }
-
-  /// 채팅방 아이템 빌드
-  Widget _buildChatRoomItem(pod.ChatRoom chatRoom) {
-    // Notifier에서 조회한 참여자 정보 사용
-    final participants =
-        chatRoom.id != null ? participantsMap[chatRoom.id!] : null;
-    // Notifier에서 조회한 마지막 메시지 정보 사용
-    final lastMessage =
-        chatRoom.id != null ? lastMessagesMap[chatRoom.id!] : null;
-    // Notifier에서 조회한 상품 이미지 URL 사용
-    final productImageUrl = productImagesMap[chatRoom.productId];
-
-    return ChatRoomItemWidget(
-      chatRoom: chatRoom,
-      participants: participants,
-      lastMessage: lastMessage,
-      productImageUrl: productImageUrl,
     );
   }
 }

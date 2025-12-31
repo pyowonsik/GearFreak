@@ -4,5 +4,5 @@
 library;
 
 export 'search_recent_searches_list_widget.dart';
-export 'search_recent_searches_screen_widget.dart';
+export 'search_recent_searches_widget.dart';
 export 'search_text_field_widget.dart';

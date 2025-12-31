@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/core/util/format_utils.dart';
 import 'package:gear_freak_flutter/core/util/product_utils.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
 
 /// 상품 카드 위젯

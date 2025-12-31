@@ -95,7 +95,7 @@ class _SearchPageState extends ConsumerState<SearchPage>
             ),
             Expanded(
               child: _showRecentSearches
-                  ? SearchRecentSearchesScreenWidget(
+                  ? SearchRecentSearchesWidget(
                       searchController: _searchController,
                       searchFocusNode: _searchFocusNode,
                     )

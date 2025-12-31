@@ -1,8 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_image_message_widget.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_text_message_widget.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
 
 /// 채팅 메시지 버블 위젯
 class ChatMessageBubbleWidget extends StatelessWidget {

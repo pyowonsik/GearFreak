@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 
 /// 상품 신고 모달
 class ProductReportModal extends StatefulWidget {

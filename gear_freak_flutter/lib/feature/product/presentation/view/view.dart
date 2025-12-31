@@ -5,3 +5,5 @@ library;
 
 export 'home_loaded_view.dart';
 export 'paginated_product_list_view.dart';
+export 'product_detail_loaded_view.dart';
+export 'profile_product_list_view.dart';

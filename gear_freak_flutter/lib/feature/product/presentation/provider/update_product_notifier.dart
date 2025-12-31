@@ -7,7 +7,7 @@ import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/update_product_usecase.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/provider/update_product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/delete_image_usecase.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/upload_image_usecase.dart';
 

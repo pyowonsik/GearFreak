@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_util.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/widget/chat_message_bubble_widget.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
 
 /// 채팅 메시지 목록 위젯
 class ChatMessageListWidget extends StatelessWidget {
@@ -39,31 +38,6 @@ class ChatMessageListWidget extends StatelessWidget {
     final previous =
         DateTime(previousDate.year, previousDate.month, previousDate.day);
     return current != previous;
-  }
-
-  /// 날짜 구분선 위젯 빌드
-  Widget _buildDateSeparator(DateTime dateTime) {
-    final dateText = ChatUtil.formatChatMessageDateSeparator(dateTime);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        children: [
-          Expanded(child: Divider(color: Colors.grey.shade300)),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              dateText,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(child: Divider(color: Colors.grey.shade300)),
-        ],
-      ),
-    );
   }
 
   @override
@@ -130,7 +104,7 @@ class ChatMessageListWidget extends StatelessWidget {
               children: [
                 // 날짜 구분선 (날짜가 바뀔 때만 표시)
                 if (showDateSeparator && currentDate != null)
-                  _buildDateSeparator(currentDate),
+                  ChatDateSeparatorWidget(dateTime: currentDate),
 
                 // 메시지 위젯
                 if (message is types.TextMessage)

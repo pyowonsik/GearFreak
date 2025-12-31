@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/product/presentation/component/component.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
 /// 홈 화면이 로드된 상태의 View
@@ -69,7 +68,7 @@ class HomeLoadedView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 카테고리 섹션
-            CategoryFilterSectionComponent(
+            CategoryFilterSectionWidget(
               selectedCategory: selectedCategory,
               onCategoryChanged: onCategoryChanged,
             ),
@@ -81,7 +80,7 @@ class HomeLoadedView extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ProductSortHeaderComponent(
+                  ProductSortHeaderWidget(
                     totalCount: pagination.totalCount ?? 0,
                     sortBy: sortBy,
                     onSortChanged: onSortChanged,

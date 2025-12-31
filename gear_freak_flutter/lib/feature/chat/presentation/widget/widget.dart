@@ -3,6 +3,8 @@
 /// Chat feature에서 사용하는 모든 재사용 가능한 위젯을 export합니다.
 library;
 
+export 'chat_app_bar_widget.dart';
+export 'chat_date_separator_widget.dart';
 export 'chat_image_message_widget.dart';
 export 'chat_message_bubble_widget.dart';
 export 'chat_message_input_widget.dart';

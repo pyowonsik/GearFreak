@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_flutter/core/route/app_router_page.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_list_screen.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/screen/create_product_screen.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/screen/home_screen.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/search/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
@@ -64,7 +63,7 @@ abstract class AppRoute {
           GoRoute(
             path: '/main/home',
             name: 'home',
-            builder: (context, state) => const HomeScreen(),
+            builder: (context, state) => const HomePage(),
           ),
         ],
       ),
@@ -90,7 +89,7 @@ abstract class AppRoute {
           GoRoute(
             path: '/main/create',
             name: 'create-product-tab',
-            builder: (context, state) => const CreateProductScreen(),
+            builder: (context, state) => const CreateProductPage(),
           ),
         ],
       ),
@@ -103,7 +102,7 @@ abstract class AppRoute {
           GoRoute(
             path: '/main/chat',
             name: 'chat-list',
-            builder: (context, state) => const ChatRoomListScreen(),
+            builder: (context, state) => const ChatRoomListPage(),
           ),
         ],
       ),

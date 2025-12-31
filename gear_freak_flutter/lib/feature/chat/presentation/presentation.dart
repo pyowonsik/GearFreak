@@ -1,6 +1,10 @@
-export 'provider/chat_notifier.dart';
-export 'provider/chat_room_list_notifier.dart';
-export 'provider/chat_room_list_state.dart';
-export 'provider/chat_state.dart';
-export 'screen/chat_room_list_screen.dart';
-export 'screen/chat_screen.dart';
+/// Gear Freak Chat Feature Presentation Layer
+///
+/// Chat feature의 presentation 레이어를 export합니다.
+library;
+
+export 'page/pages.dart';
+export 'provider/provider.dart';
+export 'util/util.dart';
+export 'view/view.dart';
+export 'widget/widget.dart';

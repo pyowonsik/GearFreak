@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/widget/widget.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kpostal_plus/kpostal_plus.dart';

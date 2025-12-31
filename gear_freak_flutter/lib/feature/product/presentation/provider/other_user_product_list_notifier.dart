@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_products_by_user_id_usecase.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 
 /// 다른 사용자의 상품 목록 Notifier
 class OtherUserProductListNotifier extends StateNotifier<ProductState> {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gear_freak_flutter/feature/profile/presentation/widget/profile_stat_item_widget.dart';
+import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 
 /// 프로필 활동 통계 섹션 위젯
 class ProfileStatsSectionWidget extends StatelessWidget {

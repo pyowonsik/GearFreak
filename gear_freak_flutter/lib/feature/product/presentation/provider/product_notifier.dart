@@ -6,8 +6,7 @@ import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_favorit
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_my_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_paginated_products_usecase.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/provider/product_state.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/utils/product_enum_helper.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 
 /// 상품 Notifier
 class ProductNotifier extends StateNotifier<ProductState> {

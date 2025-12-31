@@ -1,13 +1,8 @@
 import 'package:gear_freak_flutter/core/route/app_route.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/screen/login_screen.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/screen/signup_screen.dart';
-import 'package:gear_freak_flutter/feature/auth/presentation/screen/splash_screen.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_room_selection_screen.dart';
-import 'package:gear_freak_flutter/feature/chat/presentation/screen/chat_screen.dart';
-import 'package:gear_freak_flutter/feature/notification/presentation/screen/notification_list_screen.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/screen/other_user_product_list_screen.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/screen/product_detail_screen.dart';
-import 'package:gear_freak_flutter/feature/product/presentation/screen/update_product_screen.dart';
+import 'package:gear_freak_flutter/feature/auth/presentation/presentation.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
+import 'package:gear_freak_flutter/feature/notification/presentation/presentation.dart';
+import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/profile/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/review/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
@@ -29,21 +24,21 @@ abstract final class AppRoutes {
         GoRoute(
           path: '/splash',
           name: 'splash',
-          builder: (context, state) => const SplashScreen(),
+          builder: (context, state) => const SplashPage(),
         ),
 
         // 로그인 화면
         GoRoute(
           path: '/login',
           name: 'login',
-          builder: (context, state) => const LoginScreen(),
+          builder: (context, state) => const LoginPage(),
         ),
 
         // 회원가입 화면
         GoRoute(
           path: '/signup',
           name: 'signup',
-          builder: (context, state) => const SignupScreen(),
+          builder: (context, state) => const SignupPage(),
         ),
 
         // 메인 화면 (탭 네비게이션) - StatefulShellRoute
@@ -55,7 +50,7 @@ abstract final class AppRoutes {
           name: 'update-product',
           builder: (context, state) {
             final productId = state.pathParameters['id'] ?? '';
-            return UpdateProductScreen(productId: productId);
+            return UpdateProductPage(productId: productId);
           },
         ),
 
@@ -65,7 +60,7 @@ abstract final class AppRoutes {
           name: 'product-detail',
           builder: (context, state) {
             final productId = state.pathParameters['id'] ?? '';
-            return ProductDetailScreen(productId: productId);
+            return ProductDetailPage(productId: productId);
           },
         ),
 
@@ -77,7 +72,7 @@ abstract final class AppRoutes {
             final productId = state.pathParameters['id'] ?? '';
             final sellerId = state.uri.queryParameters['sellerId'];
             final chatRoomId = state.uri.queryParameters['chatRoomId'];
-            return ChatScreen(
+            return ChatPage(
               productId: productId,
               sellerId: sellerId != null ? int.tryParse(sellerId) : null,
               chatRoomId: chatRoomId != null ? int.tryParse(chatRoomId) : null,
@@ -91,7 +86,7 @@ abstract final class AppRoutes {
           name: 'chat-room-selection',
           builder: (context, state) {
             final productId = state.pathParameters['id'] ?? '';
-            return ChatRoomSelectionScreen(
+            return ChatRoomSelectionPage(
               productId: int.parse(productId),
             );
           },
@@ -170,7 +165,7 @@ abstract final class AppRoutes {
           name: 'other-user-products',
           builder: (context, state) {
             final userId = state.pathParameters['userId'] ?? '';
-            return OtherUserProductListScreen(userId: userId);
+            return OtherUserProductListPage(userId: userId);
           },
         ),
 
@@ -198,7 +193,7 @@ abstract final class AppRoutes {
         GoRoute(
           path: '/notifications',
           name: 'notification-list',
-          builder: (context, state) => const NotificationListScreen(),
+          builder: (context, state) => const NotificationListPage(),
         ),
 
         // 이미 작성한 리뷰 화면

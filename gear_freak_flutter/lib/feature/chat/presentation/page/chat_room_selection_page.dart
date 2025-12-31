@@ -1,0 +1,145 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
+import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
+import 'package:gear_freak_flutter/shared/widget/widget.dart';
+
+/// 채팅방 선택 화면
+class ChatRoomSelectionPage extends ConsumerStatefulWidget {
+  /// ChatRoomSelectionPage 생성자
+  const ChatRoomSelectionPage({
+    required this.productId,
+    super.key,
+  });
+
+  /// 상품 ID
+  final int productId;
+
+  @override
+  ConsumerState<ChatRoomSelectionPage> createState() =>
+      _ChatRoomSelectionPageState();
+}
+
+class _ChatRoomSelectionPageState extends ConsumerState<ChatRoomSelectionPage>
+    with PaginationScrollMixin {
+  @override
+  void initState() {
+    super.initState();
+    initPaginationScroll(
+      onLoadMore: () {
+        ref
+            .read(chatRoomSelectionNotifierProvider(widget.productId).notifier)
+            .loadMoreChatRoomsByProductId(widget.productId);
+      },
+      getPagination: () {
+        final state =
+            ref.read(chatRoomSelectionNotifierProvider(widget.productId));
+        if (state is ChatRoomListLoaded) {
+          return state.pagination;
+        }
+        return null;
+      },
+      isLoading: () {
+        final state =
+            ref.read(chatRoomSelectionNotifierProvider(widget.productId));
+        return state is ChatRoomListLoadingMore;
+      },
+      screenName: 'ChatRoomSelectionPage',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(chatRoomSelectionNotifierProvider(widget.productId).notifier)
+          .loadChatRoomsByProductId(widget.productId);
+    });
+  }
+
+  @override
+  void dispose() {
+    disposePaginationScroll();
+    super.dispose();
+  }
+
+  /// 채팅방 목록 새로고침
+  Future<void> _onRefresh() async {
+    await ref
+        .read(chatRoomSelectionNotifierProvider(widget.productId).notifier)
+        .loadChatRoomsByProductId(widget.productId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chatRoomListState =
+        ref.watch(chatRoomSelectionNotifierProvider(widget.productId));
+
+    return Scaffold(
+      appBar: const GbAppBar(
+        title: Text('대화중인 채팅'),
+      ),
+      body: switch (chatRoomListState) {
+        ChatRoomListInitial() || ChatRoomListLoading() => const GbLoadingView(),
+        ChatRoomListError(:final message) => GbErrorView(
+            message: message,
+            onRetry: () {
+              ref
+                  .read(
+                    chatRoomSelectionNotifierProvider(widget.productId)
+                        .notifier,
+                  )
+                  .loadChatRoomsByProductId(widget.productId);
+            },
+          ),
+        ChatRoomListLoaded(
+          :final chatRooms,
+          :final pagination,
+          :final participantsMap,
+          :final lastMessagesMap,
+          :final productImagesMap
+        ) ||
+        ChatRoomListLoadingMore(
+          :final chatRooms,
+          :final pagination,
+          :final participantsMap,
+          :final lastMessagesMap,
+          :final productImagesMap
+        ) =>
+          chatRooms.isEmpty
+              ? RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height -
+                          kToolbarHeight -
+                          MediaQuery.of(context).padding.top,
+                      child: const GbEmptyView(
+                        message: '채팅방이 없습니다',
+                      ),
+                    ),
+                  ),
+                )
+              : ChatRoomListLoadedView(
+                  chatRoomList: chatRooms,
+                  pagination: pagination,
+                  scrollController: scrollController!,
+                  participantsMap: participantsMap,
+                  lastMessagesMap: lastMessagesMap,
+                  productImagesMap: productImagesMap,
+                  isLoadingMore: chatRoomListState is ChatRoomListLoadingMore,
+                  onRefresh: _onRefresh,
+                  itemBuilder: (context, chatRoom) {
+                    // 참여자 정보 가져오기
+                    final participants = chatRoom.id != null
+                        ? participantsMap[chatRoom.id!]
+                        : null;
+
+                    return ChatRoomSelectionItemWidget(
+                      chatRoom: chatRoom,
+                      participants: participants,
+                    );
+                  },
+                ),
+      },
+    );
+  }
+}

@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
-import 'package:gear_freak_flutter/feature/chat/presentation/utils/chat_room_util.dart';
+import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
 import 'package:go_router/go_router.dart';
 
 /// 채팅방 선택 화면용 아이템 위젯
