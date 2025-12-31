@@ -84,6 +84,8 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
+  AppLifecycleListener? _lifecycleListener;
+
   @override
   void initState() {
     super.initState();
@@ -96,18 +98,37 @@ class _MyAppState extends ConsumerState<MyApp> {
           DeepLinkService.instance.initialize(router);
           // FCM 서비스에 라우터 설정
           FcmService.instance.setRouter(router);
-          // FCM 메시지 수신 콜백 설정 (채팅방 정보 갱신)
+          // FCM 메시지 수신 콜백 설정 (채팅방 목록 탭을 열지 않았을 때)
+          // 채팅방 목록 탭을 열면 chat_room_list_page.dart의 콜백이 이 콜백을 덮어씀
           FcmService.instance.setOnMessageReceived((chatRoomId) {
-            // 채팅방 정보 갱신 (마지막 메시지 조회 및 업데이트)
-            ref
-                .read(chatRoomListNotifierProvider.notifier)
-                .refreshChatRoomInfo(chatRoomId);
+            // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
+            // 채팅방 목록 탭을 열지 않았어도 항상 갱신됨
+            // ignore: unused_result
+            ref.refresh(totalUnreadChatCountProvider);
           });
           // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
           _handleInitialMessage();
         }
       });
     });
+
+    // 앱 생명주기 감지 (백그라운드 -> 포그라운드)
+    // 채팅방 목록 탭을 열지 않았을 때도 읽지 않은 메시지 개수 갱신
+    _lifecycleListener = AppLifecycleListener(
+      onStateChange: (AppLifecycleState state) {
+        // 백그라운드에서 포그라운드로 돌아올 때 읽지 않은 채팅 개수 갱신
+        if (state == AppLifecycleState.resumed) {
+          // ignore: unused_result
+          ref.refresh(totalUnreadChatCountProvider);
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener?.dispose();
+    super.dispose();
   }
 
   /// 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
