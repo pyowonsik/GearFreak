@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_client/gear_freak_client.dart' as pod;
 import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
-import 'package:gear_freak_flutter/feature/notification/presentation/presentation.dart';
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
@@ -23,6 +22,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage>
     with PaginationScrollMixin {
   pod.ProductCategory? _selectedCategory; // null이면 전체
+  AppLifecycleListener? _lifecycleListener;
 
   @override
   void initState() {
@@ -51,11 +51,22 @@ class _HomePageState extends ConsumerState<HomePage>
     // 초기 상품 목록 로드 (전체)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProducts();
-      // 읽지 않은 알림 개수 조회 - NotificationListNotifier를 통해 처리
-      unawaited(
-        ref.read(notificationListNotifierProvider.notifier).loadUnreadCount(),
-      );
+      // 읽지 않은 알림 개수 조회 - totalUnreadNotificationCountProvider를 통해 처리
+      // ignore: unused_result
+      ref.refresh(totalUnreadNotificationCountProvider);
     });
+
+    // 앱 생명주기 감지 (백그라운드 -> 포그라운드)
+    _lifecycleListener = AppLifecycleListener(
+      onStateChange: (AppLifecycleState state) {
+        if (state == AppLifecycleState.resumed) {
+          if (!mounted) return;
+          // 읽지 않은 알림 개수 갱신
+          // ignore: unused_result
+          ref.refresh(totalUnreadNotificationCountProvider);
+        }
+      },
+    );
   }
 
   /// 카테고리 및 정렬에 따라 상품 로드
@@ -80,6 +91,7 @@ class _HomePageState extends ConsumerState<HomePage>
   @override
   void dispose() {
     debugPrint('🏠 [HomePage] dispose 실행');
+    _lifecycleListener?.dispose();
     disposePaginationScroll();
     super.dispose();
   }
@@ -87,13 +99,10 @@ class _HomePageState extends ConsumerState<HomePage>
   @override
   Widget build(BuildContext context) {
     final productState = ref.watch(productNotifierProvider);
-    final notificationState = ref.watch(notificationListNotifierProvider);
-    // 읽지 않은 알림 개수 추출
-    final unreadCount = switch (notificationState) {
-      NotificationListLoaded(:final unreadCount) => unreadCount,
-      NotificationListLoadingMore(:final unreadCount) => unreadCount,
-      _ => 0,
-    };
+    // 읽지 않은 알림 개수 조회
+    final unreadNotificationCountAsync =
+        ref.watch(totalUnreadNotificationCountProvider);
+    final unreadCount = unreadNotificationCountAsync.value ?? 0;
 
     return Scaffold(
       appBar: GbAppBar(
@@ -113,9 +122,8 @@ class _HomePageState extends ConsumerState<HomePage>
                   await context.push('/notifications');
                   // 알림 화면에서 돌아온 경우 읽지 않은 알림 개수 다시 조회
                   if (mounted) {
-                    await ref
-                        .read(notificationListNotifierProvider.notifier)
-                        .loadUnreadCount();
+                    // ignore: unused_result
+                    ref.refresh(totalUnreadNotificationCountProvider);
                   }
                 },
               ),

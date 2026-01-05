@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/core/route/router_provider.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
+import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
 import 'package:gear_freak_flutter/shared/service/deep_link_service.dart';
 import 'package:gear_freak_flutter/shared/service/fcm_service.dart';
 import 'package:gear_freak_flutter/shared/service/pod_service.dart';
@@ -123,6 +126,13 @@ class _MyAppState extends ConsumerState<MyApp> {
             // 채팅방 목록 탭을 열지 않았어도 항상 갱신됨
             _refreshUnreadCount();
           });
+          // FCM 알림 수신 콜백 설정 (review_received 등)
+          FcmService.instance.setOnNotificationReceived(() {
+            if (!mounted) return;
+            // 읽지 않은 알림 개수 갱신 (홈 화면 빨간 점 업데이트)
+            // ignore: unused_result
+            ref.refresh(totalUnreadNotificationCountProvider);
+          });
           // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
           _handleInitialMessage();
         }
@@ -133,9 +143,12 @@ class _MyAppState extends ConsumerState<MyApp> {
     // 채팅방 목록 탭을 열지 않았을 때도 읽지 않은 메시지 개수 갱신
     _lifecycleListener = AppLifecycleListener(
       onStateChange: (AppLifecycleState state) {
-        // 백그라운드에서 포그라운드로 돌아올 때 읽지 않은 채팅 개수 갱신
+        // 백그라운드에서 포그라운드로 돌아올 때 읽지 않은 개수 갱신
         if (state == AppLifecycleState.resumed) {
-          _refreshUnreadCount();
+          _refreshUnreadCount(); // 채팅 개수 갱신
+          if (!mounted) return;
+          // ignore: unused_result
+          ref.refresh(totalUnreadNotificationCountProvider); // 알림 개수 갱신
         }
       },
     );

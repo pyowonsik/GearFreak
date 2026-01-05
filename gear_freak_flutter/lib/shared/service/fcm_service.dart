@@ -20,6 +20,9 @@ class FcmService {
   /// FCM 메시지 수신 콜백 (chatRoomId를 받아서 채팅방 정보 갱신)
   void Function(int chatRoomId)? onMessageReceived;
 
+  /// FCM 알림 수신 콜백 (알림 타입 수신 시 호출)
+  void Function()? onNotificationReceived;
+
   /// FCM 초기화 및 토큰 등록
   /// 로그인 성공 후 호출해야 합니다.
   /// [router]는 딥링크 처리를 위한 GoRouter 인스턴스입니다. (선택사항)
@@ -88,8 +91,10 @@ class FcmService {
   }
 
   /// 서버에 FCM 토큰 등록 (재시도 로직 포함)
-  Future<void> _registerTokenToServer(String token,
-      {int retryCount = 3}) async {
+  Future<void> _registerTokenToServer(
+    String token, {
+    int retryCount = 3,
+  }) async {
     for (var attempt = 1; attempt <= retryCount; attempt++) {
       try {
         final client = PodService.instance.client;
@@ -180,6 +185,13 @@ class FcmService {
     onMessageReceived = callback;
   }
 
+  /// FCM 알림 수신 콜백 설정
+  Future<void> setOnNotificationReceived(
+    void Function() callback,
+  ) async {
+    onNotificationReceived = callback;
+  }
+
   /// FCM 메시지 수신 처리 (포그라운드/백그라운드)
   void _handleMessageReceived(RemoteMessage message) {
     final data = message.data;
@@ -191,6 +203,12 @@ class FcmService {
         debugPrint('📩 FCM 알림으로 채팅방 정보 갱신 트리거: chatRoomId=$chatRoomId');
         onMessageReceived!(chatRoomId);
       }
+    }
+    // 알림인 경우 (review_received 등)
+    else if (data['type'] == 'review_received' &&
+        onNotificationReceived != null) {
+      debugPrint('📩 FCM 알림 수신: review_received');
+      onNotificationReceived!();
     }
   }
 }

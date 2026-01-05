@@ -312,6 +312,11 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
   }
 
   /// 읽지 않은 알림 개수만 조회 (알림 목록을 로드하지 않음)
+  ///
+  /// @deprecated Use totalUnreadNotificationCountProvider instead
+  /// 이 메서드는 더 이상 사용되지 않습니다.
+  /// 대신 totalUnreadNotificationCountProvider를 사용하세요.
+  @Deprecated('Use totalUnreadNotificationCountProvider instead')
   Future<void> loadUnreadCount() async {
     final result = await getUnreadCountUseCase(null);
 
@@ -322,7 +327,7 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
       },
       (count) {
         debugPrint('✅ [NotificationListNotifier] 읽지 않은 알림 개수 조회 성공: $count');
-        // 현재 상태가 로드된 상태인 경우 unreadCount만 업데이트
+        // 현재 상태에 따라 unreadCount 업데이트
         final currentState = state;
         if (currentState is NotificationListLoaded) {
           state = currentState.copyWith(unreadCount: count);
@@ -333,7 +338,7 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
             unreadCount: count,
           );
         }
-        // 초기 상태나 로딩 상태인 경우에는 상태를 변경하지 않음
+        // 로딩 상태나 에러 상태인 경우에는 상태를 변경하지 않음
         // (알림 목록을 로드할 때 unreadCount가 함께 업데이트됨)
       },
     );

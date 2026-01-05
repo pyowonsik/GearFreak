@@ -231,6 +231,12 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage>
           .read(notificationListNotifierProvider.notifier)
           .markAsRead(notification.id);
 
+      // 읽지 않은 알림 개수 갱신 (홈 화면 빨간 점 업데이트)
+      if (mounted) {
+        // ignore: unused_result
+        ref.refresh(totalUnreadNotificationCountProvider);
+      }
+
       // 리뷰 존재 여부 확인 (양쪽 모두 확인) - Notifier를 통해 처리
       final (buyerReviewExists, sellerReviewExists) = await ref
           .read(notificationListNotifierProvider.notifier)
