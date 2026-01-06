@@ -57,22 +57,31 @@ class AppRouteGuard {
     // ==================== 딥링크 경로 수정 ====================
     // GoRouter가 custom scheme 딥링크를 잘못 파싱한 경우 수정
     // 예: gearfreak://product/138 → /138로 파싱된 경우
-    if (RegExp(r'^/\d+$').hasMatch(currentPath)) {
+    // 패턴: /숫자 또는 /숫자?query=value
+    if (RegExp(r'^/\d+(\?.*)?$').hasMatch(currentPath)) {
       // Pending deep link 확인
       final pendingLink = PendingDeepLinkService.instance.pendingDeepLink;
 
       if (pendingLink != null) {
         debugPrint(
-          '🔧 잘못된 경로 감지: $currentPath → Pending link 사용: $pendingLink',
+          '🔧 Invalid path: $currentPath → Using pending: $pendingLink',
         );
         // Pending link 소비하고 해당 경로로 리디렉션
         PendingDeepLinkService.instance.consumePendingDeepLink();
         return pendingLink;
       } else {
         // Pending link가 없으면 /product/:id로 추론
-        final productId = currentPath.substring(1); // '/' 제거
-        final correctedPath = '/product/$productId';
-        debugPrint('🔧 잘못된 경로 감지: $currentPath → 수정: $correctedPath');
+        final queryIndex = currentPath.indexOf('?');
+        final pathPart = queryIndex > 0
+            ? currentPath.substring(0, queryIndex)
+            : currentPath;
+        final queryPart =
+            queryIndex > 0 ? currentPath.substring(queryIndex) : '';
+        final productId = pathPart.substring(1); // '/' 제거
+        final correctedPath = '/product/$productId$queryPart';
+        debugPrint(
+          '🔧 Invalid path: $currentPath → Fixed: $correctedPath',
+        );
         return correctedPath;
       }
     }
@@ -93,12 +102,12 @@ class AppRouteGuard {
     final isSplashScreen = currentPath == splashPath;
     final requiresAuth = _requiresAuthentication(currentPath);
 
-    debugPrint('🛡️ AppRouteGuard 실행:');
-    debugPrint('   - 현재 경로: $currentPath');
-    debugPrint('   - 인증 상태: ${authState.runtimeType}');
-    debugPrint('   - 로그인 화면: $isLoginScreen');
-    debugPrint('   - 스플래시 화면: $isSplashScreen');
-    debugPrint('   - 인증 필요: $requiresAuth');
+    debugPrint('🛡️ AppRouteGuard:');
+    debugPrint('   - Current path: $currentPath');
+    debugPrint('   - Auth state: ${authState.runtimeType}');
+    debugPrint('   - Login screen: $isLoginScreen');
+    debugPrint('   - Splash screen: $isSplashScreen');
+    debugPrint('   - Requires auth: $requiresAuth');
 
     final redirectTo = switch (authState) {
       // 초기 상태: 스플래시 화면으로 리디렉션
@@ -144,9 +153,9 @@ class AppRouteGuard {
     };
 
     if (redirectTo != null) {
-      debugPrint('🔄 리디렉션: $currentPath → $redirectTo');
+      debugPrint('🔄 Redirecting: $currentPath → $redirectTo');
     } else {
-      debugPrint('✅ 현재 경로 유지: $currentPath');
+      debugPrint('✅ Staying on current path: $currentPath');
     }
 
     return redirectTo;
@@ -190,7 +199,7 @@ class AppRouteGuard {
         PendingDeepLinkService.instance.consumePendingDeepLink();
 
     if (pendingLink != null) {
-      debugPrint('🔗 보류된 딥링크로 이동: $pendingLink');
+      debugPrint('🔗 Navigating to pending deep link: $pendingLink');
       return pendingLink;
     }
 

@@ -25,16 +25,15 @@ class FcmService {
 
   /// FCM 초기화 및 토큰 등록
   /// 로그인 성공 후 호출해야 합니다.
-  /// [router]는 딥링크 처리를 위한 GoRouter 인스턴스입니다. (선택사항)
-  Future<void> initialize({GoRouter? router}) async {
-    _router = router;
+  /// 주의: setRouter()를 먼저 호출하여 라우터를 설정해야 합니다.
+  Future<void> initialize() async {
     try {
-      debugPrint('📱 FCM 초기화 시작...');
+      debugPrint('📱 FCM initialization started...');
 
       // 알림 권한 요청
       final settings = await _messaging.requestPermission();
 
-      debugPrint('📱 FCM 권한 상태: ${settings.authorizationStatus}');
+      debugPrint('📱 FCM permission status: ${settings.authorizationStatus}');
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {
@@ -43,23 +42,23 @@ class FcmService {
           final token = await _messaging.getToken();
           if (token != null) {
             _currentToken = token;
-            debugPrint('📱 FCM 토큰 가져오기 성공: ${token.substring(0, 30)}...');
+            debugPrint('📱 FCM token retrieved: ${token.substring(0, 30)}...');
             await _registerTokenToServer(token);
           } else {
-            debugPrint('⚠️ FCM 토큰이 null입니다.');
+            debugPrint('⚠️ FCM token is null');
           }
         } catch (e) {
-          debugPrint('⚠️ FCM 토큰 가져오기 실패 (시뮬레이터일 수 있음): $e');
+          debugPrint('⚠️ Failed to get FCM token (may be simulator): $e');
         }
 
         // 포그라운드 메시지 리스너
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           debugPrint('========================================');
-          debugPrint('📱 [포그라운드] FCM 알림 수신');
-          debugPrint('메시지 ID: ${message.messageId}');
-          debugPrint('제목: ${message.notification?.title}');
-          debugPrint('내용: ${message.notification?.body}');
-          debugPrint('데이터: ${message.data}');
+          debugPrint('📱 [Foreground] FCM notification received');
+          debugPrint('Message ID: ${message.messageId}');
+          debugPrint('Title: ${message.notification?.title}');
+          debugPrint('Body: ${message.notification?.body}');
+          debugPrint('Data: ${message.data}');
           debugPrint('========================================');
           _handleMessageReceived(message);
         });
@@ -70,14 +69,14 @@ class FcmService {
         // 토큰 갱신 리스너
         _messaging.onTokenRefresh.listen((newToken) {
           _currentToken = newToken;
-          debugPrint('📱 FCM 토큰 갱신됨: ${newToken.substring(0, 30)}...');
+          debugPrint('📱 FCM token refreshed: ${newToken.substring(0, 30)}...');
           _registerTokenToServer(newToken);
         });
       } else {
-        debugPrint('⚠️ FCM 알림 권한이 거부되었습니다.');
+        debugPrint('⚠️ FCM notification permission denied');
       }
     } catch (e) {
-      debugPrint('⚠️ FCM 초기화 실패 (시뮬레이터일 수 있음): $e');
+      debugPrint('⚠️ Failed to initialize FCM (may be simulator): $e');
     }
   }
 
@@ -92,21 +91,25 @@ class FcmService {
         final deviceType = Platform.isIOS ? 'ios' : 'android';
 
         await client.fcm.registerFcmToken(token, deviceType);
-        debugPrint('✅ FCM 토큰 서버 등록 성공: ${token.substring(0, 20)}...');
+        debugPrint('✅ FCM token registered: ${token.substring(0, 20)}...');
         return; // 성공 시 즉시 반환
       } catch (e) {
-        debugPrint('❌ FCM 토큰 서버 등록 실패 (시도 $attempt/$retryCount): $e');
+        debugPrint(
+          '❌ Failed to register FCM token (attempt $attempt/$retryCount): $e',
+        );
 
         if (attempt < retryCount) {
           // 지수 백오프: 2초, 4초, 8초...
           final delay = Duration(seconds: attempt * 2);
-          debugPrint('⏳ ${delay.inSeconds}초 후 재시도...');
+          debugPrint('⏳ Retrying in ${delay.inSeconds} seconds...');
           await Future<void>.delayed(delay);
         }
       }
     }
 
-    debugPrint('⚠️ FCM 토큰 등록 최종 실패 - 다음 앱 실행 시 재시도됩니다');
+    debugPrint(
+      '⚠️ Failed to register FCM token - will retry on next app launch',
+    );
   }
 
   /// FCM 토큰 삭제 (로그아웃 시 호출)
@@ -115,10 +118,10 @@ class FcmService {
       if (_currentToken != null) {
         final client = PodService.instance.client;
         await client.fcm.deleteFcmToken(_currentToken!);
-        debugPrint('✅ FCM 토큰 서버 삭제 성공');
+        debugPrint('✅ FCM token deleted from server');
       }
     } catch (e) {
-      debugPrint('❌ FCM 토큰 서버 삭제 실패: $e');
+      debugPrint('❌ Failed to delete FCM token from server: $e');
     } finally {
       // 성공/실패 관계없이 로컬 토큰 초기화
       _currentToken = null;
@@ -131,11 +134,11 @@ class FcmService {
     final targetRouter = router ?? _router;
 
     debugPrint('========================================');
-    debugPrint('🔔 handleNotificationTap 호출됨');
-    debugPrint('📦 알림 데이터: $data');
-    debugPrint('🎯 알림 타입: ${data['type']}');
-    debugPrint('🚦 라우터 상태: ${targetRouter != null ? "설정됨" : "null"}');
-    debugPrint('📱 플랫폼: ${Platform.isIOS ? "iOS" : "Android"}');
+    debugPrint('🔔 handleNotificationTap called');
+    debugPrint('📦 Notification data: $data');
+    debugPrint('🎯 Notification type: ${data['type']}');
+    debugPrint('🚦 Router status: ${targetRouter != null ? "set" : "null"}');
+    debugPrint('📱 Platform: ${Platform.isIOS ? "iOS" : "Android"}');
     debugPrint('========================================');
 
     // 채팅 메시지 알림인 경우
@@ -146,25 +149,29 @@ class FcmService {
       final productId = data['productId'];
       final route = '/chat/$productId?chatRoomId=$chatRoomId';
 
-      debugPrint('🔗 채팅 화면으로 이동: productId=$productId, chatRoomId=$chatRoomId');
+      debugPrint(
+        '🔗 Navigating to chat: productId=$productId, chatRoomId=$chatRoomId',
+      );
 
       if (targetRouter != null) {
         _navigateWhenReady(targetRouter, route);
       } else {
-        debugPrint('⚠️ GoRouter가 설정되지 않아 채팅 화면으로 이동할 수 없습니다');
+        debugPrint('⚠️ GoRouter not set, cannot navigate to chat');
       }
     }
     // 후기 받음 알림인 경우 → 알림 화면으로 이동
     else if (data['type'] == 'review_received') {
-      debugPrint('🔗 알림 화면으로 이동: review_received 알림');
+      debugPrint('🔗 Navigating to notifications: review_received');
 
       if (targetRouter != null) {
         _navigateWhenReady(targetRouter, '/notifications');
       } else {
-        debugPrint('⚠️ GoRouter가 설정되지 않아 알림 화면으로 이동할 수 없습니다');
+        debugPrint('⚠️ GoRouter not set, cannot navigate to notifications');
       }
     } else {
-      debugPrint('⚠️ 알 수 없는 알림 타입 또는 데이터 누락: ${data['type']}');
+      debugPrint(
+        '⚠️ Unknown notification type or missing data: ${data['type']}',
+      );
     }
   }
 
@@ -173,35 +180,39 @@ class FcmService {
   /// WidgetsBinding을 사용하여 다음 프레임이 렌더링될 때까지 대기합니다.
   /// 이 방식은 고정된 delay보다 안전하고 빠릅니다.
   Future<void> _navigateWhenReady(GoRouter router, String route) async {
-    debugPrint('⏳ 라우터 준비 대기 중...');
+    try {
+      debugPrint('⏳ Waiting for router to be ready...');
 
-    // 다음 프레임까지 대기 (위젯 트리가 완전히 빌드될 때까지)
-    await WidgetsBinding.instance.endOfFrame;
+      // 다음 프레임까지 대기 (위젯 트리가 완전히 빌드될 때까지)
+      await WidgetsBinding.instance.endOfFrame;
 
-    // 추가 안전장치: 한 프레임 더 대기
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+      // 추가 안전장치: 한 프레임 더 대기
+      await Future<void>.delayed(const Duration(milliseconds: 100));
 
-    debugPrint('🚀 라우팅 실행: $route');
-    await router.push(route);
-    debugPrint('✅ 화면 이동 완료');
+      debugPrint('🚀 Executing navigation: $route');
+      await router.push(route);
+      debugPrint('✅ Navigation completed');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Navigation failed: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
   }
 
   /// GoRouter 설정 (앱 초기화 시 호출)
-  Future<void> setRouter(GoRouter router) async {
+  // ignore: use_setters_to_change_properties
+  void setRouter(GoRouter router) {
     _router = router;
   }
 
   /// FCM 메시지 수신 콜백 설정
-  Future<void> setOnMessageReceived(
-    void Function(int chatRoomId) callback,
-  ) async {
+  // ignore: use_setters_to_change_properties
+  void setOnMessageReceived(void Function(int chatRoomId) callback) {
     onMessageReceived = callback;
   }
 
   /// FCM 알림 수신 콜백 설정
-  Future<void> setOnNotificationReceived(
-    void Function() callback,
-  ) async {
+  // ignore: use_setters_to_change_properties
+  void setOnNotificationReceived(void Function() callback) {
     onNotificationReceived = callback;
   }
 
@@ -213,14 +224,14 @@ class FcmService {
     if (data['type'] == 'chat_message' && data['chatRoomId'] != null) {
       final chatRoomId = int.tryParse(data['chatRoomId'].toString());
       if (chatRoomId != null && onMessageReceived != null) {
-        debugPrint('📩 FCM 알림으로 채팅방 정보 갱신 트리거: chatRoomId=$chatRoomId');
+        debugPrint('📩 Refreshing chat room data: chatRoomId=$chatRoomId');
         onMessageReceived!(chatRoomId);
       }
     }
     // 알림인 경우 (review_received 등)
     else if (data['type'] == 'review_received' &&
         onNotificationReceived != null) {
-      debugPrint('📩 FCM 알림 수신: review_received');
+      debugPrint('📩 FCM notification received: review_received');
       onNotificationReceived!();
     }
   }

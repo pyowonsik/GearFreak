@@ -16,13 +16,31 @@ class PendingDeepLinkService {
   /// PendingDeepLinkService 인스턴스
   static final instance = PendingDeepLinkService._();
 
+  /// TTL (Time To Live) - 5분
+  static const _ttl = Duration(minutes: 5);
+
   String? _pendingDeepLink;
+  DateTime? _pendingDeepLinkTimestamp;
 
   /// 보류 중인 딥링크가 있는지 확인
-  bool get hasPendingDeepLink => _pendingDeepLink != null;
+  bool get hasPendingDeepLink => pendingDeepLink != null;
 
   /// 보류 중인 딥링크 경로
-  String? get pendingDeepLink => _pendingDeepLink;
+  ///
+  /// TTL이 초과된 경우 자동으로 null 반환
+  String? get pendingDeepLink {
+    if (_pendingDeepLink != null && _pendingDeepLinkTimestamp != null) {
+      final elapsed = DateTime.now().difference(_pendingDeepLinkTimestamp!);
+      if (elapsed > _ttl) {
+        debugPrint(
+          '⏰ Pending deep link expired (${elapsed.inMinutes} minutes elapsed)',
+        );
+        clear();
+        return null;
+      }
+    }
+    return _pendingDeepLink;
+  }
 
   /// 딥링크 저장
   ///
@@ -30,7 +48,8 @@ class PendingDeepLinkService {
   /// 예: /product/123, /chat/456?sellerId=789
   void setPendingDeepLink(String routePath) {
     _pendingDeepLink = routePath;
-    debugPrint('📌 보류 중인 딥링크 저장: $routePath');
+    _pendingDeepLinkTimestamp = DateTime.now();
+    debugPrint('📌 Pending deep link saved: $routePath');
   }
 
   /// 보류 중인 딥링크 가져오고 초기화
@@ -38,10 +57,11 @@ class PendingDeepLinkService {
   /// 딥링크를 반환하고 내부 상태를 초기화합니다.
   /// 한 번만 사용되도록 보장합니다.
   String? consumePendingDeepLink() {
-    final link = _pendingDeepLink;
+    final link = pendingDeepLink; // getter를 통해 TTL 체크
     if (link != null) {
-      debugPrint('✅ 보류 중인 딥링크 처리: $link');
+      debugPrint('✅ Consuming pending deep link: $link');
       _pendingDeepLink = null;
+      _pendingDeepLinkTimestamp = null;
     }
     return link;
   }
@@ -49,8 +69,9 @@ class PendingDeepLinkService {
   /// 보류 중인 딥링크 초기화
   void clear() {
     if (_pendingDeepLink != null) {
-      debugPrint('🗑️ 보류 중인 딥링크 삭제: $_pendingDeepLink');
+      debugPrint('🗑️ Clearing pending deep link: $_pendingDeepLink');
       _pendingDeepLink = null;
+      _pendingDeepLinkTimestamp = null;
     }
   }
 }
