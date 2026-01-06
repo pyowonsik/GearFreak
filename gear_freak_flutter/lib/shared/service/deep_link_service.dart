@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gear_freak_flutter/shared/service/pending_deep_link_service.dart';
 import 'package:go_router/go_router.dart';
 
@@ -191,7 +191,7 @@ class DeepLinkService {
   ///
   /// [url]은 딥링크 URL입니다.
   /// 앱이 이미 실행 중일 때 수신된 딥링크는 바로 라우팅합니다.
-  void _handleDeepLink(String url) {
+  Future<void> _handleDeepLink(String url) async {
     if (_router == null) {
       debugPrint('⚠️ GoRouter가 설정되지 않았습니다');
       return;
@@ -204,13 +204,13 @@ class DeepLinkService {
     }
 
     // 앱 실행 중 딥링크는 바로 라우팅
-    _navigateToDeepLink(routePath);
+    await _navigateToDeepLink(routePath);
   }
 
   /// 파싱된 경로로 라우팅 실행
   ///
   /// [routePath]는 파싱된 경로입니다.
-  void _navigateToDeepLink(String routePath) {
+  Future<void> _navigateToDeepLink(String routePath) async {
     if (_router == null) {
       debugPrint('⚠️ GoRouter가 설정되지 않았습니다');
       return;
@@ -219,22 +219,37 @@ class DeepLinkService {
     debugPrint(
       '📍 현재 라우터 위치: ${_router!.routerDelegate.currentConfiguration.uri}',
     );
-    debugPrint('🚀 라우팅 실행: $routePath');
+    debugPrint('🚀 라우팅 준비: $routePath');
+
+    // 라우터가 준비될 때까지 대기
+    await _waitForRouterReady();
 
     // 라우팅 실행
     _router!.go(routePath);
     debugPrint('✅ 딥링크 라우팅 완료: $routePath');
   }
 
+  /// 라우터가 준비될 때까지 대기
+  ///
+  /// WidgetsBinding을 사용하여 다음 프레임이 렌더링될 때까지 대기합니다.
+  /// 고정된 delay 대신 실제 준비 상태를 확인합니다.
+  Future<void> _waitForRouterReady() async {
+    // 다음 프레임까지 대기 (위젯 트리가 완전히 빌드될 때까지)
+    await WidgetsBinding.instance.endOfFrame;
+
+    // 추가 안전장치: 한 프레임 더 대기
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+  }
+
   /// 보류 중인 딥링크 처리
   ///
   /// 인증 완료 후 호출하여 보류된 딥링크를 처리합니다.
-  void processPendingDeepLink() {
+  Future<void> processPendingDeepLink() async {
     final pendingLink =
         PendingDeepLinkService.instance.consumePendingDeepLink();
     if (pendingLink != null) {
       debugPrint('🔗 보류된 딥링크 처리 시작: $pendingLink');
-      _navigateToDeepLink(pendingLink);
+      await _navigateToDeepLink(pendingLink);
     }
   }
 

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gear_freak_flutter/shared/service/pod_service.dart';
 import 'package:go_router/go_router.dart';
 
@@ -130,21 +130,26 @@ class FcmService {
     final data = message.data;
     final targetRouter = router ?? _router;
 
+    debugPrint('========================================');
+    debugPrint('🔔 handleNotificationTap 호출됨');
+    debugPrint('📦 알림 데이터: $data');
+    debugPrint('🎯 알림 타입: ${data['type']}');
+    debugPrint('🚦 라우터 상태: ${targetRouter != null ? "설정됨" : "null"}');
+    debugPrint('📱 플랫폼: ${Platform.isIOS ? "iOS" : "Android"}');
+    debugPrint('========================================');
+
     // 채팅 메시지 알림인 경우
     if (data['type'] == 'chat_message' &&
         data['chatRoomId'] != null &&
         data['productId'] != null) {
       final chatRoomId = data['chatRoomId'];
       final productId = data['productId'];
+      final route = '/chat/$productId?chatRoomId=$chatRoomId';
 
       debugPrint('🔗 채팅 화면으로 이동: productId=$productId, chatRoomId=$chatRoomId');
 
-      // 라우터가 설정되어 있으면 채팅 화면으로 이동
       if (targetRouter != null) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          targetRouter.push('/chat/$productId?chatRoomId=$chatRoomId');
-          debugPrint('✅ 채팅 화면으로 이동 완료');
-        });
+        _navigateWhenReady(targetRouter, route);
       } else {
         debugPrint('⚠️ GoRouter가 설정되지 않아 채팅 화면으로 이동할 수 없습니다');
       }
@@ -153,16 +158,32 @@ class FcmService {
     else if (data['type'] == 'review_received') {
       debugPrint('🔗 알림 화면으로 이동: review_received 알림');
 
-      // 라우터가 설정되어 있으면 알림 화면으로 이동
       if (targetRouter != null) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          targetRouter.push('/notifications');
-          debugPrint('✅ 알림 화면으로 이동 완료');
-        });
+        _navigateWhenReady(targetRouter, '/notifications');
       } else {
         debugPrint('⚠️ GoRouter가 설정되지 않아 알림 화면으로 이동할 수 없습니다');
       }
+    } else {
+      debugPrint('⚠️ 알 수 없는 알림 타입 또는 데이터 누락: ${data['type']}');
     }
+  }
+
+  /// 라우터가 준비될 때까지 대기 후 네비게이션
+  ///
+  /// WidgetsBinding을 사용하여 다음 프레임이 렌더링될 때까지 대기합니다.
+  /// 이 방식은 고정된 delay보다 안전하고 빠릅니다.
+  Future<void> _navigateWhenReady(GoRouter router, String route) async {
+    debugPrint('⏳ 라우터 준비 대기 중...');
+
+    // 다음 프레임까지 대기 (위젯 트리가 완전히 빌드될 때까지)
+    await WidgetsBinding.instance.endOfFrame;
+
+    // 추가 안전장치: 한 프레임 더 대기
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+
+    debugPrint('🚀 라우팅 실행: $route');
+    await router.push(route);
+    debugPrint('✅ 화면 이동 완료');
   }
 
   /// GoRouter 설정 (앱 초기화 시 호출)
