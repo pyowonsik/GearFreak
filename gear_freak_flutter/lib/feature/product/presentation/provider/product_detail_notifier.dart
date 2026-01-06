@@ -161,8 +161,7 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
         if (incremented) {
           final currentState = state;
           if (currentState is ProductDetailLoaded) {
-            final productResult = getProductDetailUseCase(productId);
-            productResult.then((result) {
+            getProductDetailUseCase(productId).then((result) {
               result.fold(
                 (failure) {
                   debugPrint('상품 정보를 불러오는데 실패했습니다: ${failure.message}');

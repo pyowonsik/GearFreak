@@ -245,7 +245,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage>
             chatRoomId: chatRoomId,
           );
 
-      if (!mounted) return;
+      if (!context.mounted) return;
 
       // 알림 탭 시 리뷰 작성 규칙:
       // 1. 구매자 리뷰(buyer_to_seller)는 상품 상태 변경 시에만 작성 가능
@@ -259,18 +259,20 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage>
       //   → 판매자는 구매자에게 리뷰 작성 가능 (seller_to_buyer)
       //   → 판매자 리뷰가 이미 작성되어 있으면 "이미 작성한 화면"으로 이동
 
+      if (!context.mounted) return;
+
       if (sellerReviewExists) {
         // 판매자 리뷰가 이미 작성되어 있음
         // → 판매자가 구매자에게 리뷰를 작성했다는 의미
         // → 구매자가 알림을 받았으므로, 구매자는 "판매자가 나에게 남긴 리뷰"를 봐야 함
         // → 리뷰 목록 화면의 "판매자 후기" 탭으로 이동 (인덱스 1)
-        context.push('/profile/reviews?tabIndex=1');
+        await context.push('/profile/reviews?tabIndex=1');
       } else if (buyerReviewExists && !sellerReviewExists) {
         // 구매자 리뷰는 작성됨, 판매자 리뷰는 아직 안 됨
         // → 구매자가 판매자에게 리뷰 작성 (buyer_to_seller) → 판매자가 알림 받음
         // → 판매자는 "구매자가 나에게 남긴 리뷰"를 봐야 함
         // → 리뷰 목록 화면의 "구매자 후기" 탭으로 이동 (인덱스 0)
-        context.push('/profile/reviews?tabIndex=0');
+        await context.push('/profile/reviews?tabIndex=0');
       } else {
         // 판매자 리뷰가 없고 구매자 리뷰도 없는 경우
         // → 판매자가 구매자에게 리뷰 작성 (seller_to_buyer)
@@ -280,7 +282,7 @@ class _NotificationListPageState extends ConsumerState<NotificationListPage>
         );
 
         // 리뷰 작성 완료 후 돌아온 경우 알림 목록 새로고침
-        if ((result ?? false) && mounted) {
+        if ((result ?? false) && context.mounted) {
           await ref
               .read(notificationListNotifierProvider.notifier)
               .loadNotifications();

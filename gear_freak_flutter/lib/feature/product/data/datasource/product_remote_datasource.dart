@@ -222,7 +222,9 @@ class ProductRemoteDataSource {
             final bCount = b.favoriteCount ?? 0;
             return bCount.compareTo(aCount);
           });
-        default:
+        case null:
+          // 정렬 기준이 없으면 기본 순서 유지
+          break;
       }
 
       // 페이지네이션 처리

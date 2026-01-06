@@ -2,8 +2,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Splash screen displayed during app initialization.
 class SplashPage extends StatefulWidget {
-  const SplashPage({Key? key}) : super(key: key);
+  /// Creates a [SplashPage].
+  const SplashPage({super.key});
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -89,22 +91,29 @@ class _SplashPageState extends State<SplashPage>
   }
 }
 
+/// Custom painter for drawing animated dot indicator.
 class DotIndicatorPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  final int dotCount = 12;
-
+  /// Creates a [DotIndicatorPainter].
   DotIndicatorPainter({
     required this.progress,
     required this.color,
   });
+
+  /// Current animation progress.
+  final double progress;
+
+  /// Color of the dots.
+  final Color color;
+
+  /// Number of dots in the indicator.
+  final int dotCount = 12;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 8;
 
-    for (int i = 0; i < dotCount; i++) {
+    for (var i = 0; i < dotCount; i++) {
       final angle = (i * 2 * 3.14159) / dotCount - 3.14159 / 2;
       final dotProgress = (progress + i / dotCount) % 1.0;
       final opacity =
@@ -115,7 +124,7 @@ class DotIndicatorPainter extends CustomPainter {
       final y = center.dy + radius * sin(angle);
 
       final paint = Paint()
-        ..color = color.withOpacity(opacity.clamp(0.2, 1.0))
+        ..color = color.withValues(alpha: opacity.clamp(0.2, 1.0))
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(x, y), dotRadius, paint);
@@ -127,6 +136,9 @@ class DotIndicatorPainter extends CustomPainter {
     return oldDelegate.progress != progress;
   }
 
+  /// Calculates cosine of the given angle.
   double cos(double angle) => math.cos(angle);
+
+  /// Calculates sine of the given angle.
   double sin(double angle) => math.sin(angle);
 }
