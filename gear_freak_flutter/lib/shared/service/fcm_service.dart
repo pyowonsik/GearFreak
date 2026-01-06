@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -17,6 +18,10 @@ class FcmService {
   String? _currentToken;
   GoRouter? _router;
 
+  // 스트림 구독 (메모리 누수 방지)
+  StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
+  StreamSubscription<String>? _tokenRefreshSubscription;
+
   /// FCM 메시지 수신 콜백 (chatRoomId를 받아서 채팅방 정보 갱신)
   void Function(int chatRoomId)? onMessageReceived;
 
@@ -29,6 +34,10 @@ class FcmService {
   Future<void> initialize() async {
     try {
       debugPrint('📱 FCM initialization started...');
+
+      // 기존 구독 취소 (메모리 누수 방지)
+      unawaited(_foregroundMessageSubscription?.cancel());
+      unawaited(_tokenRefreshSubscription?.cancel());
 
       // 알림 권한 요청
       final settings = await _messaging.requestPermission();
@@ -51,8 +60,9 @@ class FcmService {
           debugPrint('⚠️ Failed to get FCM token (may be simulator): $e');
         }
 
-        // 포그라운드 메시지 리스너
-        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        // 포그라운드 메시지 리스너 (구독 저장)
+        _foregroundMessageSubscription =
+            FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           debugPrint('========================================');
           debugPrint('📱 [Foreground] FCM notification received');
           debugPrint('Message ID: ${message.messageId}');
@@ -66,8 +76,9 @@ class FcmService {
         // 백그라운드→포그라운드 알림 탭 처리는 main.dart에서 처리
         // (로그인 여부와 관계없이 앱 시작 시점에 리스너 등록되어야 하므로)
 
-        // 토큰 갱신 리스너
-        _messaging.onTokenRefresh.listen((newToken) {
+        // 토큰 갱신 리스너 (구독 저장)
+        _tokenRefreshSubscription =
+            _messaging.onTokenRefresh.listen((newToken) {
           _currentToken = newToken;
           debugPrint('📱 FCM token refreshed: ${newToken.substring(0, 30)}...');
           _registerTokenToServer(newToken);
@@ -123,9 +134,20 @@ class FcmService {
     } catch (e) {
       debugPrint('❌ Failed to delete FCM token from server: $e');
     } finally {
-      // 성공/실패 관계없이 로컬 토큰 초기화
+      // 성공/실패 관계없이 로컬 토큰 및 콜백 초기화
       _currentToken = null;
+      onMessageReceived = null;
+      onNotificationReceived = null;
     }
+  }
+
+  /// FCM 서비스 정리 (메모리 누수 방지)
+  void dispose() {
+    debugPrint('🗑️ [FcmService] Disposing...');
+    _foregroundMessageSubscription?.cancel();
+    _tokenRefreshSubscription?.cancel();
+    onMessageReceived = null;
+    onNotificationReceived = null;
   }
 
   /// 알림 탭 처리 (채팅 화면 또는 리뷰 작성 화면으로 이동)

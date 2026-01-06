@@ -89,6 +89,7 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   AppLifecycleListener? _lifecycleListener;
+  StreamSubscription<RemoteMessage>? _notificationTapSubscription;
   DateTime? _lastUnreadCountRefreshTime;
 
   /// 읽지 않은 채팅 개수 갱신 (중복 호출 방지)
@@ -160,13 +161,19 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void dispose() {
     _lifecycleListener?.dispose();
+    _notificationTapSubscription?.cancel();
+    DeepLinkService.instance.dispose();
     super.dispose();
   }
 
   /// 백그라운드→포그라운드 알림 탭 핸들러 설정
   void _setupBackgroundNotificationHandler(GoRouter router) {
+    // 기존 구독 취소 (메모리 누수 방지)
+    _notificationTapSubscription?.cancel();
+
     // 앱이 백그라운드에서 알림 탭으로 포그라운드로 전환된 경우
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    _notificationTapSubscription =
+        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint('========================================');
       debugPrint('📱 [백그라운드→포그라운드] FCM 알림으로 앱 열림');
       debugPrint('메시지 ID: ${message.messageId}');
