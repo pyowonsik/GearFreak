@@ -64,17 +64,8 @@ class FcmService {
           _handleMessageReceived(message);
         });
 
-        // 앱이 백그라운드에서 열렸을 때 메시지 처리
-        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-          debugPrint('========================================');
-          debugPrint('📱 [백그라운드→포그라운드] FCM 알림으로 앱 열림');
-          debugPrint('메시지 ID: ${message.messageId}');
-          debugPrint('제목: ${message.notification?.title}');
-          debugPrint('내용: ${message.notification?.body}');
-          debugPrint('데이터: ${message.data}');
-          debugPrint('========================================');
-          handleNotificationTap(message);
-        });
+        // 백그라운드→포그라운드 알림 탭 처리는 main.dart에서 처리
+        // (로그인 여부와 관계없이 앱 시작 시점에 리스너 등록되어야 하므로)
 
         // 토큰 갱신 리스너
         _messaging.onTokenRefresh.listen((newToken) {
@@ -135,8 +126,9 @@ class FcmService {
   }
 
   /// 알림 탭 처리 (채팅 화면 또는 리뷰 작성 화면으로 이동)
-  void handleNotificationTap(RemoteMessage message) {
+  void handleNotificationTap(RemoteMessage message, {GoRouter? router}) {
     final data = message.data;
+    final targetRouter = router ?? _router;
 
     // 채팅 메시지 알림인 경우
     if (data['type'] == 'chat_message' &&
@@ -148,9 +140,9 @@ class FcmService {
       debugPrint('🔗 채팅 화면으로 이동: productId=$productId, chatRoomId=$chatRoomId');
 
       // 라우터가 설정되어 있으면 채팅 화면으로 이동
-      if (_router != null) {
+      if (targetRouter != null) {
         Future.delayed(const Duration(milliseconds: 300), () {
-          _router?.push('/chat/$productId?chatRoomId=$chatRoomId');
+          targetRouter.push('/chat/$productId?chatRoomId=$chatRoomId');
           debugPrint('✅ 채팅 화면으로 이동 완료');
         });
       } else {
@@ -162,9 +154,9 @@ class FcmService {
       debugPrint('🔗 알림 화면으로 이동: review_received 알림');
 
       // 라우터가 설정되어 있으면 알림 화면으로 이동
-      if (_router != null) {
+      if (targetRouter != null) {
         Future.delayed(const Duration(milliseconds: 300), () {
-          _router?.push('/notifications');
+          targetRouter.push('/notifications');
           debugPrint('✅ 알림 화면으로 이동 완료');
         });
       } else {

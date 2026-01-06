@@ -12,6 +12,7 @@ import 'package:gear_freak_flutter/feature/notification/di/notification_provider
 import 'package:gear_freak_flutter/shared/service/deep_link_service.dart';
 import 'package:gear_freak_flutter/shared/service/fcm_service.dart';
 import 'package:gear_freak_flutter/shared/service/pod_service.dart';
+import 'package:go_router/go_router.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 
 /// 백그라운드 메시지 핸들러
@@ -136,6 +137,8 @@ class _MyAppState extends ConsumerState<MyApp> {
         });
         // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
         _handleInitialMessage();
+        // 백그라운드→포그라운드 알림 탭 처리 (앱 실행 중)
+        _setupBackgroundNotificationHandler(router);
       }
     });
 
@@ -160,6 +163,28 @@ class _MyAppState extends ConsumerState<MyApp> {
     super.dispose();
   }
 
+  /// 백그라운드→포그라운드 알림 탭 핸들러 설정
+  void _setupBackgroundNotificationHandler(GoRouter router) {
+    // 앱이 백그라운드에서 알림 탭으로 포그라운드로 전환된 경우
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint('========================================');
+      debugPrint('📱 [백그라운드→포그라운드] FCM 알림으로 앱 열림');
+      debugPrint('메시지 ID: ${message.messageId}');
+      debugPrint('제목: ${message.notification?.title}');
+      debugPrint('내용: ${message.notification?.body}');
+      debugPrint('데이터: ${message.data}');
+      debugPrint('========================================');
+
+      // 알림 탭 처리 (현재 라우터를 직접 전달)
+      if (!mounted) return;
+      final currentRouter = ref.read(routerProvider);
+      FcmService.instance.handleNotificationTap(
+        message,
+        router: currentRouter,
+      );
+    });
+  }
+
   /// 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
   Future<void> _handleInitialMessage() async {
     try {
@@ -174,10 +199,12 @@ class _MyAppState extends ConsumerState<MyApp> {
         debugPrint('데이터: ${initialMessage.data}');
         debugPrint('========================================');
 
-        // 알림 탭 처리
+        // 알림 탭 처리 (라우터를 직접 전달)
         final router = ref.read(routerProvider);
-        await FcmService.instance.setRouter(router);
-        FcmService.instance.handleNotificationTap(initialMessage);
+        FcmService.instance.handleNotificationTap(
+          initialMessage,
+          router: router,
+        );
       }
     } catch (e) {
       debugPrint('⚠️ 초기 메시지 처리 실패: $e');
