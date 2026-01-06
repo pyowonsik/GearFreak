@@ -22,6 +22,11 @@ class FcmService {
   StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
   StreamSubscription<String>? _tokenRefreshSubscription;
 
+  // 초기화 가드 (경쟁 조건 방지)
+  bool _isInitializing = false;
+  bool _isInitialized = false;
+  Completer<void>? _initCompleter;
+
   /// FCM 메시지 수신 콜백 (chatRoomId를 받아서 채팅방 정보 갱신)
   void Function(int chatRoomId)? onMessageReceived;
 
@@ -32,6 +37,22 @@ class FcmService {
   /// 로그인 성공 후 호출해야 합니다.
   /// 주의: setRouter()를 먼저 호출하여 라우터를 설정해야 합니다.
   Future<void> initialize() async {
+    // 이미 초기화된 경우
+    if (_isInitialized) {
+      debugPrint('✅ FCM already initialized, skipping...');
+      return;
+    }
+
+    // 초기화 진행 중인 경우
+    if (_isInitializing) {
+      debugPrint('⏳ FCM initialization in progress, waiting...');
+      return _initCompleter?.future;
+    }
+
+    // 초기화 시작
+    _isInitializing = true;
+    _initCompleter = Completer<void>();
+
     try {
       debugPrint('📱 FCM initialization started...');
 
@@ -86,8 +107,17 @@ class FcmService {
       } else {
         debugPrint('⚠️ FCM notification permission denied');
       }
+
+      // 초기화 완료 표시
+      _isInitialized = true;
+      _initCompleter?.complete();
+      debugPrint('✅ FCM initialization completed');
     } catch (e) {
       debugPrint('⚠️ Failed to initialize FCM (may be simulator): $e');
+      _initCompleter?.completeError(e);
+      rethrow;
+    } finally {
+      _isInitializing = false;
     }
   }
 
@@ -138,6 +168,9 @@ class FcmService {
       _currentToken = null;
       onMessageReceived = null;
       onNotificationReceived = null;
+
+      // 재초기화 허용 (재로그인 시 다시 initialize 가능)
+      _isInitialized = false;
     }
   }
 
@@ -148,6 +181,11 @@ class FcmService {
     _tokenRefreshSubscription?.cancel();
     onMessageReceived = null;
     onNotificationReceived = null;
+
+    // 초기화 상태 리셋
+    _isInitialized = false;
+    _isInitializing = false;
+    _initCompleter = null;
   }
 
   /// 알림 탭 처리 (채팅 화면 또는 리뷰 작성 화면으로 이동)
