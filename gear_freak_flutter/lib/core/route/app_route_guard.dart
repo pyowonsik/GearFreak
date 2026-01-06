@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/provider/auth_state.dart';
+import 'package:gear_freak_flutter/shared/service/pending_deep_link_service.dart';
 import 'package:go_router/go_router.dart';
 
 /// 앱의 인증 상태에 따른 라우트 가드 클래스
@@ -52,6 +53,30 @@ class AppRouteGuard {
 
     // AuthNotifier의 현재 상태 확인
     final authState = ref.read(authNotifierProvider);
+
+    // ==================== 딥링크 경로 수정 ====================
+    // GoRouter가 custom scheme 딥링크를 잘못 파싱한 경우 수정
+    // 예: gearfreak://product/138 → /138로 파싱된 경우
+    if (RegExp(r'^/\d+$').hasMatch(currentPath)) {
+      // Pending deep link 확인
+      final pendingLink = PendingDeepLinkService.instance.pendingDeepLink;
+
+      if (pendingLink != null) {
+        debugPrint(
+          '🔧 잘못된 경로 감지: $currentPath → Pending link 사용: $pendingLink',
+        );
+        // Pending link 소비하고 해당 경로로 리디렉션
+        PendingDeepLinkService.instance.consumePendingDeepLink();
+        return pendingLink;
+      } else {
+        // Pending link가 없으면 /product/:id로 추론
+        final productId = currentPath.substring(1); // '/' 제거
+        final correctedPath = '/product/$productId';
+        debugPrint('🔧 잘못된 경로 감지: $currentPath → 수정: $correctedPath');
+        return correctedPath;
+      }
+    }
+    // ==================== End ====================
 
     // 정의되지 않은 경로(`/`) 처리 - 먼저 체크
     if (currentPath == '/' || currentPath.isEmpty) {
@@ -111,8 +136,8 @@ class AppRouteGuard {
       AuthAuthenticated() => switch (true) {
           // 로그인 화면 접근 시: redirect 쿼리 파라미터 확인
           _ when isLoginScreen => _getRedirectPath(goRouterState, homePath),
-          // 스플래시 화면 접근 시: 메인으로 리디렉션
-          _ when isSplashScreen => homePath,
+          // 스플래시 화면 접근 시: pending deep link 또는 메인으로 리디렉션
+          _ when isSplashScreen => _getPendingDeepLinkOrHome(homePath),
           // 모든 조건 충족 시 현재 경로 유지
           _ => null,
         },
@@ -153,6 +178,23 @@ class AppRouteGuard {
       return redirectParam;
     }
     // 일반 로그인인 경우 기본 경로로 이동
+    return defaultPath;
+  }
+
+  /// Pending Deep Link 또는 기본 경로로 리디렉션
+  ///
+  /// 스플래시 화면에서 인증 완료 시, 보류된 딥링크가 있으면 해당 경로로,
+  /// 없으면 기본 경로(homePath)로 리디렉션합니다.
+  String _getPendingDeepLinkOrHome(String defaultPath) {
+    final pendingLink =
+        PendingDeepLinkService.instance.consumePendingDeepLink();
+
+    if (pendingLink != null) {
+      debugPrint('🔗 보류된 딥링크로 이동: $pendingLink');
+      return pendingLink;
+    }
+
+    // 보류된 딥링크가 없으면 기본 경로로 이동
     return defaultPath;
   }
 }

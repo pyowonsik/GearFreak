@@ -41,7 +41,7 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // .env 파일 로드
-  await dotenv.load(fileName: '.env');
+  await dotenv.load();
 
   // 카카오 SDK 초기화
   final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
@@ -111,32 +111,32 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     // 딥링크 서비스 초기화 (라우터가 준비된 후)
-    // 여러 프레임을 기다려서 라우터가 완전히 준비될 때까지 대기
+    // addPostFrameCallback을 사용하여 첫 프레임 이후 초기화
+    // 지연 시간을 최소화하여 초기 딥링크를 빠르게 캡처
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          final router = ref.read(routerProvider);
-          DeepLinkService.instance.initialize(router);
-          // FCM 서비스에 라우터 설정
-          FcmService.instance.setRouter(router);
-          // FCM 메시지 수신 콜백 설정 (채팅방 목록 탭을 열지 않았을 때)
-          // 채팅방 목록 탭을 열면 chat_room_list_page.dart의 콜백이 이 콜백을 덮어씀
-          FcmService.instance.setOnMessageReceived((chatRoomId) {
-            // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
-            // 채팅방 목록 탭을 열지 않았어도 항상 갱신됨
-            _refreshUnreadCount();
-          });
-          // FCM 알림 수신 콜백 설정 (review_received 등)
-          FcmService.instance.setOnNotificationReceived(() {
-            if (!mounted) return;
-            // 읽지 않은 알림 개수 갱신 (홈 화면 빨간 점 업데이트)
-            // ignore: unused_result
-            ref.refresh(totalUnreadNotificationCountProvider);
-          });
-          // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
-          _handleInitialMessage();
-        }
-      });
+      if (mounted) {
+        final router = ref.read(routerProvider);
+        // 딥링크 서비스 초기화 (초기 딥링크를 PendingDeepLinkService에 저장)
+        DeepLinkService.instance.initialize(router);
+        // FCM 서비스에 라우터 설정
+        FcmService.instance.setRouter(router);
+        // FCM 메시지 수신 콜백 설정 (채팅방 목록 탭을 열지 않았을 때)
+        // 채팅방 목록 탭을 열면 chat_room_list_page.dart의 콜백이 이 콜백을 덮어씀
+        FcmService.instance.setOnMessageReceived((chatRoomId) {
+          // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
+          // 채팅방 목록 탭을 열지 않았어도 항상 갱신됨
+          _refreshUnreadCount();
+        });
+        // FCM 알림 수신 콜백 설정 (review_received 등)
+        FcmService.instance.setOnNotificationReceived(() {
+          if (!mounted) return;
+          // 읽지 않은 알림 개수 갱신 (홈 화면 빨간 점 업데이트)
+          // ignore: unused_result
+          ref.refresh(totalUnreadNotificationCountProvider);
+        });
+        // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
+        _handleInitialMessage();
+      }
     });
 
     // 앱 생명주기 감지 (백그라운드 -> 포그라운드)

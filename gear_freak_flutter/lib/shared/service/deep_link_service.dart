@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gear_freak_flutter/shared/service/pending_deep_link_service.dart';
 import 'package:go_router/go_router.dart';
 
 /// 딥링크 서비스
@@ -17,6 +18,7 @@ class DeepLinkService {
   StreamSubscription<Uri>? _subscription;
   bool _isInitialized = false;
   GoRouter? _router;
+  Uri? _initialLinkUri; // 초기 딥링크 URI (중복 처리 방지용)
 
   /// 서비스 초기화
   ///
@@ -46,6 +48,10 @@ class DeepLinkService {
   }
 
   /// 앱 시작 시 초기 딥링크 처리
+  ///
+  /// 초기 딥링크는 인증이 완료되지 않을 수 있으므로
+  /// PendingDeepLinkService에 저장만 하고 바로 라우팅하지 않습니다.
+  /// 인증 완료 후 [processPendingDeepLink]를 호출하여 처리합니다.
   Future<void> _handleInitialLink() async {
     if (!_isInitialized || _router == null) {
       debugPrint('⚠️ 딥링크 서비스가 초기화되지 않았습니다');
@@ -56,8 +62,18 @@ class DeepLinkService {
       // 앱이 딥링크로 시작되었는지 확인
       final uri = await _appLinks.getInitialLink();
       if (uri != null) {
+        // 초기 딥링크 URI 저장 (중복 처리 방지용)
+        _initialLinkUri = uri;
+
         debugPrint('🔗 초기 딥링크 수신: $uri');
-        _handleDeepLink(uri.toString());
+        debugPrint('📌 인증 대기를 위해 딥링크를 보류합니다');
+
+        // URL 파싱하여 경로 추출
+        final routePath = _parseDeepLinkUrl(uri.toString());
+        if (routePath != null) {
+          // 인증 완료 후 처리하기 위해 보류
+          PendingDeepLinkService.instance.setPendingDeepLink(routePath);
+        }
       }
     } on Exception catch (error, stackTrace) {
       debugPrint('❌ 초기 딥링크 처리 실패: $error');
@@ -78,6 +94,13 @@ class DeepLinkService {
     // 새로운 딥링크 수신 대기
     _subscription = _appLinks.uriLinkStream.listen(
       (uri) {
+        // 초기 딥링크와 동일한 URI는 무시 (중복 처리 방지)
+        if (_initialLinkUri != null && uri == _initialLinkUri) {
+          debugPrint('⏭️ 초기 딥링크 중복 수신 무시: $uri');
+          _initialLinkUri = null; // 한 번만 체크하고 초기화
+          return;
+        }
+
         debugPrint('🔗 딥링크 수신: $uri');
         _handleDeepLink(uri.toString());
       },
@@ -89,24 +112,21 @@ class DeepLinkService {
     debugPrint('👂 딥링크 수신 대기 시작');
   }
 
-  /// 딥링크 URL 처리
+  /// 딥링크 URL 파싱
   ///
   /// [url]은 딥링크 URL입니다.
   /// 예: https://gear-freaks.com/product/123
   /// 예: gearfreak://product/123
-  void _handleDeepLink(String url) {
-    if (_router == null) {
-      debugPrint('⚠️ GoRouter가 설정되지 않았습니다');
-      return;
-    }
-
+  ///
+  /// 파싱된 경로를 반환하거나, 파싱 실패 시 null 반환합니다.
+  String? _parseDeepLinkUrl(String url) {
     try {
       debugPrint('🔍 딥링크 파싱 시작: $url');
 
       final uri = Uri.tryParse(url);
       if (uri == null) {
         debugPrint('❌ 잘못된 URL 형식: $url');
-        return;
+        return null;
       }
 
       debugPrint('🔍 URI 파싱 결과:');
@@ -118,7 +138,7 @@ class DeepLinkService {
       // 카카오 OAuth 딥링크는 카카오 SDK가 자체적으로 처리하므로 무시
       if (uri.scheme.startsWith('kakao') && uri.host == 'oauth') {
         debugPrint('✅ 카카오 OAuth 딥링크는 카카오 SDK가 처리합니다. 무시합니다.');
-        return;
+        return null;
       }
 
       // URL에서 경로 추출
@@ -139,7 +159,7 @@ class DeepLinkService {
         debugPrint('🔍 HTTPS/HTTP 처리: routePath = $routePath');
       } else {
         debugPrint('❌ 지원하지 않는 URL 스킴: ${uri.scheme}');
-        return;
+        return null;
       }
 
       // 경로가 비어있거나 슬래시로 시작하지 않으면 추가
@@ -159,22 +179,62 @@ class DeepLinkService {
       }
 
       debugPrint('📍 최종 딥링크 경로: $routePath');
-      debugPrint(
-        '📍 현재 라우터 위치: ${_router!.routerDelegate.currentConfiguration.uri}',
-      );
-
-      // 라우팅 실행 (약간의 지연을 두어 라우터가 준비될 시간을 줌)
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (_router != null) {
-          // 파싱된 경로로 라우팅
-          debugPrint('🚀 라우팅 실행: $routePath');
-          _router!.go(routePath);
-          debugPrint('✅ 딥링크 라우팅 완료: $routePath');
-        }
-      });
+      return routePath;
     } on Exception catch (error, stackTrace) {
-      debugPrint('❌ 딥링크 처리 오류: $error');
+      debugPrint('❌ 딥링크 파싱 오류: $error');
       debugPrint('❌ 스택 트레이스: $stackTrace');
+      return null;
+    }
+  }
+
+  /// 딥링크 URL 처리 (앱 실행 중 수신된 딥링크)
+  ///
+  /// [url]은 딥링크 URL입니다.
+  /// 앱이 이미 실행 중일 때 수신된 딥링크는 바로 라우팅합니다.
+  void _handleDeepLink(String url) {
+    if (_router == null) {
+      debugPrint('⚠️ GoRouter가 설정되지 않았습니다');
+      return;
+    }
+
+    final routePath = _parseDeepLinkUrl(url);
+    if (routePath == null) {
+      debugPrint('⚠️ 딥링크 파싱 실패, 라우팅 중단');
+      return;
+    }
+
+    // 앱 실행 중 딥링크는 바로 라우팅
+    _navigateToDeepLink(routePath);
+  }
+
+  /// 파싱된 경로로 라우팅 실행
+  ///
+  /// [routePath]는 파싱된 경로입니다.
+  void _navigateToDeepLink(String routePath) {
+    if (_router == null) {
+      debugPrint('⚠️ GoRouter가 설정되지 않았습니다');
+      return;
+    }
+
+    debugPrint(
+      '📍 현재 라우터 위치: ${_router!.routerDelegate.currentConfiguration.uri}',
+    );
+    debugPrint('🚀 라우팅 실행: $routePath');
+
+    // 라우팅 실행
+    _router!.go(routePath);
+    debugPrint('✅ 딥링크 라우팅 완료: $routePath');
+  }
+
+  /// 보류 중인 딥링크 처리
+  ///
+  /// 인증 완료 후 호출하여 보류된 딥링크를 처리합니다.
+  void processPendingDeepLink() {
+    final pendingLink =
+        PendingDeepLinkService.instance.consumePendingDeepLink();
+    if (pendingLink != null) {
+      debugPrint('🔗 보류된 딥링크 처리 시작: $pendingLink');
+      _navigateToDeepLink(pendingLink);
     }
   }
 
