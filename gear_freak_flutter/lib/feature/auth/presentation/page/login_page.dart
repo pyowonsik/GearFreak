@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/auth/di/auth_providers.dart';
 import 'package:gear_freak_flutter/feature/auth/presentation/presentation.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// 로그인 화면
 class LoginPage extends ConsumerStatefulWidget {
@@ -48,53 +49,42 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             child: Column(
               children: [
                 const Spacer(flex: 3),
-                Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF2563EB),
-                        Color(0xFF7C3AED),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2563EB).withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        spreadRadius: 2,
+                Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    // 텍스트
+                    Padding(
+                      padding: const EdgeInsets.only(top: 200),
+                      child: Text(
+                        '장 비 충',
+                        style: GoogleFonts.gasoekOne(
+                          fontSize: 80,
+                          color: const Color(0xFF1E3A5F),
+                          letterSpacing: -10,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.fitness_center,
-                    size: 80,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                // 앱 이름 - 그라데이션 적용
-                ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    colors: [
-                      Color(0xFF2563EB),
-                      Color(0xFF7C3AED),
-                    ],
-                  ).createShader(bounds),
-                  child: const Text(
-                    '장비빨',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: -1.5,
-                      height: 1.2,
                     ),
-                  ),
+                    // 이미지 (텍스트 위에)
+                    Positioned(
+                      bottom: 30,
+                      child: Container(
+                        width: 300,
+                        height: 300,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Image.asset(
+                          'assets/images/barbel_boy_logo.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
+                // const SizedBox(height: 16),
                 const Text(
-                  '프리미엄 헬스 장비와 보충제를\n한 곳에서 만나보세요',
+                  '운동 용품, 중고로 사고 파는 \n가장 쉬운 방법',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
