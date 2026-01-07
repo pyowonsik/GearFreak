@@ -87,7 +87,7 @@ abstract final class AppRoutes {
           builder: (context, state) {
             final productId = state.pathParameters['id'] ?? '';
             return ChatRoomSelectionPage(
-              productId: int.parse(productId),
+              productId: int.tryParse(productId) ?? 0,
             );
           },
         ),
@@ -181,9 +181,9 @@ abstract final class AppRoutes {
             final isSellerReview =
                 state.uri.queryParameters['isSellerReview'] == 'true';
             return WriteReviewPage(
-              productId: int.parse(productId),
-              revieweeId: revieweeId != null ? int.parse(revieweeId) : 0,
-              chatRoomId: chatRoomId != null ? int.parse(chatRoomId) : 0,
+              productId: int.tryParse(productId) ?? 0,
+              revieweeId: int.tryParse(revieweeId ?? '') ?? 0,
+              chatRoomId: int.tryParse(chatRoomId ?? '') ?? 0,
               isSellerReview: isSellerReview,
             );
           },

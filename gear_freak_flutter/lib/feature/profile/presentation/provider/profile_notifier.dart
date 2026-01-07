@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -117,29 +118,12 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     final previousUploadedFileKey = currentState.uploadedFileKey;
 
     try {
-      // 1. 기존에 업로드된 파일이 있으면 먼저 삭제 (S3 정리)
-      if (previousUploadedFileKey != null) {
-        try {
-          await deleteImageUseCase(
-            DeleteImageParams(
-              fileKey: previousUploadedFileKey,
-              bucketType: bucketType,
-            ),
-          );
-        } catch (e) {
-          // 삭제 실패해도 계속 진행 (로깅만)
-          debugPrint(
-            '⚠️ 기존 업로드 파일 S3 삭제 실패 (계속 진행): $previousUploadedFileKey - $e',
-          );
-        }
-      }
-
-      // 2. 파일 정보 가져오기
+      // 1. 파일 정보 가져오기
       final fileName = imageFile.path.split('/').last;
       final fileBytes = await imageFile.readAsBytes();
       final fileSize = fileBytes.length;
 
-      // 3. Content-Type 결정
+      // 2. Content-Type 결정
       var contentType = 'image/jpeg';
       if (fileName.toLowerCase().endsWith('.png')) {
         contentType = 'image/png';
@@ -147,7 +131,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         contentType = 'image/webp';
       }
 
-      // 4. Presigned URL 요청 DTO 생성
+      // 3. Presigned URL 요청 DTO 생성
       final request = pod.GeneratePresignedUploadUrlRequestDto(
         fileName: fileName,
         contentType: contentType,
@@ -156,14 +140,14 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         prefix: prefix,
       );
 
-      // 5. 업로드 시작
+      // 4. 업로드 시작
       state = ProfileImageUploading(
         user: currentState.user,
         stats: currentState.stats,
         currentFileName: fileName,
       );
 
-      // 6. UseCase 호출
+      // 5. 새 이미지 먼저 업로드 (트랜잭션 패턴)
       final result = await uploadImageUseCase(
         UploadImageParams(
           request: request,
@@ -173,7 +157,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
       result.fold(
         (failure) {
-          // 업로드 실패 시 이전 상태로 복원 불가 (이미 삭제됨)
+          // 업로드 실패 시 기존 이미지 유지 (삭제 안 함)
           state = ProfileImageUploadError(
             user: currentState.user,
             stats: currentState.stats,
@@ -181,6 +165,26 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
           );
         },
         (response) {
+          // 6. 업로드 성공 후에만 기존 이미지 삭제
+          if (previousUploadedFileKey != null) {
+            // 기존 이미지 삭제는 백그라운드에서 처리 (실패해도 괜찮음)
+            unawaited(
+              deleteImageUseCase(
+                DeleteImageParams(
+                  fileKey: previousUploadedFileKey,
+                  bucketType: bucketType,
+                ),
+              ).then(
+                (_) => debugPrint(
+                  '✅ 기존 이미지 S3 삭제 성공: $previousUploadedFileKey',
+                ),
+                onError: (Object e) => debugPrint(
+                  '⚠️ 기존 이미지 S3 삭제 실패 (무시): $previousUploadedFileKey - $e',
+                ),
+              ),
+            );
+          }
+
           state = ProfileImageUploadSuccess(
             user: currentState.user,
             uploadedFileKey: response.fileKey,
@@ -189,7 +193,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         },
       );
     } catch (e) {
-      // 예외 발생 시에도 이전 상태로 복원 불가 (이미 삭제됨)
+      // 예외 발생 시에도 기존 이미지 유지
       state = ProfileImageUploadError(
         user: currentState.user,
         stats: currentState.stats,

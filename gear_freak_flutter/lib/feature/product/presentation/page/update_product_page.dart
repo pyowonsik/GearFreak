@@ -93,7 +93,7 @@ class _UpdateProductPageState extends ConsumerState<UpdateProductPage> {
     ref.listen<UpdateProductState>(
       updateProductNotifierProvider,
       (previous, next) {
-        if (!mounted) return;
+        if (!context.mounted) return;
 
         if (next is UpdateProductUploadError) {
           // 업로드 에러 상태일 때만 스낵바 표시

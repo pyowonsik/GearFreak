@@ -49,7 +49,7 @@ class _CreateProductPageState extends ConsumerState<CreateProductPage> {
     ref.listen<CreateProductState>(
       createProductNotifierProvider,
       (previous, next) {
-        if (!mounted) return;
+        if (!context.mounted) return;
 
         if (next is CreateProductUploadError) {
           // 업로드 에러 상태일 때만 스낵바 표시

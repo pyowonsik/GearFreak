@@ -152,12 +152,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     ref.listen<ProfileState>(
       profileNotifierProvider,
       (previous, next) {
-        if (!mounted) return;
+        if (!context.mounted) return;
 
         // 업데이트 완료 확인 (ProfileUpdating -> ProfileUpdated)
         if (next is ProfileUpdated) {
           GbSnackBar.showSuccess(context, '프로필이 저장되었습니다');
-          if (mounted) {
+          if (context.mounted) {
             // 프로필 화면 새로고침을 위해 프로필 다시 로드
             ref.read(profileNotifierProvider.notifier).loadProfile();
             context.pop();
