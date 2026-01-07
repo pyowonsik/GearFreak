@@ -72,7 +72,7 @@ class FcmService {
           final token = await _messaging.getToken();
           if (token != null) {
             _currentToken = token;
-            debugPrint('📱 FCM token retrieved: ${token.substring(0, 30)}...');
+            debugPrint('📱 FCM token retrieved: [MASKED]');
             await _registerTokenToServer(token);
           } else {
             debugPrint('⚠️ FCM token is null');
@@ -101,7 +101,7 @@ class FcmService {
         _tokenRefreshSubscription =
             _messaging.onTokenRefresh.listen((newToken) {
           _currentToken = newToken;
-          debugPrint('📱 FCM token refreshed: ${newToken.substring(0, 30)}...');
+          debugPrint('📱 FCM token refreshed: [MASKED]');
           _registerTokenToServer(newToken);
         });
       } else {
@@ -132,7 +132,7 @@ class FcmService {
         final deviceType = Platform.isIOS ? 'ios' : 'android';
 
         await client.fcm.registerFcmToken(token, deviceType);
-        debugPrint('✅ FCM token registered: ${token.substring(0, 20)}...');
+        debugPrint('✅ FCM token registered: [MASKED]');
         return; // 성공 시 즉시 반환
       } catch (e) {
         debugPrint(

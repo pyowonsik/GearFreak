@@ -40,8 +40,7 @@ class S3RemoteDataSource {
       };
 
       debugPrint('📤 S3 업로드 시작:');
-      debugPrint('   - URL: '
-          '${uri.toString().substring(0, uri.toString().indexOf('?'))}...');
+      debugPrint('   - URL: [MASKED]');
       debugPrint('   - Content-Type: $contentType');
       debugPrint('   - 파일 크기: ${fileBytes.length} bytes');
 

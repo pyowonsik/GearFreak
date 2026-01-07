@@ -95,6 +95,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// 스트림 재연결 타이머
   Timer? _reconnectTimer;
 
+  /// 처리된 메시지 ID Set (중복 방지)
+  final Set<int> _processedMessageIds = {};
+
   // ==================== Public Methods (UseCase 호출) ====================
 
   /// 채팅방 생성 또는 조회 및 진입
@@ -598,6 +601,16 @@ class ChatNotifier extends StateNotifier<ChatState> {
     List<pod.ChatMessageResponseDto> messages,
     pod.ChatMessageResponseDto message,
   ) {
+    // Set을 사용한 중복 검사 (이미 처리된 메시지 무시)
+    if (_processedMessageIds.contains(message.id)) {
+      debugPrint('⏭️ 중복 메시지 무시: ${message.id}');
+      return false;
+    }
+
+    // 처리된 메시지로 등록
+    _processedMessageIds.add(message.id);
+
+    // 기존 메시지 리스트에도 없는 경우만 이벤트 발행
     final existingIds = messages.map((m) => m.id).toSet();
     if (!existingIds.contains(message.id)) {
       // 새 메시지 이벤트 발행 (채팅방 목록 Notifier가 자동으로 반응)
@@ -839,6 +852,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   void dispose() {
     _messageStreamSubscription?.cancel();
     _reconnectTimer?.cancel();
+    _processedMessageIds.clear(); // 처리된 메시지 ID Set 정리
     super.dispose();
   }
 }

@@ -175,6 +175,33 @@ class AppRouteGuard {
     return '/login';
   }
 
+  /// redirect 파라미터 검증 (Open Redirect 공격 방지)
+  ///
+  /// 내부 경로만 허용하고, 외부 URL이나 허용되지 않은 경로는 null 반환
+  String? _validateRedirect(String? redirect) {
+    if (redirect == null || redirect.isEmpty) return null;
+
+    // 1. 내부 경로만 허용 (외부 URL 차단)
+    if (!redirect.startsWith('/')) return null;
+
+    // 2. 허용된 경로 prefix 체크
+    final allowedPrefixes = [
+      '/',
+      '/product',
+      '/chat',
+      '/profile',
+      '/review',
+      '/notifications',
+      '/search',
+    ];
+
+    final isAllowed = allowedPrefixes.any(
+      (prefix) => redirect.startsWith(prefix),
+    );
+
+    return isAllowed ? redirect : null;
+  }
+
   /// 리디렉션 경로 결정
   ///
   /// 로그인 성공 후 redirect 쿼리 파라미터가 있으면 해당 경로로,
@@ -182,9 +209,12 @@ class AppRouteGuard {
   String _getRedirectPath(GoRouterState goRouterState, String defaultPath) {
     final redirectParam = goRouterState.uri.queryParameters['redirect'];
 
-    if (redirectParam != null && redirectParam.isNotEmpty) {
-      // 딥링크에서 온 경우 원래 경로로 이동
-      return redirectParam;
+    // redirect 파라미터 검증 (Open Redirect 방지)
+    final validatedRedirect = _validateRedirect(redirectParam);
+
+    if (validatedRedirect != null) {
+      // 검증된 내부 경로로 이동
+      return validatedRedirect;
     }
     // 일반 로그인인 경우 기본 경로로 이동
     return defaultPath;

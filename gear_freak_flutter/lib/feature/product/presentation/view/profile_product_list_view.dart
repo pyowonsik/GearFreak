@@ -39,42 +39,43 @@ class ProfileProductListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: SingleChildScrollView(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Container(
-          color: Colors.white,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (products.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: GbEmptyView(
-                    message: '등록된 상품이 없습니다',
-                  ),
-                )
-              else
-                Column(
-                  children: [
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        return ProductCardWidget(
-                          product: products[index],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-            ],
+    if (products.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(48),
+            child: const GbEmptyView(
+              message: '등록된 상품이 없습니다',
+            ),
           ),
         ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: CustomScrollView(
+        controller: scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  return ProductCardWidget(
+                    product: products[index],
+                  );
+                },
+                childCount: products.length,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

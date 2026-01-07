@@ -193,7 +193,8 @@ class _ProductDetailLoadedViewState
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          final id = int.parse(widget.productId);
+          final id = int.tryParse(widget.productId);
+          if (id == null) return;
           await ref
               .read(productDetailNotifierProvider.notifier)
               .loadProductDetail(id);
@@ -615,7 +616,8 @@ class _ProductDetailLoadedViewState
               // 찜하기 버튼
               IconButton(
                 onPressed: () {
-                  final id = int.parse(widget.productId);
+                  final id = int.tryParse(widget.productId);
+                  if (id == null) return;
                   unawaited(
                     ref
                         .read(productDetailNotifierProvider.notifier)
@@ -637,7 +639,8 @@ class _ProductDetailLoadedViewState
                   onPressed: () {
                     if (widget.isMyProduct) {
                       // 본인 상품인 경우: 대화중인 채팅방 보기 화면
-                      final productId = int.parse(widget.productId);
+                      final productId = int.tryParse(widget.productId);
+                      if (productId == null) return;
                       context.push('/chat-room-selection/$productId');
                     } else {
                       // 다른 사람 상품인 경우: 1:1 채팅하기

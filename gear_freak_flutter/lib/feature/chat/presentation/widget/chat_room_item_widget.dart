@@ -133,28 +133,12 @@ class ChatRoomItemWidget extends ConsumerWidget {
               CustomSlidableAction(
                 onPressed: (context) async {
                   // 나가기 확인 다이얼로그 표시
-                  final confirmed = await showDialog<bool>(
+                  final confirmed = await GbDialog.show(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('채팅방 나가기'),
-                      content: const Text(
-                        '채팅방을 나가시겠습니까?\n'
+                    title: '채팅방 나가기',
+                    content: '채팅방을 나가시겠습니까?\n'
                         '나가기 후에도 상대방이 메시지를 보내면 다시 채팅방에 입장할 수 있습니다.',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text(
-                            '나가기',
-                            style: TextStyle(color: Color(0xFFEF4444)),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('취소'),
-                        ),
-                      ],
-                    ),
+                    confirmText: '나가기',
                   );
 
                   if (confirmed ?? false) {
@@ -165,18 +149,14 @@ class ChatRoomItemWidget extends ConsumerWidget {
 
                     if (context.mounted) {
                       if (success) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('채팅방에서 나갔습니다.'),
-                            backgroundColor: Colors.green,
-                          ),
+                        GbSnackBar.showSuccess(
+                          context,
+                          '채팅방에서 나갔습니다.',
                         );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('채팅방 나가기에 실패했습니다.'),
-                            backgroundColor: Colors.red,
-                          ),
+                        GbSnackBar.showError(
+                          context,
+                          '채팅방 나가기에 실패했습니다.',
                         );
                       }
                     }

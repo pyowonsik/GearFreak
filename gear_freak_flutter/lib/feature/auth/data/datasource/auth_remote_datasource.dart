@@ -57,7 +57,7 @@ class AuthRemoteDataSource {
     required String password,
   }) async {
     try {
-      debugPrint('📝 회원가입 시작: userName=$userName, email=$email');
+      debugPrint('📝 회원가입 시작: userName=$userName, email=[MASKED]');
 
       // 개발용: 이메일 인증 없이 바로 회원가입 (User 클래스 반환)
       final user = await _client.auth.signupWithoutEmailVerification(

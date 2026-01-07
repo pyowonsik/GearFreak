@@ -26,8 +26,7 @@ class ProductDetailPage extends ConsumerStatefulWidget {
   final String productId;
 
   @override
-  ConsumerState<ProductDetailPage> createState() =>
-      _ProductDetailPageState();
+  ConsumerState<ProductDetailPage> createState() => _ProductDetailPageState();
 }
 
 class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
@@ -226,7 +225,6 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         ),
     };
   }
-
 
   /// 상태 변경 처리
   Future<void> _handleStatusChange(

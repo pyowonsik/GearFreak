@@ -179,8 +179,9 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
     } catch (e) {
       if (mounted) {
         debugPrint('미디어 선택 오류: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('이미지 선택에 실패했습니다.')),
+        GbSnackBar.showError(
+          context,
+          '이미지 선택에 실패했습니다.',
         );
       }
     }
@@ -258,14 +259,11 @@ class _ChatLoadedViewState extends ConsumerState<ChatLoadedView>
     } catch (e) {
       debugPrint('❌ 미디어 업로드 오류: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ChatUtil.isVideoFile(media.path.split('/').last)
-                  ? '동영상 전송 중 오류가 발생했습니다.'
-                  : '이미지 전송 중 오류가 발생했습니다.',
-            ),
-          ),
+        GbSnackBar.showError(
+          context,
+          ChatUtil.isVideoFile(media.path.split('/').last)
+              ? '동영상 전송 중 오류가 발생했습니다.'
+              : '이미지 전송 중 오류가 발생했습니다.',
         );
       }
     }

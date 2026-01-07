@@ -63,14 +63,12 @@ class SearchLoadedView extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: onRefresh,
-      child: SingleChildScrollView(
+      child: CustomScrollView(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 검색 결과 목록
-            Container(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
               color: Colors.white,
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -82,20 +80,23 @@ class SearchLoadedView extends ConsumerWidget {
                     onSortChanged: onSortChanged,
                   ),
                   const SizedBox(height: 12),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return ProductCardWidget(product: product);
-                    },
-                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final product = products[index];
+                  return ProductCardWidget(product: product);
+                },
+                childCount: products.length,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
