@@ -1,15 +1,21 @@
+import 'package:serverpod/serverpod.dart';
+
 import 'package:gear_freak_server/src/common/authenticated_mixin.dart';
+
 import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
-import 'package:serverpod/serverpod.dart';
 
 /// FCM 엔드포인트
 /// FCM 토큰 등록 및 삭제를 처리합니다.
 class FcmEndpoint extends Endpoint with AuthenticatedMixin {
+  // ==================== Public Methods ====================
+
   /// FCM 토큰 등록
-  /// 
-  /// [token]은 FCM 토큰입니다.
-  /// [deviceType]은 디바이스 타입입니다 (ios, android).
+  ///
+  /// [session]: Serverpod 세션
+  /// [token]: FCM 토큰
+  /// [deviceType]: 디바이스 타입 (ios, android)
+  /// Returns: true = 성공, false = 실패
   Future<bool> registerFcmToken(
     Session session,
     String token,
@@ -29,8 +35,10 @@ class FcmEndpoint extends Endpoint with AuthenticatedMixin {
   }
 
   /// FCM 토큰 삭제
-  /// 
-  /// [token]은 FCM 토큰입니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [token]: 삭제할 FCM 토큰
+  /// Returns: true = 성공, false = 실패
   Future<bool> deleteFcmToken(
     Session session,
     String token,

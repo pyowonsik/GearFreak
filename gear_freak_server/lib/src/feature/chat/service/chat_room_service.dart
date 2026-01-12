@@ -1,12 +1,16 @@
-import 'package:gear_freak_server/src/feature/chat/service/chat_notification_service.dart';
-import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
+
+import 'package:gear_freak_server/src/feature/chat/service/chat_notification_service.dart';
 
 /// 채팅방 서비스
 /// 채팅방 생성, 조회, 참여/나가기 관련 비즈니스 로직을 처리합니다.
 class ChatRoomService {
   final ChatNotificationService _notificationService =
       ChatNotificationService();
+
+  // ==================== Public Methods ====================
 
   /// 채팅방 생성 또는 조회
   /// 상품 ID와 상대방 사용자 ID로 기존 채팅방을 찾거나 새로 생성합니다.
@@ -17,10 +21,10 @@ class ChatRoomService {
   ) async {
     try {
       session.log(
-        '💬 채팅방 생성/조회 시작 - '
-        'userId: $userId, '
-        'productId: ${request.productId}, '
-        'targetUserId: ${request.targetUserId}',
+        '[ChatRoomService] createOrGetChatRoom - start: '
+        'userId=$userId, '
+        'productId=${request.productId}, '
+        'targetUserId=${request.targetUserId}',
         level: LogLevel.info,
       );
 
@@ -88,7 +92,7 @@ class ChatRoomService {
 
       if (existingChatRoom != null) {
         session.log(
-          '✅ 기존 채팅방 발견 - chatRoomId: ${existingChatRoom.id}',
+          '[ChatRoomService] createOrGetChatRoom - found existing: chatRoomId=${existingChatRoom.id}',
           level: LogLevel.info,
         );
         return CreateChatRoomResponseDto(
@@ -114,7 +118,7 @@ class ChatRoomService {
 
       final createdChatRoom = await ChatRoom.db.insertRow(session, chatRoom);
       session.log(
-        '✅ 채팅방 생성 완료 - chatRoomId: ${createdChatRoom.id}',
+        '[ChatRoomService] createOrGetChatRoom - success: chatRoomId=${createdChatRoom.id}',
         level: LogLevel.info,
       );
 
@@ -163,7 +167,7 @@ class ChatRoomService {
       );
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 채팅방 생성/조회 실패: $e',
+        '[ChatRoomService] createOrGetChatRoom - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -205,7 +209,7 @@ class ChatRoomService {
       return chatRoom;
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 채팅방 조회 실패: $e',
+        '[ChatRoomService] getChatRoomById - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -227,7 +231,7 @@ class ChatRoomService {
       return chatRooms;
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 채팅방 목록 조회 실패: $e',
+        '[ChatRoomService] getChatRoomsByProductId - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -299,7 +303,7 @@ class ChatRoomService {
           chatRoomsWithUnreadCount, totalCount, pagination);
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 사용자 채팅방 목록 조회 실패: $e',
+        '[ChatRoomService] getUserChatRoomsByProductId - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -366,7 +370,7 @@ class ChatRoomService {
           chatRoomsWithUnreadCount, totalCount, pagination);
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 내 채팅방 목록 조회 실패: $e',
+        '[ChatRoomService] getMyChatRooms - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,

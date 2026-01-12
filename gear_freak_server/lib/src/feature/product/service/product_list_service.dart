@@ -1,11 +1,21 @@
-import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
+
 import 'package:gear_freak_server/src/feature/product/util/product_filter_util.dart';
 
 /// 상품 목록 서비스
 /// 상품 목록 조회 및 통계 관련 비즈니스 로직을 처리합니다.
 class ProductListService {
+  // ==================== Public Methods ====================
+
   /// 페이지네이션된 상품 목록 조회
+  ///
+  /// 필터링, 정렬, 페이지네이션을 적용하여 상품 목록을 조회합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [pagination]: 페이지네이션 정보 (페이지, 개수, 정렬, 필터 포함)
+  /// Returns: 페이지네이션된 상품 목록
   Future<PaginatedProductsResponseDto> getPaginatedProducts(
     Session session,
     PaginationDto pagination,
@@ -38,9 +48,15 @@ class ProductListService {
   }
 
   /// 내가 등록한 상품 목록 조회 (페이지네이션)
+  ///
   /// 수정일 기준 최근순으로 정렬됩니다.
   /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
-  /// [pagination.status]가 null이 아니면 해당 상태의 상품만 반환합니다.
+  /// [pagination.status]가 selling이면 판매중/예약중 상품을 반환합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 판매자 ID
+  /// [pagination]: 페이지네이션 정보 (상태 필터 포함)
+  /// Returns: 페이지네이션된 상품 목록
   Future<PaginatedProductsResponseDto> getMyProducts(
     Session session,
     int userId,
@@ -107,8 +123,14 @@ class ProductListService {
     return _buildPaginationResponse(products, totalCount, pagination);
   }
 
-  /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
-  /// 찜한 날 기준 최근순으로 정렬됩니다.
+  /// 내가 관심목록에 추가한 상품 목록 조회 (페이지네이션)
+  ///
+  /// 찜한 날짜 기준 최근순으로 정렬됩니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// [pagination]: 페이지네이션 정보
+  /// Returns: 페이지네이션된 상품 목록
   Future<PaginatedProductsResponseDto> getMyFavoriteProducts(
     Session session,
     int userId,
@@ -145,7 +167,13 @@ class ProductListService {
     return _buildPaginationResponse(products, totalCount, pagination);
   }
 
-  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
+  /// 상품 통계 조회
+  ///
+  /// 사용자의 판매중, 거래완료, 관심목록 개수, 후기 개수를 조회합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// Returns: 상품 통계 DTO
   Future<ProductStatsDto> getProductStats(
     Session session,
     int userId,

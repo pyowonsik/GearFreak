@@ -1,11 +1,22 @@
-import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
 
 /// 상품 상호작용 서비스
 /// 찜, 조회수 등 상품과 사용자 간의 상호작용 관련 비즈니스 로직을 처리합니다.
 class ProductInteractionService {
+  // ==================== Public Methods ====================
+
   /// 찜 추가/제거 (토글)
-  /// 반환값: true = 찜 추가됨, false = 찜 제거됨
+  ///
+  /// 이미 찜한 상품이면 제거하고, 아니면 추가합니다.
+  /// 상품의 favoriteCount도 함께 증감됩니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// [productId]: 상품 ID
+  /// Returns: true = 찜 추가됨, false = 찜 제거됨
+  /// Throws: Exception - 상품을 찾을 수 없는 경우
   Future<bool> toggleFavorite(
     Session session,
     int userId,
@@ -59,6 +70,13 @@ class ProductInteractionService {
   }
 
   /// 찜 상태 조회
+  ///
+  /// 사용자가 특정 상품을 찜했는지 확인합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// [productId]: 상품 ID
+  /// Returns: true = 찜함, false = 찜 안 함
   Future<bool> isFavorite(Session session, int userId, int productId) async {
     final favorite = await Favorite.db.findFirstRow(
       session,
@@ -68,8 +86,15 @@ class ProductInteractionService {
   }
 
   /// 조회수 증가 (계정당 1회)
+  ///
   /// 이미 조회한 경우에는 조회수를 증가시키지 않습니다.
-  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  /// 조회 기록과 상품의 viewCount를 함께 관리합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// [productId]: 상품 ID
+  /// Returns: true = 조회수 증가됨, false = 이미 조회함
+  /// Throws: Exception - 상품을 찾을 수 없는 경우
   Future<bool> incrementViewCount(
     Session session,
     int userId,

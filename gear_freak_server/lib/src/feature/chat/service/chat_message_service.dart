@@ -1,11 +1,15 @@
 import 'dart:developer' as developer;
+
+import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
+
 import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
+
 import 'package:gear_freak_server/src/feature/chat/service/chat_notification_service.dart';
 import 'package:gear_freak_server/src/feature/chat/service/chat_room_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/user_service.dart';
-import 'package:gear_freak_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart';
 
 /// 채팅 메시지 서비스
 /// 메시지 전송, 조회 관련 비즈니스 로직을 처리합니다.
@@ -14,8 +18,19 @@ class ChatMessageService {
   final ChatNotificationService _notificationService =
       ChatNotificationService();
 
+  // ==================== Public Methods ====================
+
   /// 메시지 전송
-  /// 카카오톡/당근마켓 방식: 첫 메시지 전송 시 채팅방 생성
+  ///
+  /// 카카오톡/당근마켓 방식으로 첫 메시지 전송 시 채팅방을 자동 생성합니다.
+  /// 채팅방 나가기 후 재참여 시 leftAt 이후 메시지만 보이도록 처리합니다.
+  /// 메시지 전송 후 Redis를 통해 글로벌 브로드캐스팅하고 FCM 알림을 전송합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 발신자 ID
+  /// [request]: 메시지 전송 요청 DTO
+  /// Returns: 전송된 메시지 응답 DTO
+  /// Throws: Exception - 채팅방 생성 실패, 참여자 아님, 메시지 비어있음
   Future<ChatMessageResponseDto> sendMessage(
     Session session,
     int userId,
@@ -91,7 +106,7 @@ class ChatMessageService {
             ),
           );
           session.log(
-            '채팅방 재참여: chatRoomId=$chatRoomId, userId=$userId, previousLeftAt=$previousLeftAt',
+            '[ChatMessageService] sendMessage - info: chat room rejoin - chatRoomId=$chatRoomId, userId=$userId, previousLeftAt=$previousLeftAt',
             level: LogLevel.info,
           );
         }
@@ -122,7 +137,7 @@ class ChatMessageService {
             );
           }
           session.log(
-            '채팅방 참여자 재활성화: chatRoomId=$chatRoomId, 재활성화된 참여자 수=${inactiveParticipants.length}',
+            '[ChatMessageService] sendMessage - info: participants reactivated - chatRoomId=$chatRoomId, reactivatedCount=${inactiveParticipants.length}',
             level: LogLevel.info,
           );
         }
@@ -190,7 +205,7 @@ class ChatMessageService {
         } catch (e) {
           // Presigned URL 생성 실패 시 원본 URL 유지
           session.log(
-            '⚠️ Presigned URL 생성 실패 (attachmentUrl): $e',
+            '[ChatMessageService] sendMessage - warning: Presigned URL generation failed (attachmentUrl) - $e',
             level: LogLevel.warning,
           );
         }
@@ -212,7 +227,7 @@ class ChatMessageService {
         } catch (e) {
           // Presigned URL 생성 실패 시 원본 URL 유지
           session.log(
-            '⚠️ Presigned URL 생성 실패 (content/thumbnail): $e',
+            '[ChatMessageService] sendMessage - warning: Presigned URL generation failed (content/thumbnail) - $e',
             level: LogLevel.warning,
           );
         }
@@ -233,14 +248,14 @@ class ChatMessageService {
         updatedAt: savedMessage.updatedAt,
       );
 
-      // 8. 🚀 Redis 기반 글로벌 브로드캐스팅
+      // 8. Redis 기반 글로벌 브로드캐스팅
       await session.messages.postMessage(
         'chat_room_$chatRoomId',
         response,
-        global: true, // 🔥 Redis를 통한 글로벌 브로드캐스팅
+        global: true, // Redis를 통한 글로벌 브로드캐스팅
       );
 
-      // 9. 📱 FCM 알림 전송 (비동기, 실패해도 메시지 전송은 성공)
+      // 9. FCM 알림 전송 (비동기, 실패해도 메시지 전송은 성공)
       // Session이 닫힌 후에도 실행될 수 있으므로 unawaited로 실행
       await _notificationService
           .sendFcmNotification(
@@ -251,16 +266,16 @@ class ChatMessageService {
         message: response,
       )
           .catchError((error) {
-        // Session이 닫힌 후에는 로깅할 수 없으므로 log 사용
+        // Session이 닫힌 후에는 로깅할 수 없으므로 developer.log 사용
         developer.log(
-          '⚠️ FCM 알림 전송 실패 (무시): $error',
+          '[ChatMessageService] sendFcmNotification - warning: FCM notification failed (ignored) - $error',
           name: 'ChatMessageService',
           error: error,
         );
       });
 
       session.log(
-        '메시지 전송 완료: '
+        '[ChatMessageService] sendMessage - success: '
         'chatRoomId=$chatRoomId, '
         'senderId=$userId, '
         'messageId=${savedMessage.id}',
@@ -270,7 +285,7 @@ class ChatMessageService {
       return response;
     } on Exception catch (e, stackTrace) {
       session.log(
-        '메시지 전송 실패: $e',
+        '[ChatMessageService] sendMessage - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -280,6 +295,15 @@ class ChatMessageService {
   }
 
   /// 페이지네이션된 메시지 조회
+  ///
+  /// 채팅방의 메시지를 최신순으로 조회합니다.
+  /// 재참여 사용자의 경우 leftAt 이후 메시지만 반환합니다.
+  /// Private 버킷의 첨부파일은 Presigned URL로 변환합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [request]: 메시지 조회 요청 DTO (페이지, 개수, 타입 필터)
+  /// Returns: 페이지네이션된 메시지 목록
+  /// Throws: Exception - 채팅방 없음, 잘못된 페이지네이션 값
   Future<PaginatedChatMessagesResponseDto> getChatMessagesPaginated(
     Session session,
     GetChatMessagesRequestDto request,
@@ -383,7 +407,7 @@ class ChatMessageService {
           } catch (e) {
             // Presigned URL 생성 실패 시 원본 URL 유지
             session.log(
-              '⚠️ Presigned URL 생성 실패 (attachmentUrl): $e',
+              '[ChatMessageService] getChatMessagesPaginated - warning: Presigned URL generation failed (attachmentUrl) - $e',
               level: LogLevel.warning,
             );
           }
@@ -405,7 +429,7 @@ class ChatMessageService {
           } catch (e) {
             // Presigned URL 생성 실패 시 원본 URL 유지
             session.log(
-              '⚠️ Presigned URL 생성 실패 (content/thumbnail): $e',
+              '[ChatMessageService] getChatMessagesPaginated - warning: Presigned URL generation failed (content/thumbnail) - $e',
               level: LogLevel.warning,
             );
           }
@@ -441,7 +465,7 @@ class ChatMessageService {
       );
     } on Exception catch (e, stackTrace) {
       session.log(
-        '메시지 조회 실패: $e',
+        '[ChatMessageService] getChatMessagesPaginated - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -451,6 +475,12 @@ class ChatMessageService {
   }
 
   /// 채팅방의 마지막 메시지 조회
+  ///
+  /// 채팅방 목록에서 마지막 메시지 미리보기용으로 사용됩니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [chatRoomId]: 채팅방 ID
+  /// Returns: 마지막 메시지 (없으면 null)
   Future<ChatMessage?> getLastMessageByChatRoomId(
     Session session,
     int chatRoomId,
@@ -460,7 +490,7 @@ class ChatMessageService {
       final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
       if (chatRoom == null) {
         session.log(
-          '채팅방을 찾을 수 없음: chatRoomId=$chatRoomId',
+          '[ChatMessageService] getLastMessageByChatRoomId - warning: chat room not found - chatRoomId=$chatRoomId',
           level: LogLevel.warning,
         );
         return null;
@@ -476,7 +506,7 @@ class ChatMessageService {
 
       if (lastMessage == null) {
         session.log(
-          '채팅방에 메시지가 없음: chatRoomId=$chatRoomId',
+          '[ChatMessageService] getLastMessageByChatRoomId - info: no messages in chat room - chatRoomId=$chatRoomId',
           level: LogLevel.info,
         );
         return null;
@@ -485,7 +515,7 @@ class ChatMessageService {
       return lastMessage;
     } on Exception catch (e, stackTrace) {
       session.log(
-        '마지막 메시지 조회 실패: chatRoomId=$chatRoomId, error=$e',
+        '[ChatMessageService] getLastMessageByChatRoomId - error: $e - chatRoomId=$chatRoomId',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,

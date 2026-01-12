@@ -1,12 +1,23 @@
-import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
+
 import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
 import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 
 /// 상품 서비스
 /// 상품 기본 CRUD 및 상태 관리 관련 비즈니스 로직을 처리합니다.
 class ProductService {
+  // ==================== Public Methods ====================
+
   /// 상품 생성
+  ///
+  /// 새로운 상품을 생성하고 임시 이미지를 정식 경로로 이동합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [sellerId]: 판매자 ID
+  /// [request]: 상품 생성 요청 DTO
+  /// Returns: 생성된 상품
   Future<Product> createProduct(
     Session session,
     int sellerId,
@@ -92,6 +103,16 @@ class ProductService {
   }
 
   /// 상품 수정
+  ///
+  /// 상품 정보를 수정하고 이미지 변경 사항을 S3에 반영합니다.
+  /// 삭제된 이미지는 S3에서 제거하고, 새 이미지는 정식 경로로 이동합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 수정할 상품 ID
+  /// [sellerId]: 요청자 ID (권한 확인용)
+  /// [request]: 상품 수정 요청 DTO
+  /// Returns: 수정된 상품
+  /// Throws: Exception - 상품을 찾을 수 없거나 권한이 없는 경우
   Future<Product> updateProduct(
     Session session,
     int productId,
@@ -205,6 +226,13 @@ class ProductService {
   }
 
   /// 상품 조회
+  ///
+  /// ID로 상품을 조회합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [id]: 조회할 상품 ID
+  /// Returns: 상품 정보
+  /// Throws: Exception - 상품을 찾을 수 없는 경우
   Future<Product> getProductById(Session session, int id) async {
     final product = await Product.db.findById(session, id);
 
@@ -216,6 +244,15 @@ class ProductService {
   }
 
   /// 상품 상태 변경
+  ///
+  /// 상품의 판매 상태를 변경합니다 (판매중, 예약중, 거래완료).
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// [userId]: 요청자 ID (권한 확인용)
+  /// [status]: 변경할 상태
+  /// Returns: 수정된 상품
+  /// Throws: Exception - 상품을 찾을 수 없거나 권한이 없는 경우
   Future<Product> updateProductStatus(
     Session session,
     int productId,
@@ -255,7 +292,14 @@ class ProductService {
   }
 
   /// 상품 상단으로 올리기 (updatedAt 갱신)
+  ///
   /// 상품의 updatedAt을 현재 시간으로 갱신하여 최신순 정렬에서 상단으로 올립니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// [userId]: 요청자 ID (권한 확인용)
+  /// Returns: 수정된 상품
+  /// Throws: Exception - 상품을 찾을 수 없거나 권한이 없는 경우
   Future<Product> bumpProduct(
     Session session,
     int productId,
@@ -286,6 +330,14 @@ class ProductService {
   }
 
   /// 상품 삭제
+  ///
+  /// 상품과 관련된 모든 데이터를 삭제합니다.
+  /// S3 이미지, 찜 데이터, 조회 기록도 함께 삭제됩니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 삭제할 상품 ID
+  /// [userId]: 요청자 ID (권한 확인용)
+  /// Throws: Exception - 상품을 찾을 수 없거나 권한이 없는 경우
   Future<void> deleteProduct(
     Session session,
     int productId,

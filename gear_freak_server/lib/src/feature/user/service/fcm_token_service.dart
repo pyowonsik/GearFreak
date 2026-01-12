@@ -1,16 +1,21 @@
-import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
 
 /// FCM 토큰 서비스
 /// FCM 토큰 관련 비즈니스 로직을 처리합니다.
 class FcmTokenService {
+  // ==================== Public Methods ====================
+
   /// FCM 토큰 등록 또는 업데이트
   ///
-  /// [userId]는 사용자 ID입니다.
-  /// [token]은 FCM 토큰입니다.
-  /// [deviceType]은 디바이스 타입입니다 (ios, android).
+  /// 기존 토큰이 있으면 업데이트하고, 없으면 새로 등록합니다.
   ///
-  /// 성공 시 true를 반환하고, 실패 시 false를 반환합니다.
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// [token]: FCM 토큰
+  /// [deviceType]: 디바이스 타입 (ios, android)
+  /// Returns: true = 성공, false = 실패
   static Future<bool> registerToken({
     required Session session,
     required int userId,
@@ -68,10 +73,10 @@ class FcmTokenService {
 
   /// FCM 토큰 삭제
   ///
-  /// [userId]는 사용자 ID입니다.
-  /// [token]은 FCM 토큰입니다.
-  ///
-  /// 성공 시 true를 반환하고, 실패 시 false를 반환합니다.
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// [token]: 삭제할 FCM 토큰
+  /// Returns: true = 성공, false = 실패
   static Future<bool> deleteToken({
     required Session session,
     required int userId,
@@ -102,9 +107,9 @@ class FcmTokenService {
 
   /// 사용자의 모든 FCM 토큰 조회
   ///
-  /// [userId]는 사용자 ID입니다.
-  ///
-  /// FCM 토큰 리스트를 반환합니다.
+  /// [session]: Serverpod 세션
+  /// [userId]: 사용자 ID
+  /// Returns: FCM 토큰 목록
   static Future<List<String>> getTokensByUserId({
     required Session session,
     required int userId,
@@ -129,10 +134,10 @@ class FcmTokenService {
 
   /// 채팅방 참여자들의 FCM 토큰 조회 (발신자 제외)
   ///
-  /// [chatRoomId]는 채팅방 ID입니다.
-  /// [excludeUserId]는 제외할 사용자 ID입니다 (발신자).
-  ///
-  /// FCM 토큰 리스트를 반환합니다.
+  /// [session]: Serverpod 세션
+  /// [chatRoomId]: 채팅방 ID
+  /// [excludeUserId]: 제외할 사용자 ID (발신자)
+  /// Returns: FCM 토큰 목록
   static Future<List<String>> getTokensByChatRoomId({
     required Session session,
     required int chatRoomId,
@@ -183,10 +188,12 @@ class FcmTokenService {
 
   /// 채팅방 참여자별 FCM 토큰과 알림 설정 조회 (발신자 제외)
   ///
-  /// [chatRoomId]는 채팅방 ID입니다.
-  /// [excludeUserId]는 제외할 사용자 ID입니다 (발신자).
+  /// 비활성 참여자도 포함하여 재활성화 시 메시지를 받을 수 있도록 합니다.
   ///
-  /// Map<userId, Map<token, isNotificationEnabled>> 형태로 반환합니다.
+  /// [session]: Serverpod 세션
+  /// [chatRoomId]: 채팅방 ID
+  /// [excludeUserId]: 제외할 사용자 ID (발신자)
+  /// Returns: Map<userId, Map<token, isNotificationEnabled>>
   static Future<Map<int, Map<String, bool>>>
       getTokensByChatRoomIdWithNotificationSettings({
     required Session session,

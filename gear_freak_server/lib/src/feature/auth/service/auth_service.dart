@@ -116,7 +116,7 @@ class AuthService {
 
     // 5. User가 없으면 생성 (구글 로그인 최초 시)
     // 구글 로그인 회원가입 시 닉네임은 무조건 "장비충#UUID" 형식으로 생성
-    // ⭐ UUID 사용 - 중복 걱정 없음
+    // UUID 사용 - 중복 걱정 없음
     const uuid = Uuid();
     final shortId = uuid.v4().substring(0, 9); // 9자리만 사용
     final nickname = '장비충#$shortId';
@@ -165,7 +165,7 @@ class AuthService {
 
     // 5. User가 없으면 생성 (애플 로그인 최초 시)
     // 애플 로그인 회원가입 시 닉네임은 무조건 "장비충#UUID" 형식으로 생성
-    // ⭐ UUID 사용 - 중복 걱정 없음
+    // UUID 사용 - 중복 걱정 없음
     const uuid = Uuid();
     final shortId = uuid.v4().substring(0, 9); // 9자리만 사용
     final nickname = '장비충#$shortId';
@@ -304,7 +304,7 @@ class AuthService {
 
     // 5. User가 없으면 생성 (카카오 로그인 최초 시)
     // 카카오 로그인 회원가입 시 닉네임은 무조건 "장비충#UUID" 형식으로 생성
-    // ⭐ UUID 사용 - 중복 걱정 없음
+    // UUID 사용 - 중복 걱정 없음
     const uuid = Uuid();
     final shortId = uuid.v4().substring(0, 9); // 9자리만 사용
     final nickname = '장비충#$shortId';
@@ -442,7 +442,7 @@ class AuthService {
 
     // 5. User가 없으면 생성 (네이버 로그인 최초 시)
     // 네이버 로그인 회원가입 시 닉네임은 무조건 "장비충#UUID" 형식으로 생성
-    // ⭐ UUID 사용 - 중복 걱정 없음
+    // UUID 사용 - 중복 걱정 없음
     const uuid = Uuid();
     final shortId = uuid.v4().substring(0, 9); // 9자리만 사용
     final nickname = '장비충#$shortId';

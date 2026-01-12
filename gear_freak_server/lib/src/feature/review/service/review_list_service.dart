@@ -1,17 +1,20 @@
-import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
 
 /// 리뷰 목록 서비스
 /// 후기 목록 조회 관련 비즈니스 로직을 처리합니다.
 class ReviewListService {
+  // ==================== Public Methods ====================
+
   /// 받은 후기 목록 조회 (페이지네이션)
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [userId]는 조회할 사용자 ID입니다.
-  /// [reviewType]는 조회할 후기 타입입니다 (구매자 후기 또는 판매자 후기).
-  /// [page]는 페이지 번호입니다 (기본값: 1).
-  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
-  /// 반환: 후기 목록 응답 DTO
+  /// [session]: Serverpod 세션
+  /// [userId]: 조회할 사용자 ID
+  /// [reviewType]: 조회할 후기 타입 (구매자 후기 또는 판매자 후기)
+  /// [page]: 페이지 번호 (기본값: 1)
+  /// [limit]: 페이지당 항목 수 (기본값: 10)
+  /// Returns: 후기 목록 응답 DTO
   static Future<TransactionReviewListResponseDto> getReceivedReviews({
     required Session session,
     required int userId,
@@ -80,7 +83,7 @@ class ReviewListService {
       );
     } catch (e, stackTrace) {
       session.log(
-        '❌ 받은 후기 목록 조회 실패: $e',
+        '[ReviewListService] getReceivedReviews - error: $e',
         exception: e,
         stackTrace: stackTrace,
         level: LogLevel.error,
@@ -90,14 +93,15 @@ class ReviewListService {
   }
 
   /// 구매자 후기 목록 조회
-  /// 판매자가 구매자에게 쓴 후기 (reviewType = seller_to_buyer)
-  /// 구매자 입장에서 받은 후기
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [userId]는 조회할 사용자 ID입니다.
-  /// [page]는 페이지 번호입니다 (기본값: 1).
-  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
-  /// 반환: 후기 목록 응답 DTO
+  /// 판매자가 구매자에게 쓴 후기 (reviewType = seller_to_buyer)
+  /// 구매자 입장에서 받은 후기입니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 조회할 사용자 ID
+  /// [page]: 페이지 번호 (기본값: 1)
+  /// [limit]: 페이지당 항목 수 (기본값: 10)
+  /// Returns: 후기 목록 응답 DTO
   static Future<TransactionReviewListResponseDto> getBuyerReviews({
     required Session session,
     required int userId,
@@ -114,14 +118,15 @@ class ReviewListService {
   }
 
   /// 판매자 후기 목록 조회
-  /// 구매자가 판매자에게 쓴 후기 (reviewType = buyer_to_seller)
-  /// 판매자 입장에서 받은 후기
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [userId]는 조회할 사용자 ID입니다.
-  /// [page]는 페이지 번호입니다 (기본값: 1).
-  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
-  /// 반환: 후기 목록 응답 DTO
+  /// 구매자가 판매자에게 쓴 후기 (reviewType = buyer_to_seller)
+  /// 판매자 입장에서 받은 후기입니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 조회할 사용자 ID
+  /// [page]: 페이지 번호 (기본값: 1)
+  /// [limit]: 페이지당 항목 수 (기본값: 10)
+  /// Returns: 후기 목록 응답 DTO
   static Future<TransactionReviewListResponseDto> getSellerReviews({
     required Session session,
     required int userId,
@@ -138,13 +143,14 @@ class ReviewListService {
   }
 
   /// 다른 사용자의 모든 후기 조회 (구매자 후기 + 판매자 후기)
+  ///
   /// 평균 평점도 함께 계산하여 반환합니다.
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [userId]는 조회할 사용자 ID입니다.
-  /// [page]는 페이지 번호입니다 (기본값: 1).
-  /// [limit]는 페이지당 항목 수입니다 (기본값: 10).
-  /// 반환: 후기 목록 응답 DTO (평균 평점 포함)
+  /// [session]: Serverpod 세션
+  /// [userId]: 조회할 사용자 ID
+  /// [page]: 페이지 번호 (기본값: 1)
+  /// [limit]: 페이지당 항목 수 (기본값: 10)
+  /// Returns: 후기 목록 응답 DTO (평균 평점 포함)
   static Future<TransactionReviewListResponseDto> getAllReviewsByUserId({
     required Session session,
     required int userId,
@@ -224,7 +230,7 @@ class ReviewListService {
       );
     } catch (e, stackTrace) {
       session.log(
-        '❌ 모든 후기 목록 조회 실패: $e',
+        '[ReviewListService] getAllReviewsByUserId - error: $e',
         exception: e,
         stackTrace: stackTrace,
         level: LogLevel.error,

@@ -1,20 +1,26 @@
 import 'dart:developer' as developer;
 
+import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
+
 import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
+
 import 'package:gear_freak_server/src/feature/notification/service/notification_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
-import 'package:gear_freak_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart';
 
 /// 리뷰 서비스
 /// 후기 작성, 삭제, 존재 확인 관련 비즈니스 로직을 처리합니다.
 class ReviewService {
-  /// 거래 후기 작성
+  // ==================== Public Methods ====================
+
+  /// 거래 후기 작성 (판매자 → 구매자)
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [reviewerId]는 리뷰 작성자 ID입니다.
-  /// [request]는 후기 작성 요청 정보입니다.
-  /// 반환: 생성된 후기 응답 DTO
+  /// [session]: Serverpod 세션
+  /// [reviewerId]: 리뷰 작성자 ID (판매자)
+  /// [request]: 후기 작성 요청 DTO
+  /// Returns: 생성된 후기 응답 DTO
+  /// Throws: Exception - 평점 범위 오류, 내용 길이 초과, 중복 후기
   static Future<TransactionReviewResponseDto> createTransactionReview({
     required Session session,
     required int reviewerId,
@@ -69,7 +75,7 @@ class ReviewService {
       );
 
       session.log(
-        '✅ 거래 후기 작성 완료: reviewId=${createdReview.id}, '
+        '[ReviewService] createTransactionReview - success: reviewId=${createdReview.id}, '
         'reviewerId=$reviewerId, revieweeId=${request.revieweeId}',
         level: LogLevel.info,
       );
@@ -78,7 +84,7 @@ class ReviewService {
       final reviewer = await User.db.findById(session, reviewerId);
       final reviewee = await User.db.findById(session, request.revieweeId);
 
-      // 6. 📱 FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
+      // 6. FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
       await _sendReviewNotification(
         session: session,
         reviewerId: reviewerId,
@@ -90,7 +96,7 @@ class ReviewService {
         content: request.content,
       ).catchError((error) {
         developer.log(
-          '⚠️ 후기 FCM 알림 전송 실패 (무시): $error',
+          '[ReviewService] createTransactionReview - warning: FCM notification failed (ignored) - $error',
           name: 'ReviewService',
           error: error,
         );
@@ -113,7 +119,7 @@ class ReviewService {
       );
     } catch (e, stackTrace) {
       session.log(
-        '❌ 거래 후기 작성 실패: $e',
+        '[ReviewService] createTransactionReview - error: $e',
         exception: e,
         stackTrace: stackTrace,
         level: LogLevel.error,
@@ -124,10 +130,11 @@ class ReviewService {
 
   /// 판매자에 대한 후기 작성 (구매자 → 판매자)
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [reviewerId]는 리뷰 작성자 ID입니다 (구매자).
-  /// [request]는 후기 작성 요청 정보입니다.
-  /// 반환: 생성된 후기 응답 DTO
+  /// [session]: Serverpod 세션
+  /// [reviewerId]: 리뷰 작성자 ID (구매자)
+  /// [request]: 후기 작성 요청 DTO
+  /// Returns: 생성된 후기 응답 DTO
+  /// Throws: Exception - 평점 범위 오류, 내용 길이 초과, 중복 후기
   static Future<TransactionReviewResponseDto> createSellerReview({
     required Session session,
     required int reviewerId,
@@ -178,7 +185,7 @@ class ReviewService {
       );
 
       session.log(
-        '✅ 판매자 후기 작성 완료: reviewId=${createdReview.id}, '
+        '[ReviewService] createSellerReview - success: reviewId=${createdReview.id}, '
         'reviewerId=$reviewerId, revieweeId=${request.revieweeId}',
         level: LogLevel.info,
       );
@@ -187,7 +194,7 @@ class ReviewService {
       final reviewer = await User.db.findById(session, reviewerId);
       final reviewee = await User.db.findById(session, request.revieweeId);
 
-      // 6. 📱 FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
+      // 6. FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
       await _sendReviewNotification(
         session: session,
         reviewerId: reviewerId,
@@ -199,7 +206,7 @@ class ReviewService {
         content: request.content,
       ).catchError((error) {
         developer.log(
-          '⚠️ 후기 FCM 알림 전송 실패 (무시): $error',
+          '[ReviewService] createSellerReview - warning: FCM notification failed (ignored) - $error',
           name: 'ReviewService',
           error: error,
         );
@@ -222,7 +229,7 @@ class ReviewService {
       );
     } catch (e, stackTrace) {
       session.log(
-        '❌ 판매자 후기 작성 실패: $e',
+        '[ReviewService] createSellerReview - error: $e',
         exception: e,
         stackTrace: stackTrace,
         level: LogLevel.error,
@@ -231,12 +238,16 @@ class ReviewService {
     }
   }
 
-  /// 상품 ID로 후기 삭제 (상품 상태 변경 시 사용)
+  /// 상품 ID로 후기 삭제
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [productId]는 상품 ID입니다.
-  /// [userId]는 요청한 사용자 ID입니다 (상품 판매자).
-  /// 반환: 삭제된 후기 개수
+  /// 상품 상태가 판매중으로 변경될 때 호출됩니다.
+  /// 관련 알림도 함께 삭제됩니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// [userId]: 요청자 ID (권한 확인용)
+  /// Returns: 삭제된 후기 개수
+  /// Throws: Exception - 상품 없음, 권한 없음
   static Future<int> deleteReviewsByProductId({
     required Session session,
     required int productId,
@@ -261,7 +272,7 @@ class ReviewService {
 
       if (reviews.isEmpty) {
         session.log(
-          'ℹ️ 삭제할 후기가 없습니다: productId=$productId',
+          '[ReviewService] deleteReviewsByProductId - info: no reviews to delete - productId=$productId',
           level: LogLevel.info,
         );
         return 0;
@@ -275,11 +286,11 @@ class ReviewService {
       }
 
       session.log(
-        '✅ 상품 후기 삭제 완료: productId=$productId, deletedCount=$deletedCount, userId=$userId',
+        '[ReviewService] deleteReviewsByProductId - success: productId=$productId, deletedCount=$deletedCount, userId=$userId',
         level: LogLevel.info,
       );
 
-      // 4. 📌 관련 알림 삭제 (비동기, 실패해도 후기 삭제는 성공)
+      // 4. 관련 알림 삭제 (비동기, 실패해도 후기 삭제는 성공)
       try {
         await NotificationService.deleteNotificationsByProductId(
           session: session,
@@ -287,7 +298,7 @@ class ReviewService {
         );
       } catch (error) {
         developer.log(
-          '⚠️ 상품 후기 관련 알림 삭제 실패 (무시): $error',
+          '[ReviewService] deleteReviewsByProductId - warning: notification deletion failed (ignored) - $error',
           name: 'ReviewService',
           error: error,
         );
@@ -296,7 +307,7 @@ class ReviewService {
       return deletedCount;
     } catch (e, stackTrace) {
       session.log(
-        '❌ 상품 후기 삭제 실패: $e',
+        '[ReviewService] deleteReviewsByProductId - error: $e',
         exception: e,
         stackTrace: stackTrace,
         level: LogLevel.error,
@@ -307,12 +318,14 @@ class ReviewService {
 
   /// 리뷰 존재 여부 확인
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [productId]는 상품 ID입니다.
-  /// [chatRoomId]는 채팅방 ID입니다.
-  /// [reviewerId]는 리뷰 작성자 ID입니다.
-  /// [reviewType]는 리뷰 타입입니다.
-  /// 반환: 리뷰가 존재하면 true, 없으면 false
+  /// 중복 후기 방지를 위해 기존 후기가 있는지 확인합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// [chatRoomId]: 채팅방 ID
+  /// [reviewerId]: 리뷰 작성자 ID
+  /// [reviewType]: 리뷰 타입
+  /// Returns: true = 존재, false = 없음
   static Future<bool> checkReviewExists({
     required Session session,
     required int productId,
@@ -333,7 +346,7 @@ class ReviewService {
       return existingReview != null;
     } catch (e, stackTrace) {
       session.log(
-        '❌ 리뷰 존재 여부 확인 실패: $e',
+        '[ReviewService] checkReviewExists - error: $e',
         exception: e,
         stackTrace: stackTrace,
         level: LogLevel.error,
@@ -342,15 +355,20 @@ class ReviewService {
     }
   }
 
-  /// 후기 작성 시 FCM 알림 전송 (내부 헬퍼 메서드)
+  // ==================== Private Helper Methods ====================
+
+  /// 후기 작성 시 FCM 알림 전송
   ///
-  /// [session]은 Serverpod 세션입니다.
-  /// [reviewerId]는 후기 작성자 ID입니다.
-  /// [reviewerNickname]은 후기 작성자 닉네임입니다.
-  /// [revieweeId]는 후기 대상자 ID입니다.
-  /// [rating]은 평점입니다.
-  /// [productId]는 상품 ID입니다.
-  /// [chatRoomId]는 채팅방 ID입니다.
+  /// FCM 푸시 알림을 전송하고 notification 테이블에 저장합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [reviewerId]: 후기 작성자 ID
+  /// [reviewerNickname]: 후기 작성자 닉네임
+  /// [revieweeId]: 후기 대상자 ID
+  /// [rating]: 평점
+  /// [productId]: 상품 ID
+  /// [chatRoomId]: 채팅방 ID
+  /// [content]: 후기 내용
   static Future<void> _sendReviewNotification({
     required Session session,
     required int reviewerId,
@@ -371,7 +389,7 @@ class ReviewService {
     }
 
     try {
-      safeLog('📱 후기 FCM 알림 전송 시작: revieweeId=$revieweeId, rating=$rating');
+      safeLog('[ReviewService] _sendReviewNotification - start: revieweeId=$revieweeId, rating=$rating');
 
       // 1. 후기 대상자(reviewee)의 FCM 토큰 조회
       final fcmTokens = await FcmTokenService.getTokensByUserId(
@@ -380,7 +398,7 @@ class ReviewService {
       );
 
       if (fcmTokens.isEmpty) {
-        safeLog('⚠️ 후기 FCM 알림 전송 건너뜀: reviewee의 FCM 토큰이 없음');
+        safeLog('[ReviewService] _sendReviewNotification - skip: no FCM tokens for reviewee');
         return;
       }
 
@@ -420,9 +438,9 @@ class ReviewService {
       );
 
       safeLog(
-          '✅ 후기 FCM 알림 전송 완료: revieweeId=$revieweeId, tokens=${fcmTokens.length}개');
+          '[ReviewService] _sendReviewNotification - success: FCM sent - revieweeId=$revieweeId, tokens=${fcmTokens.length}');
 
-      // 5. 📌 notification 테이블에 저장 (알림 목록 화면에서 조회하기 위해)
+      // 5. notification 테이블에 저장 (알림 목록 화면에서 조회하기 위해)
       try {
         await NotificationService.createNotification(
           session: session,
@@ -432,27 +450,27 @@ class ReviewService {
           body: body,
           data: data,
         );
-        safeLog('✅ 알림 DB 저장 완료: revieweeId=$revieweeId');
+        safeLog('[ReviewService] _sendReviewNotification - success: notification saved - revieweeId=$revieweeId');
       } catch (error) {
         safeLog(
-          '⚠️ 알림 DB 저장 실패 (무시): $error',
+          '[ReviewService] _sendReviewNotification - warning: notification save failed (ignored) - $error',
           level: LogLevel.warning,
         );
         developer.log(
-          '⚠️ 알림 DB 저장 실패: $error',
+          '[ReviewService] _sendReviewNotification - warning: notification save failed - $error',
           name: 'ReviewService',
           error: error,
         );
       }
 
-      safeLog('✅ 알림 DB 저장 완료: revieweeId=$revieweeId');
+      safeLog('[ReviewService] _sendReviewNotification - completed: revieweeId=$revieweeId');
     } catch (e, stackTrace) {
       safeLog(
-        '❌ 후기 FCM 알림 전송 실패: $e',
+        '[ReviewService] _sendReviewNotification - error: $e',
         level: LogLevel.error,
       );
       developer.log(
-        '❌ 후기 FCM 알림 전송 실패: $e',
+        '[ReviewService] _sendReviewNotification - error: $e',
         name: 'ReviewService',
         error: e,
         stackTrace: stackTrace,

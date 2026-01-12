@@ -32,7 +32,7 @@ class ChatStreamEndpoint extends Endpoint with AuthenticatedMixin {
       throw Exception('채팅방에 참여하지 않은 사용자입니다.');
     }
 
-    // 🚀 Server Events를 통한 Redis 기반 스트림 생성
+    // Server Events를 통한 Redis 기반 스트림 생성
     final messageStream = session.messages.createStream<ChatMessageResponseDto>(
       'chat_room_$chatRoomId',
     );

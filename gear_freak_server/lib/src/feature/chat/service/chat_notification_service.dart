@@ -1,12 +1,18 @@
 import 'dart:developer' as developer;
-import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
-import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
-import 'package:gear_freak_server/src/generated/protocol.dart';
+
 import 'package:serverpod/serverpod.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
+
+import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
+
+import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
 
 /// 채팅 알림 서비스
 /// 채팅방 알림 설정, 읽음 처리, 읽지 않은 메시지 개수, FCM 알림 전송 관련 비즈니스 로직을 처리합니다.
 class ChatNotificationService {
+  // ==================== Public Methods ====================
+
   /// 채팅방 알림 설정 변경
   /// 사용자가 특정 채팅방의 알림을 켜거나 끕니다.
   Future<void> updateChatRoomNotification(
@@ -20,7 +26,7 @@ class ChatNotificationService {
       final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
       if (chatRoom == null) {
         session.log(
-          '채팅방을 찾을 수 없음: chatRoomId=$chatRoomId',
+          '[ChatNotificationService] updateChatRoomNotification - warning: chat room not found - chatRoomId=$chatRoomId',
           level: LogLevel.warning,
         );
         throw Exception('채팅방을 찾을 수 없습니다.');
@@ -34,7 +40,7 @@ class ChatNotificationService {
 
       if (participant == null) {
         session.log(
-          '채팅방에 참여하지 않은 사용자: userId=$userId, chatRoomId=$chatRoomId',
+          '[ChatNotificationService] updateChatRoomNotification - warning: user not participant - userId=$userId, chatRoomId=$chatRoomId',
           level: LogLevel.warning,
         );
         throw Exception('채팅방에 참여하지 않은 사용자입니다.');
@@ -51,12 +57,12 @@ class ChatNotificationService {
       );
 
       session.log(
-        '✅ 채팅방 알림 설정 변경 완료: userId=$userId, chatRoomId=$chatRoomId, isNotificationEnabled=$isNotificationEnabled',
+        '[ChatNotificationService] updateChatRoomNotification - success: userId=$userId, chatRoomId=$chatRoomId, isNotificationEnabled=$isNotificationEnabled',
         level: LogLevel.info,
       );
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 채팅방 알림 설정 변경 실패: $e',
+        '[ChatNotificationService] updateChatRoomNotification - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -77,7 +83,7 @@ class ChatNotificationService {
       final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
       if (chatRoom == null) {
         session.log(
-          '채팅방을 찾을 수 없음: chatRoomId=$chatRoomId',
+          '[ChatNotificationService] markChatRoomAsRead - warning: chat room not found - chatRoomId=$chatRoomId',
           level: LogLevel.warning,
         );
         return;
@@ -94,7 +100,7 @@ class ChatNotificationService {
 
       if (participant == null) {
         session.log(
-          '채팅방에 참여하지 않은 사용자: userId=$userId, chatRoomId=$chatRoomId',
+          '[ChatNotificationService] markChatRoomAsRead - warning: user not participant - userId=$userId, chatRoomId=$chatRoomId',
           level: LogLevel.warning,
         );
         return;
@@ -113,12 +119,12 @@ class ChatNotificationService {
       );
 
       session.log(
-        '✅ 채팅방 읽음 처리 완료: userId=$userId, chatRoomId=$chatRoomId',
+        '[ChatNotificationService] markChatRoomAsRead - success: userId=$userId, chatRoomId=$chatRoomId',
         level: LogLevel.info,
       );
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 채팅방 읽음 처리 실패: $e',
+        '[ChatNotificationService] markChatRoomAsRead - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -183,7 +189,7 @@ class ChatNotificationService {
       return unreadCount;
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 안 읽은 메시지 개수 계산 실패: $e',
+        '[ChatNotificationService] getUnreadCount - error: $e',
         exception: e,
         level: LogLevel.error,
         stackTrace: stackTrace,
@@ -223,7 +229,7 @@ class ChatNotificationService {
       return totalUnreadCount;
     } on Exception catch (e, stackTrace) {
       session.log(
-        '❌ 전체 읽지 않은 채팅 개수 조회 실패: $e',
+        '[ChatNotificationService] getTotalUnreadChatCount - error: $e',
         exception: e,
         stackTrace: stackTrace,
         level: LogLevel.error,
@@ -263,13 +269,13 @@ class ChatNotificationService {
       final chatRoom = await ChatRoom.db.findById(session, chatRoomId);
       if (chatRoom == null) {
         safeLog(
-          '⚠️ FCM 알림 전송 건너뜀: 채팅방을 찾을 수 없음 (chatRoomId=$chatRoomId)',
+          '[ChatNotificationService] sendFcmNotification - skip: chat room not found - chatRoomId=$chatRoomId',
         );
         return;
       }
 
       // 2. 채팅방 참여자별 FCM 토큰과 알림 설정 조회 (발신자 제외)
-      safeLog('📱 FCM 알림 전송 시작: chatRoomId=$chatRoomId, senderId=$senderId');
+      safeLog('[ChatNotificationService] sendFcmNotification - start: chatRoomId=$chatRoomId, senderId=$senderId');
 
       final tokensWithSettings =
           await FcmTokenService.getTokensByChatRoomIdWithNotificationSettings(
@@ -280,7 +286,7 @@ class ChatNotificationService {
 
       if (tokensWithSettings.isEmpty) {
         safeLog(
-            '⚠️ FCM 알림 전송 건너뜀: 채팅방 참여자의 FCM 토큰이 없음 (chatRoomId=$chatRoomId)');
+            '[ChatNotificationService] sendFcmNotification - skip: no FCM tokens for participants - chatRoomId=$chatRoomId');
         return;
       }
 
@@ -366,12 +372,12 @@ class ChatNotificationService {
       }
 
       safeLog(
-        '✅ FCM 알림 전송 완료: '
+        '[ChatNotificationService] sendFcmNotification - success: '
         'chatRoomId=$chatRoomId, '
         'senderId=$senderId, '
         'senderNickname="$senderNickname", '
-        '알림ON=${tokensWithNotification.length}, '
-        '알림OFF=${tokensWithoutNotification.length}, '
+        'notificationOn=${tokensWithNotification.length}, '
+        'notificationOff=${tokensWithoutNotification.length}, '
         'title="$title", '
         'body="$body"',
       );
@@ -379,15 +385,15 @@ class ChatNotificationService {
       // FCM 알림 전송 실패는 로그만 남기고 예외를 던지지 않음
       try {
         session.log(
-          '❌ FCM 알림 전송 실패: $e',
+          '[ChatNotificationService] sendFcmNotification - warning: $e',
           exception: e,
           stackTrace: stackTrace,
           level: LogLevel.warning,
         );
       } catch (_) {
-        // Session이 닫혔으면 log 사용
+        // Session이 닫혔으면 developer.log 사용
         developer.log(
-          '❌ FCM 알림 전송 실패: $e',
+          '[ChatNotificationService] sendFcmNotification - warning: $e',
           name: 'ChatNotificationService',
           error: e,
           stackTrace: stackTrace,

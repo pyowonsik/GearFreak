@@ -1,15 +1,24 @@
-import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
-import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
-import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
+
+import 'package:gear_freak_server/src/generated/protocol.dart';
+
+import 'package:gear_freak_server/src/common/s3/service/s3_service.dart';
+import 'package:gear_freak_server/src/common/s3/util/s3_util.dart';
 
 /// 사용자 서비스
 /// 사용자 정보 조회 등 사용자 관련 비즈니스 로직을 처리합니다.
 class UserService {
   // ==================== Public Methods (Endpoint에서 직접 호출) ====================
 
-  /// 현재 로그인한 사용자 정보를 가져옵니다
+  /// 현재 로그인한 사용자 정보 조회
+  ///
+  /// 세션의 인증 정보를 기반으로 사용자를 조회합니다.
+  /// User 테이블에 없으면 자동으로 생성합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// Returns: 현재 로그인한 사용자
+  /// Throws: Exception - 인증되지 않은 경우
   static Future<User> getMe(Session session) async {
     final authenticationInfo = await session.authenticated;
 
@@ -49,7 +58,12 @@ class UserService {
     return user.copyWith(userInfo: userInfo);
   }
 
-  /// 사용자 Id로 사용자 정보를 가져옵니다
+  /// 사용자 ID로 사용자 정보 조회
+  ///
+  /// [session]: Serverpod 세션
+  /// [id]: 사용자 ID
+  /// Returns: 사용자 정보
+  /// Throws: Exception - 사용자를 찾을 수 없는 경우
   static Future<User> getUserById(Session session, int id) async {
     final user = await User.db.findById(session, id);
 
@@ -60,7 +74,10 @@ class UserService {
     return user;
   }
 
-  /// 현재 사용자의 권한(Scope) 정보를 조회합니다
+  /// 현재 사용자의 권한(Scope) 정보 조회
+  ///
+  /// [session]: Serverpod 세션
+  /// Returns: 권한 이름 목록 (인증되지 않으면 빈 리스트)
   static Future<List<String>> getUserScopes(Session session) async {
     final authenticationInfo = await session.authenticated;
 
@@ -76,6 +93,14 @@ class UserService {
   }
 
   /// 사용자 프로필 수정
+  ///
+  /// 닉네임과 프로필 이미지를 수정합니다.
+  /// 프로필 이미지는 임시 경로에서 정식 경로로 이동합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [request]: 프로필 수정 요청 DTO
+  /// Returns: 수정된 사용자 정보
+  /// Throws: Exception - 인증되지 않음, 닉네임 중복
   static Future<User> updateUserProfile(
     Session session,
     UpdateUserProfileRequestDto request,

@@ -14,11 +14,11 @@ class FcmService {
     final projectId = Platform.environment['FCM_PROJECT_ID'];
     if (projectId == null || projectId.isEmpty) {
       developer.log(
-        '⚠️ FCM_PROJECT_ID 환경 변수가 설정되지 않았습니다.',
+        '[FcmService] _getProjectId - warning: FCM_PROJECT_ID environment variable not set',
         name: 'FcmService',
       );
       developer.log(
-        '⚠️ 현재 환경 변수: ${Platform.environment.keys.where((k) => k.contains('FCM')).join(', ')}',
+        '[FcmService] _getProjectId - info: current FCM env vars - ${Platform.environment.keys.where((k) => k.contains('FCM')).join(', ')}',
         name: 'FcmService',
       );
     }
@@ -78,7 +78,7 @@ class FcmService {
       } catch (_) {
         // Session이 닫혔으면 log 사용
         developer.log(
-          '❌ OAuth2 토큰 가져오기 실패: $e',
+          '[FcmService] _getAccessToken - error: $e',
           name: 'FcmService',
           error: e,
           stackTrace: stackTrace,
@@ -197,7 +197,7 @@ class FcmService {
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
         safeLog(
-          '✅ FCM 알림 전송 성공: '
+          '[FcmService] sendNotification - success: '
           'token=${fcmToken.substring(0, 20)}..., '
           'title="$title", '
           'body="$body", '
@@ -206,7 +206,7 @@ class FcmService {
         return true;
       } else {
         safeLog(
-          '❌ FCM 알림 전송 실패: '
+          '[FcmService] sendNotification - error: '
           'statusCode=${response.statusCode}, '
           'token=${fcmToken.substring(0, 20)}..., '
           'title="$title", '
@@ -219,7 +219,7 @@ class FcmService {
     } catch (e, stackTrace) {
       try {
         session.log(
-          'FCM 알림 전송 예외: $e',
+          '[FcmService] sendNotification - error: $e',
           exception: e,
           stackTrace: stackTrace,
           level: LogLevel.error,
@@ -227,7 +227,7 @@ class FcmService {
       } catch (_) {
         // Session이 닫혔으면 log 사용
         developer.log(
-          '❌ FCM 알림 전송 예외: $e',
+          '[FcmService] sendNotification - error: $e',
           name: 'FcmService',
           error: e,
           stackTrace: stackTrace,
@@ -275,10 +275,10 @@ class FcmService {
     // Session이 닫힌 후에도 실행될 수 있으므로 안전한 로깅
     try {
       session.log(
-        '📱 FCM 알림 전송 완료: '
-        '전체=${fcmTokens.length}, '
-        '성공=$successCount, '
-        '실패=$failureCount, '
+        '[FcmService] sendNotifications - completed: '
+        'total=${fcmTokens.length}, '
+        'success=$successCount, '
+        'failed=$failureCount, '
         'title="$title", '
         'body="$body"',
         level: LogLevel.info,
@@ -286,10 +286,10 @@ class FcmService {
     } catch (e) {
       // Session이 닫혔으면 log 사용
       developer.log(
-        '📱 FCM 알림 전송 완료: '
-        '전체=${fcmTokens.length}, '
-        '성공=$successCount, '
-        '실패=$failureCount, '
+        '[FcmService] sendNotifications - completed: '
+        'total=${fcmTokens.length}, '
+        'success=$successCount, '
+        'failed=$failureCount, '
         'title="$title", '
         'body="$body"',
         name: 'FcmService',
