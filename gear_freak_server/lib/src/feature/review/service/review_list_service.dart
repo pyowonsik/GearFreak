@@ -48,11 +48,26 @@ class ReviewListService {
         offset: offset,
       );
 
-      // 4. 응답 DTO 생성
+      // 4. 응답 DTO 생성 (N+1 쿼리 방지: IN 쿼리로 User 일괄 조회)
+      // 4-1. 모든 reviewer/reviewee ID 수집
+      final reviewerIds = reviews.map((r) => r.reviewerId).toSet();
+      final revieweeIds = reviews.map((r) => r.revieweeId).toSet();
+      final allUserIds = {...reviewerIds, ...revieweeIds};
+
+      // 4-2. IN 쿼리로 한 번에 User 조회
+      final users = await User.db.find(
+        session,
+        where: (u) => u.id.inSet(allUserIds),
+      );
+
+      // 4-3. O(1) 조회를 위한 Map 생성
+      final userMap = {for (var u in users) u.id!: u};
+
+      // 4-4. DTO 생성 (Map에서 O(1) 조회)
       final reviewDtos = <TransactionReviewResponseDto>[];
       for (final review in reviews) {
-        final reviewer = await User.db.findById(session, review.reviewerId);
-        final reviewee = await User.db.findById(session, review.revieweeId);
+        final reviewer = userMap[review.reviewerId];
+        final reviewee = userMap[review.revieweeId];
 
         reviewDtos.add(
           TransactionReviewResponseDto(
@@ -164,19 +179,16 @@ class ReviewListService {
         where: (review) => review.revieweeId.equals(userId),
       );
 
-      // 2. 평균 평점 계산 (모든 후기에서)
-      final allReviews = await TransactionReview.db.find(
-        session,
-        where: (review) => review.revieweeId.equals(userId),
-      );
-
+      // 2. 평균 평점 계산 (DB 집계 함수 사용으로 최적화)
+      // 모든 후기를 메모리에 로드하지 않고 DB에서 직접 평균 계산
       double? averageRating;
-      if (allReviews.isNotEmpty) {
-        final totalRating = allReviews.fold<int>(
-          0,
-          (sum, review) => sum + review.rating,
+      if (totalCount > 0) {
+        final result = await session.db.unsafeQuery(
+          'SELECT AVG(rating) as avg_rating FROM transaction_review WHERE reviewee_id = $userId',
         );
-        averageRating = totalRating / allReviews.length;
+        if (result.isNotEmpty && result.first.first != null) {
+          averageRating = result.first.first as double;
+        }
       }
 
       // 3. 페이지네이션 계산
@@ -194,11 +206,26 @@ class ReviewListService {
         offset: offset,
       );
 
-      // 5. 응답 DTO 생성
+      // 5. 응답 DTO 생성 (N+1 쿼리 방지: IN 쿼리로 User 일괄 조회)
+      // 5-1. 모든 reviewer/reviewee ID 수집
+      final reviewerIds = reviews.map((r) => r.reviewerId).toSet();
+      final revieweeIds = reviews.map((r) => r.revieweeId).toSet();
+      final allUserIds = {...reviewerIds, ...revieweeIds};
+
+      // 5-2. IN 쿼리로 한 번에 User 조회
+      final users = await User.db.find(
+        session,
+        where: (u) => u.id.inSet(allUserIds),
+      );
+
+      // 5-3. O(1) 조회를 위한 Map 생성
+      final userMap = {for (var u in users) u.id!: u};
+
+      // 5-4. DTO 생성 (Map에서 O(1) 조회)
       final reviewDtos = <TransactionReviewResponseDto>[];
       for (final review in reviews) {
-        final reviewer = await User.db.findById(session, review.reviewerId);
-        final reviewee = await User.db.findById(session, review.revieweeId);
+        final reviewer = userMap[review.reviewerId];
+        final reviewee = userMap[review.revieweeId];
 
         reviewDtos.add(
           TransactionReviewResponseDto(

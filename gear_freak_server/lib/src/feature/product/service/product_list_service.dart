@@ -24,22 +24,7 @@ class ProductListService {
     final sortBy = pagination.sortBy ?? ProductSortBy.latest;
     final filterParams = ProductFilterParams.fromPaginationDto(pagination);
 
-    // 판매완료 제외가 필요한 경우
-    if (filterParams.excludeSold) {
-      final allProducts = await _findProductsWithFilter(session, filterParams);
-      final filteredProducts = _filterSoldProducts(allProducts);
-      final sortedProducts = _sortProducts(filteredProducts, sortBy);
-      final paginatedProducts =
-          _applyPagination(sortedProducts, offset, pagination.limit);
-
-      return _buildPaginationResponse(
-        paginatedProducts,
-        sortedProducts.length,
-        pagination,
-      );
-    }
-
-    // 일반적인 경우 (판매완료 제외 불필요)
+    // DB WHERE 절에서 모든 필터링 처리 (excludeSold 포함)
     final totalCount = await _getTotalCount(session, filterParams);
     final products = await _getSortedProducts(
         session, filterParams, sortBy, pagination.limit, offset);
@@ -155,14 +140,24 @@ class ProductListService {
     final paginatedFavorites =
         _applyPagination(favorites, offset, pagination.limit);
 
-    // productId 목록으로 상품 조회 (찜한 순서 유지)
-    final products = <Product>[];
-    for (final favorite in paginatedFavorites) {
-      final product = await Product.db.findById(session, favorite.productId);
-      if (product != null) {
-        products.add(product);
-      }
-    }
+    // productId 목록으로 상품 조회 (N+1 쿼리 방지: IN 쿼리 사용)
+    // 1. productId 목록 추출
+    final productIds = paginatedFavorites
+        .map((f) => f.productId)
+        .toSet(); // Set으로 변환하여 중복 제거
+
+    // 2. IN 쿼리로 한 번에 조회
+    final allProducts = await Product.db.find(
+      session,
+      where: (p) => p.id.inSet(productIds),
+    );
+
+    // 3. 순서 유지 (찜한 순서) - Map으로 O(1) 조회
+    final productMap = {for (var p in allProducts) p.id!: p};
+    final products = paginatedFavorites
+        .map((f) => productMap[f.productId])
+        .whereType<Product>() // null 제거
+        .toList();
 
     return _buildPaginationResponse(products, totalCount, pagination);
   }
@@ -241,19 +236,6 @@ class ProductListService {
         where: where, sortBy: sortBy, limit: limit, offset: offset);
   }
 
-  /// 필터링된 상품 조회 (정렬 없음)
-  Future<List<Product>> _findProductsWithFilter(
-    Session session,
-    ProductFilterParams params,
-  ) async {
-    final where = ProductFilterUtil.buildWhereClause(params);
-    if (where != null) {
-      return await Product.db.find(session, where: where);
-    } else {
-      return await Product.db.find(session);
-    }
-  }
-
   /// 정렬 옵션에 따른 상품 조회
   Future<List<Product>> _findProductsWithSort(
     Session session, {
@@ -317,40 +299,6 @@ class ProductListService {
   /// 판매중 필터링 (status가 null, selling, reserved인 상품만)
   List<Product> _filterSellingProducts(List<Product> products) {
     return _filterSoldProducts(products);
-  }
-
-  /// 상품 목록 정렬
-  List<Product> _sortProducts(
-    List<Product> products,
-    ProductSortBy sortBy,
-  ) {
-    final sorted = List<Product>.from(products);
-
-    switch (sortBy) {
-      case ProductSortBy.latest:
-        sorted.sort((a, b) {
-          // updatedAt이 있으면 updatedAt, 없으면 createdAt 사용
-          final aDate = a.updatedAt ?? a.createdAt ?? DateTime(1970);
-          final bDate = b.updatedAt ?? b.createdAt ?? DateTime(1970);
-          return bDate.compareTo(aDate); // 최신순 (내림차순)
-        });
-        break;
-      case ProductSortBy.priceAsc:
-        sorted.sort((a, b) => a.price.compareTo(b.price));
-        break;
-      case ProductSortBy.priceDesc:
-        sorted.sort((a, b) => b.price.compareTo(a.price));
-        break;
-      case ProductSortBy.popular:
-        sorted.sort((a, b) {
-          final aCount = a.favoriteCount ?? 0;
-          final bCount = b.favoriteCount ?? 0;
-          return bCount.compareTo(aCount); // 인기순 (내림차순)
-        });
-        break;
-    }
-
-    return sorted;
   }
 
   /// 페이지네이션 적용

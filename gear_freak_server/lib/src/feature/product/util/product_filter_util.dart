@@ -55,10 +55,22 @@ class ProductFilterUtil {
       baseWhere = (p) => p.category.equals(params.category!);
     }
 
-    // 판매완료 제외 필터
-    // Serverpod의 enum 컬럼 null 체크는 복잡하므로, 메모리에서 필터링하는 방식 사용
-    // 여기서는 where 절에 판매완료 제외 조건을 추가하지 않고,
-    // getPaginatedProducts에서 메모리 필터링으로 처리
+    // 판매완료 제외 필터 (DB WHERE 절로 최적화)
+    // status가 sold가 아닌 것만 (null, selling, reserved)
+    if (params.excludeSold) {
+      // ignore: prefer_function_declarations_over_variables
+      final excludeSoldWhere = (ProductTable p) =>
+          p.status.notEquals(ProductStatus.sold);
+
+      if (baseWhere != null) {
+        // 기존 조건과 AND 결합
+        final previousWhere = baseWhere;
+        baseWhere = (p) => previousWhere(p) & excludeSoldWhere(p);
+      } else {
+        // 판매완료 제외 조건만
+        baseWhere = excludeSoldWhere;
+      }
+    }
 
     return baseWhere;
   }

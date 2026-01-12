@@ -214,25 +214,33 @@ class FcmTokenService {
         return {};
       }
 
-      // 참여자별 토큰과 알림 설정 매핑
+      // 참여자별 토큰과 알림 설정 매핑 (N+1 쿼리 방지: IN 쿼리 사용)
+      // 1. userId 목록 추출
+      final userIds = participants.map((p) => p.userId).toSet();
+
+      // 2. IN 쿼리로 한 번에 모든 토큰 조회
+      final allTokens = await FcmToken.db.find(
+        session,
+        where: (t) => t.userId.inSet(userIds),
+      );
+
+      // 3. userId별로 그룹화
+      final tokensByUserId = <int, List<FcmToken>>{};
+      for (final token in allTokens) {
+        tokensByUserId.putIfAbsent(token.userId, () => []).add(token);
+      }
+
+      // 4. 결과 매핑
       final result = <int, Map<String, bool>>{};
       for (final participant in participants) {
-        final userId = participant.userId;
-
-        final tokens = await getTokensByUserId(
-          session: session,
-          userId: userId,
-        );
-
+        final tokens = tokensByUserId[participant.userId] ?? [];
         if (tokens.isEmpty) continue;
 
-        // 각 토큰에 대해 알림 설정 매핑
         final tokenMap = <String, bool>{};
         for (final token in tokens) {
-          tokenMap[token] = participant.isNotificationEnabled;
+          tokenMap[token.token] = participant.isNotificationEnabled;
         }
-
-        result[userId] = tokenMap;
+        result[participant.userId] = tokenMap;
       }
 
       return result;

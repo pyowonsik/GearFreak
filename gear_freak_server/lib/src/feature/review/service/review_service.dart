@@ -27,95 +27,11 @@ class ReviewService {
     required CreateTransactionReviewRequestDto request,
   }) async {
     try {
-      // 1. 평점 검증 (1~5)
-      if (request.rating < 1 || request.rating > 5) {
-        throw Exception('평점은 1~5 사이의 값이어야 합니다.');
-      }
-
-      // 2. 후기 내용 길이 검증 (최대 500자)
-      if (request.content != null && request.content!.length > 500) {
-        throw Exception('후기 내용은 최대 500자까지 입력 가능합니다.');
-      }
-
-      // 3. reviewType 결정 (기본값: seller_to_buyer, 향후 request에 포함될 수 있음)
-      // 현재는 항상 seller_to_buyer로 설정 (구매자→판매자는 별도 엔드포인트 사용)
-      final reviewType = ReviewType.seller_to_buyer;
-
-      // 4. 중복 후기 확인
-      final existingReview = await TransactionReview.db.findFirstRow(
-        session,
-        where: (review) =>
-            review.productId.equals(request.productId) &
-            review.chatRoomId.equals(request.chatRoomId) &
-            review.reviewerId.equals(reviewerId) &
-            review.reviewType.equals(reviewType),
-      );
-
-      if (existingReview != null) {
-        throw Exception('이미 작성한 후기가 있습니다.');
-      }
-
-      // 5. 후기 생성
-      final now = DateTime.now().toUtc();
-      final review = TransactionReview(
-        productId: request.productId,
-        chatRoomId: request.chatRoomId,
-        reviewerId: reviewerId,
-        revieweeId: request.revieweeId,
-        rating: request.rating,
-        content: request.content,
-        reviewType: reviewType,
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      final createdReview = await TransactionReview.db.insertRow(
-        session,
-        review,
-      );
-
-      session.log(
-        '[ReviewService] createTransactionReview - success: reviewId=${createdReview.id}, '
-        'reviewerId=$reviewerId, revieweeId=${request.revieweeId}',
-        level: LogLevel.info,
-      );
-
-      // 5. 사용자 정보 조회
-      final reviewer = await User.db.findById(session, reviewerId);
-      final reviewee = await User.db.findById(session, request.revieweeId);
-
-      // 6. FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
-      await _sendReviewNotification(
+      return await _createReview(
         session: session,
         reviewerId: reviewerId,
-        reviewerNickname: reviewer?.nickname,
-        revieweeId: request.revieweeId,
-        rating: request.rating,
-        productId: request.productId,
-        chatRoomId: request.chatRoomId,
-        content: request.content,
-      ).catchError((error) {
-        developer.log(
-          '[ReviewService] createTransactionReview - warning: FCM notification failed (ignored) - $error',
-          name: 'ReviewService',
-          error: error,
-        );
-      });
-
-      // 7. 응답 DTO 생성
-      return TransactionReviewResponseDto(
-        id: createdReview.id!,
-        productId: createdReview.productId,
-        chatRoomId: createdReview.chatRoomId,
-        reviewerId: createdReview.reviewerId,
-        reviewerNickname: reviewer?.nickname,
-        reviewerProfileImageUrl: reviewer?.profileImageUrl,
-        revieweeId: createdReview.revieweeId,
-        revieweeNickname: reviewee?.nickname,
-        rating: createdReview.rating,
-        content: createdReview.content,
-        reviewType: createdReview.reviewType,
-        createdAt: createdReview.createdAt,
+        request: request,
+        reviewType: ReviewType.seller_to_buyer,
       );
     } catch (e, stackTrace) {
       session.log(
@@ -141,91 +57,11 @@ class ReviewService {
     required CreateTransactionReviewRequestDto request,
   }) async {
     try {
-      // 1. 평점 검증 (1~5)
-      if (request.rating < 1 || request.rating > 5) {
-        throw Exception('평점은 1~5 사이의 값이어야 합니다.');
-      }
-
-      // 2. 후기 내용 길이 검증 (최대 500자)
-      if (request.content != null && request.content!.length > 500) {
-        throw Exception('후기 내용은 최대 500자까지 입력 가능합니다.');
-      }
-
-      // 3. 중복 후기 확인
-      final existingReview = await TransactionReview.db.findFirstRow(
-        session,
-        where: (review) =>
-            review.productId.equals(request.productId) &
-            review.chatRoomId.equals(request.chatRoomId) &
-            review.reviewerId.equals(reviewerId) &
-            review.reviewType.equals(ReviewType.buyer_to_seller),
-      );
-
-      if (existingReview != null) {
-        throw Exception('이미 작성한 후기가 있습니다.');
-      }
-
-      // 4. 후기 생성
-      final now = DateTime.now().toUtc();
-      final review = TransactionReview(
-        productId: request.productId,
-        chatRoomId: request.chatRoomId,
-        reviewerId: reviewerId,
-        revieweeId: request.revieweeId,
-        rating: request.rating,
-        content: request.content,
-        reviewType: ReviewType.buyer_to_seller,
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      final createdReview = await TransactionReview.db.insertRow(
-        session,
-        review,
-      );
-
-      session.log(
-        '[ReviewService] createSellerReview - success: reviewId=${createdReview.id}, '
-        'reviewerId=$reviewerId, revieweeId=${request.revieweeId}',
-        level: LogLevel.info,
-      );
-
-      // 5. 사용자 정보 조회
-      final reviewer = await User.db.findById(session, reviewerId);
-      final reviewee = await User.db.findById(session, request.revieweeId);
-
-      // 6. FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
-      await _sendReviewNotification(
+      return await _createReview(
         session: session,
         reviewerId: reviewerId,
-        reviewerNickname: reviewer?.nickname,
-        revieweeId: request.revieweeId,
-        rating: request.rating,
-        productId: request.productId,
-        chatRoomId: request.chatRoomId,
-        content: request.content,
-      ).catchError((error) {
-        developer.log(
-          '[ReviewService] createSellerReview - warning: FCM notification failed (ignored) - $error',
-          name: 'ReviewService',
-          error: error,
-        );
-      });
-
-      // 7. 응답 DTO 생성
-      return TransactionReviewResponseDto(
-        id: createdReview.id!,
-        productId: createdReview.productId,
-        chatRoomId: createdReview.chatRoomId,
-        reviewerId: createdReview.reviewerId,
-        reviewerNickname: reviewer?.nickname,
-        reviewerProfileImageUrl: reviewer?.profileImageUrl,
-        revieweeId: createdReview.revieweeId,
-        revieweeNickname: reviewee?.nickname,
-        rating: createdReview.rating,
-        content: createdReview.content,
-        reviewType: createdReview.reviewType,
-        createdAt: createdReview.createdAt,
+        request: request,
+        reviewType: ReviewType.buyer_to_seller,
       );
     } catch (e, stackTrace) {
       session.log(
@@ -356,6 +192,110 @@ class ReviewService {
   }
 
   // ==================== Private Helper Methods ====================
+
+  /// 공통 후기 생성 로직
+  ///
+  /// 모든 후기 생성 메서드에서 사용하는 공통 로직입니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [reviewerId]: 리뷰 작성자 ID
+  /// [request]: 후기 작성 요청 DTO
+  /// [reviewType]: 후기 타입 (seller_to_buyer 또는 buyer_to_seller)
+  /// Returns: 생성된 후기 응답 DTO
+  /// Throws: Exception - 평점 범위 오류, 내용 길이 초과, 중복 후기
+  static Future<TransactionReviewResponseDto> _createReview({
+    required Session session,
+    required int reviewerId,
+    required CreateTransactionReviewRequestDto request,
+    required ReviewType reviewType,
+  }) async {
+    // 1. 평점 검증 (1~5)
+    if (request.rating < 1 || request.rating > 5) {
+      throw Exception('평점은 1~5 사이의 값이어야 합니다.');
+    }
+
+    // 2. 후기 내용 길이 검증 (최대 500자)
+    if (request.content != null && request.content!.length > 500) {
+      throw Exception('후기 내용은 최대 500자까지 입력 가능합니다.');
+    }
+
+    // 3. 중복 후기 확인
+    final existingReview = await TransactionReview.db.findFirstRow(
+      session,
+      where: (review) =>
+          review.productId.equals(request.productId) &
+          review.chatRoomId.equals(request.chatRoomId) &
+          review.reviewerId.equals(reviewerId) &
+          review.reviewType.equals(reviewType),
+    );
+
+    if (existingReview != null) {
+      throw Exception('이미 작성한 후기가 있습니다.');
+    }
+
+    // 4. 후기 생성
+    final now = DateTime.now().toUtc();
+    final review = TransactionReview(
+      productId: request.productId,
+      chatRoomId: request.chatRoomId,
+      reviewerId: reviewerId,
+      revieweeId: request.revieweeId,
+      rating: request.rating,
+      content: request.content,
+      reviewType: reviewType,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final createdReview = await TransactionReview.db.insertRow(
+      session,
+      review,
+    );
+
+    session.log(
+      '[ReviewService] _createReview - success: reviewId=${createdReview.id}, '
+      'reviewerId=$reviewerId, revieweeId=${request.revieweeId}, reviewType=$reviewType',
+      level: LogLevel.info,
+    );
+
+    // 5. 사용자 정보 조회
+    final reviewer = await User.db.findById(session, reviewerId);
+    final reviewee = await User.db.findById(session, request.revieweeId);
+
+    // 6. FCM 알림 전송 (비동기, 실패해도 후기 작성은 성공)
+    await _sendReviewNotification(
+      session: session,
+      reviewerId: reviewerId,
+      reviewerNickname: reviewer?.nickname,
+      revieweeId: request.revieweeId,
+      rating: request.rating,
+      productId: request.productId,
+      chatRoomId: request.chatRoomId,
+      content: request.content,
+    ).catchError((error) {
+      developer.log(
+        '[ReviewService] _createReview - warning: FCM notification failed (ignored) - $error',
+        name: 'ReviewService',
+        error: error,
+      );
+    });
+
+    // 7. 응답 DTO 생성
+    return TransactionReviewResponseDto(
+      id: createdReview.id!,
+      productId: createdReview.productId,
+      chatRoomId: createdReview.chatRoomId,
+      reviewerId: createdReview.reviewerId,
+      reviewerNickname: reviewer?.nickname,
+      reviewerProfileImageUrl: reviewer?.profileImageUrl,
+      revieweeId: createdReview.revieweeId,
+      revieweeNickname: reviewee?.nickname,
+      rating: createdReview.rating,
+      content: createdReview.content,
+      reviewType: createdReview.reviewType,
+      createdAt: createdReview.createdAt,
+    );
+  }
 
   /// 후기 작성 시 FCM 알림 전송
   ///

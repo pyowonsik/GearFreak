@@ -154,37 +154,51 @@ class ChatNotificationService {
         return 0;
       }
 
-      // 2. 모든 메시지 조회 (자신이 보낸 메시지 제외를 위해)
-      final allMessages = await ChatMessage.db.find(
-        session,
-        where: (message) => message.chatRoomId.equals(chatRoomId),
-      );
+      // 2. DB COUNT 쿼리로 직접 계산 (메모리 필터링 대신)
+      // Serverpod ORM 제약으로 DateTime 비교가 WHERE 절에서 지원되지 않으므로
+      // 메모리 필터링을 최소화하는 방식으로 개선
 
       // 3. leftAt이 있으면 leftAt 이후 메시지만 카운트 (lastReadAt 무시)
       // 재참여한 경우 나가기 이전 메시지는 읽은 것으로 간주
       if (participant.leftAt != null) {
-        final unreadCount = allMessages.where((message) {
-          return message.senderId != userId &&
-              message.createdAt != null &&
-              message.createdAt!.isAfter(participant.leftAt!);
-        }).length;
+        final messages = await ChatMessage.db.find(
+          session,
+          where: (msg) =>
+              msg.chatRoomId.equals(chatRoomId) &
+              msg.senderId.notEquals(userId),
+        );
+        final unreadCount = messages
+            .where((msg) =>
+                msg.createdAt != null &&
+                msg.createdAt!.isAfter(participant.leftAt!))
+            .length;
         return unreadCount;
       }
 
       // 4. leftAt이 없으면 기존 로직대로 lastReadAt 기준으로 계산
       // lastReadAt이 null이면 모든 메시지를 읽지 않은 것으로 간주 (자신이 보낸 메시지 제외)
       if (participant.lastReadAt == null) {
-        final unreadCount =
-            allMessages.where((message) => message.senderId != userId).length;
+        final unreadCount = await ChatMessage.db.count(
+          session,
+          where: (msg) =>
+              msg.chatRoomId.equals(chatRoomId) &
+              msg.senderId.notEquals(userId),
+        );
         return unreadCount;
       }
 
       // 5. lastReadAt 이후의 메시지 개수 계산 (자신이 보낸 메시지는 제외)
-      final unreadCount = allMessages.where((message) {
-        return message.senderId != userId &&
-            message.createdAt != null &&
-            message.createdAt!.isAfter(participant.lastReadAt!);
-      }).length;
+      final messages = await ChatMessage.db.find(
+        session,
+        where: (msg) =>
+            msg.chatRoomId.equals(chatRoomId) &
+            msg.senderId.notEquals(userId),
+      );
+      final unreadCount = messages
+          .where((msg) =>
+              msg.createdAt != null &&
+              msg.createdAt!.isAfter(participant.lastReadAt!))
+          .length;
 
       return unreadCount;
     } on Exception catch (e, stackTrace) {

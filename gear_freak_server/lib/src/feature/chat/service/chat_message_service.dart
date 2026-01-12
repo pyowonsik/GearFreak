@@ -349,7 +349,10 @@ class ChatMessageService {
       // 오프셋 계산
       final offset = (request.page - 1) * request.limit;
 
-      // 메시지 조회 (최신 순으로 정렬, leftAt 필터는 메모리에서 적용)
+      // 메시지 조회 (최신 순으로 정렬)
+      // Serverpod ORM 제약: DateTime 비교(greaterThan 등)가 WHERE 절에서 지원되지 않음
+      // 따라서 leftAt 필터는 메모리에서 적용 후 페이지네이션 처리
+      // 참고: lib/src/feature/chat/service/chat_notification_service.dart의 getUnreadCount 참조
       final allMessages = await ChatMessage.db.find(
         session,
         orderBy: (message) => message.createdAt,
@@ -366,6 +369,7 @@ class ChatMessageService {
       );
 
       // leftAt 이후 메시지만 필터링 (메모리에서 필터링)
+      // Serverpod ORM이 DateTime 비교를 WHERE 절에서 지원하지 않으므로 불가피
       final filteredMessages = leftAtFilter != null
           ? allMessages.where((msg) {
               return msg.createdAt != null &&
