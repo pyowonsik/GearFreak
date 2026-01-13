@@ -23,3 +23,11 @@ config/google_client_secret.json
 
 # Environment variables (direnv)
 .envrc
+
+# Terraform
+deploy/aws/terraform/**/.terraform/
+deploy/aws/terraform/**/.terraform.lock.hcl
+deploy/aws/terraform/**/terraform.tfvars
+deploy/aws/terraform/**/*.tfstate
+deploy/aws/terraform/**/*.tfstate.backup
+deploy/aws/terraform/**/tfplan

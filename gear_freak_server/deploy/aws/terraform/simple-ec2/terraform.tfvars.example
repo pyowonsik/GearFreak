@@ -1,0 +1,57 @@
+# ====================
+# Project Configuration
+# ====================
+
+project_name = "gear-freak"
+aws_region   = "ap-northeast-2"
+
+# ====================
+# Instance Configuration
+# ====================
+
+instance_type = "t3.micro"
+instance_ami  = "ami-0c9c942bd7bf113a2" # Amazon Linux 2023 (ap-northeast-2)
+volume_size   = 20
+
+# ====================
+# Network Configuration
+# ====================
+
+# SSH Key Pair name (must exist in AWS)
+ssh_key_name = "gear-freak-server-key"
+
+# Your IP address in CIDR format for SSH access
+# Get your IP: curl ifconfig.me
+admin_ip = "YOUR_IP_ADDRESS/32" # Example: "123.45.67.89/32"
+
+# ====================
+# Domain Configuration
+# ====================
+
+domain = "gear-freaks.com"
+
+# Route53 Hosted Zone ID
+# Get from AWS Console: Route53 → Hosted zones → gear-freaks.com → Hosted zone ID
+hosted_zone_id = "Z0891796X4J567MSHFSJ"
+
+# ====================
+# Sensitive Environment Variables
+# Copy this section to terraform.tfvars (gitignored)
+# ====================
+
+# FCM_PROJECT_ID = "gear-freak"
+
+# AWS credentials for S3 access
+# aws_access_key_id     = "YOUR_AWS_ACCESS_KEY"
+# aws_secret_access_key = "YOUR_AWS_SECRET_KEY"
+
+# S3 bucket names
+# s3_public_bucket_name  = "gear-freak-public-storage-3059875"
+# s3_private_bucket_name = "gear-freak-private-storage-3059875"
+
+# Database credentials
+# db_password    = "STRONG_DB_PASSWORD_HERE"
+# redis_password = "STRONG_REDIS_PASSWORD_HERE"
+
+# Docker image URL (from Phase 1)
+# docker_image_url = "pyowonsik/gear-freak-server:latest"
