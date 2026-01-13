@@ -31,15 +31,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final profileState = ref.watch(profileNotifierProvider);
 
     return Scaffold(
-      appBar: GbAppBar(
-        title: const Text('내 정보'),
+      appBar: const GbAppBar(
+        title: Text('내 정보'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              context.push('/profile/settings');
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.settings_outlined),
+          //   onPressed: () {
+          //     context.push('/profile/settings');
+          //   },
+          // ),
         ],
       ),
       body: switch (profileState) {

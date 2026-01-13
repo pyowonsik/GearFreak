@@ -51,7 +51,7 @@ class _SplashPageState extends State<SplashPage>
               right: 0,
               child: Center(
                 child: Text(
-                  '장 비 충',
+                  '장 비 빨',
                   style: GoogleFonts.gasoekOne(
                     fontSize: 110,
                     color: const Color(0xFF1E3A5F),

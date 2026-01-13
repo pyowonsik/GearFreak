@@ -47,14 +47,14 @@ class ProductImageSectionWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '상품 이미지',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
-            ),
-          ),
+          // const Text(
+          //   '상품 이미지',
+          //   style: TextStyle(
+          //     fontSize: 16,
+          //     fontWeight: FontWeight.w600,
+          //     color: Color(0xFF1F2937),
+          //   ),
+          // ),
           const SizedBox(height: 4),
           Text(
             '$totalImageCount/10',

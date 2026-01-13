@@ -42,7 +42,7 @@ class AppInfoPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      '운동은 장비충',
+                      '운동은 장비빨',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -118,7 +118,7 @@ class AppInfoPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                '© 2025 운동은 장비충. All rights reserved.',
+                '© 2025 운동은 장비빨. All rights reserved.',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade500,
@@ -142,7 +142,7 @@ class AppInfoPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '회사명: 운동은 장비충',
+              '회사명: 운동은 장비빨',
               style: TextStyle(fontSize: 14),
             ),
             SizedBox(height: 8),

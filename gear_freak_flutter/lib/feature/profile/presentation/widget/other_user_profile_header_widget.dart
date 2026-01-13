@@ -97,26 +97,26 @@ class OtherUserProfileHeaderWidget extends StatelessWidget {
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.verified_user,
-                  size: 16,
-                  color: Colors.white70,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '인증된 판매자',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
+            // const SizedBox(height: 6),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     const Icon(
+            //       Icons.verified_user,
+            //       size: 16,
+            //       color: Colors.white70,
+            //     ),
+            //     const SizedBox(width: 4),
+            //     Text(
+            //       '인증된 판매자',
+            //       style: TextStyle(
+            //         fontSize: 14,
+            //         color: Colors.white.withValues(alpha: 0.9),
+            //         fontWeight: FontWeight.w500,
+            //       ),
+            //     ),
+            //   ],
+            // ),
             const SizedBox(height: 16),
           ],
         ),

@@ -472,7 +472,7 @@ class _ProductDetailLoadedViewState
                           ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     // 가격
                     Text(
                       '${formatPrice(widget.product.price)}원',
@@ -482,6 +482,7 @@ class _ProductDetailLoadedViewState
                         color: Color(0xFF2563EB),
                       ),
                     ),
+                    const SizedBox(height: 10),
                     // 상품 상태 및 거래 방법
                     Row(
                       children: [
@@ -570,7 +571,7 @@ class _ProductDetailLoadedViewState
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Divider(color: Color(0xFFE5E7EB)),
+                    // const Divider(color: Color(0xFFE5E7EB)),
                     const SizedBox(height: 16),
                     // 상품 정보
                     Row(
@@ -674,5 +675,4 @@ class _ProductDetailLoadedViewState
       ),
     );
   }
-
 }

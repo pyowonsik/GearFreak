@@ -9,7 +9,7 @@ class AuthLogoSection extends StatelessWidget {
   const AuthLogoSection({
     super.key,
     this.iconSize = 80,
-    this.title = '운동은 장비충',
+    this.title = '운동은 장비빨',
   });
 
   /// 로고 아이콘 크기

@@ -42,7 +42,7 @@ class OtherUserProfileLoadedView extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverAppBar(
-          expandedHeight: 300,
+          expandedHeight: 250,
           pinned: true,
           backgroundColor: const Color(0xFF2563EB),
           foregroundColor: Colors.white,

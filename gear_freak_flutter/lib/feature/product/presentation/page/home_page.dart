@@ -106,7 +106,7 @@ class _HomePageState extends ConsumerState<HomePage>
 
     return Scaffold(
       appBar: GbAppBar(
-        title: const Text('운동은 장비충'),
+        title: const Text('운동은 장비빨'),
         prefix: Icon(
           Icons.shopping_bag,
           color: Theme.of(context).colorScheme.primary,

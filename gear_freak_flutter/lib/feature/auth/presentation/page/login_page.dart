@@ -57,7 +57,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 200),
                       child: Text(
-                        '장 비 충',
+                        '장 비 빨',
                         style: GoogleFonts.gasoekOne(
                           fontSize: 80,
                           color: const Color(0xFF1E3A5F),

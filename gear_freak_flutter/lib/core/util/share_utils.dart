@@ -28,7 +28,7 @@ class ShareUtils {
 
       // 공유 텍스트 생성
       final shareText =
-          '운동은 장비충! \n $title\n${_formatPrice(price)}원\n$deepLinkUrl';
+          '운동은 장비빨! \n $title\n${_formatPrice(price)}원\n$deepLinkUrl';
 
       // 공유 실행
       // 카카오톡, 문자, 이메일 등 모든 공유 앱에서 선택 가능

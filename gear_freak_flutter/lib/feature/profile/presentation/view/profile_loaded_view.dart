@@ -85,16 +85,16 @@ class ProfileLoadedView extends StatelessWidget {
                 title: '후기 관리',
                 onTap: onReviewManagement,
               ),
-              ProfileMenuItemWidget(
-                icon: Icons.help_outline,
-                title: '고객 센터',
-                onTap: onCustomerCenter,
-              ),
-              ProfileMenuItemWidget(
-                icon: Icons.info_outline,
-                title: '앱 정보',
-                onTap: onAppInfo,
-              ),
+              // ProfileMenuItemWidget(
+              //   icon: Icons.help_outline,
+              //   title: '고객 센터',
+              //   onTap: onCustomerCenter,
+              // ),
+              // ProfileMenuItemWidget(
+              //   icon: Icons.info_outline,
+              //   title: '앱 정보',
+              //   onTap: onAppInfo,
+              // ),
               ProfileMenuItemWidget(
                 icon: Icons.logout_outlined,
                 title: '로그아웃',
