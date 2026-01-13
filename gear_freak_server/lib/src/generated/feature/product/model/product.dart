@@ -39,6 +39,7 @@ abstract class Product
     this.chatCount,
     this.createdAt,
     this.updatedAt,
+    this.lastBumpedAt,
     this.status,
   });
 
@@ -60,6 +61,7 @@ abstract class Product
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastBumpedAt,
     _i6.ProductStatus? status,
   }) = _ProductImpl;
 
@@ -94,6 +96,10 @@ abstract class Product
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+      lastBumpedAt: jsonSerialization['lastBumpedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['lastBumpedAt']),
       status: jsonSerialization['status'] == null
           ? null
           : _i6.ProductStatus.fromJson((jsonSerialization['status'] as int)),
@@ -154,6 +160,9 @@ abstract class Product
   /// 상품 수정일
   DateTime? updatedAt;
 
+  /// 마지막 끌어올리기 시간
+  DateTime? lastBumpedAt;
+
   /// 판매 상태
   _i6.ProductStatus? status;
 
@@ -181,6 +190,7 @@ abstract class Product
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastBumpedAt,
     _i6.ProductStatus? status,
   });
   @override
@@ -203,6 +213,7 @@ abstract class Product
       if (chatCount != null) 'chatCount': chatCount,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
+      if (lastBumpedAt != null) 'lastBumpedAt': lastBumpedAt?.toJson(),
       if (status != null) 'status': status?.toJson(),
     };
   }
@@ -227,6 +238,7 @@ abstract class Product
       if (chatCount != null) 'chatCount': chatCount,
       if (createdAt != null) 'createdAt': createdAt?.toJson(),
       if (updatedAt != null) 'updatedAt': updatedAt?.toJson(),
+      if (lastBumpedAt != null) 'lastBumpedAt': lastBumpedAt?.toJson(),
       if (status != null) 'status': status?.toJson(),
     };
   }
@@ -282,6 +294,7 @@ class _ProductImpl extends Product {
     int? chatCount,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? lastBumpedAt,
     _i6.ProductStatus? status,
   }) : super._(
           id: id,
@@ -301,6 +314,7 @@ class _ProductImpl extends Product {
           chatCount: chatCount,
           createdAt: createdAt,
           updatedAt: updatedAt,
+          lastBumpedAt: lastBumpedAt,
           status: status,
         );
 
@@ -326,6 +340,7 @@ class _ProductImpl extends Product {
     Object? chatCount = _Undefined,
     Object? createdAt = _Undefined,
     Object? updatedAt = _Undefined,
+    Object? lastBumpedAt = _Undefined,
     Object? status = _Undefined,
   }) {
     return Product(
@@ -349,6 +364,8 @@ class _ProductImpl extends Product {
       chatCount: chatCount is int? ? chatCount : this.chatCount,
       createdAt: createdAt is DateTime? ? createdAt : this.createdAt,
       updatedAt: updatedAt is DateTime? ? updatedAt : this.updatedAt,
+      lastBumpedAt:
+          lastBumpedAt is DateTime? ? lastBumpedAt : this.lastBumpedAt,
       status: status is _i6.ProductStatus? ? status : this.status,
     );
   }
@@ -419,6 +436,10 @@ class ProductTable extends _i1.Table<int?> {
       'updatedAt',
       this,
     );
+    lastBumpedAt = _i1.ColumnDateTime(
+      'lastBumpedAt',
+      this,
+    );
     status = _i1.ColumnEnum(
       'status',
       this,
@@ -473,6 +494,9 @@ class ProductTable extends _i1.Table<int?> {
   /// 상품 수정일
   late final _i1.ColumnDateTime updatedAt;
 
+  /// 마지막 끌어올리기 시간
+  late final _i1.ColumnDateTime lastBumpedAt;
+
   /// 판매 상태
   late final _i1.ColumnEnum<_i6.ProductStatus> status;
 
@@ -507,6 +531,7 @@ class ProductTable extends _i1.Table<int?> {
         chatCount,
         createdAt,
         updatedAt,
+        lastBumpedAt,
         status,
       ];
 

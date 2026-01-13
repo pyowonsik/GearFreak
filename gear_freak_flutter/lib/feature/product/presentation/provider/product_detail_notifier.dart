@@ -336,14 +336,17 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
     );
   }
 
-  /// 상품 상단으로 올리기 (updatedAt 갱신)
-  Future<bool> bumpProduct(int productId) async {
+  /// 상품 상단으로 올리기 (lastBumpedAt 갱신)
+  /// 반환값:
+  /// - null: 성공
+  /// - String: 실패 (에러 메시지)
+  Future<String?> bumpProduct(int productId) async {
     final result = await bumpProductUseCase(productId);
 
     return result.fold(
       (failure) {
         debugPrint('상품 상단으로 올리기 실패: ${failure.message}');
-        return false;
+        return failure.message;
       },
       (updatedProduct) {
         debugPrint('상품 상단으로 올리기 성공: $productId');
@@ -358,7 +361,7 @@ class ProductDetailNotifier extends StateNotifier<ProductDetailState> {
             ref.read(updatedProductProvider.notifier).state = null;
           });
         }
-        return true;
+        return null; // 성공
       },
     );
   }

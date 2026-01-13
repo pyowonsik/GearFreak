@@ -463,6 +463,10 @@ class EndpointProduct extends _i1.EndpointRef {
   String get name => 'product';
 
   /// 상품 생성
+  ///
+  /// [session]: Serverpod 세션
+  /// [request]: 상품 생성 요청 DTO
+  /// Returns: 생성된 상품
   _i2.Future<_i24.Product> createProduct(
           _i25.CreateProductRequestDto request) =>
       caller.callServerEndpoint<_i24.Product>(
@@ -472,6 +476,10 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 상품 수정
+  ///
+  /// [session]: Serverpod 세션
+  /// [request]: 상품 수정 요청 DTO
+  /// Returns: 수정된 상품
   _i2.Future<_i24.Product> updateProduct(
           _i26.UpdateProductRequestDto request) =>
       caller.callServerEndpoint<_i24.Product>(
@@ -480,6 +488,11 @@ class EndpointProduct extends _i1.EndpointRef {
         {'request': request},
       );
 
+  /// 상품 상세 조회
+  ///
+  /// [session]: Serverpod 세션
+  /// [id]: 상품 ID
+  /// Returns: 상품 정보
   _i2.Future<_i24.Product> getProduct(int id) =>
       caller.callServerEndpoint<_i24.Product>(
         'product',
@@ -488,6 +501,10 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 페이지네이션된 상품 목록 조회
+  ///
+  /// [session]: Serverpod 세션
+  /// [pagination]: 페이지네이션 정보
+  /// Returns: 페이지네이션된 상품 목록
   _i2.Future<_i27.PaginatedProductsResponseDto> getPaginatedProducts(
           _i11.PaginationDto pagination) =>
       caller.callServerEndpoint<_i27.PaginatedProductsResponseDto>(
@@ -497,7 +514,10 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 찜 추가/제거 (토글)
-  /// 반환값: true = 찜 추가됨, false = 찜 제거됨
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// Returns: true = 찜 추가됨, false = 찜 제거됨
   _i2.Future<bool> toggleFavorite(int productId) =>
       caller.callServerEndpoint<bool>(
         'product',
@@ -506,6 +526,10 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 찜 상태 조회
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// Returns: true = 찜함, false = 찜 안 함
   _i2.Future<bool> isFavorite(int productId) => caller.callServerEndpoint<bool>(
         'product',
         'isFavorite',
@@ -513,8 +537,12 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 조회수 증가 (계정당 1회)
+  ///
   /// 이미 조회한 경우에는 조회수를 증가시키지 않습니다.
-  /// 반환값: true = 조회수 증가됨, false = 이미 조회함 (증가 안 됨)
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// Returns: true = 조회수 증가됨, false = 이미 조회함
   _i2.Future<bool> incrementViewCount(int productId) =>
       caller.callServerEndpoint<bool>(
         'product',
@@ -523,6 +551,9 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 상품 삭제
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 삭제할 상품 ID
   _i2.Future<void> deleteProduct(int productId) =>
       caller.callServerEndpoint<void>(
         'product',
@@ -531,6 +562,10 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 내가 등록한 상품 목록 조회 (페이지네이션)
+  ///
+  /// [session]: Serverpod 세션
+  /// [pagination]: 페이지네이션 정보
+  /// Returns: 페이지네이션된 상품 목록
   _i2.Future<_i27.PaginatedProductsResponseDto> getMyProducts(
           _i11.PaginationDto pagination) =>
       caller.callServerEndpoint<_i27.PaginatedProductsResponseDto>(
@@ -539,7 +574,11 @@ class EndpointProduct extends _i1.EndpointRef {
         {'pagination': pagination},
       );
 
-  /// 내가 관심목록한 상품 목록 조회 (페이지네이션)
+  /// 내가 관심목록에 추가한 상품 목록 조회 (페이지네이션)
+  ///
+  /// [session]: Serverpod 세션
+  /// [pagination]: 페이지네이션 정보
+  /// Returns: 페이지네이션된 상품 목록
   _i2.Future<_i27.PaginatedProductsResponseDto> getMyFavoriteProducts(
           _i11.PaginationDto pagination) =>
       caller.callServerEndpoint<_i27.PaginatedProductsResponseDto>(
@@ -549,6 +588,10 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 상품 상태 변경
+  ///
+  /// [session]: Serverpod 세션
+  /// [request]: 상태 변경 요청 DTO
+  /// Returns: 수정된 상품
   _i2.Future<_i24.Product> updateProductStatus(
           _i28.UpdateProductStatusRequestDto request) =>
       caller.callServerEndpoint<_i24.Product>(
@@ -558,7 +601,12 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 상품 상단으로 올리기 (updatedAt 갱신)
+  ///
   /// 상품의 updatedAt을 현재 시간으로 갱신하여 최신순 정렬에서 상단으로 올립니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// Returns: 수정된 상품
   _i2.Future<_i24.Product> bumpProduct(int productId) =>
       caller.callServerEndpoint<_i24.Product>(
         'product',
@@ -566,8 +614,12 @@ class EndpointProduct extends _i1.EndpointRef {
         {'productId': productId},
       );
 
-  /// 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
-  /// 현재 로그인한 사용자의 통계를 조회합니다.
+  /// 현재 로그인한 사용자의 상품 통계 조회
+  ///
+  /// 판매중, 거래완료, 관심목록 개수, 후기 개수를 조회합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// Returns: 상품 통계 DTO
   _i2.Future<_i29.ProductStatsDto> getProductStats() =>
       caller.callServerEndpoint<_i29.ProductStatsDto>(
         'product',
@@ -575,8 +627,13 @@ class EndpointProduct extends _i1.EndpointRef {
         {},
       );
 
-  /// 다른 사용자의 상품 통계 조회 (판매중, 거래완료, 관심목록 개수, 후기 개수)
-  /// [userId]는 조회할 사용자의 ID입니다.
+  /// 다른 사용자의 상품 통계 조회
+  ///
+  /// 판매중, 거래완료, 관심목록 개수, 후기 개수를 조회합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 조회할 사용자 ID
+  /// Returns: 상품 통계 DTO
   _i2.Future<_i29.ProductStatsDto> getProductStatsByUserId(int userId) =>
       caller.callServerEndpoint<_i29.ProductStatsDto>(
         'product',
@@ -585,9 +642,14 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 다른 사용자의 상품 목록 조회 (페이지네이션)
-  /// [userId]는 조회할 사용자의 ID입니다.
+  ///
   /// [pagination.status]가 null이면 모든 상태의 상품을 반환합니다.
-  /// [pagination.status]가 ProductStatus.selling이면 판매중인 상품만 반환합니다 (selling + reserved 포함).
+  /// [pagination.status]가 ProductStatus.selling이면 판매중인 상품만 반환합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [userId]: 조회할 사용자 ID
+  /// [pagination]: 페이지네이션 정보
+  /// Returns: 페이지네이션된 상품 목록
   _i2.Future<_i27.PaginatedProductsResponseDto> getProductsByUserId(
     int userId,
     _i11.PaginationDto pagination,
@@ -602,7 +664,10 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 상품 신고 여부 조회
-  /// 반환값: true = 이미 신고함, false = 신고 안 함
+  ///
+  /// [session]: Serverpod 세션
+  /// [productId]: 상품 ID
+  /// Returns: true = 이미 신고함, false = 신고 안 함
   _i2.Future<bool> hasReportedProduct(int productId) =>
       caller.callServerEndpoint<bool>(
         'product',
@@ -611,8 +676,13 @@ class EndpointProduct extends _i1.EndpointRef {
       );
 
   /// 상품 신고하기
-  /// 중복 신고 체크: 같은 사용자가 같은 상품을 이미 신고한 경우 Exception 발생
-  /// 본인 상품 신고 불가
+  ///
+  /// 중복 신고 불가, 본인 상품 신고 불가
+  ///
+  /// [session]: Serverpod 세션
+  /// [request]: 신고 요청 DTO
+  /// Returns: 생성된 신고
+  /// Throws: Exception - 중복 신고 또는 본인 상품 신고 시
   _i2.Future<_i30.ProductReport> createProductReport(
           _i31.CreateProductReportRequestDto request) =>
       caller.callServerEndpoint<_i30.ProductReport>(
@@ -764,8 +834,10 @@ class EndpointFcm extends _i1.EndpointRef {
 
   /// FCM 토큰 등록
   ///
-  /// [token]은 FCM 토큰입니다.
-  /// [deviceType]은 디바이스 타입입니다 (ios, android).
+  /// [session]: Serverpod 세션
+  /// [token]: FCM 토큰
+  /// [deviceType]: 디바이스 타입 (ios, android)
+  /// Returns: true = 성공, false = 실패
   _i2.Future<bool> registerFcmToken(
     String token,
     String? deviceType,
@@ -781,7 +853,9 @@ class EndpointFcm extends _i1.EndpointRef {
 
   /// FCM 토큰 삭제
   ///
-  /// [token]은 FCM 토큰입니다.
+  /// [session]: Serverpod 세션
+  /// [token]: 삭제할 FCM 토큰
+  /// Returns: true = 성공, false = 실패
   _i2.Future<bool> deleteFcmToken(String token) =>
       caller.callServerEndpoint<bool>(
         'fcm',

@@ -23,6 +23,18 @@ class BumpProductUseCase
       final product = await repository.bumpProduct(productId);
       return Right(product);
     } on Exception catch (e) {
+      // 쿨다운 에러 구분
+      final errorMessage = e.toString();
+      if (errorMessage.contains('Bump cooldown active')) {
+        return Left(
+          BumpCooldownFailure(
+            errorMessage.replaceAll('Exception: ', ''),
+            exception: e,
+          ),
+        );
+      }
+
+      // 일반 에러
       return Left(
         BumpProductFailure(
           '상품을 상단으로 올릴 수 없습니다.',

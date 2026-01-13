@@ -674,4 +674,5 @@ class _ProductDetailLoadedViewState
       ),
     );
   }
+
 }

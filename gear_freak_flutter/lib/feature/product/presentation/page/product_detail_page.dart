@@ -69,20 +69,59 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
       return;
     }
 
+    // 쿨다운 사전 체크 (API 호출 전)
+    if (productData.lastBumpedAt != null) {
+      final now = DateTime.now().toUtc();
+      final timeSinceLastBump = now.difference(productData.lastBumpedAt!);
+
+      if (timeSinceLastBump.inHours < 24) {
+        final remainingMinutes = (24 * 60) - timeSinceLastBump.inMinutes;
+        final remainingHours = remainingMinutes ~/ 60;
+        final displayMinutes = remainingMinutes % 60;
+
+        if (!mounted) return;
+
+        // 모달로 안내 메시지 표시
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('상단으로 올리기'),
+            content: Text(
+              '24시간마다 적용됩니다.\n\n남은 시간: $remainingHours시간 $displayMinutes분',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('확인'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+
     // 상단으로 올리기 API 호출
-    final bumpResult = await ref
+    final errorMessage = await ref
         .read(productDetailNotifierProvider.notifier)
         .bumpProduct(productData.id!);
 
     if (!mounted) return;
 
-    if (bumpResult) {
-      if (!mounted) return;
+    if (errorMessage == null) {
+      // 성공
       GbSnackBar.showSuccess(context, '상품이 상단으로 올라갔습니다');
     } else {
-      // 실패
-      if (!mounted) return;
-      GbSnackBar.showError(context, '상품을 상단으로 올리는데 실패했습니다');
+      // 실패 (쿨다운 또는 일반 에러)
+      if (errorMessage.contains('wait') ||
+          errorMessage.contains('시간') ||
+          errorMessage.contains('Bump cooldown active')) {
+        // 쿨다운 메시지
+        GbSnackBar.showWarning(context, errorMessage);
+      } else {
+        // 일반 에러
+        GbSnackBar.showError(context, errorMessage);
+      }
     }
   }
 

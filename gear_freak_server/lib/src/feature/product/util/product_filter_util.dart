@@ -83,7 +83,9 @@ class ProductSortUtil {
       ProductSortBy sortBy) {
     switch (sortBy) {
       case ProductSortBy.latest:
-        return ((p) => p.updatedAt, true);
+        // lastBumpedAt 우선, 없으면 (null) 끝으로 (NULLS LAST 효과)
+        // bump한 상품이 상단에 오도록 함
+        return ((p) => p.lastBumpedAt, true);
       case ProductSortBy.priceAsc:
         return ((p) => p.price, false);
       case ProductSortBy.priceDesc:

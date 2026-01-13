@@ -291,15 +291,19 @@ class ProductService {
     return result;
   }
 
-  /// 상품 상단으로 올리기 (updatedAt 갱신)
+  /// 상품 상단으로 올리기 (24시간 쿨다운)
   ///
-  /// 상품의 updatedAt을 현재 시간으로 갱신하여 최신순 정렬에서 상단으로 올립니다.
+  /// 상품의 lastBumpedAt을 현재 시간으로 갱신하여 최신순 정렬에서 상단으로 올립니다.
+  /// 마지막 bump로부터 24시간이 지나지 않으면 Exception을 던집니다.
   ///
   /// [session]: Serverpod 세션
   /// [productId]: 상품 ID
   /// [userId]: 요청자 ID (권한 확인용)
   /// Returns: 수정된 상품
-  /// Throws: Exception - 상품을 찾을 수 없거나 권한이 없는 경우
+  /// Throws:
+  ///   - Exception('Product not found') - 상품을 찾을 수 없는 경우
+  ///   - Exception('Unauthorized...') - 권한이 없는 경우
+  ///   - Exception('Bump cooldown active...') - 쿨다운 중인 경우
   Future<Product> bumpProduct(
     Session session,
     int productId,
@@ -316,14 +320,44 @@ class ProductService {
       throw Exception('Unauthorized: Only the seller can bump this product');
     }
 
-    // 3. updatedAt을 현재 시간으로 갱신
+    // 3. 쿨다운 체크 (24시간)
+    if (product.lastBumpedAt != null) {
+      final now = DateTime.now().toUtc();
+      final timeSinceLastBump = now.difference(product.lastBumpedAt!);
+
+      if (timeSinceLastBump.inHours < 24) {
+        // 남은 시간 계산 (분 단위까지)
+        final remainingMinutes = (24 * 60) - timeSinceLastBump.inMinutes;
+        final remainingHours = remainingMinutes ~/ 60;
+        final displayMinutes = remainingMinutes % 60;
+
+        session.log(
+          'Bump cooldown failed: productId=$productId, userId=$userId, '
+          'remainingTime=${remainingHours}h ${displayMinutes}m',
+          level: LogLevel.warning,
+        );
+
+        throw Exception(
+          'Bump cooldown active. '
+          'Please wait ${remainingHours}h ${displayMinutes}m before bumping again.',
+        );
+      }
+    }
+
+    // 4. lastBumpedAt을 현재 시간으로 갱신 (updatedAt은 변경하지 않음)
     final now = DateTime.now().toUtc();
-    final updatedProduct = product.copyWith(updatedAt: now);
+    final updatedProduct = product.copyWith(lastBumpedAt: now);
 
     await Product.db.updateRow(
       session,
       updatedProduct,
-      columns: (t) => [t.updatedAt],
+      columns: (t) => [t.lastBumpedAt],
+    );
+
+    session.log(
+      'Product bumped: productId=$productId, userId=$userId, '
+      'lastBumpedAt=$now',
+      level: LogLevel.info,
     );
 
     return updatedProduct;

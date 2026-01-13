@@ -34,6 +34,8 @@ fields:
   createdAt: DateTime?
   ### 상품 수정일
   updatedAt: DateTime?
+  ### 마지막 끌어올리기 시간
+  lastBumpedAt: DateTime?
   ### 판매 상태
   status: ProductStatus?
 
@@ -44,3 +46,5 @@ indexes:
     fields: category
   created_at_idx:
     fields: createdAt
+  last_bumped_at_idx:
+    fields: lastBumpedAt

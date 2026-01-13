@@ -183,6 +183,19 @@ class BumpProductFailure extends ProductFailure {
   String toString() => 'BumpProductFailure: $message';
 }
 
+/// 상품 끌어올리기 쿨다운 실패
+class BumpCooldownFailure extends ProductFailure {
+  /// BumpCooldownFailure 생성자
+  const BumpCooldownFailure(
+    super.message, {
+    super.exception,
+    super.stackTrace,
+  });
+
+  @override
+  String toString() => 'BumpCooldownFailure: $message';
+}
+
 /// 상품 신고 실패
 class CreateProductReportFailure extends ProductFailure {
   /// CreateProductReportFailure 생성자
