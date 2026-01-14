@@ -1,0 +1,16 @@
+# Appfile
+# App Store Connect 및 Apple Developer 설정
+
+# Apple ID (App Store Connect 계정)
+apple_id("qqrtyu@gmail.com") # 본인의 Apple ID로 변경하세요
+
+# Bundle Identifier
+app_identifier("com.pyowonsik.gearFreakFlutter")
+
+# iTunes Connect Team ID (선택사항, 여러 팀에 속한 경우)
+# itc_team_id("123456789")
+
+# Developer Portal Team ID (Xcode에서 확인한 팀 ID)
+team_id("J26F9UUXYM")
+
+# 자세한 정보: https://docs.fastlane.tools/advanced/#appfile

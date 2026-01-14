@@ -48,3 +48,15 @@ app.*.map.json
 # Environment variables
 .env
 
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+**/fastlane/README.md
+# API 키 (절대 커밋하지 말 것!)
+**/fastlane/AuthKey*.p8
+**/fastlane/*.cer
+**/fastlane/*.p12
+**/fastlane/*.mobileprovision
+

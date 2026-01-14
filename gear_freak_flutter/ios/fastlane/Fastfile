@@ -1,0 +1,105 @@
+# Fastfile
+# iOS 배포 자동화 스크립트
+
+# 사용 통계 전송 비활성화 (선택사항)
+opt_out_usage
+
+# 기본 플랫폼
+default_platform(:ios)
+
+platform :ios do
+
+  # ==================== App Store Connect API 인증 ====================
+
+  before_all do
+    # App Store Connect API 키 설정
+    app_store_connect_api_key(
+      key_id: "Y28LL7R646",
+      issuer_id: "fe34bf88-2267-4565-a7df-0208753cb935",
+      key_filepath: "./fastlane/AuthKey.p8",
+      duration: 1200, # 20분 (선택사항)
+      in_house: false # App Store 배포 (Enterprise가 아님)
+    )
+  end
+
+  # ==================== TestFlight 베타 배포 ====================
+
+  desc "TestFlight에 베타 버전 배포"
+  desc "사용법: fastlane beta"
+  lane :beta do
+    # 1. 빌드 번호 자동 증가
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj"
+    )
+
+    # 2. iOS 앱 빌드
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store"
+    )
+
+    # 3. TestFlight에 업로드
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true  # 빌드 처리 대기 건너뛰기
+    )
+
+    # 4. 성공 메시지
+    UI.success("✅ TestFlight 업로드 완료!")
+    UI.success("App Store Connect에서 확인하세요: https://appstoreconnect.apple.com")
+  end
+
+  # ==================== App Store 정식 배포 ====================
+
+  desc "App Store에 정식 버전 업로드 (심사 제출은 수동)"
+  desc "사용법: fastlane release"
+  lane :release do
+    # 1. 빌드 번호 증가
+    increment_build_number(xcodeproj: "Runner.xcodeproj")
+
+    # 2. iOS 앱 빌드
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store"
+    )
+
+    # 3. App Store Connect에 업로드 (심사 제출 X)
+    upload_to_app_store(
+      submit_for_review: false,      # 자동 심사 제출 안 함
+      automatic_release: false,      # 심사 통과 후 자동 배포 안 함
+      skip_metadata: true,           # 메타데이터 업데이트 건너뛰기
+      skip_screenshots: true         # 스크린샷 업데이트 건너뛰기
+    )
+
+    UI.success("✅ App Store Connect 업로드 완료!")
+    UI.message("App Store Connect에서 수동으로 심사를 제출하세요")
+  end
+
+  # ==================== 빌드만 수행 ====================
+
+  desc "iOS 앱 빌드만 수행 (업로드 없음)"
+  desc "사용법: fastlane build_only"
+  lane :build_only do
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store"
+    )
+
+    UI.success("✅ 빌드 완료!")
+    UI.message("빌드 파일 위치: #{lane_context[SharedValues::IPA_OUTPUT_PATH]}")
+  end
+
+  # ==================== 빌드 번호만 증가 ====================
+
+  desc "빌드 번호만 1 증가"
+  desc "사용법: fastlane bump_build"
+  lane :bump_build do
+    increment_build_number(xcodeproj: "Runner.xcodeproj")
+
+    current_build = get_build_number(xcodeproj: "Runner.xcodeproj")
+    UI.success("빌드 번호가 #{current_build}(으)로 업데이트되었습니다")
+  end
+
+end
