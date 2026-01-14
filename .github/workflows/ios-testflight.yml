@@ -1,0 +1,117 @@
+name: iOS TestFlight 배포
+
+# 언제 실행할지 설정
+on:
+  # 수동 실행 (GitHub Actions 탭에서 버튼 클릭)
+  workflow_dispatch:
+
+  # 특정 브랜치에 push할 때 자동 실행 (선택사항)
+  # push:
+  #   branches:
+  #     - main
+  #     - release/*
+
+  # Tag 생성 시 자동 실행 (예: v1.0.0)
+  # push:
+  #   tags:
+  #     - 'v*'
+
+jobs:
+  deploy_testflight:
+    name: TestFlight 배포
+    runs-on: macos-latest  # macOS 환경 필수 (iOS 빌드)
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      # 2. Flutter 설치
+      - name: Flutter 설치
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.0'
+          channel: 'stable'
+
+      # 3. Flutter 의존성 설치
+      - name: Flutter 의존성 설치
+        working-directory: ./gear_freak_flutter
+        run: flutter pub get
+
+      # 4. .env 파일 생성
+      - name: .env 파일 생성
+        working-directory: ./gear_freak_flutter
+        env:
+          ENV_CONTENT: ${{ secrets.FLUTTER_ENV_FILE }}
+        run: |
+          echo "$ENV_CONTENT" > .env
+          echo "✅ .env 파일 생성 완료"
+
+      # 5. Flutter 빌드 검증 (선택사항)
+      - name: Flutter 분석
+        working-directory: ./gear_freak_flutter
+        run: flutter analyze
+
+      # 6. Xcode 버전 확인
+      - name: Xcode 버전 확인
+        run: xcodebuild -version
+
+      # 7. Ruby & Bundler 설치 (Fastlane 실행 환경)
+      - name: Ruby 설치
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: ./gear_freak_flutter/ios
+
+      # 8. Fastlane 설치
+      - name: Fastlane 설치
+        working-directory: ./gear_freak_flutter/ios
+        run: |
+          gem install bundler
+          bundle install
+
+      # 9. App Store Connect API Key 설정
+      - name: App Store Connect API Key 생성
+        working-directory: ./gear_freak_flutter/ios/fastlane
+        env:
+          API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: |
+          # AuthKey.p8 파일 생성
+          echo "$API_KEY_CONTENT" > AuthKey.p8
+
+          # 권한 설정
+          chmod 600 AuthKey.p8
+
+          # 파일 확인
+          ls -la AuthKey.p8
+
+      # 10. iOS 인증서 및 프로비저닝 프로파일 설정 (Match 사용 시)
+      # - name: iOS 인증서 설정
+      #   working-directory: ./gear_freak_flutter/ios
+      #   env:
+      #     MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      #   run: bundle exec fastlane match appstore --readonly
+
+      # 11. TestFlight 배포 실행
+      - name: Fastlane Beta 실행
+        working-directory: ./gear_freak_flutter/ios
+        run: bundle exec fastlane beta
+
+      # 12. 빌드 산출물 업로드 (실패 시 디버깅용)
+      - name: 빌드 로그 업로드
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            ./gear_freak_flutter/ios/fastlane/report.xml
+            ./gear_freak_flutter/ios/fastlane/*.log
+          retention-days: 7
+
+      # 13. 성공 알림 (선택사항)
+      - name: 배포 성공 알림
+        if: success()
+        run: |
+          echo "✅ TestFlight 배포 완료!"
+          echo "App Store Connect에서 확인하세요: https://appstoreconnect.apple.com"
