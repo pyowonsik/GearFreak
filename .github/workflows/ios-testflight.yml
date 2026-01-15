@@ -77,8 +77,8 @@ jobs:
         env:
           API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: |
-          # AuthKey.p8 파일 생성
-          echo "$API_KEY_CONTENT" > AuthKey.p8
+          # AuthKey.p8 파일 생성 (base64 디코딩)
+          echo "$API_KEY_CONTENT" | base64 --decode > AuthKey.p8
 
           # 권한 설정
           chmod 600 AuthKey.p8
