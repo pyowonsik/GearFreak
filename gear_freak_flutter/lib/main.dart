@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +29,21 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('내용: ${message.notification?.body}');
   debugPrint('데이터: ${message.data}');
   debugPrint('========================================');
-  // 백그라운드에서는 Provider에 접근할 수 없으므로
-  // 앱이 포그라운드로 돌아올 때 처리됨 (onMessageOpenedApp 또는 getInitialMessage)
+
+  // Android: 백그라운드에서 앱 아이콘 배지 업데이트
+  // 서버에서 보낸 badge 값을 사용 (iOS는 APNs가 자동 처리)
+  try {
+    final badgeStr = message.data['badge'];
+    if (badgeStr != null) {
+      final badge = int.tryParse(badgeStr.toString());
+      if (badge != null) {
+        await AppBadgePlus.updateBadge(badge);
+        debugPrint('📛 [백그라운드] 앱 배지 업데이트: $badge');
+      }
+    }
+  } catch (e) {
+    debugPrint('⚠️ [백그라운드] 배지 업데이트 실패: $e');
+  }
 }
 
 Future<void> main() async {
@@ -109,6 +123,32 @@ class _MyAppState extends ConsumerState<MyApp> {
     ref.refresh(totalUnreadChatCountProvider);
   }
 
+  /// FCM badge 값으로 앱 배지 업데이트 (공통 로직)
+  ///
+  /// [badge]: 서버에서 전송한 badge 값 (null이면 로컬 계산)
+  /// [source]: 로그용 소스 식별자
+  Future<void> _updateBadgeFromFcm(int? badge, {required String source}) async {
+    if (!mounted) return;
+
+    if (badge != null) {
+      debugPrint('📛 [$source] FCM badge 값으로 즉시 업데이트: $badge');
+      await AppBadgePlus.updateBadge(badge);
+    } else {
+      // badge가 null이면 로컬에서 계산 (+1은 새 알림/메시지)
+      debugPrint('⚠️ [$source] FCM badge 값이 null, 로컬에서 계산');
+      try {
+        final chatCount = await ref.read(totalUnreadChatCountProvider.future);
+        final notificationCount =
+            await ref.read(totalUnreadNotificationCountProvider.future);
+        final localBadge = chatCount + notificationCount + 1;
+        debugPrint('📛 [$source] 로컬 계산 badge 업데이트: $localBadge');
+        await AppBadgePlus.updateBadge(localBadge);
+      } catch (e) {
+        debugPrint('⚠️ [$source] 로컬 badge 계산 실패: $e');
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -124,17 +164,30 @@ class _MyAppState extends ConsumerState<MyApp> {
         FcmService.instance.setRouter(router);
         // FCM 메시지 수신 콜백 설정 (채팅방 목록 탭을 열지 않았을 때)
         // 채팅방 목록 탭을 열면 chat_room_list_page.dart의 콜백이 이 콜백을 덮어씀
-        FcmService.instance.setOnMessageReceived((chatRoomId) {
+        FcmService.instance.setOnMessageReceived((chatRoomId, badge) async {
           // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
-          // 채팅방 목록 탭을 열지 않았어도 항상 갱신됨
           _refreshUnreadCount();
+
+          // 포그라운드에서 알림 수신 시 배지 업데이트
+          await _updateBadgeFromFcm(badge, source: 'Chat');
+
+          // Provider도 갱신 (UI 동기화)
+          if (!mounted) return;
+          ref
+            ..invalidate(totalUnreadChatCountProvider)
+            ..invalidate(totalUnreadNotificationCountProvider);
         });
         // FCM 알림 수신 콜백 설정 (review_received 등)
-        FcmService.instance.setOnNotificationReceived(() {
+        FcmService.instance.setOnNotificationReceived((badge) async {
+          // 포그라운드에서 알림 수신 시 배지 업데이트
+          await _updateBadgeFromFcm(badge, source: 'Notification');
+
+          // Provider도 갱신 (UI 동기화)
           if (!mounted) return;
-          // 읽지 않은 알림 개수 갱신 (홈 화면 빨간 점 업데이트)
-          // ignore: unused_result
-          ref.refresh(totalUnreadNotificationCountProvider);
+          ref
+            ..invalidate(totalUnreadChatCountProvider)
+            // ignore: unused_result
+            ..refresh(totalUnreadNotificationCountProvider);
         });
         // 앱이 종료된 상태에서 알림 탭으로 시작된 경우 처리
         _handleInitialMessage();
@@ -143,16 +196,22 @@ class _MyAppState extends ConsumerState<MyApp> {
       }
     });
 
-    // 앱 생명주기 감지 (백그라운드 -> 포그라운드)
-    // 채팅방 목록 탭을 열지 않았을 때도 읽지 않은 메시지 개수 갱신
+    // 앱 생명주기 감지 (포그라운드 <-> 백그라운드)
     _lifecycleListener = AppLifecycleListener(
-      onStateChange: (AppLifecycleState state) {
-        // 백그라운드에서 포그라운드로 돌아올 때 읽지 않은 개수 갱신
+      onStateChange: (AppLifecycleState state) async {
+        if (!mounted) return;
+
         if (state == AppLifecycleState.resumed) {
-          _refreshUnreadCount(); // 채팅 개수 갱신
-          if (!mounted) return;
-          // ignore: unused_result
-          ref.refresh(totalUnreadNotificationCountProvider); // 알림 개수 갱신
+          // 백그라운드 → 포그라운드: 새 값 로드 후 배지 업데이트
+          debugPrint('📱 앱이 포그라운드로 복귀');
+          ref
+            ..invalidate(totalUnreadChatCountProvider)
+            ..invalidate(totalUnreadNotificationCountProvider);
+          await _updateAppBadge();
+        } else if (state == AppLifecycleState.paused) {
+          // 포그라운드 → 백그라운드: FCM 콜백에서 이미 배지 업데이트됨
+          // _updateAppBadge() 호출 시 Provider에서 이전 값을 읽어서 덮어쓸 수 있으므로 제거
+          debugPrint('📱 앱이 백그라운드로 이동');
         }
       },
     );
@@ -215,6 +274,26 @@ class _MyAppState extends ConsumerState<MyApp> {
       }
     } catch (e) {
       debugPrint('⚠️ 초기 메시지 처리 실패: $e');
+    }
+  }
+
+  /// 앱 아이콘 배지 업데이트
+  Future<void> _updateAppBadge() async {
+    try {
+      // 읽지 않은 채팅 + 알림 개수 조회 (.future로 값 로딩 완료까지 대기)
+      final chatCount = await ref.read(totalUnreadChatCountProvider.future);
+      final notificationCount =
+          await ref.read(totalUnreadNotificationCountProvider.future);
+      final totalCount = chatCount + notificationCount;
+
+      debugPrint(
+        '📛 앱 배지 업데이트: $totalCount (채팅: $chatCount, 알림: $notificationCount)',
+      );
+
+      // app_badge_plus: 0을 전달하면 배지 제거
+      await AppBadgePlus.updateBadge(totalCount);
+    } catch (e) {
+      debugPrint('⚠️ 배지 업데이트 실패: $e');
     }
   }
 

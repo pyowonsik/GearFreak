@@ -36,15 +36,33 @@ class ChatPage extends ConsumerStatefulWidget {
   ConsumerState<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends ConsumerState<ChatPage> {
+class _ChatPageState extends ConsumerState<ChatPage>
+    with WidgetsBindingObserver {
   int? _chatRoomId;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadChatRoom();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 앱이 포그라운드로 돌아올 때 읽음 처리
+    // (서버 읽음 처리 + Android 알림 취소 + iOS/Android 배지 업데이트)
+    if (state == AppLifecycleState.resumed && _chatRoomId != null) {
+      ref.read(chatNotifierProvider.notifier).markChatRoomAsRead(_chatRoomId!);
+    }
   }
 
   /// 채팅방 로드

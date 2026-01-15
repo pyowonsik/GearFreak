@@ -8,6 +8,7 @@ import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
 
 import 'package:gear_freak_server/src/feature/notification/service/notification_service.dart';
 import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
+import 'package:gear_freak_server/src/feature/chat/service/chat_notification_service.dart';
 
 /// 리뷰 서비스
 /// 후기 작성, 삭제, 존재 확인 관련 비즈니스 로직을 처리합니다.
@@ -367,6 +368,16 @@ class ReviewService {
         'rating': rating.toString(),
       };
 
+      // 3.5. 읽지 않은 총 개수 계산 (badge용)
+      final unreadChatCount = await ChatNotificationService()
+          .getTotalUnreadChatCount(session, revieweeId);
+      final unreadNotificationCount = await NotificationService.getUnreadCount(
+        session: session,
+        userId: revieweeId,
+      );
+      // 현재 알림도 포함해야 하므로 +1
+      final totalBadge = unreadChatCount + unreadNotificationCount + 1;
+
       // 4. FCM 알림 전송
       await FcmService.sendNotifications(
         session: session,
@@ -375,6 +386,7 @@ class ReviewService {
         body: body,
         data: data,
         includeNotification: true,
+        badge: totalBadge,
       );
 
       safeLog(

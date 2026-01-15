@@ -7,6 +7,7 @@ import 'package:gear_freak_server/src/generated/protocol.dart';
 import 'package:gear_freak_server/src/common/fcm/service/fcm_service.dart';
 
 import 'package:gear_freak_server/src/feature/user/service/fcm_token_service.dart';
+import 'package:gear_freak_server/src/feature/notification/service/notification_service.dart';
 
 /// 채팅 알림 서비스
 /// 채팅방 알림 설정, 읽음 처리, 읽지 않은 메시지 개수, FCM 알림 전송 관련 비즈니스 로직을 처리합니다.
@@ -334,55 +335,65 @@ class ChatNotificationService {
         'senderId': senderId.toString(),
       };
 
-      // 5. 알림 설정에 따라 토큰 분류
-      final tokensWithNotification = <String>[];
-      final tokensWithoutNotification = <String>[];
+      // 5. 사용자별로 badge 계산 후 FCM 알림 전송
+      // (badge가 사용자마다 다르므로 사용자별로 전송)
+      int notificationOnCount = 0;
+      int notificationOffCount = 0;
 
-      for (final tokenMap in tokensWithSettings.values) {
-        for (final entry in tokenMap.entries) {
-          if (entry.value) {
-            // 알림 활성화: notification 포함
-            tokensWithNotification.add(entry.key);
+      for (final entry in tokensWithSettings.entries) {
+        final recipientUserId = entry.key;
+        final tokenMap = entry.value;
+
+        // 알림 활성화된 토큰과 비활성화된 토큰 분류
+        final enabledTokens = <String>[];
+        final disabledTokens = <String>[];
+
+        for (final tokenEntry in tokenMap.entries) {
+          if (tokenEntry.value) {
+            enabledTokens.add(tokenEntry.key);
           } else {
-            // 알림 비활성화: data만 전송 (포그라운드에서 메시지 수신 가능)
-            tokensWithoutNotification.add(entry.key);
+            disabledTokens.add(tokenEntry.key);
           }
         }
-      }
 
-      // 6. FCM 알림 전송 (알림 설정에 따라 분기)
-      final futures = <Future<int>>[];
-
-      // 알림 활성화된 사용자에게는 notification 포함하여 전송
-      if (tokensWithNotification.isNotEmpty) {
-        futures.add(
-          FcmService.sendNotifications(
+        // 알림 활성화된 토큰에 notification 포함하여 전송 (badge 포함)
+        if (enabledTokens.isNotEmpty) {
+          // 해당 사용자의 읽지 않은 총 개수 계산 (채팅 + 알림)
+          final unreadChatCount = await getTotalUnreadChatCount(
+            session,
+            recipientUserId,
+          );
+          final unreadNotificationCount =
+              await NotificationService.getUnreadCount(
             session: session,
-            fcmTokens: tokensWithNotification,
+            userId: recipientUserId,
+          );
+          final totalBadge = unreadChatCount + unreadNotificationCount;
+
+          await FcmService.sendNotifications(
+            session: session,
+            fcmTokens: enabledTokens,
             title: title,
             body: body,
             data: data,
             includeNotification: true,
-          ),
-        );
-      }
+            badge: totalBadge,
+          );
+          notificationOnCount += enabledTokens.length;
+        }
 
-      // 알림 비활성화된 사용자에게는 data만 전송 (포그라운드에서 메시지 수신 가능)
-      if (tokensWithoutNotification.isNotEmpty) {
-        futures.add(
-          FcmService.sendNotifications(
+        // 알림 비활성화된 토큰에 data만 전송 (badge 없음)
+        if (disabledTokens.isNotEmpty) {
+          await FcmService.sendNotifications(
             session: session,
-            fcmTokens: tokensWithoutNotification,
+            fcmTokens: disabledTokens,
             title: title,
             body: body,
             data: data,
             includeNotification: false,
-          ),
-        );
-      }
-
-      if (futures.isNotEmpty) {
-        await Future.wait(futures);
+          );
+          notificationOffCount += disabledTokens.length;
+        }
       }
 
       safeLog(
@@ -390,8 +401,8 @@ class ChatNotificationService {
         'chatRoomId=$chatRoomId, '
         'senderId=$senderId, '
         'senderNickname="$senderNickname", '
-        'notificationOn=${tokensWithNotification.length}, '
-        'notificationOff=${tokensWithoutNotification.length}, '
+        'notificationOn=$notificationOnCount, '
+        'notificationOff=$notificationOffCount, '
         'title="$title", '
         'body="$body"',
       );

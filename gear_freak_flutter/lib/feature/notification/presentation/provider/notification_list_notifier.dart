@@ -7,17 +7,23 @@ import 'package:gear_freak_flutter/feature/notification/domain/usecase/get_unrea
 import 'package:gear_freak_flutter/feature/notification/domain/usecase/mark_as_read_usecase.dart';
 import 'package:gear_freak_flutter/feature/notification/presentation/provider/notification_list_state.dart';
 import 'package:gear_freak_flutter/feature/review/domain/usecase/check_review_exists_usecase.dart';
+import 'package:gear_freak_flutter/shared/service/badge_service.dart';
+import 'package:gear_freak_flutter/shared/service/notification_cancel_service.dart';
 
 /// 알림 목록 Notifier
 class NotificationListNotifier extends StateNotifier<NotificationListState> {
   /// NotificationListNotifier 생성자
   NotificationListNotifier(
+    this.ref,
     this.getNotificationsUseCase,
     this.markAsReadUseCase,
     this.deleteNotificationUseCase,
     this.checkReviewExistsUseCase,
     this.getUnreadCountUseCase,
   ) : super(const NotificationListInitial());
+
+  /// Riverpod Ref 인스턴스
+  final Ref ref;
 
   /// 알림 목록 조회 UseCase
   final GetNotificationsUseCase getNotificationsUseCase;
@@ -140,12 +146,12 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
       MarkAsReadParams(notificationId: notificationId),
     );
 
-    result.fold(
+    await result.fold(
       (failure) {
         debugPrint('❌ [NotificationListNotifier] 알림 읽음 처리 실패:'
             ' ${failure.message}');
       },
-      (success) {
+      (success) async {
         debugPrint('✅ [NotificationListNotifier] 알림 읽음 처리 성공: '
             'notificationId=$notificationId');
         // 현재 상태 업데이트
@@ -202,6 +208,12 @@ class NotificationListNotifier extends StateNotifier<NotificationListState> {
             unreadCount: newUnreadCount,
           );
         }
+
+        // Android: 알림 트레이에서 알림 취소
+        await NotificationCancelService.instance.cancelAllNotifications();
+
+        // Provider 무효화 후 앱 아이콘 배지 업데이트
+        await BadgeService.instance.invalidateAndUpdateBadge(ref);
       },
     );
   }
