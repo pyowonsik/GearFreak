@@ -1,3 +1,4 @@
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/get_me_usecase.dart';
 import 'package:gear_freak_flutter/feature/auth/domain/usecase/login_usecase.dart';
@@ -80,6 +81,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthAuthenticated(user);
         // FCM 토큰 등록
         await FcmService.instance.initialize();
+        // iOS 배지 초기화
+        await AppBadgePlus.updateBadge(0);
       },
     );
   }
@@ -103,6 +106,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthAuthenticated(user);
         // FCM 토큰 등록
         await FcmService.instance.initialize();
+        // iOS 배지 초기화
+        await AppBadgePlus.updateBadge(0);
       },
     );
   }
@@ -121,6 +126,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthAuthenticated(user);
         // FCM 토큰 등록
         await FcmService.instance.initialize();
+        // iOS 배지 초기화
+        await AppBadgePlus.updateBadge(0);
       },
     );
   }
@@ -139,6 +146,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthAuthenticated(user);
         // FCM 토큰 등록
         await FcmService.instance.initialize();
+        // iOS 배지 초기화
+        await AppBadgePlus.updateBadge(0);
       },
     );
   }
@@ -157,6 +166,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthAuthenticated(user);
         // FCM 토큰 등록
         await FcmService.instance.initialize();
+        // iOS 배지 초기화
+        await AppBadgePlus.updateBadge(0);
       },
     );
   }
@@ -175,6 +186,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthAuthenticated(user);
         // FCM 토큰 등록
         await FcmService.instance.initialize();
+        // iOS 배지 초기화
+        await AppBadgePlus.updateBadge(0);
       },
     );
   }

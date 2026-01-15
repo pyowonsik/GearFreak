@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import app_badge_plus
 import app_links
 import connectivity_plus
 import file_picker
@@ -24,6 +25,7 @@ import video_player_avfoundation
 import webview_flutter_wkwebview
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  AppBadgePlusPlugin.register(with: registry.registrar(forPlugin: "AppBadgePlusPlugin"))
   AppLinksMacosPlugin.register(with: registry.registrar(forPlugin: "AppLinksMacosPlugin"))
   ConnectivityPlusPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlusPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))

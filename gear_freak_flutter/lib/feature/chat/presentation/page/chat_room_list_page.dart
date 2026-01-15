@@ -1,8 +1,12 @@
+import 'dart:async';
+
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gear_freak_flutter/core/util/pagination_scroll_mixin.dart';
 import 'package:gear_freak_flutter/feature/chat/di/chat_providers.dart';
 import 'package:gear_freak_flutter/feature/chat/presentation/presentation.dart';
+import 'package:gear_freak_flutter/feature/notification/di/notification_providers.dart';
 import 'package:gear_freak_flutter/shared/service/fcm_service.dart';
 import 'package:gear_freak_flutter/shared/widget/widget.dart';
 
@@ -46,17 +50,23 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
       ref.read(chatRoomListNotifierProvider.notifier).loadChatRooms();
 
       // FCM 메시지 수신 시 채팅방 리스트 갱신
-      FcmService.instance.setOnMessageReceived((chatRoomId) {
+      FcmService.instance.setOnMessageReceived((chatRoomId, badge) async {
         if (!mounted) return;
 
         // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
         // ignore: unused_result
         ref.refresh(totalUnreadChatCountProvider);
 
+        // 서버에서 보낸 badge 값이 있으면 즉시 앱 배지 업데이트
+        await _updateBadgeFromFcm(badge);
+
         // 포그라운드에서 FCM 메시지를 받으면 채팅방 리스트 갱신
-        ref
-            .read(chatRoomListNotifierProvider.notifier)
-            .refreshChatRoomInfo(chatRoomId);
+        if (!mounted) return;
+        unawaited(
+          ref
+              .read(chatRoomListNotifierProvider.notifier)
+              .refreshChatRoomInfo(chatRoomId),
+        );
       });
     });
 
@@ -81,13 +91,42 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
     // 채팅 탭을 나갈 때 FCM 콜백을 기본 콜백으로 리셋
     // dispose 후 ref를 사용하지 않도록 main.dart의 전역 콜백을 직접 설정
     // (main.dart의 _MyAppState._refreshUnreadCount와 동일한 로직)
-    FcmService.instance.setOnMessageReceived((chatRoomId) {
-      // 기본 동작: 읽지 않은 채팅 개수 갱신만 수행
-      // 주의: 여기서는 ref를 사용할 수 없으므로 아무 작업도 하지 않음
+    FcmService.instance.setOnMessageReceived((chatRoomId, badge) async {
+      // 기본 동작: badge 값이 있으면 즉시 앱 배지 업데이트
+      // 주의: 여기서는 ref를 사용할 수 없으므로 배지만 업데이트
       // main.dart의 전역 AppLifecycleListener가 백그라운드 복귀 시 갱신함
+      if (badge != null) {
+        debugPrint(
+          '📛 [ChatRoomListPage dispose] FCM badge 즉시 업데이트: $badge',
+        );
+        await AppBadgePlus.updateBadge(badge);
+      }
     });
 
     super.dispose();
+  }
+
+  /// FCM badge 값으로 앱 배지 업데이트
+  Future<void> _updateBadgeFromFcm(int? badge) async {
+    if (!mounted) return;
+
+    if (badge != null) {
+      debugPrint('📛 [ChatRoomListPage] FCM badge 값으로 즉시 업데이트: $badge');
+      await AppBadgePlus.updateBadge(badge);
+    } else {
+      // badge가 null이면 로컬에서 계산 (+1은 새 채팅)
+      debugPrint('⚠️ [ChatRoomListPage] FCM badge null, 로컬 계산');
+      try {
+        final chatCount = await ref.read(totalUnreadChatCountProvider.future);
+        final notificationCount =
+            await ref.read(totalUnreadNotificationCountProvider.future);
+        final localBadge = chatCount + notificationCount + 1;
+        debugPrint('📛 [ChatRoomListPage] 로컬 badge: $localBadge');
+        await AppBadgePlus.updateBadge(localBadge);
+      } catch (e) {
+        debugPrint('⚠️ [ChatRoomListPage] 로컬 badge 계산 실패: $e');
+      }
+    }
   }
 
   /// 채팅방 목록 새로고침

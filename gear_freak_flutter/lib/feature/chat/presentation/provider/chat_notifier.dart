@@ -18,6 +18,8 @@ import 'package:gear_freak_flutter/feature/chat/presentation/provider/chat_state
 import 'package:gear_freak_flutter/feature/product/di/product_providers.dart';
 import 'package:gear_freak_flutter/feature/product/domain/usecase/get_product_detail_usecase.dart';
 import 'package:gear_freak_flutter/shared/feature/s3/domain/usecase/upload_chat_room_image_usecase.dart';
+import 'package:gear_freak_flutter/shared/service/badge_service.dart';
+import 'package:gear_freak_flutter/shared/service/notification_cancel_service.dart';
 
 /// 채팅 Notifier
 /// Presentation Layer: Riverpod 상태 관리
@@ -547,21 +549,25 @@ class ChatNotifier extends StateNotifier<ChatState> {
     final markReadResult = await markChatRoomAsReadUseCase(
       MarkChatRoomAsReadParams(chatRoomId: chatRoomId),
     );
-    markReadResult.fold(
+    await markReadResult.fold(
       (failure) {
         // 읽음 처리 실패해도 에러 표시하지 않음 (뒤로가기 중이므로)
         debugPrint('채팅방 읽음 처리 실패: ${failure.message}');
       },
-      (_) {
+      (_) async {
         // 읽음 처리 성공 시 이벤트 발행 (채팅방 목록 Notifier가 자동으로 반응)
         ref.read(chatRoomReadProvider.notifier).state = chatRoomId;
         // 이벤트 처리 후 초기화 (다음 읽음 처리를 위해)
-        Future.microtask(() {
-          ref.read(chatRoomReadProvider.notifier).state = null;
-        });
-        // 읽지 않은 채팅 개수 갱신 (BottomNavigationBar Badge 업데이트)
-        // ignore: unused_result
-        ref.refresh(totalUnreadChatCountProvider);
+        unawaited(
+          Future.microtask(() {
+            ref.read(chatRoomReadProvider.notifier).state = null;
+          }),
+        );
+        // Android: 알림 트레이에서 알림 취소 (채팅방 입장 시)
+        await NotificationCancelService.instance.cancelAllNotifications();
+
+        // Provider 무효화 후 앱 아이콘 배지 업데이트
+        await BadgeService.instance.invalidateAndUpdateBadge(ref);
       },
     );
   }

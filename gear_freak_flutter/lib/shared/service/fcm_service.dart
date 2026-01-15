@@ -27,11 +27,11 @@ class FcmService {
   bool _isInitialized = false;
   Completer<void>? _initCompleter;
 
-  /// FCM 메시지 수신 콜백 (chatRoomId를 받아서 채팅방 정보 갱신)
-  void Function(int chatRoomId)? onMessageReceived;
+  /// FCM 메시지 수신 콜백 (chatRoomId와 badge를 받아서 채팅방 정보 및 배지 갱신)
+  void Function(int chatRoomId, int? badge)? onMessageReceived;
 
-  /// FCM 알림 수신 콜백 (알림 타입 수신 시 호출)
-  void Function()? onNotificationReceived;
+  /// FCM 알림 수신 콜백 (알림 타입 수신 시 호출, badge 값 포함)
+  void Function(int? badge)? onNotificationReceived;
 
   /// FCM 초기화 및 토큰 등록
   /// 로그인 성공 후 호출해야 합니다.
@@ -266,13 +266,15 @@ class FcmService {
 
   /// FCM 메시지 수신 콜백 설정
   // ignore: use_setters_to_change_properties
-  void setOnMessageReceived(void Function(int chatRoomId) callback) {
+  void setOnMessageReceived(
+    void Function(int chatRoomId, int? badge) callback,
+  ) {
     onMessageReceived = callback;
   }
 
   /// FCM 알림 수신 콜백 설정
   // ignore: use_setters_to_change_properties
-  void setOnNotificationReceived(void Function() callback) {
+  void setOnNotificationReceived(void Function(int? badge) callback) {
     onNotificationReceived = callback;
   }
 
@@ -280,19 +282,26 @@ class FcmService {
   void _handleMessageReceived(RemoteMessage message) {
     final data = message.data;
 
+    // 서버에서 보낸 badge 값 추출
+    final badgeStr = data['badge'];
+    final badge = badgeStr != null ? int.tryParse(badgeStr.toString()) : null;
+    debugPrint('📛 FCM badge value from server: $badge');
+
     // 채팅 메시지 알림인 경우
     if (data['type'] == 'chat_message' && data['chatRoomId'] != null) {
       final chatRoomId = int.tryParse(data['chatRoomId'].toString());
       if (chatRoomId != null && onMessageReceived != null) {
-        debugPrint('📩 Refreshing chat room data: chatRoomId=$chatRoomId');
-        onMessageReceived!(chatRoomId);
+        debugPrint(
+          '📩 Refreshing chat room data: chatRoomId=$chatRoomId, badge=$badge',
+        );
+        onMessageReceived!(chatRoomId, badge);
       }
     }
     // 알림인 경우 (review_received 등)
     else if (data['type'] == 'review_received' &&
         onNotificationReceived != null) {
-      debugPrint('📩 FCM notification received: review_received');
-      onNotificationReceived!();
+      debugPrint('📩 FCM notification received: review_received, badge=$badge');
+      onNotificationReceived!(badge);
     }
   }
 }

@@ -81,6 +81,7 @@ final notificationListNotifierProvider = StateNotifierProvider.autoDispose<
         ref.watch(checkReviewExistsUseCaseProvider);
     final getUnreadCountUseCase = ref.watch(getUnreadCountUseCaseProvider);
     return NotificationListNotifier(
+      ref,
       getNotificationsUseCase,
       markAsReadUseCase,
       deleteNotificationUseCase,

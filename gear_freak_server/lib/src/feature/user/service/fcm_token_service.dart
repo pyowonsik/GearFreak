@@ -105,6 +105,44 @@ class FcmTokenService {
     }
   }
 
+  /// 유효하지 않은 FCM 토큰 삭제 (토큰 값만으로 삭제)
+  ///
+  /// FCM에서 UNREGISTERED 에러가 발생한 토큰을 삭제합니다.
+  ///
+  /// [session]: Serverpod 세션
+  /// [token]: 삭제할 FCM 토큰
+  /// Returns: 삭제된 행 수
+  static Future<int> deleteInvalidToken({
+    required Session session,
+    required String token,
+  }) async {
+    try {
+      final deletedRows = await FcmToken.db.deleteWhere(
+        session,
+        where: (t) => t.token.equals(token),
+      );
+
+      if (deletedRows.isNotEmpty) {
+        session.log(
+          '[FcmTokenService] 유효하지 않은 FCM 토큰 삭제 완료: '
+          'token=${token.substring(0, 20)}..., '
+          'deletedCount=${deletedRows.length}',
+          level: LogLevel.info,
+        );
+      }
+
+      return deletedRows.length;
+    } on Exception catch (e, stackTrace) {
+      session.log(
+        '[FcmTokenService] 유효하지 않은 FCM 토큰 삭제 실패: $e',
+        exception: e,
+        stackTrace: stackTrace,
+        level: LogLevel.error,
+      );
+      return 0;
+    }
+  }
+
   /// 사용자의 모든 FCM 토큰 조회
   ///
   /// [session]: Serverpod 세션
