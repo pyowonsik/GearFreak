@@ -13,10 +13,37 @@ platform :ios do
 
   before_all do
     # App Store Connect API 키 설정
+    # 환경변수에서 읽어오거나 하드코딩된 값 사용
+    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"] || "Y28LL7R646"
+    api_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"] || "fe34bf88-2267-4565-a7df-0208753cb935"
+
+    # AuthKey.p8 파일 경로 (절대 경로 사용)
+    key_filepath = File.join(Dir.pwd, "fastlane", "AuthKey.p8")
+
+    # 파일 존재 여부 확인
+    unless File.exist?(key_filepath)
+      UI.user_error!("❌ AuthKey.p8 파일을 찾을 수 없습니다: #{key_filepath}")
+    end
+
+    # 파일 크기 확인 (비어있는 파일 체크)
+    if File.size(key_filepath) == 0
+      UI.user_error!("❌ AuthKey.p8 파일이 비어있습니다")
+    end
+
+    # 파일 형식 검증 (PEM 형식 확인)
+    file_content = File.read(key_filepath)
+    unless file_content.start_with?("-----BEGIN PRIVATE KEY-----")
+      UI.error("❌ AuthKey.p8 파일이 올바른 PEM 형식이 아닙니다")
+      UI.error("파일 첫 줄: #{file_content.lines.first}")
+      UI.user_error!("GitHub Secrets의 APP_STORE_CONNECT_API_KEY_CONTENT를 확인하세요")
+    end
+
+    UI.message("✅ AuthKey.p8 파일 검증 완료 (크기: #{File.size(key_filepath)} bytes)")
+
     app_store_connect_api_key(
-      key_id: "Y28LL7R646",
-      issuer_id: "fe34bf88-2267-4565-a7df-0208753cb935",
-      key_filepath: "./fastlane/AuthKey.p8",
+      key_id: api_key_id,
+      issuer_id: api_issuer_id,
+      key_filepath: key_filepath,
       duration: 1200, # 20분 (선택사항)
       in_house: false # App Store 배포 (Enterprise가 아님)
     )

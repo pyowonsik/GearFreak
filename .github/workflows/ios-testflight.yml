@@ -83,22 +83,55 @@ jobs:
             exit 1
           fi
 
-          # AuthKey.p8 파일 생성 (base64 디코딩)
-          # 개행 문자 제거 후 디코딩 (macOS base64 명령어 사용)
-          echo "$API_KEY_CONTENT" | tr -d '\n' | base64 --decode > AuthKey.p8
+          echo "🔍 GitHub Secrets 데이터 형식 확인 중..."
 
-          # 파일 유효성 검증
+          # 시나리오 1: Base64 인코딩된 문자열 (올바른 경우)
+          # 시나리오 2: 이미 디코딩된 텍스트 (PEM 형식)
+
+          # Secrets 데이터를 임시 파일에 저장
+          echo "$API_KEY_CONTENT" > temp_secret.txt
+
+          # PEM 형식인지 확인 (이미 디코딩된 상태)
+          if head -n 1 temp_secret.txt | grep -q "BEGIN PRIVATE KEY"; then
+            echo "✅ Secrets에 PEM 형식 텍스트가 저장되어 있습니다 (base64 디코딩 불필요)"
+            mv temp_secret.txt AuthKey.p8
+          else
+            echo "🔄 Base64 디코딩 시도 중..."
+            # Base64 디코딩 시도
+            cat temp_secret.txt | tr -d '\n\r ' | base64 --decode > AuthKey.p8 2>/dev/null
+
+            if [ $? -ne 0 ]; then
+              echo "❌ Base64 디코딩 실패"
+              echo "GitHub Secrets 데이터 앞 100자:"
+              head -c 100 temp_secret.txt
+              rm -f temp_secret.txt
+              exit 1
+            fi
+            rm -f temp_secret.txt
+          fi
+
+          # 파일 크기 확인
           if [ ! -s AuthKey.p8 ]; then
             echo "❌ 에러: AuthKey.p8 파일이 비어있습니다"
-            cat AuthKey.p8 | od -c  # 디버깅용: 파일 내용 16진수 출력
             exit 1
           fi
 
-          # null byte 체크
-          if grep -q $'\x00' AuthKey.p8; then
-            echo "❌ 에러: AuthKey.p8 파일에 null byte가 포함되어 있습니다"
-            echo "GitHub Secrets의 APP_STORE_CONNECT_API_KEY_CONTENT를 다시 확인하세요"
-            cat AuthKey.p8 | od -c  # 디버깅용
+          # PEM 형식 검증
+          if head -n 1 AuthKey.p8 | grep -q "BEGIN PRIVATE KEY"; then
+            echo "✅ 파일 포맷 검증 통과 (PEM 형식)"
+          else
+            echo "❌ 에러: 파일이 올바른 PEM 형식이 아닙니다"
+            echo "파일 내용 앞 5줄:"
+            head -n 5 AuthKey.p8
+            echo ""
+            echo "16진수 덤프 (앞 100바이트):"
+            head -c 100 AuthKey.p8 | od -x
+            echo ""
+            echo "📋 해결 방법:"
+            echo "1. 원본 AuthKey.p8 파일을 확인하세요 (PEM 형식이어야 함)"
+            echo "2. 다음 명령어로 올바르게 base64 인코딩하세요:"
+            echo "   cat AuthKey.p8 | base64 | tr -d '\\n'"
+            echo "3. GitHub Secrets의 APP_STORE_CONNECT_API_KEY_CONTENT를 업데이트하세요"
             exit 1
           fi
 
@@ -108,14 +141,7 @@ jobs:
           # 파일 정보 출력
           echo "✅ AuthKey.p8 파일 생성 완료"
           ls -lh AuthKey.p8
-
-          # 파일 포맷 검증 (PEM 형식 확인)
-          if head -n 1 AuthKey.p8 | grep -q "BEGIN PRIVATE KEY"; then
-            echo "✅ 파일 포맷 검증 통과 (PEM 형식)"
-          else
-            echo "⚠️  경고: 파일이 PEM 형식이 아닐 수 있습니다"
-            head -n 1 AuthKey.p8
-          fi
+          echo "파일 첫 줄: $(head -n 1 AuthKey.p8)"
 
       # 10. iOS 인증서 및 프로비저닝 프로파일 설정 (Match 사용 시)
       # - name: iOS 인증서 설정
