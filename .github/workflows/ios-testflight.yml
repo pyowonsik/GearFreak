@@ -77,14 +77,45 @@ jobs:
         env:
           API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: |
+          # 시크릿 존재 여부 확인
+          if [ -z "$API_KEY_CONTENT" ]; then
+            echo "❌ 에러: APP_STORE_CONNECT_API_KEY_CONTENT 시크릿이 설정되지 않았습니다"
+            exit 1
+          fi
+
           # AuthKey.p8 파일 생성 (base64 디코딩)
-          echo "$API_KEY_CONTENT" | base64 --decode > AuthKey.p8
+          # 개행 문자 제거 후 디코딩 (macOS base64 명령어 사용)
+          echo "$API_KEY_CONTENT" | tr -d '\n' | base64 --decode > AuthKey.p8
+
+          # 파일 유효성 검증
+          if [ ! -s AuthKey.p8 ]; then
+            echo "❌ 에러: AuthKey.p8 파일이 비어있습니다"
+            cat AuthKey.p8 | od -c  # 디버깅용: 파일 내용 16진수 출력
+            exit 1
+          fi
+
+          # null byte 체크
+          if grep -q $'\x00' AuthKey.p8; then
+            echo "❌ 에러: AuthKey.p8 파일에 null byte가 포함되어 있습니다"
+            echo "GitHub Secrets의 APP_STORE_CONNECT_API_KEY_CONTENT를 다시 확인하세요"
+            cat AuthKey.p8 | od -c  # 디버깅용
+            exit 1
+          fi
 
           # 권한 설정
           chmod 600 AuthKey.p8
 
-          # 파일 확인
-          ls -la AuthKey.p8
+          # 파일 정보 출력
+          echo "✅ AuthKey.p8 파일 생성 완료"
+          ls -lh AuthKey.p8
+
+          # 파일 포맷 검증 (PEM 형식 확인)
+          if head -n 1 AuthKey.p8 | grep -q "BEGIN PRIVATE KEY"; then
+            echo "✅ 파일 포맷 검증 통과 (PEM 형식)"
+          else
+            echo "⚠️  경고: 파일이 PEM 형식이 아닐 수 있습니다"
+            head -n 1 AuthKey.p8
+          fi
 
       # 10. iOS 인증서 및 프로비저닝 프로파일 설정 (Match 사용 시)
       # - name: iOS 인증서 설정
@@ -96,6 +127,9 @@ jobs:
       # 11. TestFlight 배포 실행
       - name: Fastlane Beta 실행
         working-directory: ./gear_freak_flutter/ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: bundle exec fastlane beta
 
       # 12. 빌드 산출물 업로드 (실패 시 디버깅용)
