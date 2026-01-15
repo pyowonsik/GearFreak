@@ -63,7 +63,8 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "app-store"
+      export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates"  # 자동 프로비저닝 허용
     )
 
     # 3. TestFlight에 업로드
@@ -88,7 +89,8 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "app-store"
+      export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates"  # 자동 프로비저닝 허용
     )
 
     # 3. App Store Connect에 업로드 (심사 제출 X)
@@ -111,7 +113,8 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "app-store"
+      export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates"  # 자동 프로비저닝 허용
     )
 
     UI.success("✅ 빌드 완료!")
