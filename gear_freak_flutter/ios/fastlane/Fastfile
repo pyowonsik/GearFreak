@@ -17,8 +17,8 @@ platform :ios do
     api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"] || "Y28LL7R646"
     api_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"] || "fe34bf88-2267-4565-a7df-0208753cb935"
 
-    # AuthKey.p8 파일 경로 (Fastfile과 같은 디렉토리)
-    key_filepath = File.join(__dir__, "AuthKey.p8")
+    # AuthKey.p8 파일 경로 (Fastfile과 같은 디렉토리, 절대 경로로 변환)
+    key_filepath = File.expand_path("AuthKey.p8", __dir__)
 
     # 파일 존재 여부 확인
     unless File.exist?(key_filepath)
