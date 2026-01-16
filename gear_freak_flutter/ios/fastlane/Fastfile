@@ -70,7 +70,8 @@ platform :ios do
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
-      }
+      },
+      xcargs: "-allowProvisioningUpdates"
     )
 
     # 3. TestFlight에 업로드
@@ -102,7 +103,8 @@ platform :ios do
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
-      }
+      },
+      xcargs: "-allowProvisioningUpdates"
     )
 
     # 3. App Store Connect에 업로드 (심사 제출 X)
