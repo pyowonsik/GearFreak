@@ -54,10 +54,15 @@ platform :ios do
   desc "TestFlight에 베타 버전 배포"
   desc "사용법: fastlane beta"
   lane :beta do
-    # 1. 빌드 번호 자동 증가
-    increment_build_number(
-      xcodeproj: "Runner.xcodeproj"
+    # 1. App Store Connect에서 최신 빌드 번호 가져와서 +1
+    latest_build_number = latest_testflight_build_number(
+      app_identifier: "com.pyowonsik.gearFreakFlutter"
     )
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj",
+      build_number: latest_build_number + 1
+    )
+    UI.message("📦 빌드 번호: #{latest_build_number} → #{latest_build_number + 1}")
 
     # 2. 코드 서명 설정 (CI 환경용 수동 서명)
     update_code_signing_settings(
@@ -101,8 +106,16 @@ platform :ios do
   desc "App Store에 정식 버전 업로드 (심사 제출은 수동)"
   desc "사용법: fastlane release"
   lane :release do
-    # 1. 빌드 번호 증가
-    increment_build_number(xcodeproj: "Runner.xcodeproj")
+    # 1. App Store Connect에서 최신 빌드 번호 가져와서 +1
+    latest_build_number = app_store_build_number(
+      app_identifier: "com.pyowonsik.gearFreakFlutter",
+      live: false
+    )
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj",
+      build_number: latest_build_number + 1
+    )
+    UI.message("📦 빌드 번호: #{latest_build_number} → #{latest_build_number + 1}")
 
     # 2. 코드 서명 설정 (CI 환경용 수동 서명)
     update_code_signing_settings(
