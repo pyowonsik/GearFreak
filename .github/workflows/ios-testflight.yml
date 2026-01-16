@@ -60,6 +60,14 @@ jobs:
         working-directory: ./gear_freak_flutter
         run: flutter analyze
 
+      # 5-1. Flutter iOS 빌드 (사전 빌드)
+      - name: Flutter iOS 빌드
+        working-directory: ./gear_freak_flutter
+        run: |
+          echo "🔨 Flutter iOS 빌드 시작..."
+          flutter build ios --release --no-codesign
+          echo "✅ Flutter iOS 빌드 완료"
+
       # 6. Xcode 버전 확인
       - name: Xcode 버전 확인
         run: xcodebuild -version
@@ -282,7 +290,20 @@ jobs:
           path: |
             ./gear_freak_flutter/ios/fastlane/report.xml
             ./gear_freak_flutter/ios/fastlane/*.log
+            ~/Library/Logs/gym/*.log
           retention-days: 7
+
+      # 12-1. xcodebuild 로그 출력 (실패 시)
+      - name: xcodebuild 로그 출력
+        if: failure()
+        run: |
+          echo "=== xcodebuild 전체 로그 (마지막 500줄) ==="
+          if [ -f ~/Library/Logs/gym/Runner-Runner.log ]; then
+            tail -n 500 ~/Library/Logs/gym/Runner-Runner.log
+          else
+            echo "로그 파일을 찾을 수 없습니다"
+            ls -la ~/Library/Logs/gym/ 2>/dev/null || echo "gym 로그 디렉토리 없음"
+          fi
 
       # 13. 성공 알림 (선택사항)
       - name: 배포 성공 알림

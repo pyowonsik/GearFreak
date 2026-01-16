@@ -73,10 +73,13 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
+      clean: true,
       export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates",
       export_options: {
         method: "app-store",
         signingStyle: "manual",
+        teamID: "J26F9UUXYM",
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
@@ -115,10 +118,13 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
+      clean: true,
       export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates",
       export_options: {
         method: "app-store",
         signingStyle: "manual",
+        teamID: "J26F9UUXYM",
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
@@ -156,10 +162,13 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
+      clean: true,
       export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates",
       export_options: {
         method: "app-store",
         signingStyle: "manual",
+        teamID: "J26F9UUXYM",
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
