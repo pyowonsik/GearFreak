@@ -113,6 +113,15 @@ jobs:
           echo "✅ iOS 서명 설정 완료"
           echo "✅ 프로비저닝 프로파일 설치 완료 (UUID: $PP_UUID)"
 
+      # 9-1. Xcode 프로젝트 자동 서명 비활성화
+      - name: Xcode 수동 서명 설정
+        working-directory: ./gear_freak_flutter/ios
+        run: |
+          # Release 빌드에서 자동 서명 비활성화
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' Runner.xcodeproj/project.pbxproj
+
+          echo "✅ 수동 서명으로 전환 완료"
+
       # 10. App Store Connect API Key 설정
       - name: App Store Connect API Key 생성
         working-directory: ./gear_freak_flutter/ios/fastlane
