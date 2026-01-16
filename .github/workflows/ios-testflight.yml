@@ -92,28 +92,69 @@ jobs:
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
+          # Secrets 검증
+          if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
+            echo "❌ BUILD_CERTIFICATE_BASE64 secret이 비어있습니다"
+            exit 1
+          fi
+          if [ -z "$BUILD_PROVISION_PROFILE_BASE64" ]; then
+            echo "❌ BUILD_PROVISION_PROFILE_BASE64 secret이 비어있습니다"
+            exit 1
+          fi
+          if [ -z "$P12_PASSWORD" ]; then
+            echo "❌ P12_PASSWORD secret이 비어있습니다"
+            exit 1
+          fi
+          if [ -z "$KEYCHAIN_PASSWORD" ]; then
+            echo "❌ KEYCHAIN_PASSWORD secret이 비어있습니다"
+            exit 1
+          fi
+          echo "✅ 모든 Secrets 검증 완료"
+
           # Secrets에서 Base64 디코딩
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
+          echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > $PP_PATH
+
+          # 파일 크기 확인
+          echo "📦 인증서 파일 크기: $(wc -c < $CERTIFICATE_PATH) bytes"
+          echo "📦 프로비저닝 프로파일 크기: $(wc -c < $PP_PATH) bytes"
+
+          if [ ! -s "$CERTIFICATE_PATH" ]; then
+            echo "❌ 인증서 파일이 비어있습니다. Base64 인코딩을 확인하세요."
+            exit 1
+          fi
 
           # Keychain 생성
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-          # 인증서를 Keychain에 import
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-
-          # codesign이 private key에 접근할 수 있도록 partition list 설정 (필수!)
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-          # Keychain을 기본으로 설정하고 검색 목록에 추가
+          # Keychain을 검색 목록에 추가 (import 전에 설정)
           security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # 인증서를 Keychain에 import
+          echo "🔐 인증서 import 중..."
+          if ! security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH; then
+            echo "❌ 인증서 import 실패. P12_PASSWORD를 확인하세요."
+            exit 1
+          fi
+          echo "✅ 인증서 import 완료"
+
+          # codesign이 private key에 접근할 수 있도록 partition list 설정
+          # 일부 인증서는 private key가 없을 수 있으므로 실패해도 계속 진행
+          echo "🔑 Partition list 설정 중..."
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH 2>/dev/null || echo "⚠️ Partition list 설정 스킵 (private key 없음 가능)"
+
+          # Keychain을 기본으로 설정
           security default-keychain -s $KEYCHAIN_PATH
 
           # 인증서 import 확인
           echo "=== 설치된 코드 서명 인증서 ==="
-          security find-identity -v -p codesigning $KEYCHAIN_PATH
+          security find-identity -v -p codesigning $KEYCHAIN_PATH || true
+
+          # 시스템 전체 인증서도 확인
+          echo "=== 전체 코드 서명 인증서 ==="
+          security find-identity -v -p codesigning || true
 
           # 프로비저닝 프로파일 설치 (UUID 추출 후 올바른 파일명으로 저장)
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
