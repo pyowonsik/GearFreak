@@ -103,7 +103,17 @@ jobs:
 
           # 인증서를 Keychain에 import
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+
+          # codesign이 private key에 접근할 수 있도록 partition list 설정 (필수!)
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Keychain을 기본으로 설정하고 검색 목록에 추가
           security list-keychain -d user -s $KEYCHAIN_PATH
+          security default-keychain -s $KEYCHAIN_PATH
+
+          # 인증서 import 확인
+          echo "=== 설치된 코드 서명 인증서 ==="
+          security find-identity -v -p codesigning $KEYCHAIN_PATH
 
           # 프로비저닝 프로파일 설치 (UUID 추출 후 올바른 파일명으로 저장)
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
