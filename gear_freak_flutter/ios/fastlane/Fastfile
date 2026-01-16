@@ -59,7 +59,17 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # 2. iOS 앱 빌드
+    # 2. 코드 서명 설정 (CI 환경용 수동 서명)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: "J26F9UUXYM",
+      bundle_identifier: "com.pyowonsik.gearFreakFlutter",
+      profile_name: "GearFreak Production",
+      code_sign_identity: "Apple Distribution"
+    )
+
+    # 3. iOS 앱 빌드
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -70,17 +80,15 @@ platform :ios do
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
-      },
-      # Archive 단계에서도 수동 서명 사용 (CI 환경용)
-      xcargs: '-allowProvisioningUpdates CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER="GearFreak Production" CODE_SIGN_IDENTITY="Apple Distribution" DEVELOPMENT_TEAM=J26F9UUXYM'
+      }
     )
 
-    # 3. TestFlight에 업로드
+    # 4. TestFlight에 업로드
     upload_to_testflight(
       skip_waiting_for_build_processing: true  # 빌드 처리 대기 건너뛰기
     )
 
-    # 4. 성공 메시지
+    # 5. 성공 메시지
     UI.success("✅ TestFlight 업로드 완료!")
     UI.success("App Store Connect에서 확인하세요: https://appstoreconnect.apple.com")
   end
@@ -93,7 +101,17 @@ platform :ios do
     # 1. 빌드 번호 증가
     increment_build_number(xcodeproj: "Runner.xcodeproj")
 
-    # 2. iOS 앱 빌드
+    # 2. 코드 서명 설정 (CI 환경용 수동 서명)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: "J26F9UUXYM",
+      bundle_identifier: "com.pyowonsik.gearFreakFlutter",
+      profile_name: "GearFreak Production",
+      code_sign_identity: "Apple Distribution"
+    )
+
+    # 3. iOS 앱 빌드
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -104,12 +122,10 @@ platform :ios do
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
-      },
-      # Archive 단계에서도 수동 서명 사용 (CI 환경용)
-      xcargs: '-allowProvisioningUpdates CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER="GearFreak Production" CODE_SIGN_IDENTITY="Apple Distribution" DEVELOPMENT_TEAM=J26F9UUXYM'
+      }
     )
 
-    # 3. App Store Connect에 업로드 (심사 제출 X)
+    # 4. App Store Connect에 업로드 (심사 제출 X)
     upload_to_app_store(
       submit_for_review: false,      # 자동 심사 제출 안 함
       automatic_release: false,      # 심사 통과 후 자동 배포 안 함
@@ -126,6 +142,17 @@ platform :ios do
   desc "iOS 앱 빌드만 수행 (업로드 없음)"
   desc "사용법: fastlane build_only"
   lane :build_only do
+    # 1. 코드 서명 설정 (CI 환경용 수동 서명)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: "J26F9UUXYM",
+      bundle_identifier: "com.pyowonsik.gearFreakFlutter",
+      profile_name: "GearFreak Production",
+      code_sign_identity: "Apple Distribution"
+    )
+
+    # 2. iOS 앱 빌드
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -136,9 +163,7 @@ platform :ios do
         provisioningProfiles: {
           "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
         }
-      },
-      # Archive 단계에서도 수동 서명 사용 (CI 환경용)
-      xcargs: '-allowProvisioningUpdates CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER="GearFreak Production" CODE_SIGN_IDENTITY="Apple Distribution" DEVELOPMENT_TEAM=J26F9UUXYM'
+      }
     )
 
     UI.success("✅ 빌드 완료!")
