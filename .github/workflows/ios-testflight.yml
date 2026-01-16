@@ -79,7 +79,39 @@ jobs:
           gem install bundler
           bundle install
 
-      # 9. App Store Connect API Key 설정
+      # 9. iOS 인증서 및 프로비저닝 프로파일 설치
+      - name: iOS 서명 설정
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # 인증서 및 프로비저닝 프로파일 경로
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Secrets에서 Base64 디코딩
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # Keychain 생성
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # 인증서를 Keychain에 import
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # 프로비저닝 프로파일 설치
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+          echo "✅ iOS 서명 설정 완료"
+
+      # 10. App Store Connect API Key 설정
       - name: App Store Connect API Key 생성
         working-directory: ./gear_freak_flutter/ios/fastlane
         env:
@@ -151,8 +183,9 @@ jobs:
           ls -lh AuthKey.p8
           echo "파일 첫 줄: $(head -n 1 AuthKey.p8)"
 
-      # 10. iOS 인증서 및 프로비저닝 프로파일 설정 (Match 사용 시)
-      # - name: iOS 인증서 설정
+      # (선택사항) Match를 사용한 인증서 관리
+      # Match를 사용하려면 아래 주석을 해제하고 위의 수동 인증서 설치 단계를 제거하세요
+      # - name: iOS 인증서 설정 (Match)
       #   working-directory: ./gear_freak_flutter/ios
       #   env:
       #     MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
@@ -165,6 +198,13 @@ jobs:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: bundle exec fastlane beta
+
+      # 11-1. Keychain 정리
+      - name: Keychain 정리
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          echo "✅ Keychain 정리 완료"
 
       # 12. 빌드 산출물 업로드 (실패 시 디버깅용)
       - name: 빌드 로그 업로드
