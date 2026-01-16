@@ -64,13 +64,7 @@ platform :ios do
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
-      export_options: {
-        method: "app-store",
-        provisioningProfiles: {
-          "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
-        }
-      },
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Apple Distribution'"
+      xcargs: "-allowProvisioningUpdates"
     )
 
     # 3. TestFlight에 업로드
@@ -96,13 +90,7 @@ platform :ios do
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
-      export_options: {
-        method: "app-store",
-        provisioningProfiles: {
-          "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
-        }
-      },
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Apple Distribution'"
+      xcargs: "-allowProvisioningUpdates"
     )
 
     # 3. App Store Connect에 업로드 (심사 제출 X)

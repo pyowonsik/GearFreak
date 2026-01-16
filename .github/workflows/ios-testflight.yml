@@ -113,23 +113,19 @@ jobs:
           echo "✅ iOS 서명 설정 완료"
           echo "✅ 프로비저닝 프로파일 설치 완료 (UUID: $PP_UUID)"
 
-      # 9-1. Xcode 프로젝트 수동 서명 설정
-      - name: Xcode 수동 서명 설정
-        working-directory: ./gear_freak_flutter/ios
+      # 9-1. 프로비저닝 프로파일 확인
+      - name: 프로비저닝 프로파일 확인
         run: |
-          # 1. CODE_SIGN_STYLE을 Automatic에서 Manual로 변경
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' Runner.xcodeproj/project.pbxproj
+          echo "=== 설치된 프로비저닝 프로파일 ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
 
-          # 2. CODE_SIGN_IDENTITY를 iPhone Developer에서 Apple Distribution으로 변경
-          sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" = "iPhone Developer";/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";/g' Runner.xcodeproj/project.pbxproj
-
-          echo "✅ 수동 서명으로 전환 완료"
-          echo "✅ Distribution 인증서 설정 완료"
-
-          # 변경 사항 확인
           echo ""
-          echo "=== 변경된 서명 설정 확인 ==="
-          grep -E "CODE_SIGN_STYLE|CODE_SIGN_IDENTITY" Runner.xcodeproj/project.pbxproj | head -10
+          echo "=== 프로비저닝 프로파일 상세 정보 ==="
+          for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+            echo "Profile: $profile"
+            security cms -D -i "$profile" | plutil -p - | grep -E "Name|UUID|application-identifier|aps-environment|applesignin" || true
+            echo "---"
+          done
 
       # 10. App Store Connect API Key 설정
       - name: App Store Connect API Key 생성
