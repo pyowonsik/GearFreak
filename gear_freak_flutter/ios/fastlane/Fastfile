@@ -64,7 +64,7 @@ platform :ios do
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates"
+      xcargs: "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='GearFreak Production' CODE_SIGN_IDENTITY='Apple Distribution' DEVELOPMENT_TEAM='J26F9UUXYM'"
     )
 
     # 3. TestFlight에 업로드
@@ -90,7 +90,7 @@ platform :ios do
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates"
+      xcargs: "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='GearFreak Production' CODE_SIGN_IDENTITY='Apple Distribution' DEVELOPMENT_TEAM='J26F9UUXYM'"
     )
 
     # 3. App Store Connect에 업로드 (심사 제출 X)
