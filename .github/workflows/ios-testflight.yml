@@ -105,11 +105,13 @@ jobs:
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # 프로비저닝 프로파일 설치
+          # 프로비저닝 프로파일 설치 (UUID 추출 후 올바른 파일명으로 저장)
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i $PP_PATH))
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PP_UUID.mobileprovision
 
           echo "✅ iOS 서명 설정 완료"
+          echo "✅ 프로비저닝 프로파일 설치 완료 (UUID: $PP_UUID)"
 
       # 10. App Store Connect API Key 설정
       - name: App Store Connect API Key 생성

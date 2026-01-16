@@ -63,13 +63,7 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "app-store",
-      export_options: {
-        method: "app-store",
-        provisioningProfiles: {
-          "com.pyowonsik.gearFreakFlutter" => "match AppStore com.pyowonsik.gearFreakFlutter"  # 프로비저닝 프로파일 이름
-        }
-      }
+      export_method: "app-store"
     )
 
     # 3. TestFlight에 업로드
@@ -94,13 +88,7 @@ platform :ios do
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "app-store",
-      export_options: {
-        method: "app-store",
-        provisioningProfiles: {
-          "com.pyowonsik.gearFreakFlutter" => "match AppStore com.pyowonsik.gearFreakFlutter"  # 프로비저닝 프로파일 이름
-        }
-      }
+      export_method: "app-store"
     )
 
     # 3. App Store Connect에 업로드 (심사 제출 X)
