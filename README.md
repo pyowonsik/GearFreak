@@ -15,7 +15,9 @@ Flutter + Serverpod 기반의 풀스택 모바일 앱으로, 실시간 채팅과
 
 ## 데모 영상
 
-<video src="docs/demo/preview.mp4" controls width="300"></video>
+<p align="center">
+  <img src="docs/demo/preview.gif" width="280" alt="데모"/>
+</p>
 
 ## 스크린샷
 
