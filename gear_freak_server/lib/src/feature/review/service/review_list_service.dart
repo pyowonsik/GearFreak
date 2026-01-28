@@ -184,10 +184,13 @@ class ReviewListService {
       double? averageRating;
       if (totalCount > 0) {
         final result = await session.db.unsafeQuery(
-          'SELECT AVG(rating) as avg_rating FROM transaction_review WHERE reviewee_id = $userId',
+          'SELECT AVG(rating) as avg_rating FROM transaction_review WHERE "revieweeId" = $userId',
         );
         if (result.isNotEmpty && result.first.first != null) {
-          averageRating = result.first.first as double;
+          final avgValue = result.first.first;
+          averageRating = avgValue is num
+              ? avgValue.toDouble()
+              : double.tryParse(avgValue.toString());
         }
       }
 
