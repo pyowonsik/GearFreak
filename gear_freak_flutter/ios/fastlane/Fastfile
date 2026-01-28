@@ -13,10 +13,37 @@ platform :ios do
 
   before_all do
     # App Store Connect API 키 설정
+    # 환경변수에서 읽어오거나 하드코딩된 값 사용
+    api_key_id = ENV["APP_STORE_CONNECT_API_KEY_ID"] || "Y28LL7R646"
+    api_issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"] || "fe34bf88-2267-4565-a7df-0208753cb935"
+
+    # AuthKey.p8 파일 경로 (Fastfile과 같은 디렉토리, 절대 경로로 변환)
+    key_filepath = File.expand_path("AuthKey.p8", __dir__)
+
+    # 파일 존재 여부 확인
+    unless File.exist?(key_filepath)
+      UI.user_error!("❌ AuthKey.p8 파일을 찾을 수 없습니다: #{key_filepath}")
+    end
+
+    # 파일 크기 확인 (비어있는 파일 체크)
+    if File.size(key_filepath) == 0
+      UI.user_error!("❌ AuthKey.p8 파일이 비어있습니다")
+    end
+
+    # 파일 형식 검증 (PEM 형식 확인)
+    file_content = File.read(key_filepath)
+    unless file_content.start_with?("-----BEGIN PRIVATE KEY-----")
+      UI.error("❌ AuthKey.p8 파일이 올바른 PEM 형식이 아닙니다")
+      UI.error("파일 첫 줄: #{file_content.lines.first}")
+      UI.user_error!("GitHub Secrets의 APP_STORE_CONNECT_API_KEY_CONTENT를 확인하세요")
+    end
+
+    UI.message("✅ AuthKey.p8 파일 검증 완료 (크기: #{File.size(key_filepath)} bytes)")
+
     app_store_connect_api_key(
-      key_id: "Y28LL7R646",
-      issuer_id: "fe34bf88-2267-4565-a7df-0208753cb935",
-      key_filepath: "./fastlane/AuthKey.p8",
+      key_id: api_key_id,
+      issuer_id: api_issuer_id,
+      key_filepath: key_filepath,
       duration: 1200, # 20분 (선택사항)
       in_house: false # App Store 배포 (Enterprise가 아님)
     )
@@ -27,25 +54,49 @@ platform :ios do
   desc "TestFlight에 베타 버전 배포"
   desc "사용법: fastlane beta"
   lane :beta do
-    # 1. 빌드 번호 자동 증가
+    # 1. App Store Connect에서 최신 빌드 번호 가져와서 +1
+    latest_build_number = latest_testflight_build_number(
+      app_identifier: "com.pyowonsik.gearFreakFlutter"
+    )
     increment_build_number(
-      xcodeproj: "Runner.xcodeproj"
+      xcodeproj: "Runner.xcodeproj",
+      build_number: latest_build_number + 1
+    )
+    UI.message("📦 빌드 번호: #{latest_build_number} → #{latest_build_number + 1}")
+
+    # 2. 코드 서명 설정 (CI 환경용 수동 서명)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: "J26F9UUXYM",
+      bundle_identifier: "com.pyowonsik.gearFreakFlutter",
+      profile_name: "GearFreak Production",
+      code_sign_identity: "Apple Distribution"
     )
 
-    # 2. iOS 앱 빌드
+    # 3. iOS 앱 빌드
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
+      clean: true,
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates"
+      xcargs: "-allowProvisioningUpdates",
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        teamID: "J26F9UUXYM",
+        provisioningProfiles: {
+          "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
+        }
+      }
     )
 
-    # 3. TestFlight에 업로드
+    # 4. TestFlight에 업로드
     upload_to_testflight(
       skip_waiting_for_build_processing: true  # 빌드 처리 대기 건너뛰기
     )
 
-    # 4. 성공 메시지
+    # 5. 성공 메시지
     UI.success("✅ TestFlight 업로드 완료!")
     UI.success("App Store Connect에서 확인하세요: https://appstoreconnect.apple.com")
   end
@@ -55,18 +106,45 @@ platform :ios do
   desc "App Store에 정식 버전 업로드 (심사 제출은 수동)"
   desc "사용법: fastlane release"
   lane :release do
-    # 1. 빌드 번호 증가
-    increment_build_number(xcodeproj: "Runner.xcodeproj")
+    # 1. App Store Connect에서 최신 빌드 번호 가져와서 +1
+    latest_build_number = app_store_build_number(
+      app_identifier: "com.pyowonsik.gearFreakFlutter",
+      live: false
+    )
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj",
+      build_number: latest_build_number + 1
+    )
+    UI.message("📦 빌드 번호: #{latest_build_number} → #{latest_build_number + 1}")
 
-    # 2. iOS 앱 빌드
+    # 2. 코드 서명 설정 (CI 환경용 수동 서명)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: "J26F9UUXYM",
+      bundle_identifier: "com.pyowonsik.gearFreakFlutter",
+      profile_name: "GearFreak Production",
+      code_sign_identity: "Apple Distribution"
+    )
+
+    # 3. iOS 앱 빌드
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
+      clean: true,
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates"
+      xcargs: "-allowProvisioningUpdates",
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        teamID: "J26F9UUXYM",
+        provisioningProfiles: {
+          "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
+        }
+      }
     )
 
-    # 3. App Store Connect에 업로드 (심사 제출 X)
+    # 4. App Store Connect에 업로드 (심사 제출 X)
     upload_to_app_store(
       submit_for_review: false,      # 자동 심사 제출 안 함
       automatic_release: false,      # 심사 통과 후 자동 배포 안 함
@@ -83,11 +161,31 @@ platform :ios do
   desc "iOS 앱 빌드만 수행 (업로드 없음)"
   desc "사용법: fastlane build_only"
   lane :build_only do
+    # 1. 코드 서명 설정 (CI 환경용 수동 서명)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: "J26F9UUXYM",
+      bundle_identifier: "com.pyowonsik.gearFreakFlutter",
+      profile_name: "GearFreak Production",
+      code_sign_identity: "Apple Distribution"
+    )
+
+    # 2. iOS 앱 빌드
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
+      clean: true,
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates"
+      xcargs: "-allowProvisioningUpdates",
+      export_options: {
+        method: "app-store",
+        signingStyle: "manual",
+        teamID: "J26F9UUXYM",
+        provisioningProfiles: {
+          "com.pyowonsik.gearFreakFlutter" => "GearFreak Production"
+        }
+      }
     )
 
     UI.success("✅ 빌드 완료!")
