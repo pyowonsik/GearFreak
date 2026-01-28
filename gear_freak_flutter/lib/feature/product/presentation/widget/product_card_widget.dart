@@ -109,7 +109,9 @@ class ProductCardWidget extends StatelessWidget {
                       '${getProductCategoryLabel(product.category)} · '
                       '${getProductLocation(product)} · '
                       '${formatRelativeTime(
-                        product.updatedAt ?? product.createdAt,
+                        product.lastBumpedAt ??
+                            product.updatedAt ??
+                            product.createdAt,
                       )}',
                       style: const TextStyle(
                         fontSize: 12,

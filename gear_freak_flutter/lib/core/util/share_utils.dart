@@ -27,8 +27,13 @@ class ShareUtils {
       final deepLinkUrl = '$deepLinkBaseUrl/product/$productId';
 
       // 공유 텍스트 생성
-      final shareText =
-          '운동은 장비빨! \n $title\n${_formatPrice(price)}원\n$deepLinkUrl';
+      final shareText = '''
+운동은 장비빨!
+
+[$title]
+💰 ${_formatPrice(price)}원
+
+$deepLinkUrl'''.trim();
 
       // 공유 실행
       // 카카오톡, 문자, 이메일 등 모든 공유 앱에서 선택 가능

@@ -81,20 +81,123 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
 
         if (!mounted) return;
 
-        // 모달로 안내 메시지 표시
+        // 남은 시간 비율 계산 (24시간 중)
+        final totalMinutes = 24 * 60;
+        final elapsedMinutes = timeSinceLastBump.inMinutes;
+        final progress = elapsedMinutes / totalMinutes;
+
+        // 예쁜 커스텀 모달로 안내 메시지 표시
         await showDialog<void>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('상단으로 올리기'),
-            content: Text(
-              '24시간마다 적용됩니다.\n\n남은 시간: $remainingHours시간 $displayMinutes분',
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('확인'),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 타이머 아이콘과 프로그레스
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 6,
+                          backgroundColor: const Color(0xFFE5E7EB),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.timer_outlined,
+                        size: 36,
+                        color: Color(0xFF2563EB),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // 제목
+                  const Text(
+                    '아직 올릴 수 없어요',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // 설명
+                  const Text(
+                    '끌어올리기는 24시간마다 가능합니다',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // 남은 시간 박스
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          size: 20,
+                          color: Color(0xFF2563EB),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '$remainingHours시간 $displayMinutes분 후 가능',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF2563EB),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // 확인 버튼
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        '확인',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
         return;
