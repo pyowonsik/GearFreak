@@ -65,7 +65,17 @@ jobs:
         working-directory: ./gear_freak_flutter
         run: |
           echo "🔨 Flutter iOS 빌드 시작..."
-          flutter build ios --release --no-codesign
+
+          # pubspec.yaml에서 버전 추출
+          VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //')
+          BUILD_NAME=$(echo $VERSION | cut -d'+' -f1)
+          BUILD_NUMBER=$(echo $VERSION | cut -d'+' -f2)
+
+          echo "📦 버전 정보: $BUILD_NAME+$BUILD_NUMBER"
+
+          # 명시적으로 버전 전달
+          flutter build ios --release --no-codesign --build-name=$BUILD_NAME --build-number=$BUILD_NUMBER
+
           echo "✅ Flutter iOS 빌드 완료"
 
       # 6. Xcode 버전 확인
