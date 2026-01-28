@@ -135,6 +135,9 @@ class GbTextFormField extends StatelessWidget {
           vertical: 16,
         );
 
+    // maxLines > 1인 경우 힌트 텍스트를 상단에 배치
+    final isMultiLine = maxLines != null && maxLines! > 1;
+
     // filled 스타일 (signup 스타일)
     if (filled) {
       return TextFormField(
@@ -147,6 +150,8 @@ class GbTextFormField extends StatelessWidget {
         onChanged: onChanged,
         focusNode: focusNode,
         readOnly: readOnly,
+        textAlignVertical:
+            isMultiLine ? TextAlignVertical.top : TextAlignVertical.center,
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
@@ -157,6 +162,7 @@ class GbTextFormField extends StatelessWidget {
           filled: true,
           fillColor: defaultFillColor,
           contentPadding: defaultContentPadding,
+          alignLabelWithHint: isMultiLine,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -187,6 +193,8 @@ class GbTextFormField extends StatelessWidget {
       onChanged: onChanged,
       focusNode: focusNode,
       readOnly: readOnly,
+      textAlignVertical:
+          isMultiLine ? TextAlignVertical.top : TextAlignVertical.center,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
@@ -194,6 +202,7 @@ class GbTextFormField extends StatelessWidget {
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         suffixText: suffixText,
+        alignLabelWithHint: isMultiLine,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),

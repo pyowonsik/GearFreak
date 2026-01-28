@@ -443,7 +443,8 @@ class _ProductDetailLoadedViewState
                                   const SizedBox(width: 8),
                                   Text(
                                     formatRelativeTime(
-                                      widget.product.updatedAt ??
+                                      widget.product.lastBumpedAt ??
+                                          widget.product.updatedAt ??
                                           widget.product.createdAt,
                                     ),
                                     style: const TextStyle(
