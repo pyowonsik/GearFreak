@@ -38,6 +38,14 @@ jobs:
         working-directory: ./gear_freak_flutter
         run: flutter pub get
 
+      # 3-1. CocoaPods 설치 및 의존성 해결
+      - name: CocoaPods 설치
+        working-directory: ./gear_freak_flutter/ios
+        run: |
+          # CocoaPods 의존성 설치
+          pod install --repo-update
+          echo "✅ CocoaPods 설치 완료"
+
       # 4. .env 파일 생성
       - name: .env 파일 생성
         working-directory: ./gear_freak_flutter
@@ -51,6 +59,14 @@ jobs:
       - name: Flutter 분석
         working-directory: ./gear_freak_flutter
         run: flutter analyze
+
+      # 5-1. Flutter iOS 빌드 (사전 빌드)
+      - name: Flutter iOS 빌드
+        working-directory: ./gear_freak_flutter
+        run: |
+          echo "🔨 Flutter iOS 빌드 시작..."
+          flutter build ios --release --no-codesign
+          echo "✅ Flutter iOS 빌드 완료"
 
       # 6. Xcode 버전 확인
       - name: Xcode 버전 확인
@@ -71,23 +87,180 @@ jobs:
           gem install bundler
           bundle install
 
-      # 9. App Store Connect API Key 설정
+      # 9. iOS 인증서 및 프로비저닝 프로파일 설치
+      - name: iOS 서명 설정
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # 인증서 및 프로비저닝 프로파일 경로
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Secrets 검증
+          if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
+            echo "❌ BUILD_CERTIFICATE_BASE64 secret이 비어있습니다"
+            exit 1
+          fi
+          if [ -z "$BUILD_PROVISION_PROFILE_BASE64" ]; then
+            echo "❌ BUILD_PROVISION_PROFILE_BASE64 secret이 비어있습니다"
+            exit 1
+          fi
+          if [ -z "$P12_PASSWORD" ]; then
+            echo "❌ P12_PASSWORD secret이 비어있습니다"
+            exit 1
+          fi
+          if [ -z "$KEYCHAIN_PASSWORD" ]; then
+            echo "❌ KEYCHAIN_PASSWORD secret이 비어있습니다"
+            exit 1
+          fi
+          echo "✅ 모든 Secrets 검증 완료"
+
+          # Secrets에서 Base64 디코딩
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
+          echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > $PP_PATH
+
+          # 파일 크기 확인
+          echo "📦 인증서 파일 크기: $(wc -c < $CERTIFICATE_PATH) bytes"
+          echo "📦 프로비저닝 프로파일 크기: $(wc -c < $PP_PATH) bytes"
+
+          if [ ! -s "$CERTIFICATE_PATH" ]; then
+            echo "❌ 인증서 파일이 비어있습니다. Base64 인코딩을 확인하세요."
+            exit 1
+          fi
+
+          # Keychain 생성
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Keychain을 검색 목록에 추가 (import 전에 설정)
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # 인증서를 Keychain에 import
+          echo "🔐 인증서 import 중..."
+          if ! security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH; then
+            echo "❌ 인증서 import 실패. P12_PASSWORD를 확인하세요."
+            exit 1
+          fi
+          echo "✅ 인증서 import 완료"
+
+          # codesign이 private key에 접근할 수 있도록 partition list 설정
+          # 일부 인증서는 private key가 없을 수 있으므로 실패해도 계속 진행
+          echo "🔑 Partition list 설정 중..."
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH 2>/dev/null || echo "⚠️ Partition list 설정 스킵 (private key 없음 가능)"
+
+          # Keychain을 기본으로 설정
+          security default-keychain -s $KEYCHAIN_PATH
+
+          # 인증서 import 확인
+          echo "=== 설치된 코드 서명 인증서 ==="
+          security find-identity -v -p codesigning $KEYCHAIN_PATH || true
+
+          # 시스템 전체 인증서도 확인
+          echo "=== 전체 코드 서명 인증서 ==="
+          security find-identity -v -p codesigning || true
+
+          # 프로비저닝 프로파일 설치 (UUID 추출 후 올바른 파일명으로 저장)
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i $PP_PATH))
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PP_UUID.mobileprovision
+
+          echo "✅ iOS 서명 설정 완료"
+          echo "✅ 프로비저닝 프로파일 설치 완료 (UUID: $PP_UUID)"
+
+      # 9-1. 프로비저닝 프로파일 확인
+      - name: 프로비저닝 프로파일 확인
+        run: |
+          echo "=== 설치된 프로비저닝 프로파일 ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+
+          echo ""
+          echo "=== 프로비저닝 프로파일 상세 정보 ==="
+          for profile in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+            echo "Profile: $profile"
+            security cms -D -i "$profile" | plutil -p - | grep -E "Name|UUID|application-identifier|aps-environment|applesignin" || true
+            echo "---"
+          done
+
+      # 10. App Store Connect API Key 설정
       - name: App Store Connect API Key 생성
         working-directory: ./gear_freak_flutter/ios/fastlane
         env:
           API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: |
-          # AuthKey.p8 파일 생성
-          echo "$API_KEY_CONTENT" > AuthKey.p8
+          # 시크릿 존재 여부 확인
+          if [ -z "$API_KEY_CONTENT" ]; then
+            echo "❌ 에러: APP_STORE_CONNECT_API_KEY_CONTENT 시크릿이 설정되지 않았습니다"
+            exit 1
+          fi
+
+          echo "🔍 GitHub Secrets 데이터 형식 확인 중..."
+
+          # 시나리오 1: Base64 인코딩된 문자열 (올바른 경우)
+          # 시나리오 2: 이미 디코딩된 텍스트 (PEM 형식)
+
+          # Secrets 데이터를 임시 파일에 저장
+          echo "$API_KEY_CONTENT" > temp_secret.txt
+
+          # PEM 형식인지 확인 (이미 디코딩된 상태)
+          if head -n 1 temp_secret.txt | grep -q "BEGIN PRIVATE KEY"; then
+            echo "✅ Secrets에 PEM 형식 텍스트가 저장되어 있습니다 (base64 디코딩 불필요)"
+            mv temp_secret.txt AuthKey.p8
+          else
+            echo "🔄 Base64 디코딩 시도 중..."
+            # Base64 디코딩 시도
+            cat temp_secret.txt | tr -d '\n\r ' | base64 --decode > AuthKey.p8 2>/dev/null
+
+            if [ $? -ne 0 ]; then
+              echo "❌ Base64 디코딩 실패"
+              echo "GitHub Secrets 데이터 앞 100자:"
+              head -c 100 temp_secret.txt
+              rm -f temp_secret.txt
+              exit 1
+            fi
+            rm -f temp_secret.txt
+          fi
+
+          # 파일 크기 확인
+          if [ ! -s AuthKey.p8 ]; then
+            echo "❌ 에러: AuthKey.p8 파일이 비어있습니다"
+            exit 1
+          fi
+
+          # PEM 형식 검증
+          if head -n 1 AuthKey.p8 | grep -q "BEGIN PRIVATE KEY"; then
+            echo "✅ 파일 포맷 검증 통과 (PEM 형식)"
+          else
+            echo "❌ 에러: 파일이 올바른 PEM 형식이 아닙니다"
+            echo "파일 내용 앞 5줄:"
+            head -n 5 AuthKey.p8
+            echo ""
+            echo "16진수 덤프 (앞 100바이트):"
+            head -c 100 AuthKey.p8 | od -x
+            echo ""
+            echo "📋 해결 방법:"
+            echo "1. 원본 AuthKey.p8 파일을 확인하세요 (PEM 형식이어야 함)"
+            echo "2. 다음 명령어로 올바르게 base64 인코딩하세요:"
+            echo "   cat AuthKey.p8 | base64 | tr -d '\\n'"
+            echo "3. GitHub Secrets의 APP_STORE_CONNECT_API_KEY_CONTENT를 업데이트하세요"
+            exit 1
+          fi
 
           # 권한 설정
           chmod 600 AuthKey.p8
 
-          # 파일 확인
-          ls -la AuthKey.p8
+          # 파일 정보 출력
+          echo "✅ AuthKey.p8 파일 생성 완료"
+          ls -lh AuthKey.p8
+          echo "파일 첫 줄: $(head -n 1 AuthKey.p8)"
 
-      # 10. iOS 인증서 및 프로비저닝 프로파일 설정 (Match 사용 시)
-      # - name: iOS 인증서 설정
+      # (선택사항) Match를 사용한 인증서 관리
+      # Match를 사용하려면 아래 주석을 해제하고 위의 수동 인증서 설치 단계를 제거하세요
+      # - name: iOS 인증서 설정 (Match)
       #   working-directory: ./gear_freak_flutter/ios
       #   env:
       #     MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
@@ -96,7 +269,17 @@ jobs:
       # 11. TestFlight 배포 실행
       - name: Fastlane Beta 실행
         working-directory: ./gear_freak_flutter/ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: bundle exec fastlane beta
+
+      # 11-1. Keychain 정리
+      - name: Keychain 정리
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          echo "✅ Keychain 정리 완료"
 
       # 12. 빌드 산출물 업로드 (실패 시 디버깅용)
       - name: 빌드 로그 업로드
@@ -107,7 +290,20 @@ jobs:
           path: |
             ./gear_freak_flutter/ios/fastlane/report.xml
             ./gear_freak_flutter/ios/fastlane/*.log
+            ~/Library/Logs/gym/*.log
           retention-days: 7
+
+      # 12-1. xcodebuild 로그 출력 (실패 시)
+      - name: xcodebuild 로그 출력
+        if: failure()
+        run: |
+          echo "=== xcodebuild 전체 로그 (마지막 500줄) ==="
+          if [ -f ~/Library/Logs/gym/Runner-Runner.log ]; then
+            tail -n 500 ~/Library/Logs/gym/Runner-Runner.log
+          else
+            echo "로그 파일을 찾을 수 없습니다"
+            ls -la ~/Library/Logs/gym/ 2>/dev/null || echo "gym 로그 디렉토리 없음"
+          fi
 
       # 13. 성공 알림 (선택사항)
       - name: 배포 성공 알림
