@@ -82,7 +82,7 @@ class _ProductDetailPageState extends ConsumerState<ProductDetailPage> {
         if (!mounted) return;
 
         // 남은 시간 비율 계산 (24시간 중)
-        final totalMinutes = 24 * 60;
+        const totalMinutes = 24 * 60;
         final elapsedMinutes = timeSinceLastBump.inMinutes;
         final progress = elapsedMinutes / totalMinutes;
 
