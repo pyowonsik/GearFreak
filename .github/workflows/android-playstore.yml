@@ -39,7 +39,8 @@ jobs:
           ENV_CONTENT: ${{ secrets.FLUTTER_ENV_FILE }}
         run: |
           echo "$ENV_CONTENT" > .env.prod
-          echo "✅ .env.prod 파일 생성 완료"
+          touch .env.dev
+          echo "✅ .env.prod, .env.dev 파일 생성 완료"
 
       # 6. Keystore 설정
       - name: Keystore 설정
