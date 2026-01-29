@@ -59,6 +59,84 @@ resource "aws_s3_bucket_policy" "public_storage" {
   depends_on = [aws_s3_bucket_public_access_block.public_storage]
 }
 
+# ==================== Dev S3 Buckets ====================
+
+resource "aws_s3_bucket" "public_storage_dev" {
+  bucket        = "${var.public_storage_bucket_name}-dev"
+  force_destroy = true
+
+  tags = {
+    Name        = "${var.project_name} dev public storage"
+    Environment = "dev"
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "public_storage_dev" {
+  bucket = aws_s3_bucket.public_storage_dev.id
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "public_storage_dev" {
+  bucket = aws_s3_bucket.public_storage_dev.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_cors_configuration" "public_storage_dev" {
+  bucket = aws_s3_bucket.public_storage_dev.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "POST", "HEAD"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+resource "aws_s3_bucket_policy" "public_storage_dev" {
+  bucket = aws_s3_bucket.public_storage_dev.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.public_storage_dev.arn}/*"
+      }
+    ]
+  })
+
+  depends_on = [aws_s3_bucket_public_access_block.public_storage_dev]
+}
+
+resource "aws_s3_bucket" "private_storage_dev" {
+  bucket        = "${var.private_storage_bucket_name}-dev"
+  force_destroy = true
+
+  tags = {
+    Name        = "${var.project_name} dev private storage"
+    Environment = "dev"
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "private_storage_dev" {
+  bucket = aws_s3_bucket.private_storage_dev.id
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+# ==================== Private Storage ====================
+
 resource "aws_s3_bucket" "private_storage" {
   bucket        = var.private_storage_bucket_name
   force_destroy = true

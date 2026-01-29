@@ -11,24 +11,42 @@
             "type": "dart"
         },
         {
-            "name": "gear_freak_flutter",
-            "cwd": "gear_freak_flutter",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "gear_freak_flutter (profile mode)",
+            "name": "Launch Development",
             "cwd": "gear_freak_flutter",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "args": [
+                "--dart-define=ENV=dev"
+            ]
         },
         {
-            "name": "gear_freak_flutter (release mode)",
+            "name": "Launch Production",
             "cwd": "gear_freak_flutter",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "args": [
+                "--dart-define=ENV=prod"
+            ]
+        },
+        {
+            "name": "Launch Production (profile mode)",
+            "cwd": "gear_freak_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=ENV=prod"
+            ]
+        },
+        {
+            "name": "Launch Production (release mode)",
+            "cwd": "gear_freak_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=ENV=prod"
+            ]
         },
         {
             "name": "gear_freak_server",

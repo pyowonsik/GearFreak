@@ -55,8 +55,11 @@ Future<void> main() async {
   // 백그라운드 메시지 핸들러 등록
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // .env 파일 로드
-  await dotenv.load();
+  // 환경별 .env 파일 로드
+  // flutter run --dart-define=ENV=dev (기본값: dev)
+  // flutter run --dart-define=ENV=prod
+  const env = String.fromEnvironment('ENV', defaultValue: 'dev');
+  await dotenv.load(fileName: '.env.$env');
 
   // 카카오 SDK 초기화
   final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
