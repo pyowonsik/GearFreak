@@ -1,0 +1,139 @@
+name: Android 내부 테스트 배포
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy_internal:
+    name: 내부 테스트 트랙 배포
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      # 2. Java 설치
+      - name: Java 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3. Flutter 설치
+      - name: Flutter 설치
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.0'
+          channel: 'stable'
+
+      # 4. Flutter 의존성 설치
+      - name: Flutter 의존성 설치
+        working-directory: ./gear_freak_flutter
+        run: flutter pub get
+
+      # 5. .env.prod 파일 생성
+      - name: .env.prod 파일 생성
+        working-directory: ./gear_freak_flutter
+        env:
+          ENV_CONTENT: ${{ secrets.FLUTTER_ENV_FILE }}
+        run: |
+          echo "$ENV_CONTENT" > .env.prod
+          echo "✅ .env.prod 파일 생성 완료"
+
+      # 6. Keystore 설정
+      - name: Keystore 설정
+        working-directory: ./gear_freak_flutter/android
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          # Secrets 검증
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "❌ ANDROID_KEYSTORE_BASE64 secret이 비어있습니다"
+            exit 1
+          fi
+          if [ -z "$ANDROID_KEY_PROPERTIES" ]; then
+            echo "❌ ANDROID_KEY_PROPERTIES secret이 비어있습니다"
+            exit 1
+          fi
+
+          # Keystore 파일 디코딩
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+          echo "✅ keystore.jks 생성 완료 ($(wc -c < app/keystore.jks) bytes)"
+
+          # key.properties 생성
+          echo "$ANDROID_KEY_PROPERTIES" > key.properties
+          echo "✅ key.properties 생성 완료"
+
+      # 7. Flutter 분석
+      - name: Flutter 분석
+        working-directory: ./gear_freak_flutter
+        run: flutter analyze
+
+      # 8. Flutter AAB 빌드
+      - name: Flutter AAB 빌드
+        working-directory: ./gear_freak_flutter
+        run: |
+          echo "🔨 Flutter Android 빌드 시작..."
+
+          VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //')
+          BUILD_NAME=$(echo $VERSION | cut -d'+' -f1)
+          BUILD_NUMBER=$(echo $VERSION | cut -d'+' -f2)
+
+          echo "📦 버전 정보: $BUILD_NAME+$BUILD_NUMBER"
+
+          flutter build appbundle --release --build-name=$BUILD_NAME --build-number=$BUILD_NUMBER --dart-define=ENV=prod
+
+          echo "✅ Flutter AAB 빌드 완료"
+
+      # 9. Ruby & Fastlane 설치
+      - name: Ruby 설치
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: ./gear_freak_flutter/android
+
+      - name: Fastlane 설치
+        working-directory: ./gear_freak_flutter/android
+        run: |
+          gem install bundler
+          bundle install
+
+      # 10. Google Play 서비스 계정 설정
+      - name: Google Play 서비스 계정 설정
+        working-directory: ./gear_freak_flutter/android
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$GOOGLE_PLAY_SERVICE_ACCOUNT" ]; then
+            echo "❌ GOOGLE_PLAY_SERVICE_ACCOUNT secret이 비어있습니다"
+            exit 1
+          fi
+
+          echo "$GOOGLE_PLAY_SERVICE_ACCOUNT" > fastlane/service-account.json
+          echo "✅ 서비스 계정 JSON 생성 완료"
+
+      # 11. 내부 테스트 트랙 배포
+      - name: Fastlane 내부 테스트 배포
+        working-directory: ./gear_freak_flutter/android
+        run: bundle exec fastlane internal
+
+      # 12. 빌드 산출물 업로드 (실패 시 디버깅용)
+      - name: 빌드 로그 업로드
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-logs
+          path: |
+            ./gear_freak_flutter/android/fastlane/report.xml
+            ./gear_freak_flutter/android/fastlane/*.log
+          retention-days: 7
+
+      # 13. 성공 알림
+      - name: 배포 성공 알림
+        if: success()
+        run: |
+          echo "✅ 내부 테스트 트랙 배포 완료!"
+          echo "Google Play Console에서 확인하세요: https://play.google.com/console"
